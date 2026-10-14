@@ -1,0 +1,33 @@
+{
+  "id": "basic-shapes",
+  "title": "Shape templates",
+  "tools": [
+    {
+      "id": "card",
+      "title": "Add rounded card",
+      "action": {
+        "type": "addShape",
+        "shape": { "type": "rect", "x": 40, "y": 40, "width": 200, "height": 120, "rx": 12 },
+        "style": { "fill": "#2563EB", "stroke": "#172554", "strokeWidth": 2 }
+      }
+    },
+    {
+      "id": "dot",
+      "title": "Add circle",
+      "action": {
+        "type": "addShape",
+        "shape": { "type": "circle", "cx": 160, "cy": 160, "radius": 40 },
+        "style": { "fill": "#F59E0B", "opacity": 0.8 }
+      }
+    },
+    {
+      "id": "triangle",
+      "title": "Add triangle path",
+      "action": {
+        "type": "addShape",
+        "shape": { "type": "path", "d": "M40 120 L100 20 L160 120 Z", "evenodd": false },
+        "style": { "fill": "#10B981", "stroke": null }
+      }
+    }
+  ]
+}

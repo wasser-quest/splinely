@@ -1,0 +1,14 @@
+# Forma Bones integration contract
+
+Implement as additive schema v1 fields with serde defaults, preserving old projects.
+- Project.bones: Vec<Bone> (default empty).
+- Bone: id:String, parentId:Option<String> (default None), x:f64,y:f64, rotation:f64 (degrees), length:f64. Root x/y scene coordinates; child x/y are offsets from parent TIP. Child rotation relative parent rotation. Length >0, finite. Bone IDs share global unique IDs with nodes/assets/clips/etc.
+- Node.boneId:Option<String> (default None). Attached node transform is local to bone ROOT. Solver composes world bone rotation+position with node transform (rotate local x/y by bone angle, add root; node rotation += world angle; scales unchanged). Node geometry local coordinates untouched. No mesh skinning.
+- Existing Track.nodeId and PropertyOverride.nodeId may address a bone ID; allowed bone properties x,y,rotation only. Bone keyframes use existing numeric AnimValue and existing clips/evaluation context. State-machine overrides support same.
+- Root solver: world=(x,y,rotation), tip=root+length*(cos,sin). Child world root=parentTip+rotate(parentAngle,(x,y)), angle=parentAngle+rotation. Detect missing parents, cycles, duplicate IDs, nonfinite/overflow values and limit depth to128. Reject node attachment missing bone. Evaluation must not double-apply bindings. Project evaluate returns posed Nodes; provide public evaluate_bones(time,context)->Result<Vec<...>> poses for UI. Define exact BonePose API in CORE_API.md and notify collaborators if needed.
+- SVG export visible attached shapes uses solved node transforms; embed original project metadata plus bones. Bones themselves are editor guides, not exported visible geometry.
+- Browser runtime computes same FK after clip/state/explicit patches, supports forma.set(boneId,{rotation:...}), reports errors safely, preserves normal non-bone projects.
+- UI Bones tab: add root/child, parent/geometry numeric edits, bind selected node, pose keyframe using existing clip; canvas joint guides and drag joints if safely feasible. Undoable edits. Native preview uses posed nodes without double-binding; native audio stays silent. A Pivot-style demo project should include visible limb shapes and bone-driven clip.
+- CLI: rig demo, bone create/update/bind/keyframe via validated atomic save commands; plugin scaffold for trusted Rust editor-only plugins + docs. Keep stdout/stderr machine-readable JSON. Never execute installed/generated plugins automatically. Plugin exports not implied.
+
+Ownership: core worker crates/forma_document/** + CORE_API.md; runtime worker runtime/** + RUNTIME_API.md; UI worker crates/forma_editor/** (existing public forma_editor library); CLI worker crates/forma_cli/** + CLI.md + plugin-templates/**. Main owns scripts/**, docs/**, README.md and integration. Coordinate via this file and CORE_API.md; no writes outside owned scopes.

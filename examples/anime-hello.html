@@ -1,0 +1,16 @@
+<!doctype html>
+<html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Aoi sagt Hallo · Forma Showcase</title>
+<style>
+:root{color-scheme:dark;font-family:system-ui,sans-serif;background:#0b1324;color:#eef3ff}body{margin:0;padding:28px}main{max-width:760px;margin:auto}header{display:flex;align-items:center;justify-content:space-between;gap:20px}small{color:#7fddd6;letter-spacing:.18em}h1{margin:8px 0;font-size:clamp(28px,6vw,44px)}p{color:#b1bfd8;line-height:1.6}object{width:min(100%,70vh);height:auto;aspect-ratio:1;display:block;margin:auto;border-radius:28px;border:1px solid #34445f;background:#111b32}button{border:0;border-radius:14px;background:#7fddd6;color:#142535;font-weight:700;font-size:16px;padding:14px 22px;cursor:pointer}button:disabled{opacity:.5}nav{display:flex;gap:16px;align-items:center;margin:20px 0;flex-wrap:wrap}a{color:#b5a0f0}#status{color:#d7c8fa}footer{font-size:13px;color:#91a4c3}
+</style></head><body><main>
+<header><div><small>FORMA / CHARACTER STUDY</small><h1>Aoi sagt Hallo.</h1></div><span aria-hidden="true" style="font-size:42px;color:#ffe4a4">✦</span></header>
+<p>Ein eigener Anime-inspirierter Chibi-Charakter: türkisfarbene Haare, Stern-Hoodie und eine mit Bones animierte winkende Hand.</p>
+<object id="character" type="image/svg+xml" data="anime-hello.svg" aria-label="Aoi, ein winkender Anime-inspirierter Charakter">Bitte <a href="anime-hello.svg">das SVG direkt öffnen</a>.</object>
+<nav><button id="hello" disabled>▶ Hallo sagen &amp; winken</button><span id="status" role="status">Demo lädt …</span></nav>
+<footer>„Hallo!“ ist lokal erzeugtes, im SVG eingebettetes WAV-Audio: keine Internetverbindung und keine Browser-Stimme nötig. Der Start-Klick gibt Audio frei. <a href="anime-hello.forma.json">Editierbares Forma-Projekt</a> · <a href="anime-hello.svg">Eigenständiges SVG</a></footer>
+<script>
+const object=document.querySelector('#character'),button=document.querySelector('#hello'),status=document.querySelector('#status');
+object.addEventListener('load',()=>{try{const f=object.contentDocument.documentElement.forma;if(!f)throw Error('Runtime fehlt');button.disabled=false;status.textContent='Bereit — klicke auf Hallo.';}catch(e){status.textContent='Bitte das SVG direkt öffnen und dort Start drücken.';}});
+button.addEventListener('click',async()=>{button.disabled=true;try{const doc=object.contentDocument,f=doc.documentElement.forma;f.timeline.pause();await f.audio.unlock();f.timeline.seek(0);f.clip('greeting').seek(0).play();f.timeline.play();doc.querySelector('[data-forma-host-control]')?.remove();status.textContent='„Hallo!“ — eingebettetes Offline-Audio, Aoi winkt.';}catch(e){status.textContent=e.message;}finally{button.disabled=false;}});
+</script></main></body></html>

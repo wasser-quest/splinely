@@ -1,0 +1,19 @@
+{
+  "id": "colors",
+  "title": "Color presets",
+  "tools": [
+    {
+      "id": "outline",
+      "title": "Outline selected node",
+      "action": {
+        "type": "setStyle",
+        "style": { "fill": "#00000000", "stroke": "#334155", "strokeWidth": 3, "opacity": 1 }
+      }
+    }
+  ],
+  "palette": [
+    { "id": "sky", "title": "Sky fill", "style": { "fill": "#38BDF8" } },
+    { "id": "rose", "title": "Rose fill", "style": { "fill": "#FB7185" } },
+    { "id": "no-stroke", "title": "Remove stroke", "style": { "stroke": null } }
+  ]
+}

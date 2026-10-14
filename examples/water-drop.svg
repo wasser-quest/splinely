@@ -1,0 +1,728 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="640" viewBox="0 0 960 640" data-forma-version="1">
+<!-- Created with Forma 0.1.0 -->
+<metadata><forma:generator xmlns:forma="urn:forma:metadata" name="Forma" version="0.1.0" schemaVersion="1"/></metadata>
+<title>A drop in the blue</title>
+<rect id="background" data-forma-node="background" transform="translate(0 0) rotate(0) scale(1 1)" fill="rgb(4.705882352941177% 9.019607843137255% 16.862745098039216%)" fill-opacity="1" stroke="none" stroke-opacity="1" stroke-width="1" opacity="1" x="0" y="0" width="960" height="640" rx="0"/>
+<circle id="ambient" data-forma-node="ambient" transform="translate(0 0) rotate(0) scale(1 1)" fill="rgb(6.2745098039215685% 13.333333333333334% 22.35294117647059%)" fill-opacity="1" stroke="none" stroke-opacity="1" stroke-width="1" opacity="1" cx="840" cy="180" r="270"/>
+<circle id="ambient-inner" data-forma-node="ambient-inner" transform="translate(0 0) rotate(0) scale(1 1)" fill="rgb(7.450980392156863% 15.686274509803921% 25.49019607843137%)" fill-opacity="1" stroke="none" stroke-opacity="1" stroke-width="1" opacity="1" cx="840" cy="180" r="210"/>
+<text id="eyebrow" data-forma-node="eyebrow" transform="translate(0 0) rotate(0) scale(1 1)" fill="rgb(41.17647058823529% 76.86274509803923% 86.27450980392157%)" fill-opacity="1" stroke="none" stroke-opacity="1" stroke-width="1" opacity="1" x="54" y="66" font-size="14">FORMA / MOTION STUDIES</text>
+<text id="title" data-forma-node="title" transform="translate(0 0) rotate(0) scale(1 1)" fill="rgb(92.94117647058823% 96.47058823529412% 100%)" fill-opacity="1" stroke="none" stroke-opacity="1" stroke-width="1" opacity="1" x="54" y="112" font-size="34">A drop in the blue</text>
+<text id="subtitle" data-forma-node="subtitle" transform="translate(0 0) rotate(0) scale(1 1)" fill="rgb(61.1764705882353% 70.98039215686275% 79.6078431372549%)" fill-opacity="1" stroke="none" stroke-opacity="1" stroke-width="1" opacity="1" x="54" y="144" font-size="15">Squash, stretch, a soft landing. A deterministic 2.8-second loop.</text>
+<rect id="start-control" data-forma-node="start-control" transform="translate(0 0) rotate(0) scale(1 1)" fill="rgb(12.549019607843137% 23.52941176470588% 32.94117647058823%)" fill-opacity="1" stroke="none" stroke-opacity="1" stroke-width="1" opacity="1" x="54" y="567" width="152" height="40" rx="12"/>
+<text id="start-control-label" data-forma-node="start-control-label" transform="translate(0 0) rotate(0) scale(1 1)" fill="rgb(87.05882352941177% 94.11764705882352% 97.6470588235294%)" fill-opacity="1" stroke="none" stroke-opacity="1" stroke-width="1" opacity="1" x="70" y="593" font-size="15">Play / resume</text>
+<rect id="pause-control" data-forma-node="pause-control" transform="translate(0 0) rotate(0) scale(1 1)" fill="rgb(12.549019607843137% 23.52941176470588% 32.94117647058823%)" fill-opacity="1" stroke="none" stroke-opacity="1" stroke-width="1" opacity="1" x="222" y="567" width="152" height="40" rx="12"/>
+<text id="pause-control-label" data-forma-node="pause-control-label" transform="translate(0 0) rotate(0) scale(1 1)" fill="rgb(87.05882352941177% 94.11764705882352% 97.6470588235294%)" fill-opacity="1" stroke="none" stroke-opacity="1" stroke-width="1" opacity="1" x="238" y="593" font-size="15">Pause</text>
+<text id="status" data-forma-node="status" transform="translate(0 0) rotate(0) scale(1 1)" fill="rgb(61.1764705882353% 70.98039215686275% 79.6078431372549%)" fill-opacity="1" stroke="none" stroke-opacity="1" stroke-width="1" opacity="1" x="402" y="593" font-size="14">Ready · use Play</text>
+<circle id="floor-shadow" data-forma-node="floor-shadow" transform="translate(480 507) rotate(0) scale(1 0.14)" fill="rgb(2.7450980392156863% 5.88235294117647% 11.372549019607844%)" fill-opacity="1" stroke="none" stroke-opacity="1" stroke-width="1" opacity="1" cx="0" cy="0" r="160"/>
+<circle id="ball-0" data-forma-node="ball-0" transform="translate(0 0) rotate(0) scale(1 1)" fill="rgb(10.588235294117647% 36.07843137254902% 77.25490196078432%)" fill-opacity="1" stroke="none" stroke-opacity="1" stroke-width="1" opacity="1" cx="480" cy="405" r="120"/>
+<circle id="ball-1" data-forma-node="ball-1" transform="translate(0 0) rotate(0) scale(1 1)" fill="rgb(10.588235294117647% 36.470588235294116% 77.25490196078432%)" fill-opacity="1" stroke="none" stroke-opacity="1" stroke-width="1" opacity="1" cx="479.468085106383" cy="404.36170212765956" r="118.59574468085107"/>
+<circle id="ball-2" data-forma-node="ball-2" transform="translate(0 0) rotate(0) scale(1 1)" fill="rgb(10.980392156862745% 37.254901960784316% 77.64705882352942%)" fill-opacity="1" stroke="none" stroke-opacity="1" stroke-width="1" opacity="1" cx="478.93617021276594" cy="403.72340425531917" r="117.19148936170212"/>
+<circle id="ball-3" data-forma-node="ball-3" transform="translate(0 0) rotate(0) scale(1 1)" fill="rgb(11.372549019607844% 38.03921568627451% 78.03921568627452%)" fill-opacity="1" stroke="none" stroke-opacity="1" stroke-width="1" opacity="1" cx="478.40425531914894" cy="403.0851063829787" r="115.7872340425532"/>
+<circle id="ball-4" data-forma-node="ball-4" transform="translate(0 0) rotate(0) scale(1 1)" fill="rgb(11.76470588235294% 38.43137254901961% 78.43137254901961%)" fill-opacity="1" stroke="none" stroke-opacity="1" stroke-width="1" opacity="1" cx="477.8723404255319" cy="402.4468085106383" r="114.38297872340425"/>
+<circle id="ball-5" data-forma-node="ball-5" transform="translate(0 0) rotate(0) scale(1 1)" fill="rgb(11.76470588235294% 39.21568627450981% 78.82352941176471%)" fill-opacity="1" stroke="none" stroke-opacity="1" stroke-width="1" opacity="1" cx="477.3404255319149" cy="401.8085106382979" r="112.97872340425532"/>
+<circle id="ball-6" data-forma-node="ball-6" transform="translate(0 0) rotate(0) scale(1 1)" fill="rgb(12.156862745098039% 40% 79.2156862745098%)" fill-opacity="1" stroke="none" stroke-opacity="1" stroke-width="1" opacity="1" cx="476.8085106382979" cy="401.17021276595744" r="111.57446808510639"/>
+<circle id="ball-7" data-forma-node="ball-7" transform="translate(0 0) rotate(0) scale(1 1)" fill="rgb(12.549019607843137% 40.3921568627451% 79.2156862745098%)" fill-opacity="1" stroke="none" stroke-opacity="1" stroke-width="1" opacity="1" cx="476.27659574468083" cy="400.531914893617" r="110.17021276595744"/>
+<circle id="ball-8" data-forma-node="ball-8" transform="translate(0 0) rotate(0) scale(1 1)" fill="rgb(12.941176470588237% 41.17647058823529% 79.6078431372549%)" fill-opacity="1" stroke="none" stroke-opacity="1" stroke-width="1" opacity="1" cx="475.74468085106383" cy="399.8936170212766" r="108.76595744680851"/>
+<circle id="ball-9" data-forma-node="ball-9" transform="translate(0 0) rotate(0) scale(1 1)" fill="rgb(12.941176470588237% 41.96078431372549% 80%)" fill-opacity="1" stroke="none" stroke-opacity="1" stroke-width="1" opacity="1" cx="475.21276595744683" cy="399.25531914893617" r="107.36170212765957"/>
+<circle id="ball-10" data-forma-node="ball-10" transform="translate(0 0) rotate(0) scale(1 1)" fill="rgb(13.333333333333334% 42.745098039215684% 80.3921568627451%)" fill-opacity="1" stroke="none" stroke-opacity="1" stroke-width="1" opacity="1" cx="474.6808510638298" cy="398.6170212765957" r="105.95744680851064"/>
+<circle id="ball-11" data-forma-node="ball-11" transform="translate(0 0) rotate(0) scale(1 1)" fill="rgb(13.725490196078432% 43.13725490196079% 80.7843137254902%)" fill-opacity="1" stroke="none" stroke-opacity="1" stroke-width="1" opacity="1" cx="474.1489361702128" cy="397.97872340425533" r="104.5531914893617"/>
+<circle id="ball-12" data-forma-node="ball-12" transform="translate(0 0) rotate(0) scale(1 1)" fill="rgb(14.117647058823529% 43.92156862745098% 81.17647058823529%)" fill-opacity="1" stroke="none" stroke-opacity="1" stroke-width="1" opacity="1" cx="473.6170212765957" cy="397.3404255319149" r="103.14893617021276"/>
+<circle id="ball-13" data-forma-node="ball-13" transform="translate(0 0) rotate(0) scale(1 1)" fill="rgb(14.117647058823529% 44.70588235294118% 81.56862745098039%)" fill-opacity="1" stroke="none" stroke-opacity="1" stroke-width="1" opacity="1" cx="473.0851063829787" cy="396.70212765957444" r="101.74468085106383"/>
+<circle id="ball-14" data-forma-node="ball-14" transform="translate(0 0) rotate(0) scale(1 1)" fill="rgb(14.50980392156863% 45.09803921568628% 81.56862745098039%)" fill-opacity="1" stroke="none" stroke-opacity="1" stroke-width="1" opacity="1" cx="472.5531914893617" cy="396.06382978723406" r="100.34042553191489"/>
+<circle id="ball-15" data-forma-node="ball-15" transform="translate(0 0) rotate(0) scale(1 1)" fill="rgb(14.901960784313726% 45.88235294117647% 81.96078431372548%)" fill-opacity="1" stroke="none" stroke-opacity="1" stroke-width="1" opacity="1" cx="472.02127659574467" cy="395.4255319148936" r="98.93617021276596"/>
+<circle id="ball-16" data-forma-node="ball-16" transform="translate(0 0) rotate(0) scale(1 1)" fill="rgb(15.294117647058824% 46.666666666666664% 82.35294117647058%)" fill-opacity="1" stroke="none" stroke-opacity="1" stroke-width="1" opacity="1" cx="471.48936170212767" cy="394.78723404255317" r="97.53191489361703"/>
+<circle id="ball-17" data-forma-node="ball-17" transform="translate(0 0) rotate(0) scale(1 1)" fill="rgb(15.686274509803921% 47.05882352941176% 82.74509803921568%)" fill-opacity="1" stroke="none" stroke-opacity="1" stroke-width="1" opacity="1" cx="470.9574468085106" cy="394.1489361702128" r="96.12765957446808"/>
+<circle id="ball-18" data-forma-node="ball-18" transform="translate(0 0) rotate(0) scale(1 1)" fill="rgb(15.686274509803921% 47.84313725490196% 83.13725490196079%)" fill-opacity="1" stroke="none" stroke-opacity="1" stroke-width="1" opacity="1" cx="470.4255319148936" cy="393.51063829787233" r="94.72340425531915"/>
+<circle id="ball-19" data-forma-node="ball-19" transform="translate(0 0) rotate(0) scale(1 1)" fill="rgb(16.07843137254902% 48.627450980392155% 83.52941176470588%)" fill-opacity="1" stroke="none" stroke-opacity="1" stroke-width="1" opacity="1" cx="469.8936170212766" cy="392.8723404255319" r="93.31914893617022"/>
+<circle id="ball-20" data-forma-node="ball-20" transform="translate(0 0) rotate(0) scale(1 1)" fill="rgb(16.470588235294116% 49.411764705882355% 83.92156862745098%)" fill-opacity="1" stroke="none" stroke-opacity="1" stroke-width="1" opacity="1" cx="469.36170212765956" cy="392.2340425531915" r="91.91489361702128"/>
+<circle id="ball-21" data-forma-node="ball-21" transform="translate(0 0) rotate(0) scale(1 1)" fill="rgb(16.862745098039216% 49.80392156862745% 83.92156862745098%)" fill-opacity="1" stroke="none" stroke-opacity="1" stroke-width="1" opacity="1" cx="468.82978723404256" cy="391.59574468085106" r="90.51063829787233"/>
+<circle id="ball-22" data-forma-node="ball-22" transform="translate(0 0) rotate(0) scale(1 1)" fill="rgb(16.862745098039216% 50.588235294117645% 84.31372549019608%)" fill-opacity="1" stroke="none" stroke-opacity="1" stroke-width="1" opacity="1" cx="468.29787234042556" cy="390.95744680851067" r="89.1063829787234"/>
+<circle id="ball-23" data-forma-node="ball-23" transform="translate(0 0) rotate(0) scale(1 1)" fill="rgb(17.254901960784313% 51.37254901960784% 84.70588235294117%)" fill-opacity="1" stroke="none" stroke-opacity="1" stroke-width="1" opacity="1" cx="467.7659574468085" cy="390.3191489361702" r="87.70212765957447"/>
+<circle id="ball-24" data-forma-node="ball-24" transform="translate(0 0) rotate(0) scale(1 1)" fill="rgb(17.647058823529413% 51.76470588235295% 85.09803921568627%)" fill-opacity="1" stroke="none" stroke-opacity="1" stroke-width="1" opacity="1" cx="467.2340425531915" cy="389.6808510638298" r="86.29787234042553"/>
+<circle id="ball-25" data-forma-node="ball-25" transform="translate(0 0) rotate(0) scale(1 1)" fill="rgb(18.03921568627451% 52.54901960784314% 85.49019607843137%)" fill-opacity="1" stroke="none" stroke-opacity="1" stroke-width="1" opacity="1" cx="466.70212765957444" cy="389.04255319148933" r="84.8936170212766"/>
+<circle id="ball-26" data-forma-node="ball-26" transform="translate(0 0) rotate(0) scale(1 1)" fill="rgb(18.03921568627451% 53.333333333333336% 85.88235294117646%)" fill-opacity="1" stroke="none" stroke-opacity="1" stroke-width="1" opacity="1" cx="466.17021276595744" cy="388.40425531914894" r="83.48936170212767"/>
+<circle id="ball-27" data-forma-node="ball-27" transform="translate(0 0) rotate(0) scale(1 1)" fill="rgb(18.43137254901961% 53.72549019607843% 85.88235294117646%)" fill-opacity="1" stroke="none" stroke-opacity="1" stroke-width="1" opacity="1" cx="465.63829787234044" cy="387.7659574468085" r="82.08510638297872"/>
+<circle id="ball-28" data-forma-node="ball-28" transform="translate(0 0) rotate(0) scale(1 1)" fill="rgb(18.823529411764707% 54.509803921568626% 86.27450980392157%)" fill-opacity="1" stroke="none" stroke-opacity="1" stroke-width="1" opacity="1" cx="465.1063829787234" cy="387.1276595744681" r="80.68085106382979"/>
+<circle id="ball-29" data-forma-node="ball-29" transform="translate(0 0) rotate(0) scale(1 1)" fill="rgb(19.215686274509807% 55.294117647058826% 86.66666666666667%)" fill-opacity="1" stroke="none" stroke-opacity="1" stroke-width="1" opacity="1" cx="464.5744680851064" cy="386.48936170212767" r="79.27659574468086"/>
+<circle id="ball-30" data-forma-node="ball-30" transform="translate(0 0) rotate(0) scale(1 1)" fill="rgb(19.215686274509807% 56.07843137254902% 87.05882352941177%)" fill-opacity="1" stroke="none" stroke-opacity="1" stroke-width="1" opacity="1" cx="464.04255319148933" cy="385.8510638297872" r="77.87234042553192"/>
+<circle id="ball-31" data-forma-node="ball-31" transform="translate(0 0) rotate(0) scale(1 1)" fill="rgb(19.607843137254903% 56.470588235294116% 87.45098039215686%)" fill-opacity="1" stroke="none" stroke-opacity="1" stroke-width="1" opacity="1" cx="463.51063829787233" cy="385.21276595744683" r="76.46808510638297"/>
+<circle id="ball-32" data-forma-node="ball-32" transform="translate(0 0) rotate(0) scale(1 1)" fill="rgb(20% 57.25490196078431% 87.84313725490196%)" fill-opacity="1" stroke="none" stroke-opacity="1" stroke-width="1" opacity="1" cx="462.97872340425533" cy="384.5744680851064" r="75.06382978723404"/>
+<circle id="ball-33" data-forma-node="ball-33" transform="translate(0 0) rotate(0) scale(1 1)" fill="rgb(20.392156862745097% 58.03921568627452% 88.23529411764706%)" fill-opacity="1" stroke="none" stroke-opacity="1" stroke-width="1" opacity="1" cx="462.4468085106383" cy="383.93617021276594" r="73.65957446808511"/>
+<circle id="ball-34" data-forma-node="ball-34" transform="translate(0 0) rotate(0) scale(1 1)" fill="rgb(20.784313725490197% 58.43137254901961% 88.23529411764706%)" fill-opacity="1" stroke="none" stroke-opacity="1" stroke-width="1" opacity="1" cx="461.9148936170213" cy="383.29787234042556" r="72.25531914893617"/>
+<circle id="ball-35" data-forma-node="ball-35" transform="translate(0 0) rotate(0) scale(1 1)" fill="rgb(20.784313725490197% 59.21568627450981% 88.62745098039215%)" fill-opacity="1" stroke="none" stroke-opacity="1" stroke-width="1" opacity="1" cx="461.3829787234043" cy="382.6595744680851" r="70.85106382978724"/>
+<circle id="ball-36" data-forma-node="ball-36" transform="translate(0 0) rotate(0) scale(1 1)" fill="rgb(21.176470588235293% 60% 89.01960784313725%)" fill-opacity="1" stroke="none" stroke-opacity="1" stroke-width="1" opacity="1" cx="460.8510638297872" cy="382.02127659574467" r="69.4468085106383"/>
+<circle id="ball-37" data-forma-node="ball-37" transform="translate(0 0) rotate(0) scale(1 1)" fill="rgb(21.568627450980394% 60.3921568627451% 89.41176470588236%)" fill-opacity="1" stroke="none" stroke-opacity="1" stroke-width="1" opacity="1" cx="460.3191489361702" cy="381.3829787234043" r="68.04255319148936"/>
+<circle id="ball-38" data-forma-node="ball-38" transform="translate(0 0) rotate(0) scale(1 1)" fill="rgb(21.96078431372549% 61.1764705882353% 89.80392156862746%)" fill-opacity="1" stroke="none" stroke-opacity="1" stroke-width="1" opacity="1" cx="459.7872340425532" cy="380.74468085106383" r="66.63829787234043"/>
+<circle id="ball-39" data-forma-node="ball-39" transform="translate(0 0) rotate(0) scale(1 1)" fill="rgb(21.96078431372549% 61.96078431372549% 90.19607843137256%)" fill-opacity="1" stroke="none" stroke-opacity="1" stroke-width="1" opacity="1" cx="459.25531914893617" cy="380.1063829787234" r="65.2340425531915"/>
+<circle id="ball-40" data-forma-node="ball-40" transform="translate(0 0) rotate(0) scale(1 1)" fill="rgb(22.35294117647059% 62.745098039215684% 90.58823529411765%)" fill-opacity="1" stroke="none" stroke-opacity="1" stroke-width="1" opacity="1" cx="458.72340425531917" cy="379.468085106383" r="63.829787234042556"/>
+<circle id="ball-41" data-forma-node="ball-41" transform="translate(0 0) rotate(0) scale(1 1)" fill="rgb(22.745098039215687% 63.13725490196078% 90.58823529411765%)" fill-opacity="1" stroke="none" stroke-opacity="1" stroke-width="1" opacity="1" cx="458.1914893617021" cy="378.82978723404256" r="62.42553191489361"/>
+<circle id="ball-42" data-forma-node="ball-42" transform="translate(0 0) rotate(0) scale(1 1)" fill="rgb(23.137254901960784% 63.921568627450974% 90.98039215686275%)" fill-opacity="1" stroke="none" stroke-opacity="1" stroke-width="1" opacity="1" cx="457.6595744680851" cy="378.1914893617021" r="61.02127659574468"/>
+<circle id="ball-43" data-forma-node="ball-43" transform="translate(0 0) rotate(0) scale(1 1)" fill="rgb(23.137254901960784% 64.70588235294117% 91.37254901960785%)" fill-opacity="1" stroke="none" stroke-opacity="1" stroke-width="1" opacity="1" cx="457.1276595744681" cy="377.5531914893617" r="59.61702127659574"/>
+<circle id="ball-44" data-forma-node="ball-44" transform="translate(0 0) rotate(0) scale(1 1)" fill="rgb(23.52941176470588% 65.09803921568627% 91.76470588235294%)" fill-opacity="1" stroke="none" stroke-opacity="1" stroke-width="1" opacity="1" cx="456.59574468085106" cy="376.9148936170213" r="58.212765957446805"/>
+<circle id="ball-45" data-forma-node="ball-45" transform="translate(0 0) rotate(0) scale(1 1)" fill="rgb(23.92156862745098% 65.88235294117646% 92.15686274509804%)" fill-opacity="1" stroke="none" stroke-opacity="1" stroke-width="1" opacity="1" cx="456.06382978723406" cy="376.27659574468083" r="56.80851063829787"/>
+<circle id="ball-46" data-forma-node="ball-46" transform="translate(0 0) rotate(0) scale(1 1)" fill="rgb(24.313725490196077% 66.66666666666666% 92.54901960784314%)" fill-opacity="1" stroke="none" stroke-opacity="1" stroke-width="1" opacity="1" cx="455.531914893617" cy="375.63829787234044" r="55.404255319148945"/>
+<circle id="ball-47" data-forma-node="ball-47" transform="translate(0 0) rotate(0) scale(1 1)" fill="rgb(24.705882352941178% 67.45098039215686% 92.94117647058823%)" fill-opacity="1" stroke="none" stroke-opacity="1" stroke-width="1" opacity="1" cx="455" cy="375" r="54"/>
+<circle id="contact-shadow" data-forma-node="contact-shadow" transform="translate(480 289) rotate(0) scale(0.6 0.18)" fill="rgb(7.0588235294117645% 29.80392156862745% 56.86274509803921%)" fill-opacity="1" stroke="none" stroke-opacity="1" stroke-width="1" opacity="0.12" cx="0" cy="0" r="30"/>
+<circle id="ripple" data-forma-node="ripple" transform="translate(480 287) rotate(0) scale(0.6 0.18)" fill="rgb(43.13725490196079% 87.84313725490196% 96.86274509803921%)" fill-opacity="0" stroke="rgb(54.509803921568626% 92.15686274509804% 100%)" stroke-opacity="1" stroke-width="2" opacity="0" cx="0" cy="0" r="32"/>
+<path id="drop" data-forma-node="drop" transform="translate(480 130) rotate(0) scale(1 1)" fill="rgb(40.3921568627451% 88.62745098039215% 96.07843137254902%)" fill-opacity="1" stroke="none" stroke-opacity="1" stroke-width="1" opacity="1" d="M 0 -60 C -8 -35 -31 -10 -30 8 C -29 40 29 40 30 8 C 31 -10 8 -35 0 -60 Z" fill-rule="nonzero"/>
+<path id="drop-glint" data-forma-node="drop-glint" transform="translate(480 130) rotate(0) scale(1 1)" fill="rgb(86.66666666666667% 100% 100%)" fill-opacity="1" stroke="none" stroke-opacity="1" stroke-width="1" opacity="1" d="M -9 -17 C -22 -1 -23 13 -13 20 C -18 5 -10 -6 -9 -17 Z" fill-rule="nonzero"/>
+<metadata id="forma-project">{&quot;schemaVersion&quot;:1,&quot;name&quot;:&quot;A drop in the blue&quot;,&quot;width&quot;:960.0,&quot;height&quot;:640.0,&quot;nodes&quot;:[{&quot;id&quot;:&quot;background&quot;,&quot;name&quot;:&quot;&quot;,&quot;boneId&quot;:null,&quot;visible&quot;:true,&quot;locked&quot;:false,&quot;originalKind&quot;:null,&quot;transform&quot;:{&quot;x&quot;:0.0,&quot;y&quot;:0.0,&quot;rotation&quot;:0.0,&quot;scaleX&quot;:1.0,&quot;scaleY&quot;:1.0},&quot;style&quot;:{&quot;fill&quot;:{&quot;r&quot;:0.047058823529411764,&quot;g&quot;:0.09019607843137255,&quot;b&quot;:0.16862745098039217,&quot;a&quot;:1.0},&quot;stroke&quot;:null,&quot;strokeWidth&quot;:1.0,&quot;opacity&quot;:1.0},&quot;kind&quot;:{&quot;type&quot;:&quot;rect&quot;,&quot;x&quot;:0.0,&quot;y&quot;:0.0,&quot;width&quot;:960.0,&quot;height&quot;:640.0,&quot;rx&quot;:0.0}},{&quot;id&quot;:&quot;ambient&quot;,&quot;name&quot;:&quot;&quot;,&quot;boneId&quot;:null,&quot;visible&quot;:true,&quot;locked&quot;:false,&quot;originalKind&quot;:null,&quot;transform&quot;:{&quot;x&quot;:0.0,&quot;y&quot;:0.0,&quot;rotation&quot;:0.0,&quot;scaleX&quot;:1.0,&quot;scaleY&quot;:1.0},&quot;style&quot;:{&quot;fill&quot;:{&quot;r&quot;:0.06274509803921569,&quot;g&quot;:0.13333333333333333,&quot;b&quot;:0.2235294117647059,&quot;a&quot;:1.0},&quot;stroke&quot;:null,&quot;strokeWidth&quot;:1.0,&quot;opacity&quot;:1.0},&quot;kind&quot;:{&quot;type&quot;:&quot;circle&quot;,&quot;cx&quot;:840.0,&quot;cy&quot;:180.0,&quot;radius&quot;:270.0}},{&quot;id&quot;:&quot;ambient-inner&quot;,&quot;name&quot;:&quot;&quot;,&quot;boneId&quot;:null,&quot;visible&quot;:true,&quot;locked&quot;:false,&quot;originalKind&quot;:null,&quot;transform&quot;:{&quot;x&quot;:0.0,&quot;y&quot;:0.0,&quot;rotation&quot;:0.0,&quot;scaleX&quot;:1.0,&quot;scaleY&quot;:1.0},&quot;style&quot;:{&quot;fill&quot;:{&quot;r&quot;:0.07450980392156863,&quot;g&quot;:0.1568627450980392,&quot;b&quot;:0.2549019607843137,&quot;a&quot;:1.0},&quot;stroke&quot;:null,&quot;strokeWidth&quot;:1.0,&quot;opacity&quot;:1.0},&quot;kind&quot;:{&quot;type&quot;:&quot;circle&quot;,&quot;cx&quot;:840.0,&quot;cy&quot;:180.0,&quot;radius&quot;:210.0}},{&quot;id&quot;:&quot;eyebrow&quot;,&quot;name&quot;:&quot;&quot;,&quot;boneId&quot;:null,&quot;visible&quot;:true,&quot;locked&quot;:false,&quot;originalKind&quot;:null,&quot;transform&quot;:{&quot;x&quot;:0.0,&quot;y&quot;:0.0,&quot;rotation&quot;:0.0,&quot;scaleX&quot;:1.0,&quot;scaleY&quot;:1.0},&quot;style&quot;:{&quot;fill&quot;:{&quot;r&quot;:0.4117647058823529,&quot;g&quot;:0.7686274509803922,&quot;b&quot;:0.8627450980392157,&quot;a&quot;:1.0},&quot;stroke&quot;:null,&quot;strokeWidth&quot;:1.0,&quot;opacity&quot;:1.0},&quot;kind&quot;:{&quot;type&quot;:&quot;text&quot;,&quot;x&quot;:54.0,&quot;y&quot;:66.0,&quot;text&quot;:&quot;FORMA / MOTION STUDIES&quot;,&quot;fontSize&quot;:14.0}},{&quot;id&quot;:&quot;title&quot;,&quot;name&quot;:&quot;&quot;,&quot;boneId&quot;:null,&quot;visible&quot;:true,&quot;locked&quot;:false,&quot;originalKind&quot;:null,&quot;transform&quot;:{&quot;x&quot;:0.0,&quot;y&quot;:0.0,&quot;rotation&quot;:0.0,&quot;scaleX&quot;:1.0,&quot;scaleY&quot;:1.0},&quot;style&quot;:{&quot;fill&quot;:{&quot;r&quot;:0.9294117647058824,&quot;g&quot;:0.9647058823529412,&quot;b&quot;:1.0,&quot;a&quot;:1.0},&quot;stroke&quot;:null,&quot;strokeWidth&quot;:1.0,&quot;opacity&quot;:1.0},&quot;kind&quot;:{&quot;type&quot;:&quot;text&quot;,&quot;x&quot;:54.0,&quot;y&quot;:112.0,&quot;text&quot;:&quot;A drop in the blue&quot;,&quot;fontSize&quot;:34.0}},{&quot;id&quot;:&quot;subtitle&quot;,&quot;name&quot;:&quot;&quot;,&quot;boneId&quot;:null,&quot;visible&quot;:true,&quot;locked&quot;:false,&quot;originalKind&quot;:null,&quot;transform&quot;:{&quot;x&quot;:0.0,&quot;y&quot;:0.0,&quot;rotation&quot;:0.0,&quot;scaleX&quot;:1.0,&quot;scaleY&quot;:1.0},&quot;style&quot;:{&quot;fill&quot;:{&quot;r&quot;:0.611764705882353,&quot;g&quot;:0.7098039215686275,&quot;b&quot;:0.796078431372549,&quot;a&quot;:1.0},&quot;stroke&quot;:null,&quot;strokeWidth&quot;:1.0,&quot;opacity&quot;:1.0},&quot;kind&quot;:{&quot;type&quot;:&quot;text&quot;,&quot;x&quot;:54.0,&quot;y&quot;:144.0,&quot;text&quot;:&quot;Squash, stretch, a soft landing. A deterministic 2.8-second loop.&quot;,&quot;fontSize&quot;:15.0}},{&quot;id&quot;:&quot;start-control&quot;,&quot;name&quot;:&quot;&quot;,&quot;boneId&quot;:null,&quot;visible&quot;:true,&quot;locked&quot;:false,&quot;originalKind&quot;:null,&quot;transform&quot;:{&quot;x&quot;:0.0,&quot;y&quot;:0.0,&quot;rotation&quot;:0.0,&quot;scaleX&quot;:1.0,&quot;scaleY&quot;:1.0},&quot;style&quot;:{&quot;fill&quot;:{&quot;r&quot;:0.12549019607843137,&quot;g&quot;:0.23529411764705882,&quot;b&quot;:0.32941176470588235,&quot;a&quot;:1.0},&quot;stroke&quot;:null,&quot;strokeWidth&quot;:1.0,&quot;opacity&quot;:1.0},&quot;kind&quot;:{&quot;type&quot;:&quot;rect&quot;,&quot;x&quot;:54.0,&quot;y&quot;:567.0,&quot;width&quot;:152.0,&quot;height&quot;:40.0,&quot;rx&quot;:12.0}},{&quot;id&quot;:&quot;start-control-label&quot;,&quot;name&quot;:&quot;&quot;,&quot;boneId&quot;:null,&quot;visible&quot;:true,&quot;locked&quot;:false,&quot;originalKind&quot;:null,&quot;transform&quot;:{&quot;x&quot;:0.0,&quot;y&quot;:0.0,&quot;rotation&quot;:0.0,&quot;scaleX&quot;:1.0,&quot;scaleY&quot;:1.0},&quot;style&quot;:{&quot;fill&quot;:{&quot;r&quot;:0.8705882352941177,&quot;g&quot;:0.9411764705882353,&quot;b&quot;:0.9764705882352941,&quot;a&quot;:1.0},&quot;stroke&quot;:null,&quot;strokeWidth&quot;:1.0,&quot;opacity&quot;:1.0},&quot;kind&quot;:{&quot;type&quot;:&quot;text&quot;,&quot;x&quot;:70.0,&quot;y&quot;:593.0,&quot;text&quot;:&quot;Play / resume&quot;,&quot;fontSize&quot;:15.0}},{&quot;id&quot;:&quot;pause-control&quot;,&quot;name&quot;:&quot;&quot;,&quot;boneId&quot;:null,&quot;visible&quot;:true,&quot;locked&quot;:false,&quot;originalKind&quot;:null,&quot;transform&quot;:{&quot;x&quot;:0.0,&quot;y&quot;:0.0,&quot;rotation&quot;:0.0,&quot;scaleX&quot;:1.0,&quot;scaleY&quot;:1.0},&quot;style&quot;:{&quot;fill&quot;:{&quot;r&quot;:0.12549019607843137,&quot;g&quot;:0.23529411764705882,&quot;b&quot;:0.32941176470588235,&quot;a&quot;:1.0},&quot;stroke&quot;:null,&quot;strokeWidth&quot;:1.0,&quot;opacity&quot;:1.0},&quot;kind&quot;:{&quot;type&quot;:&quot;rect&quot;,&quot;x&quot;:222.0,&quot;y&quot;:567.0,&quot;width&quot;:152.0,&quot;height&quot;:40.0,&quot;rx&quot;:12.0}},{&quot;id&quot;:&quot;pause-control-label&quot;,&quot;name&quot;:&quot;&quot;,&quot;boneId&quot;:null,&quot;visible&quot;:true,&quot;locked&quot;:false,&quot;originalKind&quot;:null,&quot;transform&quot;:{&quot;x&quot;:0.0,&quot;y&quot;:0.0,&quot;rotation&quot;:0.0,&quot;scaleX&quot;:1.0,&quot;scaleY&quot;:1.0},&quot;style&quot;:{&quot;fill&quot;:{&quot;r&quot;:0.8705882352941177,&quot;g&quot;:0.9411764705882353,&quot;b&quot;:0.9764705882352941,&quot;a&quot;:1.0},&quot;stroke&quot;:null,&quot;strokeWidth&quot;:1.0,&quot;opacity&quot;:1.0},&quot;kind&quot;:{&quot;type&quot;:&quot;text&quot;,&quot;x&quot;:238.0,&quot;y&quot;:593.0,&quot;text&quot;:&quot;Pause&quot;,&quot;fontSize&quot;:15.0}},{&quot;id&quot;:&quot;status&quot;,&quot;name&quot;:&quot;&quot;,&quot;boneId&quot;:null,&quot;visible&quot;:true,&quot;locked&quot;:false,&quot;originalKind&quot;:null,&quot;transform&quot;:{&quot;x&quot;:0.0,&quot;y&quot;:0.0,&quot;rotation&quot;:0.0,&quot;scaleX&quot;:1.0,&quot;scaleY&quot;:1.0},&quot;style&quot;:{&quot;fill&quot;:{&quot;r&quot;:0.611764705882353,&quot;g&quot;:0.7098039215686275,&quot;b&quot;:0.796078431372549,&quot;a&quot;:1.0},&quot;stroke&quot;:null,&quot;strokeWidth&quot;:1.0,&quot;opacity&quot;:1.0},&quot;kind&quot;:{&quot;type&quot;:&quot;text&quot;,&quot;x&quot;:402.0,&quot;y&quot;:593.0,&quot;text&quot;:&quot;Ready · use Play&quot;,&quot;fontSize&quot;:14.0}},{&quot;id&quot;:&quot;floor-shadow&quot;,&quot;name&quot;:&quot;&quot;,&quot;boneId&quot;:null,&quot;visible&quot;:true,&quot;locked&quot;:false,&quot;originalKind&quot;:null,&quot;transform&quot;:{&quot;x&quot;:480.0,&quot;y&quot;:507.0,&quot;rotation&quot;:0.0,&quot;scaleX&quot;:1.0,&quot;scaleY&quot;:0.14},&quot;style&quot;:{&quot;fill&quot;:{&quot;r&quot;:0.027450980392156862,&quot;g&quot;:0.058823529411764705,&quot;b&quot;:0.11372549019607843,&quot;a&quot;:1.0},&quot;stroke&quot;:null,&quot;strokeWidth&quot;:1.0,&quot;opacity&quot;:1.0},&quot;kind&quot;:{&quot;type&quot;:&quot;circle&quot;,&quot;cx&quot;:0.0,&quot;cy&quot;:0.0,&quot;radius&quot;:160.0}},{&quot;id&quot;:&quot;ball-0&quot;,&quot;name&quot;:&quot;&quot;,&quot;boneId&quot;:null,&quot;visible&quot;:true,&quot;locked&quot;:false,&quot;originalKind&quot;:null,&quot;transform&quot;:{&quot;x&quot;:0.0,&quot;y&quot;:0.0,&quot;rotation&quot;:0.0,&quot;scaleX&quot;:1.0,&quot;scaleY&quot;:1.0},&quot;style&quot;:{&quot;fill&quot;:{&quot;r&quot;:0.10588235294117647,&quot;g&quot;:0.3607843137254902,&quot;b&quot;:0.7725490196078432,&quot;a&quot;:1.0},&quot;stroke&quot;:null,&quot;strokeWidth&quot;:1.0,&quot;opacity&quot;:1.0},&quot;kind&quot;:{&quot;type&quot;:&quot;circle&quot;,&quot;cx&quot;:480.0,&quot;cy&quot;:405.0,&quot;radius&quot;:120.0}},{&quot;id&quot;:&quot;ball-1&quot;,&quot;name&quot;:&quot;&quot;,&quot;boneId&quot;:null,&quot;visible&quot;:true,&quot;locked&quot;:false,&quot;originalKind&quot;:null,&quot;transform&quot;:{&quot;x&quot;:0.0,&quot;y&quot;:0.0,&quot;rotation&quot;:0.0,&quot;scaleX&quot;:1.0,&quot;scaleY&quot;:1.0},&quot;style&quot;:{&quot;fill&quot;:{&quot;r&quot;:0.10588235294117647,&quot;g&quot;:0.36470588235294116,&quot;b&quot;:0.7725490196078432,&quot;a&quot;:1.0},&quot;stroke&quot;:null,&quot;strokeWidth&quot;:1.0,&quot;opacity&quot;:1.0},&quot;kind&quot;:{&quot;type&quot;:&quot;circle&quot;,&quot;cx&quot;:479.468085106383,&quot;cy&quot;:404.36170212765956,&quot;radius&quot;:118.59574468085107}},{&quot;id&quot;:&quot;ball-2&quot;,&quot;name&quot;:&quot;&quot;,&quot;boneId&quot;:null,&quot;visible&quot;:true,&quot;locked&quot;:false,&quot;originalKind&quot;:null,&quot;transform&quot;:{&quot;x&quot;:0.0,&quot;y&quot;:0.0,&quot;rotation&quot;:0.0,&quot;scaleX&quot;:1.0,&quot;scaleY&quot;:1.0},&quot;style&quot;:{&quot;fill&quot;:{&quot;r&quot;:0.10980392156862745,&quot;g&quot;:0.37254901960784315,&quot;b&quot;:0.7764705882352941,&quot;a&quot;:1.0},&quot;stroke&quot;:null,&quot;strokeWidth&quot;:1.0,&quot;opacity&quot;:1.0},&quot;kind&quot;:{&quot;type&quot;:&quot;circle&quot;,&quot;cx&quot;:478.93617021276594,&quot;cy&quot;:403.72340425531917,&quot;radius&quot;:117.19148936170212}},{&quot;id&quot;:&quot;ball-3&quot;,&quot;name&quot;:&quot;&quot;,&quot;boneId&quot;:null,&quot;visible&quot;:true,&quot;locked&quot;:false,&quot;originalKind&quot;:null,&quot;transform&quot;:{&quot;x&quot;:0.0,&quot;y&quot;:0.0,&quot;rotation&quot;:0.0,&quot;scaleX&quot;:1.0,&quot;scaleY&quot;:1.0},&quot;style&quot;:{&quot;fill&quot;:{&quot;r&quot;:0.11372549019607843,&quot;g&quot;:0.3803921568627451,&quot;b&quot;:0.7803921568627451,&quot;a&quot;:1.0},&quot;stroke&quot;:null,&quot;strokeWidth&quot;:1.0,&quot;opacity&quot;:1.0},&quot;kind&quot;:{&quot;type&quot;:&quot;circle&quot;,&quot;cx&quot;:478.40425531914894,&quot;cy&quot;:403.0851063829787,&quot;radius&quot;:115.7872340425532}},{&quot;id&quot;:&quot;ball-4&quot;,&quot;name&quot;:&quot;&quot;,&quot;boneId&quot;:null,&quot;visible&quot;:true,&quot;locked&quot;:false,&quot;originalKind&quot;:null,&quot;transform&quot;:{&quot;x&quot;:0.0,&quot;y&quot;:0.0,&quot;rotation&quot;:0.0,&quot;scaleX&quot;:1.0,&quot;scaleY&quot;:1.0},&quot;style&quot;:{&quot;fill&quot;:{&quot;r&quot;:0.11764705882352941,&quot;g&quot;:0.3843137254901961,&quot;b&quot;:0.7843137254901961,&quot;a&quot;:1.0},&quot;stroke&quot;:null,&quot;strokeWidth&quot;:1.0,&quot;opacity&quot;:1.0},&quot;kind&quot;:{&quot;type&quot;:&quot;circle&quot;,&quot;cx&quot;:477.8723404255319,&quot;cy&quot;:402.4468085106383,&quot;radius&quot;:114.38297872340425}},{&quot;id&quot;:&quot;ball-5&quot;,&quot;name&quot;:&quot;&quot;,&quot;boneId&quot;:null,&quot;visible&quot;:true,&quot;locked&quot;:false,&quot;originalKind&quot;:null,&quot;transform&quot;:{&quot;x&quot;:0.0,&quot;y&quot;:0.0,&quot;rotation&quot;:0.0,&quot;scaleX&quot;:1.0,&quot;scaleY&quot;:1.0},&quot;style&quot;:{&quot;fill&quot;:{&quot;r&quot;:0.11764705882352941,&quot;g&quot;:0.39215686274509803,&quot;b&quot;:0.788235294117647,&quot;a&quot;:1.0},&quot;stroke&quot;:null,&quot;strokeWidth&quot;:1.0,&quot;opacity&quot;:1.0},&quot;kind&quot;:{&quot;type&quot;:&quot;circle&quot;,&quot;cx&quot;:477.3404255319149,&quot;cy&quot;:401.8085106382979,&quot;radius&quot;:112.97872340425532}},{&quot;id&quot;:&quot;ball-6&quot;,&quot;name&quot;:&quot;&quot;,&quot;boneId&quot;:null,&quot;visible&quot;:true,&quot;locked&quot;:false,&quot;originalKind&quot;:null,&quot;transform&quot;:{&quot;x&quot;:0.0,&quot;y&quot;:0.0,&quot;rotation&quot;:0.0,&quot;scaleX&quot;:1.0,&quot;scaleY&quot;:1.0},&quot;style&quot;:{&quot;fill&quot;:{&quot;r&quot;:0.12156862745098039,&quot;g&quot;:0.4,&quot;b&quot;:0.792156862745098,&quot;a&quot;:1.0},&quot;stroke&quot;:null,&quot;strokeWidth&quot;:1.0,&quot;opacity&quot;:1.0},&quot;kind&quot;:{&quot;type&quot;:&quot;circle&quot;,&quot;cx&quot;:476.8085106382979,&quot;cy&quot;:401.17021276595744,&quot;radius&quot;:111.57446808510639}},{&quot;id&quot;:&quot;ball-7&quot;,&quot;name&quot;:&quot;&quot;,&quot;boneId&quot;:null,&quot;visible&quot;:true,&quot;locked&quot;:false,&quot;originalKind&quot;:null,&quot;transform&quot;:{&quot;x&quot;:0.0,&quot;y&quot;:0.0,&quot;rotation&quot;:0.0,&quot;scaleX&quot;:1.0,&quot;scaleY&quot;:1.0},&quot;style&quot;:{&quot;fill&quot;:{&quot;r&quot;:0.12549019607843137,&quot;g&quot;:0.403921568627451,&quot;b&quot;:0.792156862745098,&quot;a&quot;:1.0},&quot;stroke&quot;:null,&quot;strokeWidth&quot;:1.0,&quot;opacity&quot;:1.0},&quot;kind&quot;:{&quot;type&quot;:&quot;circle&quot;,&quot;cx&quot;:476.27659574468083,&quot;cy&quot;:400.531914893617,&quot;radius&quot;:110.17021276595744}},{&quot;id&quot;:&quot;ball-8&quot;,&quot;name&quot;:&quot;&quot;,&quot;boneId&quot;:null,&quot;visible&quot;:true,&quot;locked&quot;:false,&quot;originalKind&quot;:null,&quot;transform&quot;:{&quot;x&quot;:0.0,&quot;y&quot;:0.0,&quot;rotation&quot;:0.0,&quot;scaleX&quot;:1.0,&quot;scaleY&quot;:1.0},&quot;style&quot;:{&quot;fill&quot;:{&quot;r&quot;:0.12941176470588237,&quot;g&quot;:0.4117647058823529,&quot;b&quot;:0.796078431372549,&quot;a&quot;:1.0},&quot;stroke&quot;:null,&quot;strokeWidth&quot;:1.0,&quot;opacity&quot;:1.0},&quot;kind&quot;:{&quot;type&quot;:&quot;circle&quot;,&quot;cx&quot;:475.74468085106383,&quot;cy&quot;:399.8936170212766,&quot;radius&quot;:108.76595744680851}},{&quot;id&quot;:&quot;ball-9&quot;,&quot;name&quot;:&quot;&quot;,&quot;boneId&quot;:null,&quot;visible&quot;:true,&quot;locked&quot;:false,&quot;originalKind&quot;:null,&quot;transform&quot;:{&quot;x&quot;:0.0,&quot;y&quot;:0.0,&quot;rotation&quot;:0.0,&quot;scaleX&quot;:1.0,&quot;scaleY&quot;:1.0},&quot;style&quot;:{&quot;fill&quot;:{&quot;r&quot;:0.12941176470588237,&quot;g&quot;:0.4196078431372549,&quot;b&quot;:0.8,&quot;a&quot;:1.0},&quot;stroke&quot;:null,&quot;strokeWidth&quot;:1.0,&quot;opacity&quot;:1.0},&quot;kind&quot;:{&quot;type&quot;:&quot;circle&quot;,&quot;cx&quot;:475.21276595744683,&quot;cy&quot;:399.25531914893617,&quot;radius&quot;:107.36170212765957}},{&quot;id&quot;:&quot;ball-10&quot;,&quot;name&quot;:&quot;&quot;,&quot;boneId&quot;:null,&quot;visible&quot;:true,&quot;locked&quot;:false,&quot;originalKind&quot;:null,&quot;transform&quot;:{&quot;x&quot;:0.0,&quot;y&quot;:0.0,&quot;rotation&quot;:0.0,&quot;scaleX&quot;:1.0,&quot;scaleY&quot;:1.0},&quot;style&quot;:{&quot;fill&quot;:{&quot;r&quot;:0.13333333333333333,&quot;g&quot;:0.42745098039215684,&quot;b&quot;:0.803921568627451,&quot;a&quot;:1.0},&quot;stroke&quot;:null,&quot;strokeWidth&quot;:1.0,&quot;opacity&quot;:1.0},&quot;kind&quot;:{&quot;type&quot;:&quot;circle&quot;,&quot;cx&quot;:474.6808510638298,&quot;cy&quot;:398.6170212765957,&quot;radius&quot;:105.95744680851064}},{&quot;id&quot;:&quot;ball-11&quot;,&quot;name&quot;:&quot;&quot;,&quot;boneId&quot;:null,&quot;visible&quot;:true,&quot;locked&quot;:false,&quot;originalKind&quot;:null,&quot;transform&quot;:{&quot;x&quot;:0.0,&quot;y&quot;:0.0,&quot;rotation&quot;:0.0,&quot;scaleX&quot;:1.0,&quot;scaleY&quot;:1.0},&quot;style&quot;:{&quot;fill&quot;:{&quot;r&quot;:0.13725490196078433,&quot;g&quot;:0.43137254901960786,&quot;b&quot;:0.807843137254902,&quot;a&quot;:1.0},&quot;stroke&quot;:null,&quot;strokeWidth&quot;:1.0,&quot;opacity&quot;:1.0},&quot;kind&quot;:{&quot;type&quot;:&quot;circle&quot;,&quot;cx&quot;:474.1489361702128,&quot;cy&quot;:397.97872340425533,&quot;radius&quot;:104.5531914893617}},{&quot;id&quot;:&quot;ball-12&quot;,&quot;name&quot;:&quot;&quot;,&quot;boneId&quot;:null,&quot;visible&quot;:true,&quot;locked&quot;:false,&quot;originalKind&quot;:null,&quot;transform&quot;:{&quot;x&quot;:0.0,&quot;y&quot;:0.0,&quot;rotation&quot;:0.0,&quot;scaleX&quot;:1.0,&quot;scaleY&quot;:1.0},&quot;style&quot;:{&quot;fill&quot;:{&quot;r&quot;:0.1411764705882353,&quot;g&quot;:0.4392156862745098,&quot;b&quot;:0.8117647058823529,&quot;a&quot;:1.0},&quot;stroke&quot;:null,&quot;strokeWidth&quot;:1.0,&quot;opacity&quot;:1.0},&quot;kind&quot;:{&quot;type&quot;:&quot;circle&quot;,&quot;cx&quot;:473.6170212765957,&quot;cy&quot;:397.3404255319149,&quot;radius&quot;:103.14893617021276}},{&quot;id&quot;:&quot;ball-13&quot;,&quot;name&quot;:&quot;&quot;,&quot;boneId&quot;:null,&quot;visible&quot;:true,&quot;locked&quot;:false,&quot;originalKind&quot;:null,&quot;transform&quot;:{&quot;x&quot;:0.0,&quot;y&quot;:0.0,&quot;rotation&quot;:0.0,&quot;scaleX&quot;:1.0,&quot;scaleY&quot;:1.0},&quot;style&quot;:{&quot;fill&quot;:{&quot;r&quot;:0.1411764705882353,&quot;g&quot;:0.4470588235294118,&quot;b&quot;:0.8156862745098039,&quot;a&quot;:1.0},&quot;stroke&quot;:null,&quot;strokeWidth&quot;:1.0,&quot;opacity&quot;:1.0},&quot;kind&quot;:{&quot;type&quot;:&quot;circle&quot;,&quot;cx&quot;:473.0851063829787,&quot;cy&quot;:396.70212765957444,&quot;radius&quot;:101.74468085106383}},{&quot;id&quot;:&quot;ball-14&quot;,&quot;name&quot;:&quot;&quot;,&quot;boneId&quot;:null,&quot;visible&quot;:true,&quot;locked&quot;:false,&quot;originalKind&quot;:null,&quot;transform&quot;:{&quot;x&quot;:0.0,&quot;y&quot;:0.0,&quot;rotation&quot;:0.0,&quot;scaleX&quot;:1.0,&quot;scaleY&quot;:1.0},&quot;style&quot;:{&quot;fill&quot;:{&quot;r&quot;:0.1450980392156863,&quot;g&quot;:0.45098039215686275,&quot;b&quot;:0.8156862745098039,&quot;a&quot;:1.0},&quot;stroke&quot;:null,&quot;strokeWidth&quot;:1.0,&quot;opacity&quot;:1.0},&quot;kind&quot;:{&quot;type&quot;:&quot;circle&quot;,&quot;cx&quot;:472.5531914893617,&quot;cy&quot;:396.06382978723406,&quot;radius&quot;:100.34042553191489}},{&quot;id&quot;:&quot;ball-15&quot;,&quot;name&quot;:&quot;&quot;,&quot;boneId&quot;:null,&quot;visible&quot;:true,&quot;locked&quot;:false,&quot;originalKind&quot;:null,&quot;transform&quot;:{&quot;x&quot;:0.0,&quot;y&quot;:0.0,&quot;rotation&quot;:0.0,&quot;scaleX&quot;:1.0,&quot;scaleY&quot;:1.0},&quot;style&quot;:{&quot;fill&quot;:{&quot;r&quot;:0.14901960784313725,&quot;g&quot;:0.4588235294117647,&quot;b&quot;:0.8196078431372549,&quot;a&quot;:1.0},&quot;stroke&quot;:null,&quot;strokeWidth&quot;:1.0,&quot;opacity&quot;:1.0},&quot;kind&quot;:{&quot;type&quot;:&quot;circle&quot;,&quot;cx&quot;:472.02127659574467,&quot;cy&quot;:395.4255319148936,&quot;radius&quot;:98.93617021276596}},{&quot;id&quot;:&quot;ball-16&quot;,&quot;name&quot;:&quot;&quot;,&quot;boneId&quot;:null,&quot;visible&quot;:true,&quot;locked&quot;:false,&quot;originalKind&quot;:null,&quot;transform&quot;:{&quot;x&quot;:0.0,&quot;y&quot;:0.0,&quot;rotation&quot;:0.0,&quot;scaleX&quot;:1.0,&quot;scaleY&quot;:1.0},&quot;style&quot;:{&quot;fill&quot;:{&quot;r&quot;:0.15294117647058825,&quot;g&quot;:0.4666666666666667,&quot;b&quot;:0.8235294117647058,&quot;a&quot;:1.0},&quot;stroke&quot;:null,&quot;strokeWidth&quot;:1.0,&quot;opacity&quot;:1.0},&quot;kind&quot;:{&quot;type&quot;:&quot;circle&quot;,&quot;cx&quot;:471.48936170212767,&quot;cy&quot;:394.78723404255317,&quot;radius&quot;:97.53191489361703}},{&quot;id&quot;:&quot;ball-17&quot;,&quot;name&quot;:&quot;&quot;,&quot;boneId&quot;:null,&quot;visible&quot;:true,&quot;locked&quot;:false,&quot;originalKind&quot;:null,&quot;transform&quot;:{&quot;x&quot;:0.0,&quot;y&quot;:0.0,&quot;rotation&quot;:0.0,&quot;scaleX&quot;:1.0,&quot;scaleY&quot;:1.0},&quot;style&quot;:{&quot;fill&quot;:{&quot;r&quot;:0.1568627450980392,&quot;g&quot;:0.47058823529411764,&quot;b&quot;:0.8274509803921568,&quot;a&quot;:1.0},&quot;stroke&quot;:null,&quot;strokeWidth&quot;:1.0,&quot;opacity&quot;:1.0},&quot;kind&quot;:{&quot;type&quot;:&quot;circle&quot;,&quot;cx&quot;:470.9574468085106,&quot;cy&quot;:394.1489361702128,&quot;radius&quot;:96.12765957446808}},{&quot;id&quot;:&quot;ball-18&quot;,&quot;name&quot;:&quot;&quot;,&quot;boneId&quot;:null,&quot;visible&quot;:true,&quot;locked&quot;:false,&quot;originalKind&quot;:null,&quot;transform&quot;:{&quot;x&quot;:0.0,&quot;y&quot;:0.0,&quot;rotation&quot;:0.0,&quot;scaleX&quot;:1.0,&quot;scaleY&quot;:1.0},&quot;style&quot;:{&quot;fill&quot;:{&quot;r&quot;:0.1568627450980392,&quot;g&quot;:0.47843137254901963,&quot;b&quot;:0.8313725490196079,&quot;a&quot;:1.0},&quot;stroke&quot;:null,&quot;strokeWidth&quot;:1.0,&quot;opacity&quot;:1.0},&quot;kind&quot;:{&quot;type&quot;:&quot;circle&quot;,&quot;cx&quot;:470.4255319148936,&quot;cy&quot;:393.51063829787233,&quot;radius&quot;:94.72340425531915}},{&quot;id&quot;:&quot;ball-19&quot;,&quot;name&quot;:&quot;&quot;,&quot;boneId&quot;:null,&quot;visible&quot;:true,&quot;locked&quot;:false,&quot;originalKind&quot;:null,&quot;transform&quot;:{&quot;x&quot;:0.0,&quot;y&quot;:0.0,&quot;rotation&quot;:0.0,&quot;scaleX&quot;:1.0,&quot;scaleY&quot;:1.0},&quot;style&quot;:{&quot;fill&quot;:{&quot;r&quot;:0.1607843137254902,&quot;g&quot;:0.48627450980392156,&quot;b&quot;:0.8352941176470589,&quot;a&quot;:1.0},&quot;stroke&quot;:null,&quot;strokeWidth&quot;:1.0,&quot;opacity&quot;:1.0},&quot;kind&quot;:{&quot;type&quot;:&quot;circle&quot;,&quot;cx&quot;:469.8936170212766,&quot;cy&quot;:392.8723404255319,&quot;radius&quot;:93.31914893617022}},{&quot;id&quot;:&quot;ball-20&quot;,&quot;name&quot;:&quot;&quot;,&quot;boneId&quot;:null,&quot;visible&quot;:true,&quot;locked&quot;:false,&quot;originalKind&quot;:null,&quot;transform&quot;:{&quot;x&quot;:0.0,&quot;y&quot;:0.0,&quot;rotation&quot;:0.0,&quot;scaleX&quot;:1.0,&quot;scaleY&quot;:1.0},&quot;style&quot;:{&quot;fill&quot;:{&quot;r&quot;:0.16470588235294117,&quot;g&quot;:0.49411764705882355,&quot;b&quot;:0.8392156862745098,&quot;a&quot;:1.0},&quot;stroke&quot;:null,&quot;strokeWidth&quot;:1.0,&quot;opacity&quot;:1.0},&quot;kind&quot;:{&quot;type&quot;:&quot;circle&quot;,&quot;cx&quot;:469.36170212765956,&quot;cy&quot;:392.2340425531915,&quot;radius&quot;:91.91489361702128}},{&quot;id&quot;:&quot;ball-21&quot;,&quot;name&quot;:&quot;&quot;,&quot;boneId&quot;:null,&quot;visible&quot;:true,&quot;locked&quot;:false,&quot;originalKind&quot;:null,&quot;transform&quot;:{&quot;x&quot;:0.0,&quot;y&quot;:0.0,&quot;rotation&quot;:0.0,&quot;scaleX&quot;:1.0,&quot;scaleY&quot;:1.0},&quot;style&quot;:{&quot;fill&quot;:{&quot;r&quot;:0.16862745098039217,&quot;g&quot;:0.4980392156862745,&quot;b&quot;:0.8392156862745098,&quot;a&quot;:1.0},&quot;stroke&quot;:null,&quot;strokeWidth&quot;:1.0,&quot;opacity&quot;:1.0},&quot;kind&quot;:{&quot;type&quot;:&quot;circle&quot;,&quot;cx&quot;:468.82978723404256,&quot;cy&quot;:391.59574468085106,&quot;radius&quot;:90.51063829787233}},{&quot;id&quot;:&quot;ball-22&quot;,&quot;name&quot;:&quot;&quot;,&quot;boneId&quot;:null,&quot;visible&quot;:true,&quot;locked&quot;:false,&quot;originalKind&quot;:null,&quot;transform&quot;:{&quot;x&quot;:0.0,&quot;y&quot;:0.0,&quot;rotation&quot;:0.0,&quot;scaleX&quot;:1.0,&quot;scaleY&quot;:1.0},&quot;style&quot;:{&quot;fill&quot;:{&quot;r&quot;:0.16862745098039217,&quot;g&quot;:0.5058823529411764,&quot;b&quot;:0.8431372549019608,&quot;a&quot;:1.0},&quot;stroke&quot;:null,&quot;strokeWidth&quot;:1.0,&quot;opacity&quot;:1.0},&quot;kind&quot;:{&quot;type&quot;:&quot;circle&quot;,&quot;cx&quot;:468.29787234042556,&quot;cy&quot;:390.95744680851067,&quot;radius&quot;:89.1063829787234}},{&quot;id&quot;:&quot;ball-23&quot;,&quot;name&quot;:&quot;&quot;,&quot;boneId&quot;:null,&quot;visible&quot;:true,&quot;locked&quot;:false,&quot;originalKind&quot;:null,&quot;transform&quot;:{&quot;x&quot;:0.0,&quot;y&quot;:0.0,&quot;rotation&quot;:0.0,&quot;scaleX&quot;:1.0,&quot;scaleY&quot;:1.0},&quot;style&quot;:{&quot;fill&quot;:{&quot;r&quot;:0.17254901960784313,&quot;g&quot;:0.5137254901960784,&quot;b&quot;:0.8470588235294118,&quot;a&quot;:1.0},&quot;stroke&quot;:null,&quot;strokeWidth&quot;:1.0,&quot;opacity&quot;:1.0},&quot;kind&quot;:{&quot;type&quot;:&quot;circle&quot;,&quot;cx&quot;:467.7659574468085,&quot;cy&quot;:390.3191489361702,&quot;radius&quot;:87.70212765957447}},{&quot;id&quot;:&quot;ball-24&quot;,&quot;name&quot;:&quot;&quot;,&quot;boneId&quot;:null,&quot;visible&quot;:true,&quot;locked&quot;:false,&quot;originalKind&quot;:null,&quot;transform&quot;:{&quot;x&quot;:0.0,&quot;y&quot;:0.0,&quot;rotation&quot;:0.0,&quot;scaleX&quot;:1.0,&quot;scaleY&quot;:1.0},&quot;style&quot;:{&quot;fill&quot;:{&quot;r&quot;:0.17647058823529413,&quot;g&quot;:0.5176470588235295,&quot;b&quot;:0.8509803921568627,&quot;a&quot;:1.0},&quot;stroke&quot;:null,&quot;strokeWidth&quot;:1.0,&quot;opacity&quot;:1.0},&quot;kind&quot;:{&quot;type&quot;:&quot;circle&quot;,&quot;cx&quot;:467.2340425531915,&quot;cy&quot;:389.6808510638298,&quot;radius&quot;:86.29787234042553}},{&quot;id&quot;:&quot;ball-25&quot;,&quot;name&quot;:&quot;&quot;,&quot;boneId&quot;:null,&quot;visible&quot;:true,&quot;locked&quot;:false,&quot;originalKind&quot;:null,&quot;transform&quot;:{&quot;x&quot;:0.0,&quot;y&quot;:0.0,&quot;rotation&quot;:0.0,&quot;scaleX&quot;:1.0,&quot;scaleY&quot;:1.0},&quot;style&quot;:{&quot;fill&quot;:{&quot;r&quot;:0.1803921568627451,&quot;g&quot;:0.5254901960784314,&quot;b&quot;:0.8549019607843137,&quot;a&quot;:1.0},&quot;stroke&quot;:null,&quot;strokeWidth&quot;:1.0,&quot;opacity&quot;:1.0},&quot;kind&quot;:{&quot;type&quot;:&quot;circle&quot;,&quot;cx&quot;:466.70212765957444,&quot;cy&quot;:389.04255319148933,&quot;radius&quot;:84.8936170212766}},{&quot;id&quot;:&quot;ball-26&quot;,&quot;name&quot;:&quot;&quot;,&quot;boneId&quot;:null,&quot;visible&quot;:true,&quot;locked&quot;:false,&quot;originalKind&quot;:null,&quot;transform&quot;:{&quot;x&quot;:0.0,&quot;y&quot;:0.0,&quot;rotation&quot;:0.0,&quot;scaleX&quot;:1.0,&quot;scaleY&quot;:1.0},&quot;style&quot;:{&quot;fill&quot;:{&quot;r&quot;:0.1803921568627451,&quot;g&quot;:0.5333333333333333,&quot;b&quot;:0.8588235294117647,&quot;a&quot;:1.0},&quot;stroke&quot;:null,&quot;strokeWidth&quot;:1.0,&quot;opacity&quot;:1.0},&quot;kind&quot;:{&quot;type&quot;:&quot;circle&quot;,&quot;cx&quot;:466.17021276595744,&quot;cy&quot;:388.40425531914894,&quot;radius&quot;:83.48936170212767}},{&quot;id&quot;:&quot;ball-27&quot;,&quot;name&quot;:&quot;&quot;,&quot;boneId&quot;:null,&quot;visible&quot;:true,&quot;locked&quot;:false,&quot;originalKind&quot;:null,&quot;transform&quot;:{&quot;x&quot;:0.0,&quot;y&quot;:0.0,&quot;rotation&quot;:0.0,&quot;scaleX&quot;:1.0,&quot;scaleY&quot;:1.0},&quot;style&quot;:{&quot;fill&quot;:{&quot;r&quot;:0.1843137254901961,&quot;g&quot;:0.5372549019607843,&quot;b&quot;:0.8588235294117647,&quot;a&quot;:1.0},&quot;stroke&quot;:null,&quot;strokeWidth&quot;:1.0,&quot;opacity&quot;:1.0},&quot;kind&quot;:{&quot;type&quot;:&quot;circle&quot;,&quot;cx&quot;:465.63829787234044,&quot;cy&quot;:387.7659574468085,&quot;radius&quot;:82.08510638297872}},{&quot;id&quot;:&quot;ball-28&quot;,&quot;name&quot;:&quot;&quot;,&quot;boneId&quot;:null,&quot;visible&quot;:true,&quot;locked&quot;:false,&quot;originalKind&quot;:null,&quot;transform&quot;:{&quot;x&quot;:0.0,&quot;y&quot;:0.0,&quot;rotation&quot;:0.0,&quot;scaleX&quot;:1.0,&quot;scaleY&quot;:1.0},&quot;style&quot;:{&quot;fill&quot;:{&quot;r&quot;:0.18823529411764706,&quot;g&quot;:0.5450980392156862,&quot;b&quot;:0.8627450980392157,&quot;a&quot;:1.0},&quot;stroke&quot;:null,&quot;strokeWidth&quot;:1.0,&quot;opacity&quot;:1.0},&quot;kind&quot;:{&quot;type&quot;:&quot;circle&quot;,&quot;cx&quot;:465.1063829787234,&quot;cy&quot;:387.1276595744681,&quot;radius&quot;:80.68085106382979}},{&quot;id&quot;:&quot;ball-29&quot;,&quot;name&quot;:&quot;&quot;,&quot;boneId&quot;:null,&quot;visible&quot;:true,&quot;locked&quot;:false,&quot;originalKind&quot;:null,&quot;transform&quot;:{&quot;x&quot;:0.0,&quot;y&quot;:0.0,&quot;rotation&quot;:0.0,&quot;scaleX&quot;:1.0,&quot;scaleY&quot;:1.0},&quot;style&quot;:{&quot;fill&quot;:{&quot;r&quot;:0.19215686274509805,&quot;g&quot;:0.5529411764705883,&quot;b&quot;:0.8666666666666667,&quot;a&quot;:1.0},&quot;stroke&quot;:null,&quot;strokeWidth&quot;:1.0,&quot;opacity&quot;:1.0},&quot;kind&quot;:{&quot;type&quot;:&quot;circle&quot;,&quot;cx&quot;:464.5744680851064,&quot;cy&quot;:386.48936170212767,&quot;radius&quot;:79.27659574468086}},{&quot;id&quot;:&quot;ball-30&quot;,&quot;name&quot;:&quot;&quot;,&quot;boneId&quot;:null,&quot;visible&quot;:true,&quot;locked&quot;:false,&quot;originalKind&quot;:null,&quot;transform&quot;:{&quot;x&quot;:0.0,&quot;y&quot;:0.0,&quot;rotation&quot;:0.0,&quot;scaleX&quot;:1.0,&quot;scaleY&quot;:1.0},&quot;style&quot;:{&quot;fill&quot;:{&quot;r&quot;:0.19215686274509805,&quot;g&quot;:0.5607843137254902,&quot;b&quot;:0.8705882352941177,&quot;a&quot;:1.0},&quot;stroke&quot;:null,&quot;strokeWidth&quot;:1.0,&quot;opacity&quot;:1.0},&quot;kind&quot;:{&quot;type&quot;:&quot;circle&quot;,&quot;cx&quot;:464.04255319148933,&quot;cy&quot;:385.8510638297872,&quot;radius&quot;:77.87234042553192}},{&quot;id&quot;:&quot;ball-31&quot;,&quot;name&quot;:&quot;&quot;,&quot;boneId&quot;:null,&quot;visible&quot;:true,&quot;locked&quot;:false,&quot;originalKind&quot;:null,&quot;transform&quot;:{&quot;x&quot;:0.0,&quot;y&quot;:0.0,&quot;rotation&quot;:0.0,&quot;scaleX&quot;:1.0,&quot;scaleY&quot;:1.0},&quot;style&quot;:{&quot;fill&quot;:{&quot;r&quot;:0.19607843137254902,&quot;g&quot;:0.5647058823529412,&quot;b&quot;:0.8745098039215686,&quot;a&quot;:1.0},&quot;stroke&quot;:null,&quot;strokeWidth&quot;:1.0,&quot;opacity&quot;:1.0},&quot;kind&quot;:{&quot;type&quot;:&quot;circle&quot;,&quot;cx&quot;:463.51063829787233,&quot;cy&quot;:385.21276595744683,&quot;radius&quot;:76.46808510638297}},{&quot;id&quot;:&quot;ball-32&quot;,&quot;name&quot;:&quot;&quot;,&quot;boneId&quot;:null,&quot;visible&quot;:true,&quot;locked&quot;:false,&quot;originalKind&quot;:null,&quot;transform&quot;:{&quot;x&quot;:0.0,&quot;y&quot;:0.0,&quot;rotation&quot;:0.0,&quot;scaleX&quot;:1.0,&quot;scaleY&quot;:1.0},&quot;style&quot;:{&quot;fill&quot;:{&quot;r&quot;:0.2,&quot;g&quot;:0.5725490196078431,&quot;b&quot;:0.8784313725490196,&quot;a&quot;:1.0},&quot;stroke&quot;:null,&quot;strokeWidth&quot;:1.0,&quot;opacity&quot;:1.0},&quot;kind&quot;:{&quot;type&quot;:&quot;circle&quot;,&quot;cx&quot;:462.97872340425533,&quot;cy&quot;:384.5744680851064,&quot;radius&quot;:75.06382978723404}},{&quot;id&quot;:&quot;ball-33&quot;,&quot;name&quot;:&quot;&quot;,&quot;boneId&quot;:null,&quot;visible&quot;:true,&quot;locked&quot;:false,&quot;originalKind&quot;:null,&quot;transform&quot;:{&quot;x&quot;:0.0,&quot;y&quot;:0.0,&quot;rotation&quot;:0.0,&quot;scaleX&quot;:1.0,&quot;scaleY&quot;:1.0},&quot;style&quot;:{&quot;fill&quot;:{&quot;r&quot;:0.20392156862745098,&quot;g&quot;:0.5803921568627451,&quot;b&quot;:0.8823529411764706,&quot;a&quot;:1.0},&quot;stroke&quot;:null,&quot;strokeWidth&quot;:1.0,&quot;opacity&quot;:1.0},&quot;kind&quot;:{&quot;type&quot;:&quot;circle&quot;,&quot;cx&quot;:462.4468085106383,&quot;cy&quot;:383.93617021276594,&quot;radius&quot;:73.65957446808511}},{&quot;id&quot;:&quot;ball-34&quot;,&quot;name&quot;:&quot;&quot;,&quot;boneId&quot;:null,&quot;visible&quot;:true,&quot;locked&quot;:false,&quot;originalKind&quot;:null,&quot;transform&quot;:{&quot;x&quot;:0.0,&quot;y&quot;:0.0,&quot;rotation&quot;:0.0,&quot;scaleX&quot;:1.0,&quot;scaleY&quot;:1.0},&quot;style&quot;:{&quot;fill&quot;:{&quot;r&quot;:0.20784313725490197,&quot;g&quot;:0.5843137254901961,&quot;b&quot;:0.8823529411764706,&quot;a&quot;:1.0},&quot;stroke&quot;:null,&quot;strokeWidth&quot;:1.0,&quot;opacity&quot;:1.0},&quot;kind&quot;:{&quot;type&quot;:&quot;circle&quot;,&quot;cx&quot;:461.9148936170213,&quot;cy&quot;:383.29787234042556,&quot;radius&quot;:72.25531914893617}},{&quot;id&quot;:&quot;ball-35&quot;,&quot;name&quot;:&quot;&quot;,&quot;boneId&quot;:null,&quot;visible&quot;:true,&quot;locked&quot;:false,&quot;originalKind&quot;:null,&quot;transform&quot;:{&quot;x&quot;:0.0,&quot;y&quot;:0.0,&quot;rotation&quot;:0.0,&quot;scaleX&quot;:1.0,&quot;scaleY&quot;:1.0},&quot;style&quot;:{&quot;fill&quot;:{&quot;r&quot;:0.20784313725490197,&quot;g&quot;:0.592156862745098,&quot;b&quot;:0.8862745098039215,&quot;a&quot;:1.0},&quot;stroke&quot;:null,&quot;strokeWidth&quot;:1.0,&quot;opacity&quot;:1.0},&quot;kind&quot;:{&quot;type&quot;:&quot;circle&quot;,&quot;cx&quot;:461.3829787234043,&quot;cy&quot;:382.6595744680851,&quot;radius&quot;:70.85106382978724}},{&quot;id&quot;:&quot;ball-36&quot;,&quot;name&quot;:&quot;&quot;,&quot;boneId&quot;:null,&quot;visible&quot;:true,&quot;locked&quot;:false,&quot;originalKind&quot;:null,&quot;transform&quot;:{&quot;x&quot;:0.0,&quot;y&quot;:0.0,&quot;rotation&quot;:0.0,&quot;scaleX&quot;:1.0,&quot;scaleY&quot;:1.0},&quot;style&quot;:{&quot;fill&quot;:{&quot;r&quot;:0.21176470588235294,&quot;g&quot;:0.6,&quot;b&quot;:0.8901960784313725,&quot;a&quot;:1.0},&quot;stroke&quot;:null,&quot;strokeWidth&quot;:1.0,&quot;opacity&quot;:1.0},&quot;kind&quot;:{&quot;type&quot;:&quot;circle&quot;,&quot;cx&quot;:460.8510638297872,&quot;cy&quot;:382.02127659574467,&quot;radius&quot;:69.4468085106383}},{&quot;id&quot;:&quot;ball-37&quot;,&quot;name&quot;:&quot;&quot;,&quot;boneId&quot;:null,&quot;visible&quot;:true,&quot;locked&quot;:false,&quot;originalKind&quot;:null,&quot;transform&quot;:{&quot;x&quot;:0.0,&quot;y&quot;:0.0,&quot;rotation&quot;:0.0,&quot;scaleX&quot;:1.0,&quot;scaleY&quot;:1.0},&quot;style&quot;:{&quot;fill&quot;:{&quot;r&quot;:0.21568627450980393,&quot;g&quot;:0.6039215686274509,&quot;b&quot;:0.8941176470588236,&quot;a&quot;:1.0},&quot;stroke&quot;:null,&quot;strokeWidth&quot;:1.0,&quot;opacity&quot;:1.0},&quot;kind&quot;:{&quot;type&quot;:&quot;circle&quot;,&quot;cx&quot;:460.3191489361702,&quot;cy&quot;:381.3829787234043,&quot;radius&quot;:68.04255319148936}},{&quot;id&quot;:&quot;ball-38&quot;,&quot;name&quot;:&quot;&quot;,&quot;boneId&quot;:null,&quot;visible&quot;:true,&quot;locked&quot;:false,&quot;originalKind&quot;:null,&quot;transform&quot;:{&quot;x&quot;:0.0,&quot;y&quot;:0.0,&quot;rotation&quot;:0.0,&quot;scaleX&quot;:1.0,&quot;scaleY&quot;:1.0},&quot;style&quot;:{&quot;fill&quot;:{&quot;r&quot;:0.2196078431372549,&quot;g&quot;:0.611764705882353,&quot;b&quot;:0.8980392156862745,&quot;a&quot;:1.0},&quot;stroke&quot;:null,&quot;strokeWidth&quot;:1.0,&quot;opacity&quot;:1.0},&quot;kind&quot;:{&quot;type&quot;:&quot;circle&quot;,&quot;cx&quot;:459.7872340425532,&quot;cy&quot;:380.74468085106383,&quot;radius&quot;:66.63829787234043}},{&quot;id&quot;:&quot;ball-39&quot;,&quot;name&quot;:&quot;&quot;,&quot;boneId&quot;:null,&quot;visible&quot;:true,&quot;locked&quot;:false,&quot;originalKind&quot;:null,&quot;transform&quot;:{&quot;x&quot;:0.0,&quot;y&quot;:0.0,&quot;rotation&quot;:0.0,&quot;scaleX&quot;:1.0,&quot;scaleY&quot;:1.0},&quot;style&quot;:{&quot;fill&quot;:{&quot;r&quot;:0.2196078431372549,&quot;g&quot;:0.6196078431372549,&quot;b&quot;:0.9019607843137255,&quot;a&quot;:1.0},&quot;stroke&quot;:null,&quot;strokeWidth&quot;:1.0,&quot;opacity&quot;:1.0},&quot;kind&quot;:{&quot;type&quot;:&quot;circle&quot;,&quot;cx&quot;:459.25531914893617,&quot;cy&quot;:380.1063829787234,&quot;radius&quot;:65.2340425531915}},{&quot;id&quot;:&quot;ball-40&quot;,&quot;name&quot;:&quot;&quot;,&quot;boneId&quot;:null,&quot;visible&quot;:true,&quot;locked&quot;:false,&quot;originalKind&quot;:null,&quot;transform&quot;:{&quot;x&quot;:0.0,&quot;y&quot;:0.0,&quot;rotation&quot;:0.0,&quot;scaleX&quot;:1.0,&quot;scaleY&quot;:1.0},&quot;style&quot;:{&quot;fill&quot;:{&quot;r&quot;:0.2235294117647059,&quot;g&quot;:0.6274509803921569,&quot;b&quot;:0.9058823529411765,&quot;a&quot;:1.0},&quot;stroke&quot;:null,&quot;strokeWidth&quot;:1.0,&quot;opacity&quot;:1.0},&quot;kind&quot;:{&quot;type&quot;:&quot;circle&quot;,&quot;cx&quot;:458.72340425531917,&quot;cy&quot;:379.468085106383,&quot;radius&quot;:63.829787234042556}},{&quot;id&quot;:&quot;ball-41&quot;,&quot;name&quot;:&quot;&quot;,&quot;boneId&quot;:null,&quot;visible&quot;:true,&quot;locked&quot;:false,&quot;originalKind&quot;:null,&quot;transform&quot;:{&quot;x&quot;:0.0,&quot;y&quot;:0.0,&quot;rotation&quot;:0.0,&quot;scaleX&quot;:1.0,&quot;scaleY&quot;:1.0},&quot;style&quot;:{&quot;fill&quot;:{&quot;r&quot;:0.22745098039215686,&quot;g&quot;:0.6313725490196078,&quot;b&quot;:0.9058823529411765,&quot;a&quot;:1.0},&quot;stroke&quot;:null,&quot;strokeWidth&quot;:1.0,&quot;opacity&quot;:1.0},&quot;kind&quot;:{&quot;type&quot;:&quot;circle&quot;,&quot;cx&quot;:458.1914893617021,&quot;cy&quot;:378.82978723404256,&quot;radius&quot;:62.42553191489361}},{&quot;id&quot;:&quot;ball-42&quot;,&quot;name&quot;:&quot;&quot;,&quot;boneId&quot;:null,&quot;visible&quot;:true,&quot;locked&quot;:false,&quot;originalKind&quot;:null,&quot;transform&quot;:{&quot;x&quot;:0.0,&quot;y&quot;:0.0,&quot;rotation&quot;:0.0,&quot;scaleX&quot;:1.0,&quot;scaleY&quot;:1.0},&quot;style&quot;:{&quot;fill&quot;:{&quot;r&quot;:0.23137254901960785,&quot;g&quot;:0.6392156862745098,&quot;b&quot;:0.9098039215686274,&quot;a&quot;:1.0},&quot;stroke&quot;:null,&quot;strokeWidth&quot;:1.0,&quot;opacity&quot;:1.0},&quot;kind&quot;:{&quot;type&quot;:&quot;circle&quot;,&quot;cx&quot;:457.6595744680851,&quot;cy&quot;:378.1914893617021,&quot;radius&quot;:61.02127659574468}},{&quot;id&quot;:&quot;ball-43&quot;,&quot;name&quot;:&quot;&quot;,&quot;boneId&quot;:null,&quot;visible&quot;:true,&quot;locked&quot;:false,&quot;originalKind&quot;:null,&quot;transform&quot;:{&quot;x&quot;:0.0,&quot;y&quot;:0.0,&quot;rotation&quot;:0.0,&quot;scaleX&quot;:1.0,&quot;scaleY&quot;:1.0},&quot;style&quot;:{&quot;fill&quot;:{&quot;r&quot;:0.23137254901960785,&quot;g&quot;:0.6470588235294118,&quot;b&quot;:0.9137254901960784,&quot;a&quot;:1.0},&quot;stroke&quot;:null,&quot;strokeWidth&quot;:1.0,&quot;opacity&quot;:1.0},&quot;kind&quot;:{&quot;type&quot;:&quot;circle&quot;,&quot;cx&quot;:457.1276595744681,&quot;cy&quot;:377.5531914893617,&quot;radius&quot;:59.61702127659574}},{&quot;id&quot;:&quot;ball-44&quot;,&quot;name&quot;:&quot;&quot;,&quot;boneId&quot;:null,&quot;visible&quot;:true,&quot;locked&quot;:false,&quot;originalKind&quot;:null,&quot;transform&quot;:{&quot;x&quot;:0.0,&quot;y&quot;:0.0,&quot;rotation&quot;:0.0,&quot;scaleX&quot;:1.0,&quot;scaleY&quot;:1.0},&quot;style&quot;:{&quot;fill&quot;:{&quot;r&quot;:0.23529411764705882,&quot;g&quot;:0.6509803921568628,&quot;b&quot;:0.9176470588235294,&quot;a&quot;:1.0},&quot;stroke&quot;:null,&quot;strokeWidth&quot;:1.0,&quot;opacity&quot;:1.0},&quot;kind&quot;:{&quot;type&quot;:&quot;circle&quot;,&quot;cx&quot;:456.59574468085106,&quot;cy&quot;:376.9148936170213,&quot;radius&quot;:58.212765957446805}},{&quot;id&quot;:&quot;ball-45&quot;,&quot;name&quot;:&quot;&quot;,&quot;boneId&quot;:null,&quot;visible&quot;:true,&quot;locked&quot;:false,&quot;originalKind&quot;:null,&quot;transform&quot;:{&quot;x&quot;:0.0,&quot;y&quot;:0.0,&quot;rotation&quot;:0.0,&quot;scaleX&quot;:1.0,&quot;scaleY&quot;:1.0},&quot;style&quot;:{&quot;fill&quot;:{&quot;r&quot;:0.23921568627450981,&quot;g&quot;:0.6588235294117647,&quot;b&quot;:0.9215686274509803,&quot;a&quot;:1.0},&quot;stroke&quot;:null,&quot;strokeWidth&quot;:1.0,&quot;opacity&quot;:1.0},&quot;kind&quot;:{&quot;type&quot;:&quot;circle&quot;,&quot;cx&quot;:456.06382978723406,&quot;cy&quot;:376.27659574468083,&quot;radius&quot;:56.80851063829787}},{&quot;id&quot;:&quot;ball-46&quot;,&quot;name&quot;:&quot;&quot;,&quot;boneId&quot;:null,&quot;visible&quot;:true,&quot;locked&quot;:false,&quot;originalKind&quot;:null,&quot;transform&quot;:{&quot;x&quot;:0.0,&quot;y&quot;:0.0,&quot;rotation&quot;:0.0,&quot;scaleX&quot;:1.0,&quot;scaleY&quot;:1.0},&quot;style&quot;:{&quot;fill&quot;:{&quot;r&quot;:0.24313725490196078,&quot;g&quot;:0.6666666666666666,&quot;b&quot;:0.9254901960784314,&quot;a&quot;:1.0},&quot;stroke&quot;:null,&quot;strokeWidth&quot;:1.0,&quot;opacity&quot;:1.0},&quot;kind&quot;:{&quot;type&quot;:&quot;circle&quot;,&quot;cx&quot;:455.531914893617,&quot;cy&quot;:375.63829787234044,&quot;radius&quot;:55.404255319148945}},{&quot;id&quot;:&quot;ball-47&quot;,&quot;name&quot;:&quot;&quot;,&quot;boneId&quot;:null,&quot;visible&quot;:true,&quot;locked&quot;:false,&quot;originalKind&quot;:null,&quot;transform&quot;:{&quot;x&quot;:0.0,&quot;y&quot;:0.0,&quot;rotation&quot;:0.0,&quot;scaleX&quot;:1.0,&quot;scaleY&quot;:1.0},&quot;style&quot;:{&quot;fill&quot;:{&quot;r&quot;:0.24705882352941178,&quot;g&quot;:0.6745098039215687,&quot;b&quot;:0.9294117647058824,&quot;a&quot;:1.0},&quot;stroke&quot;:null,&quot;strokeWidth&quot;:1.0,&quot;opacity&quot;:1.0},&quot;kind&quot;:{&quot;type&quot;:&quot;circle&quot;,&quot;cx&quot;:455.0,&quot;cy&quot;:375.0,&quot;radius&quot;:54.0}},{&quot;id&quot;:&quot;contact-shadow&quot;,&quot;name&quot;:&quot;&quot;,&quot;boneId&quot;:null,&quot;visible&quot;:true,&quot;locked&quot;:false,&quot;originalKind&quot;:null,&quot;transform&quot;:{&quot;x&quot;:480.0,&quot;y&quot;:289.0,&quot;rotation&quot;:0.0,&quot;scaleX&quot;:1.0,&quot;scaleY&quot;:0.18},&quot;style&quot;:{&quot;fill&quot;:{&quot;r&quot;:0.07058823529411765,&quot;g&quot;:0.2980392156862745,&quot;b&quot;:0.5686274509803921,&quot;a&quot;:1.0},&quot;stroke&quot;:null,&quot;strokeWidth&quot;:1.0,&quot;opacity&quot;:0.15},&quot;kind&quot;:{&quot;type&quot;:&quot;circle&quot;,&quot;cx&quot;:0.0,&quot;cy&quot;:0.0,&quot;radius&quot;:30.0}},{&quot;id&quot;:&quot;ripple&quot;,&quot;name&quot;:&quot;&quot;,&quot;boneId&quot;:null,&quot;visible&quot;:true,&quot;locked&quot;:false,&quot;originalKind&quot;:null,&quot;transform&quot;:{&quot;x&quot;:480.0,&quot;y&quot;:287.0,&quot;rotation&quot;:0.0,&quot;scaleX&quot;:1.0,&quot;scaleY&quot;:0.18},&quot;style&quot;:{&quot;fill&quot;:{&quot;r&quot;:0.43137254901960786,&quot;g&quot;:0.8784313725490196,&quot;b&quot;:0.9686274509803922,&quot;a&quot;:0.0},&quot;stroke&quot;:{&quot;r&quot;:0.5450980392156862,&quot;g&quot;:0.9215686274509803,&quot;b&quot;:1.0,&quot;a&quot;:1.0},&quot;strokeWidth&quot;:2.0,&quot;opacity&quot;:0.0},&quot;kind&quot;:{&quot;type&quot;:&quot;circle&quot;,&quot;cx&quot;:0.0,&quot;cy&quot;:0.0,&quot;radius&quot;:32.0}},{&quot;id&quot;:&quot;drop&quot;,&quot;name&quot;:&quot;&quot;,&quot;boneId&quot;:null,&quot;visible&quot;:true,&quot;locked&quot;:false,&quot;originalKind&quot;:null,&quot;transform&quot;:{&quot;x&quot;:480.0,&quot;y&quot;:130.0,&quot;rotation&quot;:0.0,&quot;scaleX&quot;:1.0,&quot;scaleY&quot;:1.0},&quot;style&quot;:{&quot;fill&quot;:{&quot;r&quot;:0.403921568627451,&quot;g&quot;:0.8862745098039215,&quot;b&quot;:0.9607843137254902,&quot;a&quot;:1.0},&quot;stroke&quot;:null,&quot;strokeWidth&quot;:1.0,&quot;opacity&quot;:1.0},&quot;kind&quot;:{&quot;type&quot;:&quot;path&quot;,&quot;d&quot;:&quot;M 0 -60 C -8 -35 -31 -10 -30 8 C -29 40 29 40 30 8 C 31 -10 8 -35 0 -60 Z&quot;,&quot;bounds&quot;:[-30.031612396240234,-60.0,60.06322479248047,92.0],&quot;evenodd&quot;:false}},{&quot;id&quot;:&quot;drop-glint&quot;,&quot;name&quot;:&quot;&quot;,&quot;boneId&quot;:null,&quot;visible&quot;:true,&quot;locked&quot;:false,&quot;originalKind&quot;:null,&quot;transform&quot;:{&quot;x&quot;:480.0,&quot;y&quot;:130.0,&quot;rotation&quot;:0.0,&quot;scaleX&quot;:1.0,&quot;scaleY&quot;:1.0},&quot;style&quot;:{&quot;fill&quot;:{&quot;r&quot;:0.8666666666666667,&quot;g&quot;:1.0,&quot;b&quot;:1.0,&quot;a&quot;:1.0},&quot;stroke&quot;:null,&quot;strokeWidth&quot;:1.0,&quot;opacity&quot;:1.0},&quot;kind&quot;:{&quot;type&quot;:&quot;path&quot;,&quot;d&quot;:&quot;M -9 -17 C -22 -1 -23 13 -13 20 C -18 5 -10 -6 -9 -17 Z&quot;,&quot;bounds&quot;:[-19.727062225341797,-17.0,10.727062225341797,37.0],&quot;evenodd&quot;:false}}],&quot;bones&quot;:[],&quot;clips&quot;:[{&quot;id&quot;:&quot;bounce&quot;,&quot;name&quot;:&quot;Water drop bounce&quot;,&quot;duration&quot;:2.8,&quot;looping&quot;:true,&quot;autoplay&quot;:true,&quot;blendMode&quot;:&quot;override&quot;,&quot;weight&quot;:1.0,&quot;tracks&quot;:[{&quot;nodeId&quot;:&quot;drop&quot;,&quot;property&quot;:&quot;y&quot;,&quot;keyframes&quot;:[{&quot;time&quot;:0.0,&quot;value&quot;:{&quot;type&quot;:&quot;number&quot;,&quot;value&quot;:130.0},&quot;easing&quot;:{&quot;type&quot;:&quot;cubicBezier&quot;,&quot;x1&quot;:0.42,&quot;y1&quot;:0.0,&quot;x2&quot;:0.58,&quot;y2&quot;:1.0}},{&quot;time&quot;:0.9,&quot;value&quot;:{&quot;type&quot;:&quot;number&quot;,&quot;value&quot;:247.0},&quot;easing&quot;:{&quot;type&quot;:&quot;cubicBezier&quot;,&quot;x1&quot;:0.42,&quot;y1&quot;:0.0,&quot;x2&quot;:0.58,&quot;y2&quot;:1.0}},{&quot;time&quot;:1.02,&quot;value&quot;:{&quot;type&quot;:&quot;number&quot;,&quot;value&quot;:260.0},&quot;easing&quot;:{&quot;type&quot;:&quot;cubicBezier&quot;,&quot;x1&quot;:0.42,&quot;y1&quot;:0.0,&quot;x2&quot;:0.58,&quot;y2&quot;:1.0}},{&quot;time&quot;:1.16,&quot;value&quot;:{&quot;type&quot;:&quot;number&quot;,&quot;value&quot;:242.0},&quot;easing&quot;:{&quot;type&quot;:&quot;cubicBezier&quot;,&quot;x1&quot;:0.42,&quot;y1&quot;:0.0,&quot;x2&quot;:0.58,&quot;y2&quot;:1.0}},{&quot;time&quot;:1.8,&quot;value&quot;:{&quot;type&quot;:&quot;number&quot;,&quot;value&quot;:130.0},&quot;easing&quot;:{&quot;type&quot;:&quot;cubicBezier&quot;,&quot;x1&quot;:0.42,&quot;y1&quot;:0.0,&quot;x2&quot;:0.58,&quot;y2&quot;:1.0}},{&quot;time&quot;:2.8,&quot;value&quot;:{&quot;type&quot;:&quot;number&quot;,&quot;value&quot;:130.0},&quot;easing&quot;:{&quot;type&quot;:&quot;cubicBezier&quot;,&quot;x1&quot;:0.42,&quot;y1&quot;:0.0,&quot;x2&quot;:0.58,&quot;y2&quot;:1.0}}]},{&quot;nodeId&quot;:&quot;drop&quot;,&quot;property&quot;:&quot;scaleX&quot;,&quot;keyframes&quot;:[{&quot;time&quot;:0.0,&quot;value&quot;:{&quot;type&quot;:&quot;number&quot;,&quot;value&quot;:1.0},&quot;easing&quot;:{&quot;type&quot;:&quot;cubicBezier&quot;,&quot;x1&quot;:0.42,&quot;y1&quot;:0.0,&quot;x2&quot;:0.58,&quot;y2&quot;:1.0}},{&quot;time&quot;:0.9,&quot;value&quot;:{&quot;type&quot;:&quot;number&quot;,&quot;value&quot;:0.84},&quot;easing&quot;:{&quot;type&quot;:&quot;cubicBezier&quot;,&quot;x1&quot;:0.42,&quot;y1&quot;:0.0,&quot;x2&quot;:0.58,&quot;y2&quot;:1.0}},{&quot;time&quot;:1.02,&quot;value&quot;:{&quot;type&quot;:&quot;number&quot;,&quot;value&quot;:1.32},&quot;easing&quot;:{&quot;type&quot;:&quot;cubicBezier&quot;,&quot;x1&quot;:0.42,&quot;y1&quot;:0.0,&quot;x2&quot;:0.58,&quot;y2&quot;:1.0}},{&quot;time&quot;:1.16,&quot;value&quot;:{&quot;type&quot;:&quot;number&quot;,&quot;value&quot;:0.86},&quot;easing&quot;:{&quot;type&quot;:&quot;cubicBezier&quot;,&quot;x1&quot;:0.42,&quot;y1&quot;:0.0,&quot;x2&quot;:0.58,&quot;y2&quot;:1.0}},{&quot;time&quot;:1.8,&quot;value&quot;:{&quot;type&quot;:&quot;number&quot;,&quot;value&quot;:1.0},&quot;easing&quot;:{&quot;type&quot;:&quot;cubicBezier&quot;,&quot;x1&quot;:0.42,&quot;y1&quot;:0.0,&quot;x2&quot;:0.58,&quot;y2&quot;:1.0}},{&quot;time&quot;:2.8,&quot;value&quot;:{&quot;type&quot;:&quot;number&quot;,&quot;value&quot;:1.0},&quot;easing&quot;:{&quot;type&quot;:&quot;cubicBezier&quot;,&quot;x1&quot;:0.42,&quot;y1&quot;:0.0,&quot;x2&quot;:0.58,&quot;y2&quot;:1.0}}]},{&quot;nodeId&quot;:&quot;drop&quot;,&quot;property&quot;:&quot;scaleY&quot;,&quot;keyframes&quot;:[{&quot;time&quot;:0.0,&quot;value&quot;:{&quot;type&quot;:&quot;number&quot;,&quot;value&quot;:1.0},&quot;easing&quot;:{&quot;type&quot;:&quot;cubicBezier&quot;,&quot;x1&quot;:0.42,&quot;y1&quot;:0.0,&quot;x2&quot;:0.58,&quot;y2&quot;:1.0}},{&quot;time&quot;:0.9,&quot;value&quot;:{&quot;type&quot;:&quot;number&quot;,&quot;value&quot;:1.16},&quot;easing&quot;:{&quot;type&quot;:&quot;cubicBezier&quot;,&quot;x1&quot;:0.42,&quot;y1&quot;:0.0,&quot;x2&quot;:0.58,&quot;y2&quot;:1.0}},{&quot;time&quot;:1.02,&quot;value&quot;:{&quot;type&quot;:&quot;number&quot;,&quot;value&quot;:0.62},&quot;easing&quot;:{&quot;type&quot;:&quot;cubicBezier&quot;,&quot;x1&quot;:0.42,&quot;y1&quot;:0.0,&quot;x2&quot;:0.58,&quot;y2&quot;:1.0}},{&quot;time&quot;:1.16,&quot;value&quot;:{&quot;type&quot;:&quot;number&quot;,&quot;value&quot;:1.14},&quot;easing&quot;:{&quot;type&quot;:&quot;cubicBezier&quot;,&quot;x1&quot;:0.42,&quot;y1&quot;:0.0,&quot;x2&quot;:0.58,&quot;y2&quot;:1.0}},{&quot;time&quot;:1.8,&quot;value&quot;:{&quot;type&quot;:&quot;number&quot;,&quot;value&quot;:1.0},&quot;easing&quot;:{&quot;type&quot;:&quot;cubicBezier&quot;,&quot;x1&quot;:0.42,&quot;y1&quot;:0.0,&quot;x2&quot;:0.58,&quot;y2&quot;:1.0}},{&quot;time&quot;:2.8,&quot;value&quot;:{&quot;type&quot;:&quot;number&quot;,&quot;value&quot;:1.0},&quot;easing&quot;:{&quot;type&quot;:&quot;cubicBezier&quot;,&quot;x1&quot;:0.42,&quot;y1&quot;:0.0,&quot;x2&quot;:0.58,&quot;y2&quot;:1.0}}]},{&quot;nodeId&quot;:&quot;drop-glint&quot;,&quot;property&quot;:&quot;y&quot;,&quot;keyframes&quot;:[{&quot;time&quot;:0.0,&quot;value&quot;:{&quot;type&quot;:&quot;number&quot;,&quot;value&quot;:130.0},&quot;easing&quot;:{&quot;type&quot;:&quot;cubicBezier&quot;,&quot;x1&quot;:0.42,&quot;y1&quot;:0.0,&quot;x2&quot;:0.58,&quot;y2&quot;:1.0}},{&quot;time&quot;:0.9,&quot;value&quot;:{&quot;type&quot;:&quot;number&quot;,&quot;value&quot;:247.0},&quot;easing&quot;:{&quot;type&quot;:&quot;cubicBezier&quot;,&quot;x1&quot;:0.42,&quot;y1&quot;:0.0,&quot;x2&quot;:0.58,&quot;y2&quot;:1.0}},{&quot;time&quot;:1.02,&quot;value&quot;:{&quot;type&quot;:&quot;number&quot;,&quot;value&quot;:260.0},&quot;easing&quot;:{&quot;type&quot;:&quot;cubicBezier&quot;,&quot;x1&quot;:0.42,&quot;y1&quot;:0.0,&quot;x2&quot;:0.58,&quot;y2&quot;:1.0}},{&quot;time&quot;:1.16,&quot;value&quot;:{&quot;type&quot;:&quot;number&quot;,&quot;value&quot;:242.0},&quot;easing&quot;:{&quot;type&quot;:&quot;cubicBezier&quot;,&quot;x1&quot;:0.42,&quot;y1&quot;:0.0,&quot;x2&quot;:0.58,&quot;y2&quot;:1.0}},{&quot;time&quot;:1.8,&quot;value&quot;:{&quot;type&quot;:&quot;number&quot;,&quot;value&quot;:130.0},&quot;easing&quot;:{&quot;type&quot;:&quot;cubicBezier&quot;,&quot;x1&quot;:0.42,&quot;y1&quot;:0.0,&quot;x2&quot;:0.58,&quot;y2&quot;:1.0}},{&quot;time&quot;:2.8,&quot;value&quot;:{&quot;type&quot;:&quot;number&quot;,&quot;value&quot;:130.0},&quot;easing&quot;:{&quot;type&quot;:&quot;cubicBezier&quot;,&quot;x1&quot;:0.42,&quot;y1&quot;:0.0,&quot;x2&quot;:0.58,&quot;y2&quot;:1.0}}]},{&quot;nodeId&quot;:&quot;drop-glint&quot;,&quot;property&quot;:&quot;scaleX&quot;,&quot;keyframes&quot;:[{&quot;time&quot;:0.0,&quot;value&quot;:{&quot;type&quot;:&quot;number&quot;,&quot;value&quot;:1.0},&quot;easing&quot;:{&quot;type&quot;:&quot;cubicBezier&quot;,&quot;x1&quot;:0.42,&quot;y1&quot;:0.0,&quot;x2&quot;:0.58,&quot;y2&quot;:1.0}},{&quot;time&quot;:0.9,&quot;value&quot;:{&quot;type&quot;:&quot;number&quot;,&quot;value&quot;:0.84},&quot;easing&quot;:{&quot;type&quot;:&quot;cubicBezier&quot;,&quot;x1&quot;:0.42,&quot;y1&quot;:0.0,&quot;x2&quot;:0.58,&quot;y2&quot;:1.0}},{&quot;time&quot;:1.02,&quot;value&quot;:{&quot;type&quot;:&quot;number&quot;,&quot;value&quot;:1.32},&quot;easing&quot;:{&quot;type&quot;:&quot;cubicBezier&quot;,&quot;x1&quot;:0.42,&quot;y1&quot;:0.0,&quot;x2&quot;:0.58,&quot;y2&quot;:1.0}},{&quot;time&quot;:1.16,&quot;value&quot;:{&quot;type&quot;:&quot;number&quot;,&quot;value&quot;:0.86},&quot;easing&quot;:{&quot;type&quot;:&quot;cubicBezier&quot;,&quot;x1&quot;:0.42,&quot;y1&quot;:0.0,&quot;x2&quot;:0.58,&quot;y2&quot;:1.0}},{&quot;time&quot;:1.8,&quot;value&quot;:{&quot;type&quot;:&quot;number&quot;,&quot;value&quot;:1.0},&quot;easing&quot;:{&quot;type&quot;:&quot;cubicBezier&quot;,&quot;x1&quot;:0.42,&quot;y1&quot;:0.0,&quot;x2&quot;:0.58,&quot;y2&quot;:1.0}},{&quot;time&quot;:2.8,&quot;value&quot;:{&quot;type&quot;:&quot;number&quot;,&quot;value&quot;:1.0},&quot;easing&quot;:{&quot;type&quot;:&quot;cubicBezier&quot;,&quot;x1&quot;:0.42,&quot;y1&quot;:0.0,&quot;x2&quot;:0.58,&quot;y2&quot;:1.0}}]},{&quot;nodeId&quot;:&quot;drop-glint&quot;,&quot;property&quot;:&quot;scaleY&quot;,&quot;keyframes&quot;:[{&quot;time&quot;:0.0,&quot;value&quot;:{&quot;type&quot;:&quot;number&quot;,&quot;value&quot;:1.0},&quot;easing&quot;:{&quot;type&quot;:&quot;cubicBezier&quot;,&quot;x1&quot;:0.42,&quot;y1&quot;:0.0,&quot;x2&quot;:0.58,&quot;y2&quot;:1.0}},{&quot;time&quot;:0.9,&quot;value&quot;:{&quot;type&quot;:&quot;number&quot;,&quot;value&quot;:1.16},&quot;easing&quot;:{&quot;type&quot;:&quot;cubicBezier&quot;,&quot;x1&quot;:0.42,&quot;y1&quot;:0.0,&quot;x2&quot;:0.58,&quot;y2&quot;:1.0}},{&quot;time&quot;:1.02,&quot;value&quot;:{&quot;type&quot;:&quot;number&quot;,&quot;value&quot;:0.62},&quot;easing&quot;:{&quot;type&quot;:&quot;cubicBezier&quot;,&quot;x1&quot;:0.42,&quot;y1&quot;:0.0,&quot;x2&quot;:0.58,&quot;y2&quot;:1.0}},{&quot;time&quot;:1.16,&quot;value&quot;:{&quot;type&quot;:&quot;number&quot;,&quot;value&quot;:1.14},&quot;easing&quot;:{&quot;type&quot;:&quot;cubicBezier&quot;,&quot;x1&quot;:0.42,&quot;y1&quot;:0.0,&quot;x2&quot;:0.58,&quot;y2&quot;:1.0}},{&quot;time&quot;:1.8,&quot;value&quot;:{&quot;type&quot;:&quot;number&quot;,&quot;value&quot;:1.0},&quot;easing&quot;:{&quot;type&quot;:&quot;cubicBezier&quot;,&quot;x1&quot;:0.42,&quot;y1&quot;:0.0,&quot;x2&quot;:0.58,&quot;y2&quot;:1.0}},{&quot;time&quot;:2.8,&quot;value&quot;:{&quot;type&quot;:&quot;number&quot;,&quot;value&quot;:1.0},&quot;easing&quot;:{&quot;type&quot;:&quot;cubicBezier&quot;,&quot;x1&quot;:0.42,&quot;y1&quot;:0.0,&quot;x2&quot;:0.58,&quot;y2&quot;:1.0}}]},{&quot;nodeId&quot;:&quot;contact-shadow&quot;,&quot;property&quot;:&quot;opacity&quot;,&quot;keyframes&quot;:[{&quot;time&quot;:0.0,&quot;value&quot;:{&quot;type&quot;:&quot;number&quot;,&quot;value&quot;:0.12},&quot;easing&quot;:{&quot;type&quot;:&quot;cubicBezier&quot;,&quot;x1&quot;:0.42,&quot;y1&quot;:0.0,&quot;x2&quot;:0.58,&quot;y2&quot;:1.0}},{&quot;time&quot;:1.02,&quot;value&quot;:{&quot;type&quot;:&quot;number&quot;,&quot;value&quot;:0.65},&quot;easing&quot;:{&quot;type&quot;:&quot;cubicBezier&quot;,&quot;x1&quot;:0.42,&quot;y1&quot;:0.0,&quot;x2&quot;:0.58,&quot;y2&quot;:1.0}},{&quot;time&quot;:1.8,&quot;value&quot;:{&quot;type&quot;:&quot;number&quot;,&quot;value&quot;:0.12},&quot;easing&quot;:{&quot;type&quot;:&quot;cubicBezier&quot;,&quot;x1&quot;:0.42,&quot;y1&quot;:0.0,&quot;x2&quot;:0.58,&quot;y2&quot;:1.0}},{&quot;time&quot;:2.8,&quot;value&quot;:{&quot;type&quot;:&quot;number&quot;,&quot;value&quot;:0.12},&quot;easing&quot;:{&quot;type&quot;:&quot;cubicBezier&quot;,&quot;x1&quot;:0.42,&quot;y1&quot;:0.0,&quot;x2&quot;:0.58,&quot;y2&quot;:1.0}}]},{&quot;nodeId&quot;:&quot;contact-shadow&quot;,&quot;property&quot;:&quot;scaleX&quot;,&quot;keyframes&quot;:[{&quot;time&quot;:0.0,&quot;value&quot;:{&quot;type&quot;:&quot;number&quot;,&quot;value&quot;:0.6},&quot;easing&quot;:{&quot;type&quot;:&quot;cubicBezier&quot;,&quot;x1&quot;:0.42,&quot;y1&quot;:0.0,&quot;x2&quot;:0.58,&quot;y2&quot;:1.0}},{&quot;time&quot;:1.02,&quot;value&quot;:{&quot;type&quot;:&quot;number&quot;,&quot;value&quot;:1.3},&quot;easing&quot;:{&quot;type&quot;:&quot;cubicBezier&quot;,&quot;x1&quot;:0.42,&quot;y1&quot;:0.0,&quot;x2&quot;:0.58,&quot;y2&quot;:1.0}},{&quot;time&quot;:1.8,&quot;value&quot;:{&quot;type&quot;:&quot;number&quot;,&quot;value&quot;:0.6},&quot;easing&quot;:{&quot;type&quot;:&quot;cubicBezier&quot;,&quot;x1&quot;:0.42,&quot;y1&quot;:0.0,&quot;x2&quot;:0.58,&quot;y2&quot;:1.0}},{&quot;time&quot;:2.8,&quot;value&quot;:{&quot;type&quot;:&quot;number&quot;,&quot;value&quot;:0.6},&quot;easing&quot;:{&quot;type&quot;:&quot;cubicBezier&quot;,&quot;x1&quot;:0.42,&quot;y1&quot;:0.0,&quot;x2&quot;:0.58,&quot;y2&quot;:1.0}}]},{&quot;nodeId&quot;:&quot;ripple&quot;,&quot;property&quot;:&quot;opacity&quot;,&quot;keyframes&quot;:[{&quot;time&quot;:0.0,&quot;value&quot;:{&quot;type&quot;:&quot;number&quot;,&quot;value&quot;:0.0},&quot;easing&quot;:{&quot;type&quot;:&quot;cubicBezier&quot;,&quot;x1&quot;:0.42,&quot;y1&quot;:0.0,&quot;x2&quot;:0.58,&quot;y2&quot;:1.0}},{&quot;time&quot;:0.98,&quot;value&quot;:{&quot;type&quot;:&quot;number&quot;,&quot;value&quot;:0.0},&quot;easing&quot;:{&quot;type&quot;:&quot;cubicBezier&quot;,&quot;x1&quot;:0.42,&quot;y1&quot;:0.0,&quot;x2&quot;:0.58,&quot;y2&quot;:1.0}},{&quot;time&quot;:1.04,&quot;value&quot;:{&quot;type&quot;:&quot;number&quot;,&quot;value&quot;:0.8},&quot;easing&quot;:{&quot;type&quot;:&quot;cubicBezier&quot;,&quot;x1&quot;:0.42,&quot;y1&quot;:0.0,&quot;x2&quot;:0.58,&quot;y2&quot;:1.0}},{&quot;time&quot;:1.7,&quot;value&quot;:{&quot;type&quot;:&quot;number&quot;,&quot;value&quot;:0.0},&quot;easing&quot;:{&quot;type&quot;:&quot;cubicBezier&quot;,&quot;x1&quot;:0.42,&quot;y1&quot;:0.0,&quot;x2&quot;:0.58,&quot;y2&quot;:1.0}},{&quot;time&quot;:2.8,&quot;value&quot;:{&quot;type&quot;:&quot;number&quot;,&quot;value&quot;:0.0},&quot;easing&quot;:{&quot;type&quot;:&quot;cubicBezier&quot;,&quot;x1&quot;:0.42,&quot;y1&quot;:0.0,&quot;x2&quot;:0.58,&quot;y2&quot;:1.0}}]},{&quot;nodeId&quot;:&quot;ripple&quot;,&quot;property&quot;:&quot;scaleX&quot;,&quot;keyframes&quot;:[{&quot;time&quot;:0.0,&quot;value&quot;:{&quot;type&quot;:&quot;number&quot;,&quot;value&quot;:0.6},&quot;easing&quot;:{&quot;type&quot;:&quot;cubicBezier&quot;,&quot;x1&quot;:0.42,&quot;y1&quot;:0.0,&quot;x2&quot;:0.58,&quot;y2&quot;:1.0}},{&quot;time&quot;:0.98,&quot;value&quot;:{&quot;type&quot;:&quot;number&quot;,&quot;value&quot;:0.6},&quot;easing&quot;:{&quot;type&quot;:&quot;cubicBezier&quot;,&quot;x1&quot;:0.42,&quot;y1&quot;:0.0,&quot;x2&quot;:0.58,&quot;y2&quot;:1.0}},{&quot;time&quot;:1.7,&quot;value&quot;:{&quot;type&quot;:&quot;number&quot;,&quot;value&quot;:2.8},&quot;easing&quot;:{&quot;type&quot;:&quot;cubicBezier&quot;,&quot;x1&quot;:0.42,&quot;y1&quot;:0.0,&quot;x2&quot;:0.58,&quot;y2&quot;:1.0}},{&quot;time&quot;:2.8,&quot;value&quot;:{&quot;type&quot;:&quot;number&quot;,&quot;value&quot;:2.8},&quot;easing&quot;:{&quot;type&quot;:&quot;cubicBezier&quot;,&quot;x1&quot;:0.42,&quot;y1&quot;:0.0,&quot;x2&quot;:0.58,&quot;y2&quot;:1.0}}]}]}],&quot;stateMachines&quot;:[],&quot;variables&quot;:{},&quot;audioAssets&quot;:[],&quot;audioCues&quot;:[],&quot;speechCues&quot;:[],&quot;customJs&quot;:&quot;\nconst svg = document.currentScript.ownerSVGElement;\nconst data = JSON.parse(svg.querySelector(&apos;[id=\&quot;forma-project\&quot;]&apos;).textContent);\nconst machine = data.stateMachines.length ? forma.machine(&apos;gallery&apos;) : null;\nconst status = svg.querySelector(&apos;[id=\&quot;status\&quot;]&apos;);\nlet paused = [], pauseRequested = false;\nfunction describe() {\n  status.textContent = (machine ? &apos;State: &apos; + machine.state : &apos;Water drop&apos;) +\n    &apos; · &apos; + (forma.timeline.playing ? &apos;playing&apos; : &apos;paused&apos;) +\n    &apos; · speech &apos; + (forma.speech.enabled ? &apos;enabled&apos; : &apos;off&apos;);\n}\nfunction start() {\n  pauseRequested = false;\n  const host = svg.querySelector(&apos;[data-forma-host-control]&apos;);\n  if (host) host.remove(); // These generated scenes contain no audio assets to unlock.\n  if (machine &amp;&amp; machine.state === &apos;idle&apos;) machine.send(&apos;START&apos;);\n  else for (const id of paused) forma.clip(id).play();\n  paused = []; forma.timeline.play(); describe();\n}\nfunction pause() {\n  pauseRequested = true;\n  if (forma.timeline.playing) {\n    paused = data.clips.filter(c =&gt; forma.clip(c.id).playing).map(c =&gt; c.id);\n    forma.timeline.pause();\n  }\n  describe();\n}\nfor (const [id, fn] of [[&apos;start-control&apos;, start], [&apos;pause-control&apos;, pause]]) {\n  const el = svg.querySelector(&apos;[id=\&quot;&apos; + id + &apos;\&quot;]&apos;);\n  el.setAttribute(&apos;role&apos;, &apos;button&apos;); el.setAttribute(&apos;tabindex&apos;, &apos;0&apos;);\n  el.setAttribute(&apos;aria-label&apos;, id === &apos;start-control&apos; ? &apos;Play or resume animation&apos; : &apos;Pause animation&apos;);\n  el.style.cursor = &apos;pointer&apos;;\n  const label = svg.querySelector(&apos;[id=\&quot;&apos; + id + &apos;-label\&quot;]&apos;);\n  label.style.pointerEvents = &apos;none&apos;;\n  forma.on(id, &apos;click&apos;, fn);\n  const key = event =&gt; { if (event.key === &apos;Enter&apos; || event.key === &apos; &apos;) { event.preventDefault(); fn(); } };\n  el.addEventListener(&apos;keydown&apos;, key);\n  forma.onDestroy(() =&gt; el.removeEventListener(&apos;keydown&apos;, key));\n}\nconst host = svg.querySelector(&apos;[data-forma-host-control]&apos;);\nif (host) {\n  const key = event =&gt; { if (event.key === &apos;Enter&apos; || event.key === &apos; &apos;) start(); };\n  host.addEventListener(&apos;click&apos;, start); host.addEventListener(&apos;keydown&apos;, key);\n  forma.onDestroy(() =&gt; { host.removeEventListener(&apos;click&apos;, start); host.removeEventListener(&apos;keydown&apos;, key); });\n}\nforma.on(&apos;showcase.start&apos;, start);\nforma.on(&apos;showcase.pause&apos;, pause);\nforma.on(&apos;state.change&apos;, () =&gt; {\n  // Pausing synchronizes the wall clock. A queued clip.end may enter the next\n  // state after the Pause handler returns; hold that new clip, not the old one.\n  if (pauseRequested) {\n    paused = data.clips.filter(c =&gt; forma.clip(c.id).playing).map(c =&gt; c.id);\n    forma.timeline.pause();\n  }\n  describe();\n});\nforma.on(&apos;error&apos;, () =&gt; { status.textContent = &apos;Runtime error · inspect diagnostics&apos;; });\ndescribe();\n&quot;,&quot;rawSvg&quot;:&quot;&quot;}</metadata>
+<script type="application/ecmascript"><![CDATA[/* Forma runtime v1. Dependency-free; embed this file unchanged in an SVG script. */
+(function (host) {
+  'use strict';
+  const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+  const finite = (v, label) => { if (typeof v !== 'number' || !Number.isFinite(v)) throw new Error(label + ' must be finite'); return v; };
+  const weightValue = v => { finite(v,'Clip weight'); if(v<0 || v>1)throw new Error('Clip weight must be in [0,1]'); return v; };
+  const fadeDuration = v => { finite(v,'Fade duration'); if(v<0)throw new Error('Fade duration must be nonnegative'); return v; };
+  const list = v => Array.isArray(v) ? v : Object.entries(v || {}).map(([id, item]) => ({ ...item, id: item.id || id }));
+  const unwrap = v => v && (v.type === 'number' || v.type === 'color') ? v.value : v;
+  const own = (o, k) => Object.prototype.hasOwnProperty.call(o, k);
+  function equal(a,b) {
+    if(a===b)return true;if(!a || !b || typeof a!=='object' || typeof b!=='object' || Array.isArray(a)!==Array.isArray(b))return false;
+    const keys=Object.keys(a);return keys.length===Object.keys(b).length && keys.every(k=>own(b,k) && equal(a[k],b[k]));
+  }
+  function color(v) {
+    if (v && typeof v === 'object' && !Array.isArray(v) && ['r','g','b'].every(k => Number.isFinite(v[k])) && (v.a==null || Number.isFinite(v.a))) return [v.r, v.g, v.b, v.a == null ? 1 : v.a];
+    if (typeof v !== 'string' || !/^#([a-f\d]{3,4}|[a-f\d]{6}|[a-f\d]{8})$/i.test(v)) return null;
+    let hex = v.slice(1); if (hex.length < 5) hex = [...hex].map(c => c + c).join('');
+    return [0,2,4,6].map((i) => i < hex.length ? parseInt(hex.slice(i,i+2),16) / 255 : 1);
+  }
+  function interpolate(a, b, t) {
+    a = unwrap(a); b = unwrap(b);
+    if (typeof a === 'number' && typeof b === 'number') return t <= 0 ? a : t >= 1 ? b : a*(1-t)+b*t;
+    const ca = color(a), cb = color(b);
+    if (ca && cb) {
+      const c = ca.map((v,i) => t <= 0 ? v : t >= 1 ? cb[i] : v*(1-t)+cb[i]*t);
+      return {r:c[0],g:c[1],b:c[2],a:c[3]};
+    }
+    if (Array.isArray(a) && Array.isArray(b) && a.length === b.length && [...a,...b].every(Number.isFinite)) return a.map((v,i) => t <= 0 ? v : t >= 1 ? b[i] : v*(1-t)+b[i]*t);
+    return t < 1 ? a : b;
+  }
+  function easing(spec, t) {
+    const type = Array.isArray(spec) ? 'cubicBezier' : typeof spec === 'string' ? spec : (spec || {}).type || 'linear';
+    if (type === 'step' || type === 'discrete') return t < 1 ? 0 : 1;
+    if (type === 'linear') return t;
+    const points = Array.isArray(spec) ? spec : type === 'cubicBezier' ? [spec.x1,spec.y1,spec.x2,spec.y2] : null;
+    if (!points || points.length !== 4 || !points.every(Number.isFinite) || points[0] < 0 || points[0] > 1 || points[2] < 0 || points[2] > 1) throw new Error('Unsupported easing');
+    if (t <= 0 || t >= 1) return t;
+    const curve = (s,a,b) => 3*(1-s)*(1-s)*s*a + 3*(1-s)*s*s*b + s*s*s;
+    let lo=0, hi=1;
+    for (let i=0;i<60;i++) { const mid=(lo+hi)/2; if (curve(mid,points[0],points[2]) < t) lo=mid; else hi=mid; }
+    return curve((lo+hi)/2,points[1],points[3]);
+  }
+  function evaluateTrack(track, time) {
+    const frames = track.keyframes || [];
+    if (!frames.length) return undefined;
+    if (time < frames[0].time) return unwrap(frames[0].value);
+    // Last duplicate at an exact timestamp wins; normalization preserves stored order.
+    let i = 0; while (i+1 < frames.length && frames[i+1].time <= time) i++;
+    if (i+1 === frames.length) return unwrap(frames[i].value);
+    const a=frames[i], b=frames[i+1];
+    return interpolate(a.value,b.value,easing(a.easing,(time-a.time)/(b.time-a.time)));
+  }
+  const boneProperties = new Set(['x','y','rotation']);
+  function bonePatch(props) {
+    const result={};
+    for(const [key,value] of Object.entries(props)) {
+      if(!boneProperties.has(key)) throw new Error('Unsupported bone property: '+key);
+      if(value && typeof value==='object' && (value.type!=='number' || !own(value,'value'))) throw new Error('Bone '+key+' must be numeric');
+      result[key]=finite(unwrap(value),'Bone '+key);
+    }
+    return result;
+  }
+  function solveBones(bones) {
+    const byId=new Map(bones.map(b=>[b.id,b])), poses=new Map(), visiting=new Set();
+    function solve(id,depth) {
+      if(depth>128) throw new Error('Bone depth limit exceeded (128)');
+      if(visiting.has(id)) throw new Error('Bone cycle: '+id);
+      const b=byId.get(id); if(!b) throw new Error('Missing bone parent: '+id);
+      visiting.add(id);
+      // Traverse even cached ancestors so the limit is independent of input order.
+      const parent=b.parentId==null?null:solve(b.parentId,depth+1);
+      visiting.delete(id);
+      if(poses.has(id)) return poses.get(id);
+      let x=finite(b.x,'Bone x'), y=finite(b.y,'Bone y'), rotation=finite(b.rotation,'Bone rotation');
+      const length=finite(b.length,'Bone length'); if(length<=0) throw new Error('Bone length must be positive');
+      if(parent) {
+        const angle=(parent.rotation%360)*Math.PI/180, c=Math.cos(angle), s=Math.sin(angle);
+        const localX=x, localY=y;
+        x=parent.tipX+c*localX-s*localY; y=parent.tipY+s*localX+c*localY;
+        rotation+=parent.rotation;
+      }
+      const angle=(rotation%360)*Math.PI/180;
+      const pose={id:b.id,x:finite(x,'Bone world x'),y:finite(y,'Bone world y'),rotation:finite(rotation,'Bone world rotation'),length,tipX:finite(x+length*Math.cos(angle),'Bone tip x'),tipY:finite(y+length*Math.sin(angle),'Bone tip y')};
+      poses.set(id,pose); return pose;
+    }
+    return bones.map(b=>solve(b.id,1));
+  }
+  function normalize(project) {
+    if (!project || typeof project !== 'object' || Array.isArray(project)) throw new Error('Project must be an object');
+    if (project.schemaVersion != null && project.schemaVersion !== 1) throw new Error('Unsupported schemaVersion: ' + project.schemaVersion);
+    const unique = (items, label) => {
+      const ids=new Set(); for (const x of items) { if (typeof x.id !== 'string' || !x.id || ids.has(x.id)) throw new Error('Missing or duplicate ' + label + ' id: ' + x.id); ids.add(x.id); } return items;
+    };
+    const clips = unique(list(project.clips).map(c => {
+      if(c.id==='@timeline')throw new Error('Reserved clip id: @timeline');
+      const duration=finite(c.duration,'Clip duration'); if (duration <= 0) throw new Error('Clip duration must be positive');
+      const blendMode=c.blendMode===undefined?'override':c.blendMode;
+      if(!['override','weighted'].includes(blendMode))throw new Error('Unsupported blendMode: '+blendMode);
+      const weight=weightValue(c.weight===undefined?1:c.weight);
+      return {...c,duration,blendMode,weight,loop: !!(c.looping == null ? c.loop : c.looping),tracks:(c.tracks || []).map(t => {
+        if(typeof (t.nodeId || t.target)!=='string' || typeof t.property!=='string')throw new Error('Track requires target and property');
+        if(!t.keyframes || !t.keyframes.length)throw new Error('Track requires keyframes');
+        const keyframes=t.keyframes.map(k => {
+          if (finite(k.time,'Keyframe time') < 0 || k.time > duration) throw new Error('Keyframe outside clip');
+          const value=unwrap(k.value);if(value===undefined)throw new Error('Keyframe requires value');
+          if(typeof value==='number' || (k.value && k.value.type==='number'))finite(value,'Keyframe value');
+          if(blendMode==='weighted' && typeof value!=='number' && !color(value))throw new Error('Weighted keyframe must be numeric or RGBA');
+          if(Array.isArray(value) && value.some(v=>typeof v!=='number' || !Number.isFinite(v)))throw new Error('Keyframe array must contain finite numbers');
+          easing(k.easing,0.5);return {...k};
+        }).sort((a,b)=>a.time-b.time);
+        return {...t,target:t.nodeId || t.target,property:t.property,keyframes};
+      })};
+    }), 'clip');
+    const machines=unique(list(project.stateMachines || project.machines).map(m=>{
+      const states=unique(list(m.states),'state'), ids=new Set(states.map(s=>s.id));
+      if(!ids.has(m.initial))throw new Error('Unknown initial state: '+m.initial);
+      for(const t of [...(m.transitions || []),...states.flatMap(s=>s.transitions || [])])if(!ids.has(t.to || t.target))throw new Error('Unknown state: '+(t.to || t.target));
+      return {...m,states};
+    }),'machine');
+    for(const source of [project,...clips]) {
+      for(const cue of [...(source.audioCues || []),...(source.speechCues || [])]) {
+        if(finite(cue.time,'Cue time')<0)throw new Error('Cue time must be nonnegative');
+        for(const k of ['offset','volume','duration'])if(cue[k]!=null && (finite(cue[k],'Cue '+k)<0 || (k==='duration' && cue[k]===0)))throw new Error('Invalid cue '+k);
+      }
+    }
+    const nodes=unique(list(project.nodes),'node'), bones=unique(list(project.bones),'bone'), assets=unique(list(project.audioAssets || project.assets),'asset');
+    unique([...nodes,...bones,...clips,...machines,...assets,...(project.audioCues || []),...(project.speechCues || []),...clips.flatMap(c=>[...(c.audioCues || []),...(c.speechCues || [])])].filter(x=>x.id!=null),'global');
+    const boneIds=new Set(bones.map(b=>b.id));
+    for(const b of bones) if(b.parentId!=null && (typeof b.parentId!=='string' || !boneIds.has(b.parentId))) throw new Error('Missing bone parent: '+b.parentId);
+    solveBones(bones);
+    for(const n of nodes) if(n.boneId!=null && !boneIds.has(n.boneId)) throw new Error('Missing node bone: '+n.boneId);
+    const validatePatch=(id,props)=>{if(boneIds.has(id)) bonePatch(props);};
+    for(const c of clips) for(const t of c.tracks) for(const k of t.keyframes) validatePatch(t.target,{[t.property]:k.value});
+    for(const m of machines) for(const s of m.states) {
+      if(Array.isArray(s.overrides)) for(const o of s.overrides) validatePatch(o.nodeId || o.target,{[o.property]:o.value});
+      else for(const [id,props] of Object.entries(s.overrides || {})) validatePatch(id,props);
+    }
+    const validateActions=items=>{for(const a of items || [])if(a.type==='blendClip') {
+      const c=clips.find(c=>c.id===a.clipId);
+      if(!c || c.blendMode!=='weighted')throw new Error('blendClip requires an existing weighted clip: '+a.clipId);
+      weightValue(a.weight);fadeDuration(a.duration===undefined?0:a.duration);
+    }};
+    for(const m of machines) {
+      for(const s of m.states) {for(const key of ['onEnter','entry','exit','onExit'])validateActions(s[key]);for(const t of s.transitions || [])validateActions(t.actions);}
+      for(const t of m.transitions || [])validateActions(t.actions);
+    }
+    for(const b of project.interactions || [])validateActions(b.actions);
+    return {...project,nodes,bones,clips,machines,assets};
+  }
+  function owningSvg(el) {
+    for(let n=el;n;n=n.parentNode)if((n.tagName || '').toLowerCase()==='svg')return n;
+    return el && el.ownerSVGElement;
+  }
+  function readProject(svg) {
+    const candidates=svg.querySelectorAll('[id="forma-project"], [data-forma-project]');
+    const block=[...candidates].find(el=>(!owningSvg(el) || owningSvg(el)===svg) && (!el.namespaceURI || el.namespaceURI==='http://www.w3.org/2000/svg'));
+    if (!block) throw new Error('Missing forma-project metadata');
+    try { return JSON.parse(block.textContent); } catch (e) { throw new Error('Invalid forma-project JSON: ' + e.message); }
+  }
+  function createRuntime(svg, project, options) {
+    options = options || {};
+    if (!svg || typeof svg.querySelectorAll !== 'function') throw new Error('An SVG root is required');
+    project = normalize(project == null ? readProject(svg) : project);
+    if (svg.forma) throw new Error('SVG already has a Forma runtime');
+    const env=options.window || (svg.ownerDocument && svg.ownerDocument.defaultView) || host;
+    const diagnostics=[], subscriptions=new Map(), cleanup=[], explicit=new Map(), nodes=new Map(), clips=new Map(), machines=new Map();
+    const bones=new Map(project.bones.map(b=>[b.id,b]));
+    let bonePoses=[];
+    const variables=new Map(Object.entries(project.variables || {}).map(([k,v]) => [k,v]));
+    let dead=false, raf=null, last=null, api, processing=false, ticking=false;
+    let syncClock=()=>{};
+    const queue=[];
+    const report = error => { const e=error instanceof Error ? error : new Error(String(error)); diagnostics.push(e); if (diagnostics.length>100) diagnostics.shift(); dispatch('error',{error:e}); return e; };
+    function dispatch(name, detail, target) {
+      const keys = target == null ? [name] : [target+'\u0000'+name,name];
+      for (const key of keys) for (const fn of [...(subscriptions.get(key) || [])]) {
+        try { const result=fn(detail,api); if (result && typeof result.catch === 'function') result.catch(e => { if (name !== 'error') report(e); }); }
+        catch(e) { if (name !== 'error') report(e); }
+      }
+    }
+    const ensure = () => { if (dead) throw new Error('Forma runtime destroyed'); };
+    function on(a,b,c) {
+      ensure(); const key=typeof b === 'function' ? a : a+'\u0000'+b, fn=typeof b === 'function' ? b : c;
+      if (typeof fn !== 'function') throw new Error('Event handler must be a function');
+      if (!subscriptions.has(key)) subscriptions.set(key,new Set()); subscriptions.get(key).add(fn);
+      return () => { const set=subscriptions.get(key); if(set) {set.delete(fn); if(!set.size) subscriptions.delete(key);} };
+    }
+    const elements=new Map(); if(svg.id) elements.set(svg.id,svg);
+    for(const el of svg.querySelectorAll('[id]'))if((!owningSvg(el) || owningSvg(el)===svg) && (!el.namespaceURI || el.namespaceURI==='http://www.w3.org/2000/svg') && !['svg','script','metadata'].includes((el.tagName || '').toLowerCase()))elements.set(el.id,el);
+    for (const node of project.nodes) {
+      const el=elements.get(node.id); if (!el && node.visible!==false) {report('Missing SVG node: '+node.id); continue;}
+      const core=!!node.kind;
+      const base=core ? {...node.transform,...node.style} : {...node.properties};
+      if(core) { for(const k of ['width','height','radius','fontSize','d']) if(node.kind[k]!=null) base[k]=node.kind[k]; }
+      nodes.set(node.id,{el,base,core,visible:node.visible!==false,boneId:node.boneId,original:new Map(),lastKeys:new Set()});
+    }
+    // Adapter allows exported elements without a corresponding node descriptor.
+    function getNode(id) {
+      if(!nodes.has(id) && elements.has(id)) nodes.set(id,{el:elements.get(id),base:{},core:false,original:new Map(),lastKeys:new Set()});
+      if(!nodes.has(id)) throw new Error('Unknown node: '+id); return nodes.get(id);
+    }
+    function attr(node,name,value) {
+      if(dead) return;
+      if(!node.original.has(name)) node.original.set(name,node.el.getAttribute(name));
+      if(value == null) node.el.removeAttribute(name); else node.el.setAttribute(name,String(value));
+    }
+    const aliases={radius:'r',fontSize:'font-size',strokeWidth:'stroke-width',scaleX:'scaleX',scaleY:'scaleY'};
+    const attrName=k => Object.prototype.hasOwnProperty.call(aliases,k)?aliases[k]:k;
+    const supported=new Set('x y cx cy r radius rx ry width height fill stroke opacity fill-opacity stroke-opacity strokeWidth stroke-width fontSize font-size rotation scaleX scaleY transform d points visibility'.split(' '));
+    function render() {
+      if(dead) return;
+      const values=new Map([...nodes].map(([id,n]) => [id,{...n.base}]));
+      const boneValues=new Map([...bones].map(([id,b])=>[id,{...b}]));
+      const merge=(id,props) => { try {
+        if(bones.has(id)) Object.assign(boneValues.get(id),bonePatch(props));
+        else {getNode(id); if(!values.has(id)) values.set(id,{}); Object.assign(values.get(id),props);}
+      } catch(e){report(e);} };
+      for(const m of machines.values()) {
+        const state=m.states.get(m.state); const overrides=state && state.overrides;
+        if(Array.isArray(overrides)) for(const o of overrides) merge(o.nodeId || o.target,{[o.property]:o.value});
+        else for(const [id,p] of Object.entries(overrides || {})) merge(id,p);
+      }
+      let group=new Map();
+      const flush=()=>{
+        for(const [id,props] of group)for(const [property,samples] of props) {
+          const total=samples.reduce((s,v)=>s+v.weight,0);if(total===0)continue;
+          try {
+            let base=(bones.has(id)?boneValues.get(id):values.get(id) || getNode(id).base)[property];
+            const residual=Math.max(0,1-total), divisor=Math.max(1,total);
+            // Adapter baselines come from original DOM, never a previously animated frame.
+            if(residual>0 && base===undefined && !bones.has(id)) {
+              const node=getNode(id), name=attrName(property);
+              if(!node.core && node.el) {
+                base=node.original.has(name)?node.original.get(name):node.el.getAttribute(name);
+                if(typeof samples[0].value==='number' && base!=null)base=Number(base);
+                if(property==='stroke' && base==='none')base=null;
+              }
+            }
+            let value;
+            if(typeof samples[0].value==='number') {
+              const fallback=['scaleX','scaleY','opacity'].includes(property)?1:0;
+              const baseline=residual===0?0:finite(base==null?fallback:unwrap(base),'Weighted baseline');
+              value=baseline*residual+samples.reduce((s,v)=>s+v.value*(v.weight/divisor),0);
+              finite(value,'Weighted result');
+            } else {
+              const baseline=residual===0?[0,0,0,0]:color(unwrap(base)) || (property==='stroke' && base==null?[0,0,0,0]:null);
+              if(!baseline)throw new Error('Weighted baseline must be RGBA');
+              const channels=baseline.map((b,i)=>b*residual+samples.reduce((s,v)=>s+color(v.value)[i]*(v.weight/divisor),0));
+              value={r:channels[0],g:channels[1],b:channels[2],a:channels[3]};
+            }
+            merge(id,{[property]:value});
+          } catch(e){report(e);}
+        }
+        group=new Map();
+      };
+      for(const c of [...clips.values()].sort((a,b)=>a.priority-b.priority || a.index-b.index)) if(c.active) {
+        if(c.blendMode!=='weighted')flush();
+        // A clip contributes at most once per property (last duplicate track wins).
+        const sampled=new Map();
+        for(const t of c.tracks) {
+          const value=evaluateTrack(t,c.time);if(value===undefined)continue;
+          if(c.blendMode!=='weighted')merge(t.target,{[t.property]:value});
+          else {if(!sampled.has(t.target))sampled.set(t.target,new Map());sampled.get(t.target).set(t.property,value);}
+        }
+        if(c.blendMode==='weighted' && c.weight>0)for(const [id,props] of sampled) {
+          if(!group.has(id))group.set(id,new Map());
+          for(const [property,value] of props) {
+            const target=group.get(id);if(!target.has(property))target.set(property,[]);
+            target.get(property).push({value,weight:c.weight});
+          }
+        }
+      }
+      flush();
+      for(const [id,p] of explicit) merge(id,p);
+      let poses;
+      try {bonePoses=solveBones([...boneValues.values()]); poses=new Map(bonePoses.map(p=>[p.id,p]));}
+      catch(e) {report(e);return;} // Keep the last valid frame on FK overflow.
+      for(const [id,props] of values) {
+        if(dead) return;
+        const binding=getNode(id).boneId;
+        if(binding!=null) {
+          try {
+            const pose=poses.get(binding), angle=(pose.rotation%360)*Math.PI/180, c=Math.cos(angle), s=Math.sin(angle);
+            const x=finite(unwrap(props.x==null?0:props.x),'Transform x'), y=finite(unwrap(props.y==null?0:props.y),'Transform y');
+            props.x=finite(pose.x+c*x-s*y,'Attached x'); props.y=finite(pose.y+s*x+c*y,'Attached y');
+            props.rotation=finite(pose.rotation+finite(unwrap(props.rotation==null?0:props.rotation),'Transform rotation'),'Attached rotation');
+          } catch(e) {report(e);continue;}
+        }
+        const node=getNode(id), keys=new Set();
+        if(!node.el) continue; // Hidden descriptors remain valid animation/override targets.
+        if(node.visible===false) {attr(node,'visibility','hidden'); keys.add('visibility');}
+        const composed=node.core || binding!=null;
+        if(composed) {
+          try {
+            const component=(key,fallback)=>finite(props[key]==null?fallback:unwrap(props[key]),'Transform '+key);
+            attr(node,'transform',`translate(${component('x',0)} ${component('y',0)}) rotate(${component('rotation',0)}) scale(${component('scaleX',1)} ${component('scaleY',1)})`);
+          } catch(error){report(error);} keys.add('transform');
+        }
+        for(const [key,raw] of Object.entries(props)) {
+          if(dead) return;
+          if(composed && ['x','y','rotation','scaleX','scaleY'].includes(key)) continue;
+          if(composed && key==='transform') {report('Raw transform is unsupported on composed nodes');continue;}
+          // Never turn schema properties into scripts, URLs, or markup.
+          if(!supported.has(key)) {report('Unsupported property: '+key);continue;}
+          if(node.visible===false && key==='visibility') continue;
+          const name=attrName(key), value=unwrap(raw), col=color(value);
+          if((key==='fill'||key==='stroke') && col) {
+            attr(node,name,`rgb(${Math.round(clamp(col[0],0,1)*255)},${Math.round(clamp(col[1],0,1)*255)},${Math.round(clamp(col[2],0,1)*255)})`);
+            attr(node,name+'-opacity',clamp(col[3],0,1)); keys.add(name+'-opacity');
+          } else {
+            if(Array.isArray(value) && !value.every(v=>typeof v==='number' && Number.isFinite(v))){report('Property arrays must contain finite numbers');continue;}
+            const serialized=Array.isArray(value)?value.join(' '):(node.core && key==='stroke' && value==null?'none':value);
+            if(typeof serialized === 'string' && (/url\s*\(/i.test(serialized) || serialized.includes('\\'))){report('URL properties are unsupported');continue;}
+            if(typeof serialized==='number' && !Number.isFinite(serialized)){report('Property must be finite');continue;}
+            if(serialized && typeof serialized==='object'){report('Unsupported property value');continue;}
+            attr(node,name,serialized);
+          }
+          keys.add(name);
+        }
+        for(const key of node.lastKeys) if(!keys.has(key)) attr(node,key,node.original.get(key));
+        node.lastKeys=keys;
+      }
+    }
+    function set(id,props) {ensure();if(!bones.has(id))getNode(id); if(props===null) explicit.delete(id); else {if(!props || typeof props!=='object' || Array.isArray(props)) throw new Error('Properties must be an object or null');explicit.set(id,{...explicit.get(id),...(bones.has(id)?bonePatch(props):props)});}render();}
+    function variable(id) {ensure();if(!variables.has(id)) throw new Error('Unknown variable: '+id);return {get:()=>variables.get(id),set:v=>{ensure();const old=variables.get(id);if((old===null?v!==null:typeof old!==typeof v) || Array.isArray(old)!==Array.isArray(v))throw new Error('Variable type mismatch: '+id);if(v===undefined || typeof v==='function' || (typeof v==='number' && !Number.isFinite(v)))throw new Error('Variable must be a JSON value');variables.set(id,v);emit('variable.change',{id,value:v});}};}
+    function actions(items,detail) {
+      for(const a of items || []) {
+        try {
+          switch(a.type) {
+            case 'setProperty': set(a.nodeId,{[a.property]:a.value});break;
+            case 'set': set(a.target,a.properties);break;
+            case 'playClip': case 'clip.play': clip(a.clipId || a.clip).play();break;
+            case 'blendClip': clip(a.clipId).fadeTo(a.weight,a.duration===undefined?0:a.duration);break;
+            case 'stopClip': case 'clip.stop': clip(a.clipId || a.clip).stop();break;
+            case 'clip.pause': clip(a.clipId || a.clip).pause();break;
+            case 'clip.seek': clip(a.clipId || a.clip).seek(a.time);break;
+            case 'setVariable': case 'variable.set': variable(a.name || a.variable).set(a.value);break;
+            case 'emit': emit(typeof a.event === 'object'?a.event.name:a.event,detail,typeof a.event==='object'?a.event.target:undefined);break;
+            case 'machine.send': send(a.machine,a.event,detail);break;
+            case 'playAudio': case 'audio.play': audio.play(a.assetId || a.asset);break;
+            case 'speak': case 'speech.say': speech.say(a.text,a);break;
+            default: throw new Error('Unsupported action: '+a.type);
+          }
+        } catch(e) {report(e);}
+      }
+    }
+    function eventMatches(spec,event,target) { return typeof spec==='string' ? spec===event : spec && spec.name===event && (spec.target==null || spec.target===target); }
+    function guard(g) {if(!g)return true; if(typeof g !== 'object' || !own(g,'variable')) {report('Unsupported guard');return false;} return variables.has(g.variable) && equal(variables.get(g.variable),g.equals);}
+    function send(id,event,detail,target) {ensure();if(!machines.has(id)) throw new Error('Unknown machine: '+id);enqueue({id,event,detail,target});}
+    function enqueue(item) {if(!processing){syncClock();ensure();}queue.push(item);drain();}
+    function drain() {
+      if(processing)return; processing=true;
+      try {
+        let count=0;
+        while(queue.length) {
+          if(++count>256) {queue.length=0;report('Event cycle limit exceeded (256)');break;}
+          const e=queue.shift();
+          if(e.broadcast) {dispatch(e.event,e.detail,e.target);queue.unshift(...[...machines.keys()].map(id=>({...e,id,broadcast:false})));continue;}
+          const m=machines.get(e.id); if(!m)continue;
+          const state=m.states.get(m.state);
+          const transitions=[...(state.transitions || []),...(m.transitions || [])];
+          const t=transitions.find(t=>(t.from==null || t.from===m.state || t.from==='*') && eventMatches(t.event,e.event,e.target) && guard(t.guard));
+          if(!t)continue;
+          const next=t.to || t.target; if(!m.states.has(next)) {report('Unknown state: '+next);continue;}
+          actions(state.exit || state.onExit,e.detail); const previous=m.state; m.state=next;
+          actions(t.actions,e.detail); actions(m.states.get(next).onEnter || m.states.get(next).entry,e.detail);
+          render();dispatch('state.change',{machine:m.id,from:previous,to:next,event:e.event});
+        }
+      } finally {processing=false;}
+    }
+    function emit(event,detail,target) {ensure();enqueue({broadcast:true,event,detail,target});}
+    for(const m of project.machines) {
+      const states=new Map(m.states.map(s=>[s.id,s])); if(!states.has(m.initial)) throw new Error('Unknown initial state: '+m.initial);
+      machines.set(m.id,{...m,states,state:m.initial});
+    }
+    function machine(id) {ensure();const m=machines.get(id);if(!m) throw new Error('Unknown machine: '+id);return {send:(event,detail)=>send(id,typeof event==='object'?event.name:event,detail,typeof event==='object'?event.target:undefined),get state(){return m.state;}};}
+    const callbacks=new Set();
+    for(const [index,c] of project.clips.entries()) clips.set(c.id,{...c,index,priority:c.priority || 0,time:0,playing:false,active:false,cycle:0,revision:0,ramp:null,sources:new Map()});
+    const first=project.clips[0] && project.clips[0].id;
+    const transport={id:'@timeline',duration:Infinity,time:0,playing:false,manual:false,loop:false,cycle:0,revision:0,sources:new Map(),audioCues:project.audioCues || [],speechCues:project.speechCues || []};
+    const cueList=c => c.audioCues || [];
+    const speechList=c => c.speechCues || [];
+    function transportPlay(){if(!transport.playing){transport.playing=true;transport.revision++;if(transport.time===0)crossing(transport,0,0,true);schedule(transport);}}
+    function transportPause(){transport.playing=false;transport.revision++;stopSources(transport);speech.cancel();}
+    function getClip(id) {ensure();const c=clips.get(id);if(!c)throw new Error('Unknown clip: '+id);return c;}
+    function stopSources(c) {for(const source of c.sources.values()) source.stop(); c.sources.clear();}
+    function crossing(c,from,to,zero) {
+      const rev=c.revision;
+      const items=[...callbacks].filter(cb=>cb.clip===c.id).map(cb=>({...cb,type:'callback'}));
+      for(const cue of speechList(c)) items.push({time:cue.time,type:'speech',cue});
+      items.sort((a,b)=>a.time-b.time);
+      for(const item of items) if((item.time>from && item.time<=to) || (zero && item.time===0)) {
+        if(c.revision!==rev || dead) return false;
+        if(item.type==='callback') {if(callbacks.has(item.ref)) try{const result=item.fn({clip:c.id,time:item.time,cycle:c.cycle},api);if(result && typeof result.catch==='function')result.catch(report);}catch(e){report(e);}}
+        else speech.say(item.cue.text,item.cue);
+      }
+      return c.revision===rev && !dead;
+    }
+    const failedLoopCues=new Set();
+    function schedule(c) {
+      if(!c.playing || !audio.ready)return;
+      const cues=cueList(c);
+      for(let lap=0;lap<=(c.loop && !audio.context.createBuffer?1:0);lap++) for(let i=0;i<cues.length;i++) {
+        const cue=cues[i], key=(c.loop?'loop':c.cycle+lap)+':'+i;
+        if(c.sources.has(key))continue;
+        if(c.loop && audio.context.createBuffer) {
+          const failure=c.id+':'+i;if(failedLoopCues.has(failure))continue;
+          try {const buffer=audio.loopBuffer(c,i,cue);c.sources.set(key,audio.start(cue.assetId || cue.asset,{buffer,loop:true,offset:c.time%c.duration,volume:cue.volume}));}catch(e){failedLoopCues.add(failure);report(e);}
+          continue;
+        }
+        const start=finite(cue.time,'Audio cue time')+(lap?lap*c.duration:0);
+        const asset=cue.assetId || cue.asset;
+        const buffer=audio.buffers.get(asset);if(!buffer){report('Unknown or unavailable audio asset: '+asset);continue;}
+        const offset=cue.offset || 0, length=Math.min(cue.duration==null?buffer.duration-offset:cue.duration,c.duration-cue.time);
+        const elapsed=Math.max(0,c.time-start);
+        if(start<0 || cue.time>=c.duration || length<=elapsed)continue;
+        try {
+          const handle=audio.start(asset,{offset:offset+elapsed,volume:cue.volume,duration:length-elapsed,when:audio.context.currentTime+Math.max(0,start-c.time)});
+          c.sources.set(key,handle);
+        } catch(e){report(e);}
+      }
+    }
+    function clip(id) {
+      const c=getClip(id);
+      return {
+        get time(){return c.time;},get duration(){return c.duration;},get playing(){return c.playing;},get loop(){return c.loop;},
+        get weight(){ensure();syncClock();return c.weight;},
+        setWeight(weight){ensure();weightValue(weight);if(c.blendMode!=='weighted')throw new Error('Weight controls require a weighted clip');syncClock();c.ramp=null;c.weight=weight;render();return this;},
+        fadeTo(weight,seconds){ensure();weightValue(weight);fadeDuration(seconds);if(c.blendMode!=='weighted')throw new Error('Weight controls require a weighted clip');syncClock();c.ramp=seconds===0?null:{from:c.weight,to:weight,duration:seconds,elapsed:0};if(seconds===0)c.weight=weight;render();return this;},
+        set loop(v){ensure();c.loop=!!v;if(c.loop)c.time%=c.duration;c.revision++;stopSources(c);render();schedule(c);},
+        play(){ensure();syncClock();if(c.playing)return this;if(c.time>=c.duration){c.time=0;c.cycle=0;}c.active=true;c.playing=true;c.revision++;const revision=c.revision;transportPlay();if(dead || c.revision!==revision || !c.playing)return this;render();if(c.time===0)crossing(c,0,0,true);schedule(c);return this;},
+        pause(){ensure();syncClock();c.playing=false;c.revision++;stopSources(c);speech.cancel();if(!transport.manual && ![...clips.values()].some(c=>c.playing))transportPause();return this;},
+        seek(time){ensure();syncClock();finite(time,'Seek time');c.time=c.loop?Math.max(0,time)%c.duration:clamp(time,0,c.duration);c.cycle=0;c.active=true;c.revision++;stopSources(c);speech.cancel();render();schedule(c);return this;},
+        stop(){this.pause();c.ramp=null;c.time=0;c.cycle=0;c.active=false;render();return this;}
+      };
+    }
+    function tick(delta) {
+      ensure();if(finite(delta,'Tick delta')<0)throw new Error('Tick delta must be nonnegative');
+      if(ticking)throw new Error('Reentrant tick is unsupported');
+      ticking=true;
+      try {
+      let remaining=delta,segments=0;
+      do {
+        if(++segments>10000){report('Transport catch-up limit exceeded (10000)');for(const c of clips.values())if(c.playing)clip(c.id).pause();transportPause();break;}
+        const active=[transport,...clips.values()].filter(c=>c.playing);
+        const fading=[...clips.values()].filter(c=>c.ramp);
+        if(!active.length && !fading.length)break;
+        let step=remaining;
+        for(const c of fading)step=Math.min(step,c.ramp.duration-c.ramp.elapsed);
+        for(const c of active) {
+          step=Math.min(step,c.duration-c.time);
+          for(const cb of callbacks)if(cb.clip===c.id && cb.time>c.time)step=Math.min(step,cb.time-c.time);
+          for(const cue of speechList(c))if(cue.time>c.time)step=Math.min(step,cue.time-c.time);
+        }
+        const snapshots=active.map(c=>({c,from:c.time,revision:c.revision}));
+        for(const c of active)c.time+=step;
+        for(const c of fading) {
+          const r=c.ramp;r.elapsed=Math.min(r.duration,r.elapsed+step);
+          c.weight=r.elapsed===r.duration?r.to:r.from*(1-r.elapsed/r.duration)+r.to*(r.elapsed/r.duration);
+          if(r.elapsed===r.duration)c.ramp=null;
+        }
+        remaining=Math.max(0,remaining-step);render();
+        for(const {c,from,revision} of snapshots) {
+          if(dead)return;if(c.revision!==revision || !c.playing)continue;
+          if(!crossing(c,from,c.time,false))continue;
+          if(c.time===c.duration) {
+            if(!c.loop){c.playing=false;c.revision++;stopSources(c);emit('clip.end',{clip:c.id},c.id);}
+            else {c.time=0;c.cycle++;for(const [key,h] of c.sources)if(Number(key.split(':')[0])<c.cycle){h.stop();c.sources.delete(key);}render();crossing(c,0,0,true);}
+          }
+        }
+      } while(remaining>0 && !dead);
+      if(dead)return;for(const c of [transport,...clips.values()])schedule(c);render();
+      } finally {ticking=false;}
+    }
+    function at(time,fn,opts) {
+      ensure();finite(time,'Callback time');if(typeof fn!=='function')throw new Error('Timeline callback must be a function');
+      const id=opts && opts.clip || transport.id,c=id===transport.id?transport:getClip(id);if(time<0 || time>c.duration)throw new Error('Callback outside clip');
+      const cb={clip:id,time,fn};cb.ref=cb;callbacks.add(cb);return()=>callbacks.delete(cb);
+    }
+    let context=null, unlocking=null,loopBytes=0;const buffers=new Map(),independent=new Set(),loopBuffers=new Map();
+    const speechOwned=new Set();
+    const speech={
+      enable(){ensure();options.speech=true;return this;},
+      get enabled(){return !!options.speech;},
+      say(text,opts){ensure();if(!options.speech){report('Speech is opt-in: createRuntime with {speech:true}; browser speech cancellation is global');return null;}if(!env.speechSynthesis || !env.SpeechSynthesisUtterance){report('Speech synthesis unavailable');return null;}
+        const u=new env.SpeechSynthesisUtterance(String(text));for(const k of ['lang','rate','pitch','volume'])if(opts && opts[k]!=null)u[k]=opts[k];
+        speechOwned.add(u);u.onend=()=>speechOwned.delete(u);u.onerror=e=>{speechOwned.delete(u);report('Speech error: '+e.error);};env.speechSynthesis.speak(u);return u;
+      },
+      cancel(){if(speechOwned.size && env.speechSynthesis){
+        const registry=env[registryKey];if(registry && registry.instances.size>1){report('Cannot isolate browser speech cancellation across instances');return;}
+        env.speechSynthesis.cancel();speechOwned.clear();}}
+    };
+    const audio={
+      ready:false,buffers,get context(){return context;},
+      loopBuffer(c,index,cue){
+        const key=c.id+':'+index;if(loopBuffers.has(key))return loopBuffers.get(key);
+        const original=buffers.get(cue.assetId || cue.asset);if(!original)throw new Error('Unknown loop audio asset');
+        const frames=Math.ceil(c.duration*original.sampleRate),bytes=frames*original.numberOfChannels*4;
+        if(loopBytes+bytes>128*1024*1024)throw new Error('Loop audio padding exceeds 128 MiB limit');
+        const start=Math.round(cue.time*original.sampleRate),offset=Math.round((cue.offset || 0)*original.sampleRate);
+        const count=Math.min(frames-start,original.length-offset,Math.round((cue.duration==null?c.duration:cue.duration)*original.sampleRate));
+        if(start<0 || offset<0 || count<=0)throw new Error('Invalid loop audio cue range');
+        const buffer=context.createBuffer(original.numberOfChannels,frames,original.sampleRate);
+        for(let ch=0;ch<original.numberOfChannels;ch++)buffer.getChannelData(ch).set(original.getChannelData(ch).subarray(offset,offset+count),start);
+        loopBytes+=bytes;loopBuffers.set(key,buffer);return buffer;
+      },
+      async unlock(){
+        ensure();if(unlocking)return unlocking;
+        unlocking=(async()=>{
+          const C=env.AudioContext || env.webkitAudioContext;if(!C)throw new Error('Web Audio unavailable');if(!context)context=new C();
+          await context.resume();
+          for(const a of project.assets) if(!buffers.has(a.id)) {
+            const data=a.dataBase64 || a.data;if(a.url || typeof data!=='string' || !/^[a-z\d+/]*={0,2}$/i.test(data) || data.length%4!==0)throw new Error('Asset must contain embedded base64: '+a.id);
+            if(data.length>64*1024*1024)throw new Error('Audio asset exceeds 64 MiB encoded limit: '+a.id);
+            const raw=env.atob ? env.atob(data) : (typeof Buffer!=='undefined'?Buffer.from(data,'base64').toString('binary'):null);if(raw===null)throw new Error('Base64 decoder unavailable');
+            const bytes=Uint8Array.from(raw,c=>c.charCodeAt(0));const buffer=await context.decodeAudioData(bytes.buffer);
+            if(dead)throw new Error('Forma runtime destroyed');buffers.set(a.id,buffer);
+          }
+          if(dead)throw new Error('Forma runtime destroyed');audio.ready=true;for(const c of [transport,...clips.values()])schedule(c);return api;
+        })();
+        try{return await unlocking;}catch(e){report(e);throw e;}finally{unlocking=null;}
+      },
+      start(id,opts){
+        ensure();if(!audio.ready)throw new Error('Audio is locked; await audio.unlock()');opts=opts || {};const buffer=opts.buffer || buffers.get(id);if(!buffer)throw new Error('Unknown audio asset: '+id);
+        const offset=finite(opts.offset==null?0:opts.offset,'Audio offset'),volume=finite(opts.volume==null?1:opts.volume,'Audio volume');
+        const duration=finite(opts.duration==null?buffer.duration-offset:opts.duration,'Audio duration');
+        if(offset<0 || offset>=buffer.duration || duration<=0 || volume<0)throw new Error('Invalid audio range or volume');
+        const source=context.createBufferSource(),gain=context.createGain();source.buffer=buffer;source.loop=!!opts.loop;gain.gain.value=volume;source.connect(gain);gain.connect(context.destination);
+        let stopped=false;const handle={stop(){if(stopped)return;stopped=true;try{source.stop();}catch(_){}source.disconnect();gain.disconnect();independent.delete(handle);},get stopped(){return stopped;}};
+        source.onended=()=>{stopped=true;source.disconnect();gain.disconnect();independent.delete(handle);};
+        try {if(opts.loop)source.start(opts.when==null?context.currentTime:opts.when,offset);
+          else source.start(opts.when==null?context.currentTime:opts.when,offset,Math.min(duration,buffer.duration-offset));}
+        catch(e){handle.stop();throw e;}return handle;
+      },
+      play(id,opts){const handle=audio.start(id,opts);independent.add(handle);return handle;},
+      pause(){for(const h of [...independent])h.stop();},seek(time){audio.pause();if(time!=null)api.timeline.seek(time);}
+    };
+    const pointerStarts=new Map();
+    function wantsPointerCapture(target) {
+      if(options.pointerCapture!=null)return options.pointerCapture===true;
+      const dragEvents=['dragstart','drag','dragend'];
+      return dragEvents.some(name=>subscriptions.has(name)||subscriptions.has(target+'\u0000'+name)) ||
+        (project.interactions||[]).some(b=>b.target===target && dragEvents.includes(b.event)) ||
+        (project.stateMachines||[]).some(m=>(m.transitions||[]).some(t=>t.event && dragEvents.includes(t.event.name) && (!t.event.target||t.event.target===target)));
+    }
+    const eventTypes=['click','dblclick','pointerenter','pointerleave','pointerdown','pointermove','pointerup','pointercancel','lostpointercapture','wheel','keydown','keyup','focus','blur'];
+    function coordinates(event) {
+      let x=event.clientX || 0,y=event.clientY || 0;
+      try {const matrix=svg.getScreenCTM();if(matrix){const p=svg.createSVGPoint();p.x=x;p.y=y;const q=p.matrixTransform(matrix.inverse());x=q.x;y=q.y;}}catch(e){report(e);}
+      return {x,y};
+    }
+    for(const type of eventTypes) {
+      const listener=event=>{
+        if(dead)return;
+        for(let control=event.target;control && control!==svg;control=control.parentNode)if(control.getAttribute && control.getAttribute('data-forma-host-control')!=null)return;
+        if(event.target && owningSvg(event.target) && owningSvg(event.target)!==svg)return;
+        let el=event.target;while(el && el!==svg && elements.get(el.id)!==el)el=el.parentNode;
+        const target=el && el.id || svg.id,point=coordinates(event),detail={...point,event,target,key:event.key,pointerId:event.pointerId,buttons:event.buttons};
+        // Keep keyboard handling scoped to focus within this SVG. Focusability remains exporter's choice.
+        emit(type,detail,target);
+        if(dead)return;
+        for(const binding of project.interactions || [])if(binding.target===target && binding.event===type)actions(binding.actions,detail);
+        if(dead)return;
+        if(type==='pointerdown') {pointerStarts.set(event.pointerId,{...point,target,el});try{if(el && el.setPointerCapture && wantsPointerCapture(target))el.setPointerCapture(event.pointerId);}catch(_){}emit('dragstart',{...detail,dx:0,dy:0},target);}
+        if(type==='pointermove' && pointerStarts.has(event.pointerId)){const start=pointerStarts.get(event.pointerId);emit('drag',{...detail,dx:point.x-start.x,dy:point.y-start.y},start.target);}
+        if((type==='pointerup'||type==='pointercancel'||type==='lostpointercapture') && pointerStarts.has(event.pointerId)){const start=pointerStarts.get(event.pointerId);pointerStarts.delete(event.pointerId);try{if(start.el.releasePointerCapture)start.el.releasePointerCapture(event.pointerId);}catch(_){}emit('dragend',{...detail,dx:point.x-start.x,dy:point.y-start.y,cancelled:type!=='pointerup'},start.target);}
+      };
+      svg.addEventListener(type,listener,true);cleanup.push(()=>svg.removeEventListener(type,listener,true));
+    }
+    function snapshot() {
+      // Observational only: don't advance clocks, invoke callbacks or expose handles.
+      return {version:1,destroyed:dead,time:transport.time,playing:transport.playing,
+        clips:[...clips.values()].map(c=>({id:c.id,time:c.time,duration:c.duration,active:c.active,playing:c.playing,weight:c.weight,fading:!!c.ramp})),
+        states:Object.fromEntries([...machines].map(([id,m])=>[id,m.state])),
+        audio:{ready:audio.ready,state:context?context.state:'locked',embeddedAssets:project.assets.length},
+        speech:{enabled:!!options.speech},diagnostics:diagnostics.map(e=>e.message)};
+    }
+    api={version:1,snapshot,reportError(error){ensure();return report(error);},diagnostics,on,emit,bones(){ensure();return bonePoses.map(p=>({...p}));},onDestroy(fn){ensure();if(typeof fn!=='function')throw new Error('Disposer must be a function');cleanup.push(fn);},get destroyed(){return dead;}, clip,machine,set,variable,timeline:{at,get time(){return transport.time;},get playing(){return transport.playing;},play(){ensure();syncClock();transport.manual=true;transportPlay();return this;},pause(){ensure();transport.manual=false;for(const c of clips.values())clip(c.id).pause();transportPause();return this;},seek(time){ensure();syncClock();finite(time,'Timeline seek time');if(time<0)throw new Error('Timeline seek must be nonnegative');transport.time=time;transport.revision++;stopSources(transport);for(const c of clips.values())if(c.active)clip(c.id).seek(c.loop?time%c.duration:Math.min(time,c.duration));speech.cancel();schedule(transport);return this;}},audio,speech,tick,
+      destroy(){if(dead)return;dead=true;if(raf!=null && env.cancelAnimationFrame)env.cancelAnimationFrame(raf);for(const fn of cleanup)try{fn();}catch(error){report(error);}for(const c of [transport,...clips.values()])stopSources(c);audio.pause();speech.cancel();loopBuffers.clear();buffers.clear();if(context && context.close)Promise.resolve(context.close()).catch(()=>{});subscriptions.clear();callbacks.clear();for(const [id,start] of pointerStarts)try{if(start.el.releasePointerCapture)start.el.releasePointerCapture(id);}catch(_){}pointerStarts.clear();if(svg.forma===api)delete svg.forma;unregister(env,api);}
+    };
+    svg.forma=api;register(env,api);
+    try {
+    processing=true;
+    try {for(const m of machines.values())actions(m.states.get(m.state).onEnter || m.states.get(m.state).entry);}
+    finally {processing=false;drain();}
+    // Preservation-only customJs is expected, not an error. Trusted hosts decide execution separately.
+    render();for(const c of project.clips)if(c.autoplay)clip(c.id).play();
+    } catch(error) {api.destroy();throw error;}
+    if(options.autoTick!==false && !dead){
+      const now=()=>env.performance && env.performance.now?env.performance.now():Date.now();last=now();let clock=env;
+      const advance=()=>{if(dead)return;const nextClock=audio.ready && context.state==='running'?context:env;
+        const current=nextClock===env?now():context.currentTime*1000;
+        if(clock!==nextClock){clock=nextClock;last=current;return;}
+        const delta=Math.max(0,(current-last)/1000);last=current;try{tick(delta);}catch(e){report(e);}};
+      syncClock=()=>{if(!ticking && !processing && !dead)advance();};
+      if(env.requestAnimationFrame){const frame=()=>{advance();if(!dead)raf=env.requestAnimationFrame(frame);};raf=env.requestAnimationFrame(frame);}
+      // Replenish/audio-clock transport even when rendering is suspended. Native padded loops do not depend on either timer.
+      if(env.setInterval){const timer=env.setInterval(()=>{if(audio.ready || [...clips.values()].some(c=>c.ramp))advance();},25);cleanup.push(()=>env.clearInterval(timer));}
+    }
+    return api;
+  }
+  const registryKey=typeof Symbol==='function'?Symbol.for('forma.runtime.instances.v1'):'__formaRuntimeInstancesV1';
+  function register(env,api){if(!env)return;if(!env[registryKey])env[registryKey]={instances:new Set(),alias:null};const r=env[registryKey];r.instances.add(api);syncAlias(env,r);}
+  function unregister(env,api){const r=env && env[registryKey];if(r){r.instances.delete(api);syncAlias(env,r);}}
+  function syncAlias(env,r){if(r.alias && env.forma===r.alias)delete env.forma;r.alias=null;if(r.instances.size===1 && env.forma==null){r.alias=[...r.instances][0];env.forma=r.alias;}}
+  const exported={createRuntime,readProject,normalize,evaluateTrack,interpolate,easing};
+  if(typeof module==='object' && module.exports)module.exports=exported;
+  else {
+    if(!host.FormaRuntime)host.FormaRuntime=exported;
+    const script=host.document && host.document.currentScript;
+    const svg=script && (script.ownerSVGElement || (script.parentNode && script.parentNode.closest && script.parentNode.closest('svg')));
+    if(svg && !svg.forma)try{createRuntime(svg);}catch(e){if(host.console)host.console.error('Forma initialization failed; static SVG retained:',e);}
+  }
+})(typeof window!=='undefined'?window:globalThis);
+
+;(function(){
+const speech=false, controls=true;
+
+const svg=document.currentScript && document.currentScript.ownerSVGElement;
+if(!svg || !svg.forma)return;
+const forma=svg.forma;
+const data=JSON.parse(svg.querySelector('[id="forma-project"]').textContent);
+if(speech && forma.speech.enable)forma.speech.enable();
+const report=error=>{if(forma.destroyed)return;const e=new Error('Forma host: '+String(error));if(forma.reportError)forma.reportError(e);else{forma.diagnostics.push(e);if(forma.diagnostics.length>100)forma.diagnostics.shift();forma.emit('error',{error:e});}console.error('Forma host:',error);};
+if(controls && ((data.audioAssets || []).length || speech)) {
+  const resume=(data.clips || []).filter(c=>forma.clip(c.id).playing).map(c=>c.id);
+  forma.timeline.pause();forma.timeline.seek(0);
+  const ns='http://www.w3.org/2000/svg', button=document.createElementNS(ns,'g');
+  button.setAttribute('data-forma-host-control','');button.setAttribute('role','button');button.setAttribute('tabindex','0');
+  button.setAttribute('aria-label','Start Forma audio and animation');button.style.cursor='pointer';
+  const rect=document.createElementNS(ns,'rect');rect.setAttribute('x','8');rect.setAttribute('y','8');
+  rect.setAttribute('width','176');rect.setAttribute('height','36');rect.setAttribute('rx','6');rect.setAttribute('fill','#202a44');
+  const text=document.createElementNS(ns,'text');text.setAttribute('x','20');text.setAttribute('y','32');
+  text.setAttribute('fill','white');text.setAttribute('font-size','16');text.style.pointerEvents='none';text.textContent='Start audio / animation';
+  button.append(rect,text);svg.appendChild(button);
+  let pending=false;
+  const start=async event=>{
+    if(event.type==='keydown' && event.key!=='Enter' && event.key!==' ')return;
+    event.preventDefault();event.stopPropagation();if(pending)return;pending=true;
+    let unlockingAudio=false;
+    try {
+      if((data.audioAssets || []).length){unlockingAudio=true;await forma.audio.unlock();unlockingAudio=false;}
+      if(forma.destroyed)return;
+      forma.timeline.seek(0);for(const id of resume)forma.clip(id).play();forma.timeline.play();button.remove();
+    }catch(error){pending=false;text.textContent='Retry audio start';if(!unlockingAudio)report(error);}
+  };
+  button.addEventListener('click',start);button.addEventListener('keydown',start);
+  forma.onDestroy(()=>{button.removeEventListener('click',start);button.removeEventListener('keydown',start);button.remove();});
+}
+
+if(data.customJs) {
+  try {new Function('forma','"use strict";\n'+data.customJs)(forma);}
+  catch(error){report(error);}
+}
+
+})();
+]]></script>
+</svg>

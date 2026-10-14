@@ -1,0 +1,134 @@
+{
+  "name": "Native smoke",
+  "width": 400,
+  "height": 300,
+  "nodes": [
+    {
+      "id": "button",
+      "kind": {
+        "type": "rect",
+        "x": 100,
+        "y": 100,
+        "width": 200,
+        "height": 100,
+        "rx": 0
+      }
+    },
+    {
+      "id": "status",
+      "kind": {
+        "type": "rect",
+        "x": 100,
+        "y": 240,
+        "width": 200,
+        "height": 30,
+        "rx": 0
+      }
+    }
+  ],
+  "stateMachines": [
+    {
+      "id": "interaction",
+      "initial": "idle",
+      "states": [
+        {
+          "id": "idle",
+          "overrides": [
+            {
+              "nodeId": "button",
+              "property": "fill",
+              "value": {
+                "type": "color",
+                "value": {
+                  "r": 1,
+                  "g": 0,
+                  "b": 0,
+                  "a": 1
+                }
+              }
+            }
+          ]
+        },
+        {
+          "id": "hover",
+          "overrides": [
+            {
+              "nodeId": "button",
+              "property": "fill",
+              "value": {
+                "type": "color",
+                "value": {
+                  "r": 0,
+                  "g": 1,
+                  "b": 0,
+                  "a": 1
+                }
+              }
+            }
+          ]
+        },
+        {
+          "id": "clicked",
+          "overrides": [
+            {
+              "nodeId": "button",
+              "property": "fill",
+              "value": {
+                "type": "color",
+                "value": {
+                  "r": 0,
+                  "g": 0,
+                  "b": 1,
+                  "a": 1
+                }
+              }
+            }
+          ]
+        }
+      ],
+      "transitions": [
+        {
+          "from": "idle",
+          "to": "hover",
+          "event": {
+            "name": "pointerenter",
+            "target": "button"
+          }
+        },
+        {
+          "from": "hover",
+          "to": "idle",
+          "event": {
+            "name": "pointerleave",
+            "target": "button"
+          }
+        },
+        {
+          "from": "hover",
+          "to": "clicked",
+          "event": {
+            "name": "click",
+            "target": "button"
+          }
+        },
+        {
+          "from": "idle",
+          "to": "clicked",
+          "event": {
+            "name": "click",
+            "target": "button"
+          }
+        }
+      ]
+    }
+  ],
+  "audioAssets": [
+    {
+      "id": "beep",
+      "name": "smoke beep",
+      "mimeType": "audio/wav",
+      "dataBase64": "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"
+    }
+  ],
+  "customJs": "forma.set('status',{fill:{r:1,g:0,b:1,a:1}});forma.on('click',async()=>{if(forma.audio.ready){forma.audio.play('beep');forma.set('status',{fill:{r:0,g:1,b:1,a:1}});}});"
+}

@@ -1,0 +1,550 @@
+{
+  "audioAssets": [],
+  "audioCues": [],
+  "bones": [
+    {
+      "id": "torso",
+      "length": 95.0,
+      "parentId": null,
+      "rotation": -90.0,
+      "x": 320.0,
+      "y": 245.0
+    },
+    {
+      "id": "neck",
+      "length": 25.0,
+      "parentId": "torso",
+      "rotation": 0.0,
+      "x": 0.0,
+      "y": 0.0
+    },
+    {
+      "id": "left-arm",
+      "length": 65.0,
+      "parentId": "torso",
+      "rotation": -135.0,
+      "x": 0.0,
+      "y": 0.0
+    },
+    {
+      "id": "left-forearm",
+      "length": 55.0,
+      "parentId": "left-arm",
+      "rotation": -25.0,
+      "x": 0.0,
+      "y": 0.0
+    },
+    {
+      "id": "right-arm",
+      "length": 65.0,
+      "parentId": "torso",
+      "rotation": 135.0,
+      "x": 0.0,
+      "y": 0.0
+    },
+    {
+      "id": "right-forearm",
+      "length": 55.0,
+      "parentId": "right-arm",
+      "rotation": 25.0,
+      "x": 0.0,
+      "y": 0.0
+    },
+    {
+      "id": "left-thigh",
+      "length": 80.0,
+      "parentId": null,
+      "rotation": 115.0,
+      "x": 320.0,
+      "y": 245.0
+    },
+    {
+      "id": "left-shin",
+      "length": 75.0,
+      "parentId": "left-thigh",
+      "rotation": -20.0,
+      "x": 0.0,
+      "y": 0.0
+    },
+    {
+      "id": "right-thigh",
+      "length": 80.0,
+      "parentId": null,
+      "rotation": 65.0,
+      "x": 320.0,
+      "y": 245.0
+    },
+    {
+      "id": "right-shin",
+      "length": 75.0,
+      "parentId": "right-thigh",
+      "rotation": 20.0,
+      "x": 0.0,
+      "y": 0.0
+    }
+  ],
+  "clips": [
+    {
+      "autoplay": true,
+      "duration": 2.0,
+      "id": "wave",
+      "looping": true,
+      "name": "Wave",
+      "tracks": [
+        {
+          "keyframes": [
+            {
+              "easing": {
+                "type": "linear"
+              },
+              "time": 0.0,
+              "value": {
+                "type": "number",
+                "value": 25.0
+              }
+            },
+            {
+              "easing": {
+                "type": "linear"
+              },
+              "time": 1.0,
+              "value": {
+                "type": "number",
+                "value": -110.0
+              }
+            },
+            {
+              "easing": {
+                "type": "linear"
+              },
+              "time": 2.0,
+              "value": {
+                "type": "number",
+                "value": 25.0
+              }
+            }
+          ],
+          "nodeId": "right-forearm",
+          "property": "rotation"
+        }
+      ]
+    }
+  ],
+  "customJs": "",
+  "height": 480.0,
+  "name": "Pivot-style bone demo",
+  "nodes": [
+    {
+      "boneId": null,
+      "id": "background",
+      "kind": {
+        "height": 480.0,
+        "rx": 0.0,
+        "type": "rect",
+        "width": 640.0,
+        "x": 0.0,
+        "y": 0.0
+      },
+      "locked": false,
+      "name": "",
+      "originalKind": null,
+      "style": {
+        "fill": {
+          "a": 1.0,
+          "b": 0.98,
+          "g": 0.96,
+          "r": 0.95
+        },
+        "opacity": 1.0,
+        "stroke": null,
+        "strokeWidth": 1.0
+      },
+      "transform": {
+        "rotation": 0.0,
+        "scaleX": 1.0,
+        "scaleY": 1.0,
+        "x": 0.0,
+        "y": 0.0
+      },
+      "visible": true
+    },
+    {
+      "boneId": "torso",
+      "id": "torso-shape",
+      "kind": {
+        "height": 10.0,
+        "rx": 0.0,
+        "type": "rect",
+        "width": 95.0,
+        "x": 0.0,
+        "y": -5.0
+      },
+      "locked": false,
+      "name": "",
+      "originalKind": null,
+      "style": {
+        "fill": {
+          "a": 1.0,
+          "b": 0.4,
+          "g": 0.22,
+          "r": 0.12
+        },
+        "opacity": 1.0,
+        "stroke": null,
+        "strokeWidth": 1.0
+      },
+      "transform": {
+        "rotation": 0.0,
+        "scaleX": 1.0,
+        "scaleY": 1.0,
+        "x": 0.0,
+        "y": 0.0
+      },
+      "visible": true
+    },
+    {
+      "boneId": "neck",
+      "id": "neck-shape",
+      "kind": {
+        "height": 10.0,
+        "rx": 0.0,
+        "type": "rect",
+        "width": 25.0,
+        "x": 0.0,
+        "y": -5.0
+      },
+      "locked": false,
+      "name": "",
+      "originalKind": null,
+      "style": {
+        "fill": {
+          "a": 1.0,
+          "b": 0.4,
+          "g": 0.22,
+          "r": 0.12
+        },
+        "opacity": 1.0,
+        "stroke": null,
+        "strokeWidth": 1.0
+      },
+      "transform": {
+        "rotation": 0.0,
+        "scaleX": 1.0,
+        "scaleY": 1.0,
+        "x": 0.0,
+        "y": 0.0
+      },
+      "visible": true
+    },
+    {
+      "boneId": "left-arm",
+      "id": "left-arm-shape",
+      "kind": {
+        "height": 10.0,
+        "rx": 0.0,
+        "type": "rect",
+        "width": 65.0,
+        "x": 0.0,
+        "y": -5.0
+      },
+      "locked": false,
+      "name": "",
+      "originalKind": null,
+      "style": {
+        "fill": {
+          "a": 1.0,
+          "b": 0.4,
+          "g": 0.22,
+          "r": 0.12
+        },
+        "opacity": 1.0,
+        "stroke": null,
+        "strokeWidth": 1.0
+      },
+      "transform": {
+        "rotation": 0.0,
+        "scaleX": 1.0,
+        "scaleY": 1.0,
+        "x": 0.0,
+        "y": 0.0
+      },
+      "visible": true
+    },
+    {
+      "boneId": "left-forearm",
+      "id": "left-forearm-shape",
+      "kind": {
+        "height": 10.0,
+        "rx": 0.0,
+        "type": "rect",
+        "width": 55.0,
+        "x": 0.0,
+        "y": -5.0
+      },
+      "locked": false,
+      "name": "",
+      "originalKind": null,
+      "style": {
+        "fill": {
+          "a": 1.0,
+          "b": 0.4,
+          "g": 0.22,
+          "r": 0.12
+        },
+        "opacity": 1.0,
+        "stroke": null,
+        "strokeWidth": 1.0
+      },
+      "transform": {
+        "rotation": 0.0,
+        "scaleX": 1.0,
+        "scaleY": 1.0,
+        "x": 0.0,
+        "y": 0.0
+      },
+      "visible": true
+    },
+    {
+      "boneId": "right-arm",
+      "id": "right-arm-shape",
+      "kind": {
+        "height": 10.0,
+        "rx": 0.0,
+        "type": "rect",
+        "width": 65.0,
+        "x": 0.0,
+        "y": -5.0
+      },
+      "locked": false,
+      "name": "",
+      "originalKind": null,
+      "style": {
+        "fill": {
+          "a": 1.0,
+          "b": 0.4,
+          "g": 0.22,
+          "r": 0.12
+        },
+        "opacity": 1.0,
+        "stroke": null,
+        "strokeWidth": 1.0
+      },
+      "transform": {
+        "rotation": 0.0,
+        "scaleX": 1.0,
+        "scaleY": 1.0,
+        "x": 0.0,
+        "y": 0.0
+      },
+      "visible": true
+    },
+    {
+      "boneId": "right-forearm",
+      "id": "right-forearm-shape",
+      "kind": {
+        "height": 10.0,
+        "rx": 0.0,
+        "type": "rect",
+        "width": 55.0,
+        "x": 0.0,
+        "y": -5.0
+      },
+      "locked": false,
+      "name": "",
+      "originalKind": null,
+      "style": {
+        "fill": {
+          "a": 1.0,
+          "b": 0.4,
+          "g": 0.22,
+          "r": 0.12
+        },
+        "opacity": 1.0,
+        "stroke": null,
+        "strokeWidth": 1.0
+      },
+      "transform": {
+        "rotation": 0.0,
+        "scaleX": 1.0,
+        "scaleY": 1.0,
+        "x": 0.0,
+        "y": 0.0
+      },
+      "visible": true
+    },
+    {
+      "boneId": "left-thigh",
+      "id": "left-thigh-shape",
+      "kind": {
+        "height": 10.0,
+        "rx": 0.0,
+        "type": "rect",
+        "width": 80.0,
+        "x": 0.0,
+        "y": -5.0
+      },
+      "locked": false,
+      "name": "",
+      "originalKind": null,
+      "style": {
+        "fill": {
+          "a": 1.0,
+          "b": 0.4,
+          "g": 0.22,
+          "r": 0.12
+        },
+        "opacity": 1.0,
+        "stroke": null,
+        "strokeWidth": 1.0
+      },
+      "transform": {
+        "rotation": 0.0,
+        "scaleX": 1.0,
+        "scaleY": 1.0,
+        "x": 0.0,
+        "y": 0.0
+      },
+      "visible": true
+    },
+    {
+      "boneId": "left-shin",
+      "id": "left-shin-shape",
+      "kind": {
+        "height": 10.0,
+        "rx": 0.0,
+        "type": "rect",
+        "width": 75.0,
+        "x": 0.0,
+        "y": -5.0
+      },
+      "locked": false,
+      "name": "",
+      "originalKind": null,
+      "style": {
+        "fill": {
+          "a": 1.0,
+          "b": 0.4,
+          "g": 0.22,
+          "r": 0.12
+        },
+        "opacity": 1.0,
+        "stroke": null,
+        "strokeWidth": 1.0
+      },
+      "transform": {
+        "rotation": 0.0,
+        "scaleX": 1.0,
+        "scaleY": 1.0,
+        "x": 0.0,
+        "y": 0.0
+      },
+      "visible": true
+    },
+    {
+      "boneId": "right-thigh",
+      "id": "right-thigh-shape",
+      "kind": {
+        "height": 10.0,
+        "rx": 0.0,
+        "type": "rect",
+        "width": 80.0,
+        "x": 0.0,
+        "y": -5.0
+      },
+      "locked": false,
+      "name": "",
+      "originalKind": null,
+      "style": {
+        "fill": {
+          "a": 1.0,
+          "b": 0.4,
+          "g": 0.22,
+          "r": 0.12
+        },
+        "opacity": 1.0,
+        "stroke": null,
+        "strokeWidth": 1.0
+      },
+      "transform": {
+        "rotation": 0.0,
+        "scaleX": 1.0,
+        "scaleY": 1.0,
+        "x": 0.0,
+        "y": 0.0
+      },
+      "visible": true
+    },
+    {
+      "boneId": "right-shin",
+      "id": "right-shin-shape",
+      "kind": {
+        "height": 10.0,
+        "rx": 0.0,
+        "type": "rect",
+        "width": 75.0,
+        "x": 0.0,
+        "y": -5.0
+      },
+      "locked": false,
+      "name": "",
+      "originalKind": null,
+      "style": {
+        "fill": {
+          "a": 1.0,
+          "b": 0.4,
+          "g": 0.22,
+          "r": 0.12
+        },
+        "opacity": 1.0,
+        "stroke": null,
+        "strokeWidth": 1.0
+      },
+      "transform": {
+        "rotation": 0.0,
+        "scaleX": 1.0,
+        "scaleY": 1.0,
+        "x": 0.0,
+        "y": 0.0
+      },
+      "visible": true
+    },
+    {
+      "boneId": "neck",
+      "id": "head",
+      "kind": {
+        "cx": 25.0,
+        "cy": 0.0,
+        "radius": 22.0,
+        "type": "circle"
+      },
+      "locked": false,
+      "name": "",
+      "originalKind": null,
+      "style": {
+        "fill": {
+          "a": 1.0,
+          "b": 0.9411764705882353,
+          "g": 0.5490196078431373,
+          "r": 0.3137254901960784
+        },
+        "opacity": 1.0,
+        "stroke": null,
+        "strokeWidth": 1.0
+      },
+      "transform": {
+        "rotation": 0.0,
+        "scaleX": 1.0,
+        "scaleY": 1.0,
+        "x": 0.0,
+        "y": 0.0
+      },
+      "visible": true
+    }
+  ],
+  "rawSvg": "",
+  "schemaVersion": 1,
+  "speechCues": [],
+  "stateMachines": [],
+  "variables": {},
+  "width": 640.0
+}

@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="720" height="216" viewBox="0 0 720 216" role="img" aria-labelledby="title desc">
+  <title id="title">Forma — vector, motion, sound</title>
+  <desc id="desc">An original turquoise F built from bone joints, a coral motion arc and violet sound waves, next to the Forma wordmark.</desc>
+  <defs><linearGradient id="ink" x2="1" y2="1"><stop stop-color="#55e6cb"/><stop offset="1" stop-color="#56b7ec"/></linearGradient></defs>
+  <rect width="720" height="216" rx="28" fill="#111827"/>
+  <path d="M55 158V59H151M55 104H128" fill="none" stroke="url(#ink)" stroke-width="19" stroke-linecap="round" stroke-linejoin="round"/>
+  <g fill="#111827" stroke="#78edd8" stroke-width="5"><circle cx="55" cy="59" r="10"/><circle cx="55" cy="104" r="10"/><circle cx="55" cy="158" r="10"/><circle cx="151" cy="59" r="10"/><circle cx="128" cy="104" r="10"/></g>
+  <path d="M118 153Q162 164 173 116" fill="none" stroke="#fb8e7c" stroke-width="5" stroke-linecap="round"/><path d="M163 119l11-7 3 13" fill="none" stroke="#fb8e7c" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+  <g fill="none" stroke="#b8a0ff" stroke-width="4" stroke-linecap="round"><path d="M187 80v18m8-24v30m8-20v14"/></g>
+  <text x="239" y="129" fill="#f1f5f9" font-family="DejaVu Sans, sans-serif" font-weight="700" font-size="80" letter-spacing="-3">Forma</text>
+  <text x="245" y="164" fill="#a8b5cb" font-family="DejaVu Sans, sans-serif" font-size="18" letter-spacing="3">VECTOR · MOTION · SOUND</text>
+</svg>

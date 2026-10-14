@@ -1,0 +1,17 @@
+[package]
+name = "forma_runtime"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[lib]
+crate-type = ["rlib", "cdylib"]
+
+[[bin]]
+name = "forma-runtime"
+path = "src/main.rs"
+
+[dependencies]
+forma_document.workspace = true
+serde.workspace = true
+serde_json = { workspace = true, features = ["raw_value"] }

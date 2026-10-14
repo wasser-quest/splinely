@@ -1,0 +1,1574 @@
+{
+  "schemaVersion": 1,
+  "name": "Brown owl",
+  "width": 640.0,
+  "height": 640.0,
+  "nodes": [
+    {
+      "id": "background",
+      "name": "",
+      "boneId": null,
+      "visible": true,
+      "locked": false,
+      "originalKind": null,
+      "transform": {
+        "x": 0.0,
+        "y": 0.0,
+        "rotation": 0.0,
+        "scaleX": 1.0,
+        "scaleY": 1.0
+      },
+      "style": {
+        "fill": {
+          "r": 0.9529411764705882,
+          "g": 0.9215686274509803,
+          "b": 0.8666666666666667,
+          "a": 1.0
+        },
+        "stroke": null,
+        "strokeWidth": 1.0,
+        "opacity": 1.0
+      },
+      "kind": {
+        "type": "path",
+        "d": "M0 0 L640 0 L640 640 L0 640 Z ",
+        "bounds": [
+          0.0,
+          0.0,
+          640.0,
+          640.0
+        ],
+        "evenodd": false
+      }
+    },
+    {
+      "id": "halo",
+      "name": "",
+      "boneId": null,
+      "visible": true,
+      "locked": false,
+      "originalKind": null,
+      "gradient": {
+        "radial": true,
+        "angle": 0.0,
+        "stops": [
+          {
+            "offset": 0.0,
+            "color": {
+              "r": 0.9725490196078431,
+              "g": 0.9450980392156862,
+              "b": 0.8941176470588236,
+              "a": 1.0
+            }
+          },
+          {
+            "offset": 1.0,
+            "color": {
+              "r": 0.9176470588235294,
+              "g": 0.8627450980392157,
+              "b": 0.7686274509803922,
+              "a": 1.0
+            }
+          }
+        ]
+      },
+      "transform": {
+        "x": 0.0,
+        "y": 0.0,
+        "rotation": 0.0,
+        "scaleX": 1.0,
+        "scaleY": 1.0
+      },
+      "style": {
+        "fill": {
+          "r": 0.9725490196078431,
+          "g": 0.9450980392156862,
+          "b": 0.8941176470588236,
+          "a": 1.0
+        },
+        "stroke": null,
+        "strokeWidth": 1.0,
+        "opacity": 1.0
+      },
+      "kind": {
+        "type": "path",
+        "d": "M570 300 C570 438.0712 458.0712 550 320 550 C181.92882 550 70 438.0712 70 300 C70 161.92882 181.92882 50 320 50 C458.0712 50 570 161.92882 570 300 Z ",
+        "bounds": [
+          70.0,
+          50.0,
+          500.0,
+          500.0
+        ],
+        "evenodd": false
+      }
+    },
+    {
+      "id": "branch",
+      "name": "",
+      "boneId": null,
+      "visible": true,
+      "locked": false,
+      "originalKind": null,
+      "gradient": {
+        "radial": false,
+        "angle": 90.0,
+        "stops": [
+          {
+            "offset": 0.0,
+            "color": {
+              "r": 0.4823529411764706,
+              "g": 0.3333333333333333,
+              "b": 0.20784313725490197,
+              "a": 1.0
+            }
+          },
+          {
+            "offset": 1.0,
+            "color": {
+              "r": 0.3333333333333333,
+              "g": 0.2196078431372549,
+              "b": 0.12549019607843137,
+              "a": 1.0
+            }
+          }
+        ]
+      },
+      "transform": {
+        "x": 0.0,
+        "y": 0.0,
+        "rotation": 0.0,
+        "scaleX": 1.0,
+        "scaleY": 1.0
+      },
+      "style": {
+        "fill": {
+          "r": 0.4823529411764706,
+          "g": 0.3333333333333333,
+          "b": 0.20784313725490197,
+          "a": 1.0
+        },
+        "stroke": null,
+        "strokeWidth": 1.0,
+        "opacity": 1.0
+      },
+      "kind": {
+        "type": "path",
+        "d": "M48 514 C180 494 430 500 596 478 L600 506 C440 532 190 530 52 544 Z ",
+        "bounds": [
+          48.0,
+          478.0,
+          552.0,
+          66.0
+        ],
+        "evenodd": false
+      }
+    },
+    {
+      "id": "branch-twig",
+      "name": "",
+      "boneId": null,
+      "visible": true,
+      "locked": false,
+      "originalKind": null,
+      "transform": {
+        "x": 0.0,
+        "y": 0.0,
+        "rotation": 0.0,
+        "scaleX": 1.0,
+        "scaleY": 1.0
+      },
+      "style": {
+        "fill": {
+          "r": 0.41568627450980394,
+          "g": 0.27058823529411763,
+          "b": 0.1607843137254902,
+          "a": 1.0
+        },
+        "stroke": null,
+        "strokeWidth": 1.0,
+        "opacity": 1.0
+      },
+      "kind": {
+        "type": "path",
+        "d": "M468 498 Q512 470 540 432 L552 440 Q528 480 488 508 Z ",
+        "bounds": [
+          468.0,
+          432.0,
+          84.0,
+          76.0
+        ],
+        "evenodd": false
+      }
+    },
+    {
+      "id": "owl-tuft-left",
+      "name": "",
+      "boneId": null,
+      "visible": true,
+      "locked": false,
+      "originalKind": null,
+      "transform": {
+        "x": 0.0,
+        "y": 0.0,
+        "rotation": 0.0,
+        "scaleX": 1.0,
+        "scaleY": 1.0
+      },
+      "style": {
+        "fill": {
+          "r": 0.3607843137254902,
+          "g": 0.2235294117647059,
+          "b": 0.11372549019607843,
+          "a": 1.0
+        },
+        "stroke": null,
+        "strokeWidth": 1.0,
+        "opacity": 1.0
+      },
+      "kind": {
+        "type": "path",
+        "d": "M236 214 Q206 168 212 112 Q254 138 282 188 Z ",
+        "bounds": [
+          211.0,
+          112.0,
+          71.0,
+          102.0
+        ],
+        "evenodd": false
+      }
+    },
+    {
+      "id": "owl-tuft-right",
+      "name": "",
+      "boneId": null,
+      "visible": true,
+      "locked": false,
+      "originalKind": null,
+      "transform": {
+        "x": 0.0,
+        "y": 0.0,
+        "rotation": 0.0,
+        "scaleX": 1.0,
+        "scaleY": 1.0
+      },
+      "style": {
+        "fill": {
+          "r": 0.3607843137254902,
+          "g": 0.2235294117647059,
+          "b": 0.11372549019607843,
+          "a": 1.0
+        },
+        "stroke": null,
+        "strokeWidth": 1.0,
+        "opacity": 1.0
+      },
+      "kind": {
+        "type": "path",
+        "d": "M404 214 Q434 168 428 112 Q386 138 358 188 Z ",
+        "bounds": [
+          358.0,
+          112.0,
+          71.0,
+          102.0
+        ],
+        "evenodd": false
+      }
+    },
+    {
+      "id": "owl-body",
+      "name": "",
+      "boneId": null,
+      "visible": true,
+      "locked": false,
+      "originalKind": null,
+      "gradient": {
+        "radial": false,
+        "angle": 90.0,
+        "stops": [
+          {
+            "offset": 0.0,
+            "color": {
+              "r": 0.6039215686274509,
+              "g": 0.4,
+              "b": 0.2196078431372549,
+              "a": 1.0
+            }
+          },
+          {
+            "offset": 1.0,
+            "color": {
+              "r": 0.43529411764705883,
+              "g": 0.27058823529411763,
+              "b": 0.1411764705882353,
+              "a": 1.0
+            }
+          }
+        ]
+      },
+      "transform": {
+        "x": 0.0,
+        "y": 0.0,
+        "rotation": 0.0,
+        "scaleX": 1.0,
+        "scaleY": 1.0
+      },
+      "style": {
+        "fill": {
+          "r": 0.6039215686274509,
+          "g": 0.4,
+          "b": 0.2196078431372549,
+          "a": 1.0
+        },
+        "stroke": null,
+        "strokeWidth": 1.0,
+        "opacity": 1.0
+      },
+      "kind": {
+        "type": "path",
+        "d": "M320 160 C236 156 200 214 206 288 C186 356 172 410 208 470 C248 534 392 534 432 470 C468 410 454 356 434 288 C440 214 404 156 320 160 Z ",
+        "bounds": [
+          185.7653045654297,
+          159.8048858642578,
+          268.46942138671875,
+          358.19512939453125
+        ],
+        "evenodd": false
+      }
+    },
+    {
+      "id": "owl-wing-left",
+      "name": "",
+      "boneId": null,
+      "visible": true,
+      "locked": false,
+      "originalKind": null,
+      "gradient": {
+        "radial": false,
+        "angle": 90.0,
+        "stops": [
+          {
+            "offset": 0.0,
+            "color": {
+              "r": 0.47843137254901963,
+              "g": 0.30196078431372547,
+              "b": 0.1607843137254902,
+              "a": 1.0
+            }
+          },
+          {
+            "offset": 1.0,
+            "color": {
+              "r": 0.3333333333333333,
+              "g": 0.20392156862745098,
+              "b": 0.10588235294117647,
+              "a": 1.0
+            }
+          }
+        ]
+      },
+      "transform": {
+        "x": 209.81080627441406,
+        "y": 378.1111145019531,
+        "rotation": 0.0,
+        "scaleX": 1.0,
+        "scaleY": 1.0
+      },
+      "style": {
+        "fill": {
+          "r": 0.47843137254901963,
+          "g": 0.30196078431372547,
+          "b": 0.1607843137254902,
+          "a": 1.0
+        },
+        "stroke": null,
+        "strokeWidth": 1.0,
+        "opacity": 1.0
+      },
+      "kind": {
+        "type": "path",
+        "d": "M4.1892 -82.1111 Q-51.8108 -32.1111 -33.8108 59.8889 Q-19.8108 99.8889 16.1892 67.8889 L38.1892 -26.1111 Z",
+        "bounds": [
+          -38.189178466796875,
+          -82.11109924316406,
+          76.37837982177734,
+          164.22222900390625
+        ],
+        "evenodd": false
+      }
+    },
+    {
+      "id": "owl-wing-right",
+      "name": "",
+      "boneId": null,
+      "visible": true,
+      "locked": false,
+      "originalKind": null,
+      "gradient": {
+        "radial": false,
+        "angle": 90.0,
+        "stops": [
+          {
+            "offset": 0.0,
+            "color": {
+              "r": 0.47843137254901963,
+              "g": 0.30196078431372547,
+              "b": 0.1607843137254902,
+              "a": 1.0
+            }
+          },
+          {
+            "offset": 1.0,
+            "color": {
+              "r": 0.3333333333333333,
+              "g": 0.20392156862745098,
+              "b": 0.10588235294117647,
+              "a": 1.0
+            }
+          }
+        ]
+      },
+      "transform": {
+        "x": 430.18919372558594,
+        "y": 378.1111145019531,
+        "rotation": 0.0,
+        "scaleX": 1.0,
+        "scaleY": 1.0
+      },
+      "style": {
+        "fill": {
+          "r": 0.47843137254901963,
+          "g": 0.30196078431372547,
+          "b": 0.1607843137254902,
+          "a": 1.0
+        },
+        "stroke": null,
+        "strokeWidth": 1.0,
+        "opacity": 1.0
+      },
+      "kind": {
+        "type": "path",
+        "d": "M-4.1892 -82.1111 Q51.8108 -32.1111 33.8108 59.8889 Q19.8108 99.8889 -16.1892 67.8889 L-38.1892 -26.1111 Z",
+        "bounds": [
+          -38.18920135498047,
+          -82.11109924316406,
+          76.37837982177734,
+          164.22222900390625
+        ],
+        "evenodd": false
+      }
+    },
+    {
+      "id": "owl-wing-marks",
+      "name": "",
+      "boneId": null,
+      "visible": true,
+      "locked": false,
+      "originalKind": null,
+      "transform": {
+        "x": 0.0,
+        "y": 0.0,
+        "rotation": 0.0,
+        "scaleX": 1.0,
+        "scaleY": 1.0
+      },
+      "style": {
+        "fill": {
+          "r": 0.0,
+          "g": 0.0,
+          "b": 0.0,
+          "a": 0.0
+        },
+        "stroke": {
+          "r": 0.24705882352941178,
+          "g": 0.14901960784313725,
+          "b": 0.0784313725490196,
+          "a": 1.0
+        },
+        "strokeWidth": 5.0,
+        "opacity": 1.0
+      },
+      "kind": {
+        "type": "path",
+        "d": "M188 374 Q204 384 224 380 M184 404 Q202 414 222 408 M188 434 Q204 442 220 436 M452 374 Q436 384 416 380 M456 404 Q438 414 418 408 M452 434 Q436 442 420 436 ",
+        "bounds": [
+          184.0,
+          374.0,
+          272.0,
+          64.57144165039062
+        ],
+        "evenodd": false
+      }
+    },
+    {
+      "id": "owl-belly",
+      "name": "",
+      "boneId": null,
+      "visible": true,
+      "locked": false,
+      "originalKind": null,
+      "gradient": {
+        "radial": false,
+        "angle": 90.0,
+        "stops": [
+          {
+            "offset": 0.0,
+            "color": {
+              "r": 0.8901960784313725,
+              "g": 0.7764705882352941,
+              "b": 0.611764705882353,
+              "a": 1.0
+            }
+          },
+          {
+            "offset": 1.0,
+            "color": {
+              "r": 0.788235294117647,
+              "g": 0.6313725490196078,
+              "b": 0.45098039215686275,
+              "a": 1.0
+            }
+          }
+        ]
+      },
+      "transform": {
+        "x": 0.0,
+        "y": 0.0,
+        "rotation": 0.0,
+        "scaleX": 1.0,
+        "scaleY": 1.0
+      },
+      "style": {
+        "fill": {
+          "r": 0.8901960784313725,
+          "g": 0.7764705882352941,
+          "b": 0.611764705882353,
+          "a": 1.0
+        },
+        "stroke": null,
+        "strokeWidth": 1.0,
+        "opacity": 1.0
+      },
+      "kind": {
+        "type": "path",
+        "d": "M320 330 C262 322 232 366 234 424 C232 484 276 506 320 508 C372 508 408 482 406 424 C408 368 376 324 320 330 Z ",
+        "bounds": [
+          233.9061279296875,
+          329.0588684082031,
+          172.182373046875,
+          178.94113159179688
+        ],
+        "evenodd": false
+      }
+    },
+    {
+      "id": "owl-belly-marks",
+      "name": "",
+      "boneId": null,
+      "visible": true,
+      "locked": false,
+      "originalKind": null,
+      "transform": {
+        "x": 0.0,
+        "y": 0.0,
+        "rotation": 0.0,
+        "scaleX": 1.0,
+        "scaleY": 1.0
+      },
+      "style": {
+        "fill": {
+          "r": 0.0,
+          "g": 0.0,
+          "b": 0.0,
+          "a": 0.0
+        },
+        "stroke": {
+          "r": 0.5411764705882353,
+          "g": 0.35294117647058826,
+          "b": 0.19607843137254902,
+          "a": 1.0
+        },
+        "strokeWidth": 5.0,
+        "opacity": 1.0
+      },
+      "kind": {
+        "type": "path",
+        "d": "M272 372 Q283 381 294 372 M306 372 Q317 381 328 372 M340 372 Q351 381 362 372 M256 404 Q267 413 278 404 M289 404 Q300 413 311 404 M322 404 Q333 413 344 404 M355 404 Q366 413 377 404 M262 436 Q273 445 284 436 M296 436 Q307 445 318 436 M330 436 Q341 445 352 436 M364 436 Q375 445 386 436 M278 468 Q289 477 300 468 M312 468 Q323 477 334 468 M346 468 Q357 477 368 468 ",
+        "bounds": [
+          256.0,
+          372.0,
+          130.0,
+          100.5
+        ],
+        "evenodd": false
+      }
+    },
+    {
+      "id": "owl-talons",
+      "name": "",
+      "boneId": null,
+      "visible": true,
+      "locked": false,
+      "originalKind": null,
+      "transform": {
+        "x": 0.0,
+        "y": 0.0,
+        "rotation": 0.0,
+        "scaleX": 1.0,
+        "scaleY": 1.0
+      },
+      "style": {
+        "fill": {
+          "r": 0.24313725490196078,
+          "g": 0.19215686274509805,
+          "b": 0.1568627450980392,
+          "a": 1.0
+        },
+        "stroke": null,
+        "strokeWidth": 1.0,
+        "opacity": 1.0
+      },
+      "kind": {
+        "type": "path",
+        "d": "M262 498 L256 522 L266 522 L270 500 Z M282 500 L280 526 L290 526 L292 500 Z M302 498 L306 522 L316 520 L310 496 Z M330 496 L324 520 L334 522 L340 498 Z M348 500 L350 526 L360 526 L358 500 Z M370 500 L374 522 L384 522 L378 498 Z ",
+        "bounds": [
+          256.0,
+          496.0,
+          128.0,
+          30.0
+        ],
+        "evenodd": false
+      }
+    },
+    {
+      "id": "owl-disc",
+      "name": "",
+      "boneId": null,
+      "visible": true,
+      "locked": false,
+      "originalKind": null,
+      "transform": {
+        "x": 0.0,
+        "y": 0.0,
+        "rotation": 0.0,
+        "scaleX": 1.0,
+        "scaleY": 1.0
+      },
+      "style": {
+        "fill": {
+          "r": 0.9176470588235294,
+          "g": 0.8392156862745098,
+          "b": 0.7019607843137254,
+          "a": 1.0
+        },
+        "stroke": {
+          "r": 0.6627450980392157,
+          "g": 0.4745098039215686,
+          "b": 0.29411764705882354,
+          "a": 1.0
+        },
+        "strokeWidth": 5.0,
+        "opacity": 1.0
+      },
+      "kind": {
+        "type": "path",
+        "d": "M320 224 C302 188 238 186 220 230 C202 274 228 316 270 320 C294 322 310 310 320 298 C330 310 346 322 370 320 C412 316 438 274 420 230 C402 186 338 188 320 224 Z ",
+        "bounds": [
+          214.21066284179688,
+          196.98123168945312,
+          211.57867431640625,
+          123.23846435546875
+        ],
+        "evenodd": false
+      }
+    },
+    {
+      "id": "owl-brows",
+      "name": "",
+      "boneId": null,
+      "visible": true,
+      "locked": false,
+      "originalKind": null,
+      "transform": {
+        "x": 0.0,
+        "y": 0.0,
+        "rotation": 0.0,
+        "scaleX": 1.0,
+        "scaleY": 1.0
+      },
+      "style": {
+        "fill": {
+          "r": 0.0,
+          "g": 0.0,
+          "b": 0.0,
+          "a": 0.0
+        },
+        "stroke": {
+          "r": 0.4196078431372549,
+          "g": 0.26666666666666666,
+          "b": 0.14901960784313725,
+          "a": 1.0
+        },
+        "strokeWidth": 8.0,
+        "opacity": 1.0
+      },
+      "kind": {
+        "type": "path",
+        "d": "M232 214 Q276 196 316 240 M408 214 Q364 196 324 240 ",
+        "bounds": [
+          232.0,
+          208.77420043945312,
+          176.0,
+          31.225799560546875
+        ],
+        "evenodd": false
+      }
+    },
+    {
+      "id": "owl-eye-ring-left",
+      "name": "",
+      "boneId": null,
+      "visible": true,
+      "locked": false,
+      "originalKind": null,
+      "transform": {
+        "x": 0.0,
+        "y": 0.0,
+        "rotation": 0.0,
+        "scaleX": 1.0,
+        "scaleY": 1.0
+      },
+      "style": {
+        "fill": {
+          "r": 0.22745098039215686,
+          "g": 0.15294117647058825,
+          "b": 0.09411764705882353,
+          "a": 1.0
+        },
+        "stroke": null,
+        "strokeWidth": 1.0,
+        "opacity": 1.0
+      },
+      "kind": {
+        "type": "path",
+        "d": "M314 258 C314 281.19595 295.19595 300 272 300 C248.80405 300 230 281.19595 230 258 C230 234.80405 248.80405 216 272 216 C295.19595 216 314 234.80405 314 258 Z ",
+        "bounds": [
+          230.0,
+          216.0,
+          84.0,
+          84.0
+        ],
+        "evenodd": false
+      }
+    },
+    {
+      "id": "owl-eye-ring-right",
+      "name": "",
+      "boneId": null,
+      "visible": true,
+      "locked": false,
+      "originalKind": null,
+      "transform": {
+        "x": 0.0,
+        "y": 0.0,
+        "rotation": 0.0,
+        "scaleX": 1.0,
+        "scaleY": 1.0
+      },
+      "style": {
+        "fill": {
+          "r": 0.22745098039215686,
+          "g": 0.15294117647058825,
+          "b": 0.09411764705882353,
+          "a": 1.0
+        },
+        "stroke": null,
+        "strokeWidth": 1.0,
+        "opacity": 1.0
+      },
+      "kind": {
+        "type": "path",
+        "d": "M412 258 C412 281.19595 393.19595 300 370 300 C346.80405 300 328 281.19595 328 258 C328 234.80405 346.80405 216 370 216 C393.19595 216 412 234.80405 412 258 Z ",
+        "bounds": [
+          328.0,
+          216.0,
+          84.0,
+          84.0
+        ],
+        "evenodd": false
+      }
+    },
+    {
+      "id": "owl-eye-left",
+      "name": "",
+      "boneId": null,
+      "visible": true,
+      "locked": false,
+      "originalKind": null,
+      "gradient": {
+        "radial": true,
+        "angle": 0.0,
+        "stops": [
+          {
+            "offset": 0.0,
+            "color": {
+              "r": 1.0,
+              "g": 0.7607843137254902,
+              "b": 0.2901960784313726,
+              "a": 1.0
+            }
+          },
+          {
+            "offset": 1.0,
+            "color": {
+              "r": 0.8862745098039215,
+              "g": 0.5254901960784314,
+              "b": 0.11372549019607843,
+              "a": 1.0
+            }
+          }
+        ]
+      },
+      "transform": {
+        "x": 0.0,
+        "y": 0.0,
+        "rotation": 0.0,
+        "scaleX": 1.0,
+        "scaleY": 1.0
+      },
+      "style": {
+        "fill": {
+          "r": 1.0,
+          "g": 0.7607843137254902,
+          "b": 0.2901960784313726,
+          "a": 1.0
+        },
+        "stroke": null,
+        "strokeWidth": 1.0,
+        "opacity": 1.0
+      },
+      "kind": {
+        "type": "path",
+        "d": "M309 258 C309 278.43454 292.43454 295 272 295 C251.56546 295 235 278.43454 235 258 C235 237.56546 251.56546 221 272 221 C292.43454 221 309 237.56546 309 258 Z ",
+        "bounds": [
+          235.0,
+          221.0,
+          74.0,
+          74.0
+        ],
+        "evenodd": false
+      }
+    },
+    {
+      "id": "owl-eye-right",
+      "name": "",
+      "boneId": null,
+      "visible": true,
+      "locked": false,
+      "originalKind": null,
+      "gradient": {
+        "radial": true,
+        "angle": 0.0,
+        "stops": [
+          {
+            "offset": 0.0,
+            "color": {
+              "r": 1.0,
+              "g": 0.7607843137254902,
+              "b": 0.2901960784313726,
+              "a": 1.0
+            }
+          },
+          {
+            "offset": 1.0,
+            "color": {
+              "r": 0.8862745098039215,
+              "g": 0.5254901960784314,
+              "b": 0.11372549019607843,
+              "a": 1.0
+            }
+          }
+        ]
+      },
+      "transform": {
+        "x": 0.0,
+        "y": 0.0,
+        "rotation": 0.0,
+        "scaleX": 1.0,
+        "scaleY": 1.0
+      },
+      "style": {
+        "fill": {
+          "r": 1.0,
+          "g": 0.7607843137254902,
+          "b": 0.2901960784313726,
+          "a": 1.0
+        },
+        "stroke": null,
+        "strokeWidth": 1.0,
+        "opacity": 1.0
+      },
+      "kind": {
+        "type": "path",
+        "d": "M407 258 C407 278.43454 390.43454 295 370 295 C349.56546 295 333 278.43454 333 258 C333 237.56546 349.56546 221 370 221 C390.43454 221 407 237.56546 407 258 Z ",
+        "bounds": [
+          333.0,
+          221.0,
+          74.0,
+          74.0
+        ],
+        "evenodd": false
+      }
+    },
+    {
+      "id": "owl-pupil-left",
+      "name": "",
+      "boneId": null,
+      "visible": true,
+      "locked": false,
+      "originalKind": null,
+      "transform": {
+        "x": 0.0,
+        "y": 0.0,
+        "rotation": 0.0,
+        "scaleX": 1.0,
+        "scaleY": 1.0
+      },
+      "style": {
+        "fill": {
+          "r": 0.08627450980392157,
+          "g": 0.058823529411764705,
+          "b": 0.0392156862745098,
+          "a": 1.0
+        },
+        "stroke": null,
+        "strokeWidth": 1.0,
+        "opacity": 1.0
+      },
+      "kind": {
+        "type": "path",
+        "d": "M289 260 C289 269.38885 281.38885 277 272 277 C262.61115 277 255 269.38885 255 260 C255 250.61116 262.61115 243 272 243 C281.38885 243 289 250.61116 289 260 Z ",
+        "bounds": [
+          255.0,
+          243.0,
+          34.0,
+          34.0
+        ],
+        "evenodd": false
+      }
+    },
+    {
+      "id": "owl-pupil-right",
+      "name": "",
+      "boneId": null,
+      "visible": true,
+      "locked": false,
+      "originalKind": null,
+      "transform": {
+        "x": 0.0,
+        "y": 0.0,
+        "rotation": 0.0,
+        "scaleX": 1.0,
+        "scaleY": 1.0
+      },
+      "style": {
+        "fill": {
+          "r": 0.08627450980392157,
+          "g": 0.058823529411764705,
+          "b": 0.0392156862745098,
+          "a": 1.0
+        },
+        "stroke": null,
+        "strokeWidth": 1.0,
+        "opacity": 1.0
+      },
+      "kind": {
+        "type": "path",
+        "d": "M387 260 C387 269.38885 379.38885 277 370 277 C360.61115 277 353 269.38885 353 260 C353 250.61116 360.61115 243 370 243 C379.38885 243 387 250.61116 387 260 Z ",
+        "bounds": [
+          353.0,
+          243.0,
+          34.0,
+          34.0
+        ],
+        "evenodd": false
+      }
+    },
+    {
+      "id": "owl-glint-left",
+      "name": "",
+      "boneId": null,
+      "visible": true,
+      "locked": false,
+      "originalKind": null,
+      "transform": {
+        "x": 0.0,
+        "y": 0.0,
+        "rotation": 0.0,
+        "scaleX": 1.0,
+        "scaleY": 1.0
+      },
+      "style": {
+        "fill": {
+          "r": 1.0,
+          "g": 1.0,
+          "b": 1.0,
+          "a": 1.0
+        },
+        "stroke": null,
+        "strokeWidth": 1.0,
+        "opacity": 1.0
+      },
+      "kind": {
+        "type": "path",
+        "d": "M271 253 C271 255.76143 268.7614 258 266 258 C263.2386 258 261 255.76143 261 253 C261 250.23857 263.2386 248 266 248 C268.7614 248 271 250.23857 271 253 Z ",
+        "bounds": [
+          261.0,
+          248.0,
+          10.0,
+          10.0
+        ],
+        "evenodd": false
+      }
+    },
+    {
+      "id": "owl-glint-right",
+      "name": "",
+      "boneId": null,
+      "visible": true,
+      "locked": false,
+      "originalKind": null,
+      "transform": {
+        "x": 0.0,
+        "y": 0.0,
+        "rotation": 0.0,
+        "scaleX": 1.0,
+        "scaleY": 1.0
+      },
+      "style": {
+        "fill": {
+          "r": 1.0,
+          "g": 1.0,
+          "b": 1.0,
+          "a": 1.0
+        },
+        "stroke": null,
+        "strokeWidth": 1.0,
+        "opacity": 1.0
+      },
+      "kind": {
+        "type": "path",
+        "d": "M369 253 C369 255.76143 366.7614 258 364 258 C361.2386 258 359 255.76143 359 253 C359 250.23857 361.2386 248 364 248 C366.7614 248 369 250.23857 369 253 Z ",
+        "bounds": [
+          359.0,
+          248.0,
+          10.0,
+          10.0
+        ],
+        "evenodd": false
+      }
+    },
+    {
+      "id": "owl-lid-left",
+      "name": "",
+      "boneId": null,
+      "visible": true,
+      "locked": false,
+      "originalKind": null,
+      "transform": {
+        "x": 0.0,
+        "y": 0.0,
+        "rotation": 0.0,
+        "scaleX": 1.0,
+        "scaleY": 1.0
+      },
+      "style": {
+        "fill": {
+          "r": 0.6627450980392157,
+          "g": 0.47843137254901963,
+          "b": 0.2980392156862745,
+          "a": 1.0
+        },
+        "stroke": null,
+        "strokeWidth": 1.0,
+        "opacity": 0.0
+      },
+      "kind": {
+        "type": "path",
+        "d": "M315 258 C315 281.74823 295.74823 301 272 301 C248.25175 301 229 281.74823 229 258 C229 234.25175 248.25175 215 272 215 C295.74823 215 315 234.25175 315 258 Z ",
+        "bounds": [
+          229.0,
+          215.0,
+          86.0,
+          86.0
+        ],
+        "evenodd": false
+      }
+    },
+    {
+      "id": "owl-lid-right",
+      "name": "",
+      "boneId": null,
+      "visible": true,
+      "locked": false,
+      "originalKind": null,
+      "transform": {
+        "x": 0.0,
+        "y": 0.0,
+        "rotation": 0.0,
+        "scaleX": 1.0,
+        "scaleY": 1.0
+      },
+      "style": {
+        "fill": {
+          "r": 0.6627450980392157,
+          "g": 0.47843137254901963,
+          "b": 0.2980392156862745,
+          "a": 1.0
+        },
+        "stroke": null,
+        "strokeWidth": 1.0,
+        "opacity": 0.0
+      },
+      "kind": {
+        "type": "path",
+        "d": "M413 258 C413 281.74823 393.74823 301 370 301 C346.25177 301 327 281.74823 327 258 C327 234.25175 346.25177 215 370 215 C393.74823 215 413 234.25175 413 258 Z ",
+        "bounds": [
+          327.0,
+          215.0,
+          86.0,
+          86.0
+        ],
+        "evenodd": false
+      }
+    },
+    {
+      "id": "owl-lid-lines",
+      "name": "",
+      "boneId": null,
+      "visible": true,
+      "locked": false,
+      "originalKind": null,
+      "transform": {
+        "x": 0.0,
+        "y": 0.0,
+        "rotation": 0.0,
+        "scaleX": 1.0,
+        "scaleY": 1.0
+      },
+      "style": {
+        "fill": {
+          "r": 0.22745098039215686,
+          "g": 0.15294117647058825,
+          "b": 0.09411764705882353,
+          "a": 1.0
+        },
+        "stroke": null,
+        "strokeWidth": 1.0,
+        "opacity": 0.0
+      },
+      "kind": {
+        "type": "path",
+        "d": "M238 262 Q272 286 306 262 L306 268 Q272 292 238 268 Z M336 262 Q370 286 404 262 L404 268 Q370 292 336 268 Z ",
+        "bounds": [
+          238.0,
+          262.0,
+          166.0,
+          18.0
+        ],
+        "evenodd": false
+      }
+    },
+    {
+      "id": "owl-beak",
+      "name": "",
+      "boneId": null,
+      "visible": true,
+      "locked": false,
+      "originalKind": null,
+      "transform": {
+        "x": 0.0,
+        "y": 0.0,
+        "rotation": 0.0,
+        "scaleX": 1.0,
+        "scaleY": 1.0
+      },
+      "style": {
+        "fill": {
+          "r": 0.29411764705882354,
+          "g": 0.23137254901960785,
+          "b": 0.1803921568627451,
+          "a": 1.0
+        },
+        "stroke": null,
+        "strokeWidth": 1.0,
+        "opacity": 1.0
+      },
+      "kind": {
+        "type": "path",
+        "d": "M304 282 Q320 272 336 282 L325 312 Q320 320 315 312 Z ",
+        "bounds": [
+          304.0,
+          277.0,
+          32.0,
+          39.0
+        ],
+        "evenodd": false
+      }
+    },
+    {
+      "id": "owl-beak-light",
+      "name": "",
+      "boneId": null,
+      "visible": true,
+      "locked": false,
+      "originalKind": null,
+      "transform": {
+        "x": 0.0,
+        "y": 0.0,
+        "rotation": 0.0,
+        "scaleX": 1.0,
+        "scaleY": 1.0
+      },
+      "style": {
+        "fill": {
+          "r": 0.47843137254901963,
+          "g": 0.4,
+          "b": 0.33725490196078434,
+          "a": 1.0
+        },
+        "stroke": null,
+        "strokeWidth": 1.0,
+        "opacity": 1.0
+      },
+      "kind": {
+        "type": "path",
+        "d": "M309 283 Q320 277 331 283 L322 290 Z ",
+        "bounds": [
+          309.0,
+          280.0,
+          22.0,
+          10.0
+        ],
+        "evenodd": false
+      }
+    }
+  ],
+  "bones": [],
+  "clips": [],
+  "stateMachines": [
+    {
+      "id": "owl-mood",
+      "initial": "idle",
+      "states": [
+        {
+          "id": "idle",
+          "onEnter": [
+            {
+              "type": "setVariable",
+              "name": "mood",
+              "value": "idle"
+            }
+          ],
+          "overrides": [
+            {
+              "nodeId": "owl-lid-left",
+              "property": "opacity",
+              "value": {
+                "type": "number",
+                "value": 0.0
+              }
+            },
+            {
+              "nodeId": "owl-lid-right",
+              "property": "opacity",
+              "value": {
+                "type": "number",
+                "value": 0.0
+              }
+            },
+            {
+              "nodeId": "owl-lid-lines",
+              "property": "opacity",
+              "value": {
+                "type": "number",
+                "value": 0.0
+              }
+            },
+            {
+              "nodeId": "owl-brows",
+              "property": "y",
+              "value": {
+                "type": "number",
+                "value": 0.0
+              }
+            },
+            {
+              "nodeId": "owl-tuft-left",
+              "property": "y",
+              "value": {
+                "type": "number",
+                "value": 0.0
+              }
+            },
+            {
+              "nodeId": "owl-tuft-right",
+              "property": "y",
+              "value": {
+                "type": "number",
+                "value": 0.0
+              }
+            },
+            {
+              "nodeId": "owl-wing-left",
+              "property": "rotation",
+              "value": {
+                "type": "number",
+                "value": 0.0
+              }
+            },
+            {
+              "nodeId": "owl-wing-right",
+              "property": "rotation",
+              "value": {
+                "type": "number",
+                "value": 0.0
+              }
+            }
+          ]
+        },
+        {
+          "id": "attentive",
+          "onEnter": [
+            {
+              "type": "setVariable",
+              "name": "mood",
+              "value": "attentive"
+            }
+          ],
+          "overrides": [
+            {
+              "nodeId": "owl-lid-left",
+              "property": "opacity",
+              "value": {
+                "type": "number",
+                "value": 0.0
+              }
+            },
+            {
+              "nodeId": "owl-lid-right",
+              "property": "opacity",
+              "value": {
+                "type": "number",
+                "value": 0.0
+              }
+            },
+            {
+              "nodeId": "owl-lid-lines",
+              "property": "opacity",
+              "value": {
+                "type": "number",
+                "value": 0.0
+              }
+            },
+            {
+              "nodeId": "owl-brows",
+              "property": "y",
+              "value": {
+                "type": "number",
+                "value": -6.0
+              }
+            },
+            {
+              "nodeId": "owl-tuft-left",
+              "property": "y",
+              "value": {
+                "type": "number",
+                "value": -7.0
+              }
+            },
+            {
+              "nodeId": "owl-tuft-right",
+              "property": "y",
+              "value": {
+                "type": "number",
+                "value": -7.0
+              }
+            },
+            {
+              "nodeId": "owl-wing-left",
+              "property": "rotation",
+              "value": {
+                "type": "number",
+                "value": 0.0
+              }
+            },
+            {
+              "nodeId": "owl-wing-right",
+              "property": "rotation",
+              "value": {
+                "type": "number",
+                "value": 0.0
+              }
+            }
+          ]
+        },
+        {
+          "id": "content",
+          "onEnter": [
+            {
+              "type": "setVariable",
+              "name": "mood",
+              "value": "content"
+            }
+          ],
+          "overrides": [
+            {
+              "nodeId": "owl-lid-left",
+              "property": "opacity",
+              "value": {
+                "type": "number",
+                "value": 1.0
+              }
+            },
+            {
+              "nodeId": "owl-lid-right",
+              "property": "opacity",
+              "value": {
+                "type": "number",
+                "value": 1.0
+              }
+            },
+            {
+              "nodeId": "owl-lid-lines",
+              "property": "opacity",
+              "value": {
+                "type": "number",
+                "value": 1.0
+              }
+            },
+            {
+              "nodeId": "owl-brows",
+              "property": "y",
+              "value": {
+                "type": "number",
+                "value": 0.0
+              }
+            },
+            {
+              "nodeId": "owl-tuft-left",
+              "property": "y",
+              "value": {
+                "type": "number",
+                "value": 0.0
+              }
+            },
+            {
+              "nodeId": "owl-tuft-right",
+              "property": "y",
+              "value": {
+                "type": "number",
+                "value": 0.0
+              }
+            },
+            {
+              "nodeId": "owl-wing-left",
+              "property": "rotation",
+              "value": {
+                "type": "number",
+                "value": 8.0
+              }
+            },
+            {
+              "nodeId": "owl-wing-right",
+              "property": "rotation",
+              "value": {
+                "type": "number",
+                "value": -8.0
+              }
+            }
+          ]
+        }
+      ],
+      "transitions": [
+        {
+          "from": "idle",
+          "to": "attentive",
+          "event": {
+            "name": "owl.hover",
+            "target": null
+          },
+          "guard": null,
+          "actions": []
+        },
+        {
+          "from": "idle",
+          "to": "content",
+          "event": {
+            "name": "owl.click",
+            "target": null
+          },
+          "guard": null,
+          "actions": []
+        },
+        {
+          "from": "attentive",
+          "to": "content",
+          "event": {
+            "name": "owl.click",
+            "target": null
+          },
+          "guard": null,
+          "actions": []
+        },
+        {
+          "from": "content",
+          "to": "idle",
+          "event": {
+            "name": "owl.click",
+            "target": null
+          },
+          "guard": null,
+          "actions": []
+        },
+        {
+          "from": "content",
+          "to": "idle",
+          "event": {
+            "name": "owl.settled",
+            "target": null
+          },
+          "guard": null,
+          "actions": []
+        },
+        {
+          "from": "attentive",
+          "to": "idle",
+          "event": {
+            "name": "owl.leave",
+            "target": null
+          },
+          "guard": null,
+          "actions": []
+        },
+        {
+          "from": "content",
+          "to": "idle",
+          "event": {
+            "name": "owl.leave",
+            "target": null
+          },
+          "guard": null,
+          "actions": []
+        }
+      ]
+    }
+  ],
+  "variables": {
+    "mood": "idle"
+  },
+  "audioAssets": [],
+  "audioCues": [],
+  "speechCues": [],
+  "customJs": "\n// Reviewed, instance-local controller. All state changes go through the machine.\nconst machine = forma.machine('owl-mood');\nconst pupils = ['owl-pupil-left', 'owl-pupil-right', 'owl-glint-left', 'owl-glint-right'];\nlet settle = null;\nfunction isOwl(element) {\n  return !!(element && element.id && element.id.startsWith('owl-') && element.localName !== 'svg');\n}\nfunction resetEyes() { for (const id of pupils) forma.set(id, null); }\nfunction track(detail) {\n  // Runtime detail.x/y are already viewBox coordinates. The radial limit keeps\n  // pupil and glint inside each iris, even at the figure's edges.\n  for (const [side, cx] of [['left', 272], ['right', 370]]) {\n    const dx = detail.x - cx, dy = detail.y - 260;\n    const length = Math.hypot(dx, dy), factor = length ? Math.min(12, length / 7) / length : 0;\n    for (const part of ['pupil', 'glint']) forma.set('owl-' + part + '-' + side, {x: dx * factor, y: dy * factor});\n  }\n}\nforma.on('pointermove', detail => {\n  if (isOwl(detail.event.target)) {\n    if (machine.state === 'idle') machine.send('owl.hover');\n    if (machine.state === 'attentive') track(detail);\n  } else if (machine.state !== 'idle') machine.send('owl.leave');\n});\nforma.on('pointerenter', detail => {\n  if (isOwl(detail.event.target) && machine.state === 'idle') machine.send('owl.hover');\n});\nforma.on('pointerleave', detail => {\n  // Ignore moving from one owl piece to another.\n  if (!isOwl(detail.event.relatedTarget)) machine.send('owl.leave');\n});\nforma.on('click', detail => {\n  if (isOwl(detail.event.target)) machine.send('owl.click');\n});\nforma.on('state.change', detail => {\n  if (detail.machine !== 'owl-mood') return;\n  clearTimeout(settle);\n  if (detail.to !== 'attentive') resetEyes();\n  if (detail.to === 'content') settle = setTimeout(() => machine.send('owl.settled'), 1400);\n});\nforma.onDestroy(() => clearTimeout(settle));\n",
+  "rawSvg": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"640\" height=\"640\" viewBox=\"0 0 640 640\">\n<title>Brown owl</title>\n<defs>\n<radialGradient id=\"glow\" cx=\"0.5\" cy=\"0.45\" r=\"0.5\"><stop offset=\"0\" stop-color=\"#f8f1e4\"/><stop offset=\"1\" stop-color=\"#eadcc4\"/></radialGradient>\n<linearGradient id=\"bodyShade\" x1=\"0\" y1=\"0\" x2=\"0\" y2=\"1\"><stop offset=\"0\" stop-color=\"#9a6638\"/><stop offset=\"1\" stop-color=\"#6f4524\"/></linearGradient>\n<linearGradient id=\"bellyShade\" x1=\"0\" y1=\"0\" x2=\"0\" y2=\"1\"><stop offset=\"0\" stop-color=\"#e3c69c\"/><stop offset=\"1\" stop-color=\"#c9a173\"/></linearGradient>\n<linearGradient id=\"wingShade\" x1=\"0\" y1=\"0\" x2=\"0\" y2=\"1\"><stop offset=\"0\" stop-color=\"#7a4d29\"/><stop offset=\"1\" stop-color=\"#55341b\"/></linearGradient>\n<radialGradient id=\"iris\" cx=\"0.5\" cy=\"0.5\" r=\"0.5\"><stop offset=\"0\" stop-color=\"#ffc24a\"/><stop offset=\"1\" stop-color=\"#e2861d\"/></radialGradient>\n<linearGradient id=\"branchShade\" x1=\"0\" y1=\"0\" x2=\"0\" y2=\"1\"><stop offset=\"0\" stop-color=\"#7b5535\"/><stop offset=\"1\" stop-color=\"#553820\"/></linearGradient>\n</defs>\n<rect id=\"background\" width=\"640\" height=\"640\" fill=\"#f3ebdd\"/>\n<circle id=\"halo\" cx=\"320\" cy=\"300\" r=\"250\" fill=\"url(#glow)\"/>\n<path id=\"branch\" d=\"M48 514 C180 494 430 500 596 478 L600 506 C440 532 190 530 52 544 Z\" fill=\"url(#branchShade)\"/>\n<path id=\"branch-twig\" d=\"M468 498 Q512 470 540 432 L552 440 Q528 480 488 508 Z\" fill=\"#6a4529\"/>\n<path id=\"owl-tuft-left\" d=\"M236 214 Q206 168 212 112 Q254 138 282 188 Z\" fill=\"#5c391d\"/>\n<path id=\"owl-tuft-right\" d=\"M404 214 Q434 168 428 112 Q386 138 358 188 Z\" fill=\"#5c391d\"/>\n<path id=\"owl-body\" d=\"M320 160 C236 156 200 214 206 288 C186 356 172 410 208 470 C248 534 392 534 432 470 C468 410 454 356 434 288 C440 214 404 156 320 160 Z\" fill=\"url(#bodyShade)\"/>\n<path id=\"owl-wing-left\" d=\"M214 296 Q158 346 176 438 Q190 478 226 446 L248 352 Z\" fill=\"url(#wingShade)\"/>\n<path id=\"owl-wing-right\" d=\"M426 296 Q482 346 464 438 Q450 478 414 446 L392 352 Z\" fill=\"url(#wingShade)\"/>\n<path id=\"owl-wing-marks\" d=\"M188 374 Q204 384 224 380 M184 404 Q202 414 222 408 M188 434 Q204 442 220 436 M452 374 Q436 384 416 380 M456 404 Q438 414 418 408 M452 434 Q436 442 420 436\" fill=\"none\" stroke=\"#3f2614\" stroke-width=\"5\"/>\n<path id=\"owl-belly\" d=\"M320 330 C262 322 232 366 234 424 C232 484 276 506 320 508 C372 508 408 482 406 424 C408 368 376 324 320 330 Z\" fill=\"url(#bellyShade)\"/>\n<path id=\"owl-belly-marks\" d=\"M272 372 Q283 381 294 372 M306 372 Q317 381 328 372 M340 372 Q351 381 362 372 M256 404 Q267 413 278 404 M289 404 Q300 413 311 404 M322 404 Q333 413 344 404 M355 404 Q366 413 377 404 M262 436 Q273 445 284 436 M296 436 Q307 445 318 436 M330 436 Q341 445 352 436 M364 436 Q375 445 386 436 M278 468 Q289 477 300 468 M312 468 Q323 477 334 468 M346 468 Q357 477 368 468\" fill=\"none\" stroke=\"#8a5a32\" stroke-width=\"5\"/>\n<path id=\"owl-talons\" d=\"M262 498 L256 522 L266 522 L270 500 Z M282 500 L280 526 L290 526 L292 500 Z M302 498 L306 522 L316 520 L310 496 Z M330 496 L324 520 L334 522 L340 498 Z M348 500 L350 526 L360 526 L358 500 Z M370 500 L374 522 L384 522 L378 498 Z\" fill=\"#3e3128\"/>\n<path id=\"owl-disc\" d=\"M320 224 C302 188 238 186 220 230 C202 274 228 316 270 320 C294 322 310 310 320 298 C330 310 346 322 370 320 C412 316 438 274 420 230 C402 186 338 188 320 224 Z\" fill=\"#ead6b3\" stroke=\"#a9794b\" stroke-width=\"5\"/>\n<path id=\"owl-brows\" d=\"M232 214 Q276 196 316 240 M408 214 Q364 196 324 240\" fill=\"none\" stroke=\"#6b4426\" stroke-width=\"8\"/>\n<circle id=\"owl-eye-ring-left\" cx=\"272\" cy=\"258\" r=\"42\" fill=\"#3a2718\"/>\n<circle id=\"owl-eye-ring-right\" cx=\"370\" cy=\"258\" r=\"42\" fill=\"#3a2718\"/>\n<circle id=\"owl-eye-left\" cx=\"272\" cy=\"258\" r=\"37\" fill=\"url(#iris)\"/>\n<circle id=\"owl-eye-right\" cx=\"370\" cy=\"258\" r=\"37\" fill=\"url(#iris)\"/>\n<circle id=\"owl-pupil-left\" cx=\"272\" cy=\"260\" r=\"17\" fill=\"#160f0a\"/>\n<circle id=\"owl-pupil-right\" cx=\"370\" cy=\"260\" r=\"17\" fill=\"#160f0a\"/>\n<circle id=\"owl-glint-left\" cx=\"266\" cy=\"253\" r=\"5\" fill=\"#ffffff\"/>\n<circle id=\"owl-glint-right\" cx=\"364\" cy=\"253\" r=\"5\" fill=\"#ffffff\"/>\n<circle id=\"owl-lid-left\" cx=\"272\" cy=\"258\" r=\"43\" fill=\"#a97a4c\" opacity=\"0\"/>\n<circle id=\"owl-lid-right\" cx=\"370\" cy=\"258\" r=\"43\" fill=\"#a97a4c\" opacity=\"0\"/>\n<path id=\"owl-lid-lines\" d=\"M238 262 Q272 286 306 262 L306 268 Q272 292 238 268 Z M336 262 Q370 286 404 262 L404 268 Q370 292 336 268 Z\" fill=\"#3a2718\" opacity=\"0\"/>\n<path id=\"owl-beak\" d=\"M304 282 Q320 272 336 282 L325 312 Q320 320 315 312 Z\" fill=\"#4b3b2e\"/>\n<path id=\"owl-beak-light\" d=\"M309 283 Q320 277 331 283 L322 290 Z\" fill=\"#7a6656\"/>\n</svg>"
+}

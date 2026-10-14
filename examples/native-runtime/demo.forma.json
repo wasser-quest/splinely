@@ -1,0 +1,18 @@
+{
+  "name": "Native host-driven model demo",
+  "nodes": [{"id": "box", "boneId": "root", "kind": {"type": "rect", "x": 0, "y": 0, "width": 10, "height": 10}}],
+  "bones": [{"id": "root", "x": 0, "y": 0, "rotation": 0, "length": 10}],
+  "clips": [{"id": "move", "duration": 2, "autoplay": true, "blendMode": "weighted", "weight": 1,
+    "tracks": [{"nodeId": "root", "property": "x", "keyframes": [
+      {"time": 0, "value": {"type": "number", "value": 0}},
+      {"time": 2, "value": {"type": "number", "value": 20}}
+    ]}]
+  }],
+  "stateMachines": [{"id": "main", "initial": "idle", "states": [
+    {"id": "idle"},
+    {"id": "talking", "onEnter": [{"type": "speak", "text": "Hello from the native host", "lang": "en"}]}
+  ], "transitions": [{"from": "idle", "to": "talking", "event": {"name": "click", "target": "box"},
+    "actions": [{"type": "blendClip", "clipId": "move", "weight": 0, "duration": 1}]
+  }]}],
+  "customJs": "throw new Error('This is inert project data, never executed');"
+}

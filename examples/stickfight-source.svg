@@ -1,0 +1,96 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="540" viewBox="0 0 960 540">
+<rect id="stage" width="960" height="540" fill="#0b101d"/>
+<circle id="orb-outer" cx="480" cy="246" r="205" fill="#111d30"/>
+<circle id="orb-inner" cx="480" cy="246" r="168" fill="#142239"/>
+<path id="horizon" d="M0 432 H960 V540 H0 Z" fill="#101929"/>
+<path id="floor-line" d="M55 431 H905 V433 H55 Z" fill="#30465d"/>
+<path id="floor-grid-0" d="M110 433 L40 540 L41 540 L111 433 Z" fill="#1b293c"/>
+<path id="floor-grid-1" d="M233 433 L163 540 L164 540 L234 433 Z" fill="#1b293c"/>
+<path id="floor-grid-2" d="M356 433 L286 540 L287 540 L357 433 Z" fill="#1b293c"/>
+<path id="floor-grid-3" d="M479 433 L409 540 L410 540 L480 433 Z" fill="#1b293c"/>
+<path id="floor-grid-4" d="M602 433 L532 540 L533 540 L603 433 Z" fill="#1b293c"/>
+<path id="floor-grid-5" d="M725 433 L655 540 L656 540 L726 433 Z" fill="#1b293c"/>
+<path id="floor-grid-6" d="M848 433 L778 540 L779 540 L849 433 Z" fill="#1b293c"/>
+<path id="cinder-shadow" d="M-85 0 C-85 -12 85 -12 85 0 C85 12 -85 12 -85 0 Z" fill="#070c16"/>
+<path id="cinder-marker" d="M295 465 H405 V467 H295 Z" fill="#ffb15e"/>
+<path id="flux-shadow" d="M-85 0 C-85 -12 85 -12 85 0 C85 12 -85 12 -85 0 Z" fill="#070c16"/>
+<path id="flux-marker" d="M555 465 H665 V467 H555 Z" fill="#64e7ec"/>
+<path id="cinder-leg-back-shape" d="M0 -4.5 H62 A4.5 4.5 0 0 1 62 4.5 H0 A4.5 4.5 0 0 1 0 -4.5 Z" fill="#b66c3d"/>
+<circle id="cinder-leg-back-joint" cx="0" cy="0" r="5.5" fill="#ffb15e"/>
+<path id="cinder-shin-back-shape" d="M0 -4.5 H62 A4.5 4.5 0 0 1 62 4.5 H0 A4.5 4.5 0 0 1 0 -4.5 Z" fill="#b66c3d"/>
+<circle id="cinder-shin-back-joint" cx="0" cy="0" r="5.5" fill="#ffb15e"/>
+<path id="cinder-shin-back-boot" d="M0 -5.0 H17 A5.0 5.0 0 0 1 17 5.0 H0 A5.0 5.0 0 0 1 0 -5.0 Z" fill="#ffb15e"/>
+<path id="cinder-arm-back-shape" d="M0 -4.5 H57 A4.5 4.5 0 0 1 57 4.5 H0 A4.5 4.5 0 0 1 0 -4.5 Z" fill="#b66c3d"/>
+<circle id="cinder-arm-back-joint" cx="0" cy="0" r="5.5" fill="#ffb15e"/>
+<path id="cinder-fore-back-shape" d="M0 -4.5 H57 A4.5 4.5 0 0 1 57 4.5 H0 A4.5 4.5 0 0 1 0 -4.5 Z" fill="#b66c3d"/>
+<circle id="cinder-fore-back-joint" cx="0" cy="0" r="5.5" fill="#ffb15e"/>
+<circle id="cinder-fore-back-fist" cx="57" cy="0" r="8" fill="#fff0d5"/>
+<path id="cinder-torso-shape" d="M0 -6.5 H88 A6.5 6.5 0 0 1 88 6.5 H0 A6.5 6.5 0 0 1 0 -6.5 Z" fill="#ffb15e"/>
+<circle id="cinder-torso-joint" cx="0" cy="0" r="5.5" fill="#fff0d5"/>
+<path id="cinder-leg-front-shape" d="M0 -4.5 H62 A4.5 4.5 0 0 1 62 4.5 H0 A4.5 4.5 0 0 1 0 -4.5 Z" fill="#ffb15e"/>
+<circle id="cinder-leg-front-joint" cx="0" cy="0" r="5.5" fill="#ffb15e"/>
+<path id="cinder-shin-front-shape" d="M0 -4.5 H62 A4.5 4.5 0 0 1 62 4.5 H0 A4.5 4.5 0 0 1 0 -4.5 Z" fill="#ffb15e"/>
+<circle id="cinder-shin-front-joint" cx="0" cy="0" r="5.5" fill="#ffb15e"/>
+<path id="cinder-shin-front-boot" d="M0 -5.0 H17 A5.0 5.0 0 0 1 17 5.0 H0 A5.0 5.0 0 0 1 0 -5.0 Z" fill="#ffb15e"/>
+<path id="cinder-neck-shape" d="M0 -4.5 H18 A4.5 4.5 0 0 1 18 4.5 H0 A4.5 4.5 0 0 1 0 -4.5 Z" fill="#ffb15e"/>
+<circle id="cinder-neck-joint" cx="0" cy="0" r="5.5" fill="#ffb15e"/>
+<path id="cinder-arm-front-shape" d="M0 -4.5 H57 A4.5 4.5 0 0 1 57 4.5 H0 A4.5 4.5 0 0 1 0 -4.5 Z" fill="#ffb15e"/>
+<circle id="cinder-arm-front-joint" cx="0" cy="0" r="5.5" fill="#ffb15e"/>
+<path id="cinder-fore-front-shape" d="M0 -4.5 H57 A4.5 4.5 0 0 1 57 4.5 H0 A4.5 4.5 0 0 1 0 -4.5 Z" fill="#ffb15e"/>
+<circle id="cinder-fore-front-joint" cx="0" cy="0" r="5.5" fill="#ffb15e"/>
+<circle id="cinder-fore-front-fist" cx="57" cy="0" r="8" fill="#fff0d5"/>
+<circle id="cinder-head" cx="18" cy="0" r="19" fill="#ffb15e"/>
+<path id="cinder-visor" d="M17 3 H23 V17 H17 Z" fill="#0b101d"/>
+<path id="cinder-chest-mark" d="M28 -3 H68 V3 H28 Z" fill="#fff0d5"/>
+<path id="flux-leg-back-shape" d="M0 -4.5 H62 A4.5 4.5 0 0 1 62 4.5 H0 A4.5 4.5 0 0 1 0 -4.5 Z" fill="#278eaa"/>
+<circle id="flux-leg-back-joint" cx="0" cy="0" r="5.5" fill="#64e7ec"/>
+<path id="flux-shin-back-shape" d="M0 -4.5 H62 A4.5 4.5 0 0 1 62 4.5 H0 A4.5 4.5 0 0 1 0 -4.5 Z" fill="#278eaa"/>
+<circle id="flux-shin-back-joint" cx="0" cy="0" r="5.5" fill="#64e7ec"/>
+<path id="flux-shin-back-boot" d="M0 -5.0 H17 A5.0 5.0 0 0 1 17 5.0 H0 A5.0 5.0 0 0 1 0 -5.0 Z" fill="#64e7ec"/>
+<path id="flux-arm-back-shape" d="M0 -4.5 H57 A4.5 4.5 0 0 1 57 4.5 H0 A4.5 4.5 0 0 1 0 -4.5 Z" fill="#278eaa"/>
+<circle id="flux-arm-back-joint" cx="0" cy="0" r="5.5" fill="#64e7ec"/>
+<path id="flux-fore-back-shape" d="M0 -4.5 H57 A4.5 4.5 0 0 1 57 4.5 H0 A4.5 4.5 0 0 1 0 -4.5 Z" fill="#278eaa"/>
+<circle id="flux-fore-back-joint" cx="0" cy="0" r="5.5" fill="#64e7ec"/>
+<circle id="flux-fore-back-fist" cx="57" cy="0" r="8" fill="#deffff"/>
+<path id="flux-torso-shape" d="M0 -6.5 H88 A6.5 6.5 0 0 1 88 6.5 H0 A6.5 6.5 0 0 1 0 -6.5 Z" fill="#64e7ec"/>
+<circle id="flux-torso-joint" cx="0" cy="0" r="5.5" fill="#deffff"/>
+<path id="flux-leg-front-shape" d="M0 -4.5 H62 A4.5 4.5 0 0 1 62 4.5 H0 A4.5 4.5 0 0 1 0 -4.5 Z" fill="#64e7ec"/>
+<circle id="flux-leg-front-joint" cx="0" cy="0" r="5.5" fill="#64e7ec"/>
+<path id="flux-shin-front-shape" d="M0 -4.5 H62 A4.5 4.5 0 0 1 62 4.5 H0 A4.5 4.5 0 0 1 0 -4.5 Z" fill="#64e7ec"/>
+<circle id="flux-shin-front-joint" cx="0" cy="0" r="5.5" fill="#64e7ec"/>
+<path id="flux-shin-front-boot" d="M0 -5.0 H17 A5.0 5.0 0 0 1 17 5.0 H0 A5.0 5.0 0 0 1 0 -5.0 Z" fill="#64e7ec"/>
+<path id="flux-neck-shape" d="M0 -4.5 H18 A4.5 4.5 0 0 1 18 4.5 H0 A4.5 4.5 0 0 1 0 -4.5 Z" fill="#64e7ec"/>
+<circle id="flux-neck-joint" cx="0" cy="0" r="5.5" fill="#64e7ec"/>
+<path id="flux-arm-front-shape" d="M0 -4.5 H57 A4.5 4.5 0 0 1 57 4.5 H0 A4.5 4.5 0 0 1 0 -4.5 Z" fill="#64e7ec"/>
+<circle id="flux-arm-front-joint" cx="0" cy="0" r="5.5" fill="#64e7ec"/>
+<path id="flux-fore-front-shape" d="M0 -4.5 H57 A4.5 4.5 0 0 1 57 4.5 H0 A4.5 4.5 0 0 1 0 -4.5 Z" fill="#64e7ec"/>
+<circle id="flux-fore-front-joint" cx="0" cy="0" r="5.5" fill="#64e7ec"/>
+<circle id="flux-fore-front-fist" cx="57" cy="0" r="8" fill="#deffff"/>
+<circle id="flux-head" cx="18" cy="0" r="19" fill="#64e7ec"/>
+<path id="flux-visor" d="M17 -17 H23 V-3 H17 Z" fill="#0b101d"/>
+<path id="flux-chest-mark" d="M28 -3 H68 V3 H28 Z" fill="#deffff"/>
+<path id="dodge-spark-0" d="M18.0 2.0 L48.0 0.0 L18.0 -2.0 Z" fill="#ffb15e"/>
+<path id="dodge-spark-1" d="M11.313708498984763 14.142135623730951 L33.941125496954285 33.94112549695428 L14.142135623730951 11.31370849898476 Z" fill="#ffb15e"/>
+<path id="dodge-spark-2" d="M-1.999999999999999 18.0 L2.9391523179536475e-15 48.0 L2.000000000000001 18.0 Z" fill="#ffb15e"/>
+<path id="dodge-spark-3" d="M-14.142135623730951 11.313708498984763 L-33.94112549695428 33.941125496954285 L-11.31370849898476 14.142135623730951 Z" fill="#ffb15e"/>
+<path id="dodge-spark-4" d="M-18.0 -1.9999999999999978 L-48.0 5.878304635907295e-15 L-18.0 2.000000000000002 Z" fill="#ffb15e"/>
+<path id="dodge-spark-5" d="M-11.313708498984763 -14.142135623730951 L-33.941125496954285 -33.94112549695428 L-14.142135623730955 -11.31370849898476 Z" fill="#ffb15e"/>
+<path id="dodge-spark-6" d="M1.9999999999999967 -18.0 L-8.817456953860943e-15 -48.0 L-2.000000000000003 -18.0 Z" fill="#ffb15e"/>
+<path id="dodge-spark-7" d="M14.142135623730947 -11.313708498984765 L33.94112549695427 -33.941125496954285 L11.313708498984756 -14.142135623730953 Z" fill="#ffb15e"/>
+<path id="hit-spark-0" d="M18.0 2.0 L48.0 0.0 L18.0 -2.0 Z" fill="#fff0d5"/>
+<path id="hit-spark-1" d="M11.313708498984763 14.142135623730951 L33.941125496954285 33.94112549695428 L14.142135623730951 11.31370849898476 Z" fill="#fff0d5"/>
+<path id="hit-spark-2" d="M-1.999999999999999 18.0 L2.9391523179536475e-15 48.0 L2.000000000000001 18.0 Z" fill="#fff0d5"/>
+<path id="hit-spark-3" d="M-14.142135623730951 11.313708498984763 L-33.94112549695428 33.941125496954285 L-11.31370849898476 14.142135623730951 Z" fill="#fff0d5"/>
+<path id="hit-spark-4" d="M-18.0 -1.9999999999999978 L-48.0 5.878304635907295e-15 L-18.0 2.000000000000002 Z" fill="#fff0d5"/>
+<path id="hit-spark-5" d="M-11.313708498984763 -14.142135623730951 L-33.941125496954285 -33.94112549695428 L-14.142135623730955 -11.31370849898476 Z" fill="#fff0d5"/>
+<path id="hit-spark-6" d="M1.9999999999999967 -18.0 L-8.817456953860943e-15 -48.0 L-2.000000000000003 -18.0 Z" fill="#fff0d5"/>
+<path id="hit-spark-7" d="M14.142135623730947 -11.313708498984765 L33.94112549695427 -33.941125496954285 L11.313708498984756 -14.142135623730953 Z" fill="#fff0d5"/>
+<path id="block-spark-0" d="M18.0 2.0 L48.0 0.0 L18.0 -2.0 Z" fill="#64e7ec"/>
+<path id="block-spark-1" d="M11.313708498984763 14.142135623730951 L33.941125496954285 33.94112549695428 L14.142135623730951 11.31370849898476 Z" fill="#64e7ec"/>
+<path id="block-spark-2" d="M-1.999999999999999 18.0 L2.9391523179536475e-15 48.0 L2.000000000000001 18.0 Z" fill="#64e7ec"/>
+<path id="block-spark-3" d="M-14.142135623730951 11.313708498984763 L-33.94112549695428 33.941125496954285 L-11.31370849898476 14.142135623730951 Z" fill="#64e7ec"/>
+<path id="block-spark-4" d="M-18.0 -1.9999999999999978 L-48.0 5.878304635907295e-15 L-18.0 2.000000000000002 Z" fill="#64e7ec"/>
+<path id="block-spark-5" d="M-11.313708498984763 -14.142135623730951 L-33.941125496954285 -33.94112549695428 L-14.142135623730955 -11.31370849898476 Z" fill="#64e7ec"/>
+<path id="block-spark-6" d="M1.9999999999999967 -18.0 L-8.817456953860943e-15 -48.0 L-2.000000000000003 -18.0 Z" fill="#64e7ec"/>
+<path id="block-spark-7" d="M14.142135623730947 -11.313708498984765 L33.94112549695427 -33.941125496954285 L11.313708498984756 -14.142135623730953 Z" fill="#64e7ec"/>
+</svg>

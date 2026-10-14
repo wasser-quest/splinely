@@ -1,0 +1,12 @@
+[package]
+name = {{NAME}}
+version = "0.1.0"
+edition = "2021"
+publish = false
+
+# Independent source crate, even when generated inside another workspace.
+[workspace]
+
+[dependencies]
+forma_editor = { path = {{EDITOR_PATH}} }
+bevy_ecs = "=0.17.3"
