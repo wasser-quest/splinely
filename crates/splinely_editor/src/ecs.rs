@@ -86,9 +86,10 @@ fn evaluate(
             .project
             .evaluate_with_context(frame.time, &context.0)
             .unwrap_or_else(|error| {
-                diagnostics
-                    .0
-                    .push(format!("Vorschau-Ersatzdarstellung: {error}"));
+                diagnostics.0.push(crate::i18n::trf(
+                    "Vorschau-Ersatzdarstellung: {error}",
+                    &[format!("{error}")],
+                ));
                 frame.project.nodes.clone()
             });
         pending.0 = nodes

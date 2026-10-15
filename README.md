@@ -1,24 +1,30 @@
 # Splinely
 
-Splinely ist ein Rust-Desktopeditor mit **`.sply`-Projektdateien** und eingebetteter JavaScript-Runtime für interaktive SVGs. **Aktueller Stand: funktionierender Prototyp, nicht der vollständige Funktionsumfang aus [PLAN.md](PLAN.md).**
+**English** · [Deutsch](README.de.md) · [Español](README.es.md) · [Français](README.fr.md) · [日本語](README.ja.md) · [简体中文](README.zh.md)
 
-## Mit einem LLM installieren
+![Splinely logo](assets/splinely-logo.svg)
 
-Einem KI-Agenten mit Shell-Zugriff (z. B. Claude Code) einfach sagen:
+Splinely is a Rust desktop editor with **`.sply` project files** and an embedded JavaScript runtime for interactive SVGs. Draw shapes and paths, animate them with keyframes, bones and state machines, and export a single self-contained SVG. **Current state: a working prototype, not the full scope of [PLAN.md](PLAN.md).**
 
-> Installiere mir Splinely: https://raw.githubusercontent.com/wasser-quest/splinely/main/llms.txt
+The editor speaks **English, German, Spanish, French, Japanese and Simplified Chinese**. It follows the system language and can be switched under **Settings › General › Language**. Japanese and Chinese need an installed CJK font (e.g. Noto Sans CJK). The detailed documents in `docs/` are written in German.
 
-Die [`llms.txt`](llms.txt) beschreibt, wie der Agent das passende fertige Paket aus den Releases lädt, die Prüfsumme kontrolliert, es nach `~/.local/opt` entpackt und danach mit `splinely-cli` arbeitet.
+## Install with an LLM
 
-## Start
+Just tell an AI agent with shell access (e.g. Claude Code):
 
-**Ohne Kompilieren:** Fertige Linux-Pakete (`splinely-vX.Y.Z-x86_64-linux.tar.gz` mit Editor, CLI, Viewer, Runtime und `libsplinely_runtime.so`) liegen bei jedem [Release](https://github.com/wasser-quest/splinely/releases/latest). Installation und ein fertiger Text, mit dem sich ein LLM-Agent Splinely selbst holt: [docs/INSTALL-BINARIES.md](docs/INSTALL-BINARIES.md).
+> Install Splinely for me: https://raw.githubusercontent.com/wasser-quest/splinely/main/llms.txt
 
-Aus dem Quellcode:
+[`llms.txt`](llms.txt) tells the agent how to download the matching prebuilt package from the releases, verify the checksum, unpack it to `~/.local/opt` and then work with `splinely-cli`.
 
-Voraussetzungen: Rust/Cargo; für das Desktopfenster eine funktionierende Grafik-/Fensterumgebung. Beim ersten Build lädt Cargo Abhängigkeiten herunter. Node.js und Python 3 werden nur für die Prüfskripte (`scripts/check.sh`) benötigt.
+## Getting started
 
-Unter Linux braucht der Build von Editor und Viewer die GTK-/WebKit-, ALSA- und D-Bus-Entwicklerpakete:
+**No compiling:** prebuilt Linux packages (`splinely-vX.Y.Z-x86_64-linux.tar.gz` with editor, CLI, viewer, runtime and `libsplinely_runtime.so`) are attached to every [release](https://github.com/wasser-quest/splinely/releases/latest). Installation details: [docs/INSTALL-BINARIES.md](docs/INSTALL-BINARIES.md).
+
+From source:
+
+Requirements: Rust/Cargo; a working graphics/window environment for the desktop window. The first build downloads dependencies. Node.js and Python 3 are only needed for the check scripts (`scripts/check.sh`).
+
+On Linux, building the editor and viewer needs the GTK/WebKit, ALSA and D-Bus development packages:
 
 ```sh
 # Fedora
@@ -31,107 +37,107 @@ sudo apt install libgtk-3-dev libwebkit2gtk-4.1-dev libsoup-3.0-dev libasound2-d
 git clone https://github.com/wasser-quest/splinely.git
 cd splinely
 cargo run -p splinely_editor --bin splinely
-# Export ohne Desktopfenster:
+# Export without a desktop window:
 cargo run -p splinely_editor --bin splinely -- --demo-export /tmp/splinely-demo.svg
 ```
 
-Der Editor startet mit seiner eigenen Demo. Eine **`.sply`-Datei hereinziehen**, unter **Datei → Öffnen …** (Strg+O, System-Dateidialog) bzw. **Zuletzt geöffnet** wählen oder direkt starten: `cargo run -p splinely_editor --bin splinely -- examples/demo.sply`. Ungespeicherte Änderungen und Zeichen-/Quelltextentwürfe werden vor einem Wechsel und beim Schließen des Fensters abgefragt; der Fenstertitel zeigt Datei und `•` für ungespeichert. **Speichern** bewahrt das bearbeitbare Projekt; SVG ist nur ein optionaler Export.
+The editor starts with its own demo. **Drop in a `.sply` file**, use **File → Open …** (Ctrl+O, system file dialog) or **Recent**, or start directly: `cargo run -p splinely_editor --bin splinely -- examples/demo.sply`. Unsaved changes and drawing/source drafts are confirmed before switching and when closing the window; the window title shows the file and `•` when unsaved. **Save** keeps the editable project; SVG is only an optional export.
 
-**Gestalten / Animieren / Erweitert** trennen Zeichnen, Animation und Code. Auswahl, Pen, Pfadpunkte und Freihand sind exklusive Werkzeuge; zusätzliche Optionen bleiben zugeklappt. **Vorschau**, **Abspielen** und **Splinely Viewer öffnen** sind direkt erreichbar. [Bedienung, Gesten und Grenzen](docs/usability.md).
+**Design / Animate / Advanced** separate drawing, animation and code. Select, Pen, Path points and Freehand are exclusive tools; extra options stay collapsed. **Preview**, **Play** and **Open Splinely Viewer** are always at hand. [Usage, gestures and limits](docs/usability.md).
 
-Eigenes JavaScript läuft nur nach ausdrücklicher, sitzungsbezogener Freigabe unter **Erweitert → JavaScript**, nie in der nativen Zeichenfläche. Unter **Animieren → Audio** lässt sich eine begrenzte `ffplay`-Vorschau globaler Audiocues aktivieren; Vorbereitung erfolgt im Hintergrund.
+Custom JavaScript only runs after explicit, per-session approval under **Advanced → JavaScript**, never in the native canvas. **Animate → Audio** can turn on a limited `ffplay` preview of global audio cues; preparation happens in the background.
 
-## Eine Projektdatei: `.sply`
+## One project file: `.sply`
 
-Geometrie, Ebenen, Bones, Keyframes, States, Blend-Gewichte, Variablen, eingebettetes Audio und eigener Code bleiben **zusammen in einer Datei**. Kein zusätzliches JSON/SVG oder Assetverzeichnis nötig. Intern ist `.sply` streng validiertes, lesbares JSON; ältere `.json`/`.splinely.json`-Projekte bleiben kompatibel. Die Anwendung/Runtime und installierte Editorplugins sind nicht Teil des Projektfiles. [Format und Kompatibilität](docs/sply-format.md).
+Geometry, layers, bones, keyframes, states, blend weights, variables, embedded audio and custom code stay **together in one file**. No extra JSON/SVG or asset folder needed. Internally `.sply` is strictly validated, readable JSON; older `.json`/`.splinely.json` projects stay compatible. The application/runtime and installed editor plugins are not part of the project file. [Format and compatibility](docs/sply-format.md).
 
-Unter **Animieren** führen **Animation einfach erstellen** (Keyframe/Preset) und **Zustandsmaschine einfach erstellen** (Klick/Hover, Sichtbarkeit, Clipstart) durch die ersten Schritte. Gewichtete Mischung und zeitliche Fades bleiben neben den Expertentools erreichbar. [Schritt-für-Schritt und Blend-Grenzen](docs/animation-workflow.md).
+Under **Animate**, **Easy animation** (keyframe/preset) and **Guided state machine** (click/hover, visibility, clip start) walk you through the first steps. Weighted blending and timed fades stay available next to the expert tools. [Step by step and blending limits](docs/animation-workflow.md).
 
 ```sh
 splinely-cli new --demo --output scene.sply
 splinely-cli convert legacy.splinely.json --output scene.sply
 splinely-viewer scene.sply
-# Nur für geprüften eigenen Code:
+# Only for reviewed custom code:
 splinely-viewer examples/desert-stickfight.sply --trusted-js
 ```
 
 ## Splinely Viewer
 
-`cargo build -p splinely_viewer` baut die echte native SVG-WebView. Im Editor öffnet **▶ Splinely Viewer** einen Snapshot des aktuellen Projekts, inklusive Runtime, States und eingebettetem Audio; die stille resvg-Zeichenfläche bleibt getrennt. Eigenes JS nur nach Freigabe in Advanced. Direkt ohne vorherigen SVG-Export: `cargo run -p splinely_viewer --bin splinely-viewer -- examples/brown-owl.sply --trusted-js` (mitgelieferten Code vorher prüfen). Bestehende SVGs bleiben ebenfalls unterstützt. Aktive fremde SVGs sind nicht vertrauenswürdig. Linux benötigt GTK3/WebKitGTK; [Details und Tests](crates/splinely_viewer/README.md).
+`cargo build -p splinely_viewer` builds the real native SVG WebView. In the editor, **▶ Splinely Viewer** opens a snapshot of the current project including runtime, states and embedded audio; the silent resvg canvas stays separate. Custom JS only after approval under Advanced. Directly without exporting an SVG first: `cargo run -p splinely_viewer --bin splinely-viewer -- examples/brown-owl.sply --trusted-js` (review the bundled code first). Existing SVGs are supported too. Active third-party SVGs are not trusted. Linux needs GTK3/WebKitGTK; [details and tests](crates/splinely_viewer/README.md).
 
-SVG-Exporte enthalten **Created with Splinely**, Anwendungs-/Schemaversion und maschinenlesbare Generator-Metadaten (`urn:splinely:metadata`). Kein sichtbares Wasserzeichen; die Kennzeichnung ist editierbar, kein Echtheitsnachweis.
+SVG exports contain **Created with Splinely**, the application/schema version and machine-readable generator metadata (`urn:splinely:metadata`). There is no visible watermark; the label is editable and no proof of authenticity.
 
-## Runtime verständlich bedienen
+## Using the runtime
 
-[Runtime-Kochbuch](docs/runtime-cookbook.md): Play/Pause/Neustart, Clip- und globale Uhr, HTML-Einbettung, Audio und Fehlersuche. `splinely.snapshot()` zeigt Laufzeitstatus als kopierte JSON-Daten; `splinely.reportError(error)` nutzt den einheitlichen Error-Kanal mit begrenzter Historie. Bestehende Transport-/State-APIs bleiben unverändert.
+[Runtime cookbook](docs/runtime-cookbook.md): play/pause/restart, clip and global clock, HTML embedding, audio and troubleshooting. `splinely.snapshot()` returns the runtime state as copied JSON data; `splinely.reportError(error)` uses the shared error channel with a bounded history.
 
-## Browserunabhängige Runtime
+## Browser-independent runtime
 
-`splinely_runtime` stellt den Splinely-Dokumentkern als native Rust-Runtime, C-ABI (`cdylib`) und `splinely-runtime`-JSON-Zeilenprozess bereit. Andere Sprachen können Events senden, Zeit/Clip-Gewichte steuern und ausgewertete Nodes/Bones abrufen. Zeichnen, Eingabetreffer und Audio übernimmt der Host — kein Browser, aber auch kein allgemeiner SVG-JavaScript-Interpreter. [API und Python-Beispiele](docs/native-runtime.md).
+`splinely_runtime` provides the Splinely document core as a native Rust runtime, a C ABI (`cdylib`) and the `splinely-runtime` JSON-lines process. Other languages can send events, control time/clip weights and read evaluated nodes/bones. The host does drawing, hit testing and audio — no browser, but also no general SVG JavaScript interpreter. [API and Python examples](docs/native-runtime.md).
 
 ```sh
 cargo build -p splinely_runtime
 python3 examples/native-runtime/smoke.py --library target/debug/libsplinely_runtime.so --binary target/debug/splinely-runtime
 ```
 
-## CLI-Workflow
+## CLI workflow
 
-CLI und Editor verwenden denselben Dokumentkern. CLI-Ergebnisse sind JSON; Fehler stehen als JSON auf stderr (mit `hint` für den nächsten Schritt) und liefern einen Fehlerstatus. Kein KI-Anbieter, API-Key oder Server ist erforderlich.
+CLI and editor share the same document core. CLI results are JSON; errors are JSON on stderr (with a `hint` for the next step) and return a failing exit status. No AI provider, API key or server is required.
 
-**Einstieg:** `splinely-cli guide` zeigt den kurzen Arbeitsablauf mit getesteten Rezepten. Bearbeitungsbefehle speichern ohne `--output` direkt in die Eingabedatei, `check` findet typische Fehler (verdeckte Formen, Clips, die nie abspielen, unlesbarer Text …) samt ausführbarem Fix, `batch` führt viele Schritte ganz oder gar nicht aus, `clip` verwaltet Clips und `on` macht Formen interaktiv.
+**Getting started:** `splinely-cli guide` shows the short workflow with tested recipes. Editing commands save back into the input file when `--output` is omitted, `check` finds typical mistakes (hidden shapes, clips that never play, unreadable text …) with a runnable fix, `batch` runs many steps all or nothing, `clip` manages clips and `on` makes shapes interactive.
 
 ```sh
-F=/tmp/szene.sply
+F=/tmp/scene.sply
 cargo run -p splinely-cli -- new --output $F --width 800 --height 450 --background "#0b1d3a"
-cargo run -p splinely-cli -- node add $F --kind circle --id sonne --x 400 --y 420 --radius 60 --fill orange --pivot center
-cargo run -p splinely-cli -- keyframe $F --clip aufgang --target sonne --property y --time 3 --by -260 --easing ease-out --autoplay --loop
-cargo run -p splinely-cli -- on $F --event click --target sonne --set sonne.fill=gold
+cargo run -p splinely-cli -- node add $F --kind circle --id sun --x 400 --y 420 --radius 60 --fill orange --pivot center
+cargo run -p splinely-cli -- keyframe $F --clip sunrise --target sun --property y --time 3 --by -260 --easing ease-out --autoplay --loop
+cargo run -p splinely-cli -- on $F --event click --target sun --set sun.fill=gold
 cargo run -p splinely-cli -- check $F
-cargo run -p splinely-cli -- render $F --time 1.5 --output /tmp/szene.png
+cargo run -p splinely-cli -- render $F --time 1.5 --output /tmp/scene.png
 ```
 
-Mit JSON und Merge-Patch:
+With JSON and merge patches:
 
 ```sh
 cargo run -p splinely-cli -- new --demo --output /tmp/draft.splinely.json
 cargo run -p splinely-cli -- validate /tmp/draft.splinely.json
 cargo run -p splinely-cli -- inspect /tmp/draft.splinely.json
 cargo run -p splinely-cli -- evaluate /tmp/draft.splinely.json --time 0.5
-printf '%s\n' '{"name":"Meine Animation"}' > /tmp/splinely-patch.json
+printf '%s\n' '{"name":"My animation"}' > /tmp/splinely-patch.json
 cargo run -p splinely-cli -- apply /tmp/draft.splinely.json --patch /tmp/splinely-patch.json --output /tmp/final.splinely.json
 cargo run -p splinely-cli -- export /tmp/final.splinely.json --output /tmp/final.svg
 ```
 
-`schema` liefert einen Formatleitfaden mit vollständigen Beispielen, kein formales JSON Schema. `apply` nutzt RFC-7396-Merge-Patch: Arrays werden vollständig ersetzt. `evaluate` führt keine Zustandsaktionen, JS oder Audio aus; nicht automatisch aktive Clips werden dabei nicht abgespielt. Details: [CLI.md](CLI.md), [CORE_API.md](CORE_API.md). Für andere LLMs: [Authoring-Anleitung](LLM.md) und [kopierbarer Prompt](prompts/splinely-author.md); `schema` und `capabilities` liefern die tatsächlich unterstützten Features.
+`schema` returns a format guide with complete examples, not a formal JSON Schema. `apply` uses RFC 7396 merge patches: arrays are replaced entirely. `evaluate` runs no state actions, JS or audio; clips that are not active are not played. Details: [CLI.md](CLI.md), [CORE_API.md](CORE_API.md). For other LLMs: [authoring guide](LLM.md) and [copy-paste prompt](prompts/splinely-author.md); `schema` and `capabilities` list the features that are actually supported.
 
-## Durchgängiges Offline-Beispiel
+## End-to-end offline example
 
-- [examples/demo.splinely.json](examples/demo.splinely.json): editierbares Projekt mit Kreis, dreisekündiger Keyframe-Bewegung, Klick-Zustandswechsel und eingebettetem WAV-Cue bei **1,5 Sekunden globaler Transportzeit**.
-- [examples/demo.svg](examples/demo.svg): tatsächlicher CLI-Export mit explizit freigegebenem, kurzem `customJs`-Handler. Ein Kreis-Klick entsperrt Audio und startet die Bewegung samt Transport neu; beim ersten Klick wird der Kreis orange.
-- Der Ton ist **0,4 Sekunden synthetischer, silbenartiger Klang, keine gesprochenen Worte**. PCM-WAV, mono, 8 kHz, 16 Bit; keine externen Audiodateien und keine Sprachsynthese.
+- [examples/demo.splinely.json](examples/demo.splinely.json): editable project with a circle, a three-second keyframe motion, a click state change and an embedded WAV cue at **1.5 seconds of global transport time**.
+- [examples/demo.svg](examples/demo.svg): the actual CLI export with an explicitly approved, short `customJs` handler. Clicking the circle unlocks audio and restarts the motion and transport; on the first click the circle turns orange.
+- The sound is **0.4 seconds of synthetic, syllable-like tone, no spoken words**. PCM WAV, mono, 8 kHz, 16 bit; no external audio files.
 
 ```sh
-# Reproduzierbar: CLI new --demo → apply → validate → export --trusted-js
+# Reproducible: CLI new --demo → apply → validate → export --trusted-js
 bash scripts/generate-demo.sh
-# Standardexport: Code bleibt nur gespeichert; Start-Control entsperrt Audio ohne Nutzercode.
+# Default export: code is only stored; the start control unlocks audio without user code.
 cargo run -p splinely-cli -- export examples/demo.splinely.json --output /tmp/demo-safe.svg
-# Nur nach Prüfung des eigenen Codes:
+# Only after reviewing your own code:
 cargo run -p splinely-cli -- export examples/demo.splinely.json --trusted-js --output /tmp/demo-trusted.svg
 ```
 
-`demo.svg` direkt im Browser als `file://` öffnen, **Start audio / animation** und anschließend den Kreis klicken. Nicht als `<img>` einbinden: dort werden SVG-Skripte nicht ausgeführt. Ohne Skriptausführung bleibt die statische Ausgangsgrafik sichtbar. Browser/CSP können Skripte oder dynamische Codekompilierung blockieren; Audio braucht eine echte Nutzerinteraktion und einen unterstützten Decoder.
+Open `demo.svg` directly in the browser as `file://`, click **Start audio / animation** and then the circle. Do not embed it as `<img>`: SVG scripts don't run there. Without scripts the static initial graphic stays visible. Browsers/CSP can block scripts or dynamic code compilation; audio needs a real user interaction and a supported decoder.
 
-Die mitgelieferte Runtime und die Beispieldatei brauchen keine nachgeladenen Bibliotheken oder Netzwerkressourcen. Das ist **keine Sandbox**: beliebiger freigegebener Nutzercode kann Netzwerkaufrufe und andere Browseraktionen ausführen. Standardmäßig bleibt `customJs` erhalten, wird aber nicht ausgeführt; `rawSvg` bleibt nur Metadaten. Unbekannte Projekte nicht mit `--trusted-js` exportieren/öffnen.
+The bundled runtime and the example file need no external libraries or network resources. This is **not a sandbox**: approved user code can make network requests and perform other browser actions. By default `customJs` is kept but not executed; `rawSvg` stays metadata only. Don't export/open unknown projects with `--trusted-js`.
 
-## Vektoren, Ebenen und Bones
+## Vectors, layers and bones
 
-- **Layers:** Auswahl, Reihenfolge, Sichtbarkeit und Bearbeitungssperre. Farben und Transparenz stehen im Inspektor.
-- **Pfade:** Doppelklick auf einen Pfadrand fügt einen formtreuen Anker ein; Shift koppelt Bézier-Tangenten symmetrisch, Shift+Alt erhält die Nachbarlänge. [Details](docs/path-editing.md). SVG-Pfadsyntax sowie grafische Anker/Bézier-Kontrollpunkte bearbeiten; **Pen** zeichnet per Klick und Drag (Enter fertig, Escape abbrechen). **Snap 10** rastet Objektpositionen beim Loslassen lokal ein. Rechtecke/Kreise in Pfade umwandeln und unverändert zurückwandeln. SVG-Import ist bewusst begrenzt und verweigert nicht unterstützte Darstellung statt sie stillschweigend zu verlieren.
-- **Bones:** Gelenke auswählen/verschieben, Elternbeziehungen und Bindungen bearbeiten, Rotation keyframen. Starre Bindung und begrenztes Zwei-Bone-IK für direkte, versatzfreie Kindgelenke; keine Mesh-Deformation. `examples/rig.splinely.json` laden; `examples/rig.svg` zeigt dieselbe Animation im Browser.
-- **Navigation:** F/Home passt die Szene ein; +/- zoomt, 0 setzt 100 %. Mitteltaste oder Leertaste + linke Maustaste verschiebt die Ansicht, ohne Formen zu verändern; Space ohne Ziehen startet/stoppt beim Loslassen. Lineale sind ein-/ausblendbar und bleiben beim Pan/Zoom im Dokumentkoordinatensystem. Die Timeline lässt sich ausblenden. **Interact** trennt Szenenereignisse vom Bearbeiten.
-- **Freihand/Tablet:** Freihand-Modus erzeugt editierbare SVG-Pfade, ein Strich pro Undo-Schritt. Druckabhängige Konturen nur bei verfügbaren Force-Events; keine pauschale Hardware-/Treiberzusage. [Tablet-Hinweise](docs/tablet.md).
-- **Drop-in-Plugins:** `splinely-plugin.json` in den Pluginordner legen und neu starten — deklarative Formwerkzeuge und Paletten werden automatisch geladen, ohne Kompilieren. [Format, Ordner und Beispiele](docs/drop-in-plugins.md); keine automatische Ausführung fremder Skripte/Bibliotheken.
-- **Plugins:** statische Rust-ECS-Erweiterungen mit eigenen Ressourcen und einer Decorate-Phase. [Vorlage](plugin-templates/editor/README.md); `splinely-cli plugin` erzeugt Quelltext, führt ihn aber niemals aus. Native Plugins sind vertrauenswürdiger Code, keine Sandbox.
+- **Layers:** selection, order, visibility and edit lock. Colors and transparency are in the inspector.
+- **Paths:** double-clicking a path edge inserts a shape-preserving anchor; Shift links Bézier handles symmetrically, Shift+Alt keeps the neighbouring length. [Details](docs/path-editing.md). Edit SVG path syntax as well as graphical anchors/Bézier control points; **Pen** draws by click and drag (Enter finishes, Escape cancels). **Snap 10** snaps object positions locally on release. Convert rectangles/circles to paths and back while unchanged. SVG import is deliberately limited and rejects unsupported appearance instead of silently dropping it.
+- **Bones:** select/move joints, edit parents and bindings, keyframe rotation. Rigid binding and limited two-bone IK for direct, offset-free child joints; no mesh deformation. Load `examples/rig.splinely.json`; `examples/rig.svg` shows the same animation in the browser.
+- **Navigation:** F/Home fits the scene; +/- zooms, 0 sets 100 %. Middle button or Space + left button pans without changing shapes; Space without dragging starts/stops on release. Rulers can be shown/hidden and stay in document coordinates while panning/zooming. The timeline can be hidden. **Preview** separates scene events from editing.
+- **Freehand/tablet:** freehand mode creates editable SVG paths, one stroke per undo step. Pressure-sensitive strokes only when force events are available; no blanket hardware/driver promise. [Tablet notes](docs/tablet.md).
+- **Drop-in plugins:** put a `splinely-plugin.json` into the plugin folder and restart — declarative shape tools and palettes load automatically without compiling. [Format, folders and examples](docs/drop-in-plugins.md); third-party scripts/libraries never run automatically.
+- **Plugins:** static Rust ECS extensions with their own resources and a decorate phase. [Template](plugin-templates/editor/README.md); `splinely-cli plugin` generates source code but never runs it. Native plugins are trusted code, not a sandbox.
 
 ```sh
 cargo run -p splinely-cli -- import-svg drawing.svg --output drawing.splinely.json
@@ -139,7 +145,7 @@ cargo run -p splinely-cli -- rig-demo --output /tmp/rig.splinely.json
 cargo run -p splinely-cli -- export /tmp/rig.splinely.json --output /tmp/rig.svg
 ```
 
-Formen per CLI anlegen, anordnen und als PNG prüfen (gleiche Logik wie im Editor):
+Create and arrange shapes with the CLI and check them as PNG (same logic as the editor):
 
 ```sh
 cargo run -p splinely-cli -- node add scene.sply --kind circle --x 200 --y 150 --radius 40 --fill tomato --output scene.sply
@@ -147,47 +153,48 @@ cargo run -p splinely-cli -- arrange align scene.sply --nodes node-1,node-2 --ed
 cargo run -p splinely-cli -- render scene.sply --output scene.png --width 800
 ```
 
-Weitere Form-, Anordnungs-, Bone-, Ebenen- und Konvertierungsbefehle: [CLI.md](CLI.md). `keyframe` fügt einzelne Node-/Bone-Keys ohne komplette Array-Patches hinzu.
+More shape, arrange, bone, layer and conversion commands: [CLI.md](CLI.md). `keyframe` adds single node/bone keys without full array patches.
 
-## Implementiert und noch offen
+## Implemented and still open
 
-| Jetzt implementiert | Nicht implementiert / zurückgestellt |
+| Implemented now | Not implemented / deferred |
 | --- | --- |
-| Rechteck, Kreis, Text, Pfade, Polygon/Stern/Linie; Mehrfach- und Rechteckauswahl, Skalier-/Drehgriffe, intelligente und manuelle Hilfslinien, Kontextmenü, Befehlspalette (Strg+K), Einstellungen (Strg+,) mit frei belegbaren Tastenkürzeln, hellem/dunklem Erscheinungsbild und sichtbarem Raster, Aufnahme-Modus (Auto-Key), Verlaufsliste, Maßanzeige am Zeiger, visuelle Zeitleiste mit ziehbaren Schlüsselbildern und Easing-Menü, einstellbare Zwiebelhaut (Schlüsselbilder oder Intervall, mehrere Geister), Text direkt auf der Zeichenfläche, Dokumentfarben, Formatvorlagen für neue Projekte, PNG-/GIF-Export, Pipette, lineare/radiale Verläufe, verschachtelte Gruppen (Baumansicht, `<g>`-Export), Text in Pfad, Ausrichten/Verteilen/Spiegeln, kurvenerhaltende boolesche Operationen, Pfad-Morphing, animierte Verläufe, Ebenenreihenfolge, Kopieren/Einfügen, Farben/Transparenz, Ebenen, Konvertierung, Undo/Redo | Morphing zwischen Formen mit unterschiedlicher Topologie wird angenähert (wachsende/schrumpfende Teilpfade), kein Löcher-genaues Zuordnen |
-| Projekt laden/speichern, temporäre Datei + Umbenennung; Editor-Autosave für geänderte Projekte alle 30 s mit Wiederherstellungsdialog | Historische Schemamigrationen, vollständige Ressourcenquoten |
-| Timeline, Keyframes, Easing, unabhängige Clip-Uhren, parallele States, gewichtete Clips und zeitliche Crossfades (`blendClip`) | Additives Blending, visueller Blend-Tree/Blend-Space |
-| Zustandsmodell, Guards/Aktionen, editierbarer Zustandsgraph, JSON-Bearbeitung und native Zustandsvorschau | Freie Drag-Verbindungen, automatisches Graph-Layout |
-| Browser-Events, Clip-/Transport-API, eingebettete Audioassets/Cues | Native JS-Ausführung oder garantierte Audio-Latenz; native Audiovorschau nur globale Cues via ffplay |
-| Statischer/interaktiver SVG-Export, begrenzter SVG-Vektorimport, JS-/Raw-SVG-Quelltextfelder | **Kein vollständiger Importer für beliebige SVGs**; Text/Images/Gradienten/Filter werden beim Import abgelehnt; Raw-SVG allein bleibt Metadaten |
-| Bevy-ECS-Projektion, registrierbare statische Plugins, Bones und starre Bindungen | Dynamische native Plugins, Mesh-Skinning, allgemeine IK-Ketten, automatische Übersetzung beliebiger Bevy-Systeme in Browsercode, isolierte untrusted Vorschau |
+| Rectangle, circle, text, paths, polygon/star/line; multi and box selection, scale/rotate handles, smart and manual guides, context menu, command palette (Ctrl+K), settings (Ctrl+,) with rebindable shortcuts, light/dark theme, UI language and visible grid, record mode (auto-key), history list, size readout at the pointer, visual timeline with draggable keyframes and easing menu, configurable onion skin (keyframes or interval, several ghosts), text editing on the canvas, document colors, presets for new projects, PNG/GIF export, eyedropper, linear/radial gradients, nested groups (tree view, `<g>` export), text to path, align/distribute/flip, curve-preserving boolean operations, path morphing, animated gradients, layer order, copy/paste, colors/transparency, layers, conversion, undo/redo | Morphing between shapes of different topology is approximated (growing/shrinking subpaths), no exact hole matching |
+| Load/save project via temporary file + rename; editor autosave for changed projects every 30 s with a recovery dialog | Historical schema migrations, complete resource quotas |
+| Timeline, keyframes, easing, independent clip clocks, parallel states, weighted clips and timed crossfades (`blendClip`) | Additive blending, visual blend tree/blend space |
+| State model, guards/actions, editable state graph, JSON editing and native state preview | Free drag connections, automatic graph layout |
+| Browser events, clip/transport API, embedded audio assets/cues | Native JS execution or guaranteed audio latency; native audio preview covers only global cues via ffplay |
+| Static/interactive SVG export, limited SVG vector import, JS/raw SVG source fields | **No complete importer for arbitrary SVGs**; text/images/gradients/filters are rejected on import; raw SVG on its own stays metadata |
+| Bevy ECS projection, registrable static plugins, bones and rigid bindings | Dynamic native plugins, mesh skinning, general IK chains, automatic translation of arbitrary Bevy systems into browser code, isolated untrusted preview |
 
-Die native Vorschau rendert SVG mit resvg: Pfade, Rundungen und Transformationen sind sichtbar. Text nutzt lokale Systemfonts und kann browserabhängig abweichen. Formen werden konturgenau ausgewählt (Füllregel bzw. Randabstand); unsichtbare Formen (Deckkraft 0) sind nicht anklickbar. Schema 1 wurde erweitert; alte Projekte laden mit Standardwerten für neue Felder. Ältere Splinely-Binaries verstehen die neuen Felder nicht. Die `.sply`-Projektdatei (intern JSON) bleibt maßgeblich; der SVG-Export ist kein verlustfreier Import-Roundtrip.
+The native preview renders SVG with resvg: paths, rounded corners and transforms are visible. Text uses local system fonts and may differ between browsers. Shapes are picked along their exact outline (fill rule or stroke distance); invisible shapes (opacity 0) can't be clicked. Schema 1 has been extended; old projects load with defaults for new fields. Older Splinely binaries don't understand the new fields. The `.sply` project file (JSON inside) is authoritative; the SVG export is no lossless import round trip.
 
-## Prüfen
+## Checks
 
 ```sh
 bash scripts/check.sh
 ```
 
-Das Skript führt Workspace-Tests, Node-Runtime-Tests, echte CLI-Demoerzeugung/-auswertung/-export und einen Python-XML-/Metadaten-/WAV-/Ressourcencheck aus. Es prüft auch die ausgelieferten Beispieldateien. **Kein Ersatz für einen echten Browser-/Audiotest.** Zusätzlich: `python3 scripts/svg-corpus.py` prüft installierte reale SVGs, `python3 scripts/browser-smoke.py examples/demo.svg /tmp/splinely-svg-corpus/manifest.json` prüft Firefox einschließlich Corpus-Pixelvergleich. Tests umfassen striktes JSON, Pfade, Ebenen, Bones, Plugin-Lebenszyklus und Runtime-Sicherheitsregressionen; XML und eingebetteter WAV werden geprüft. Firefox 151.0.1: Offline-Runtime-Smoke **PASS** und echter CLI-Export mit WebDriver-Klick, Audio-Unlock/Decode und Zustandswechsel geprüft. Hörbare Hardwareausgabe und Audio-Latenz bleiben ungeprüft. Reproduktion und manuelle Abnahme: [docs/browser-tests.md](docs/browser-tests.md). Native GUI-Screenshots sowie GDB/REA-Artefaktprüfung: [docs/verification.md](docs/verification.md).
+The script runs workspace tests, Node runtime tests, real CLI demo generation/evaluation/export and a Python XML/metadata/WAV/resource check. It also checks the shipped example files. **No replacement for a real browser/audio test.** Additionally, `python3 scripts/svg-corpus.py` checks installed real-world SVGs and `python3 scripts/browser-smoke.py examples/demo.svg /tmp/splinely-svg-corpus/manifest.json` checks Firefox including a corpus pixel comparison. Tests cover strict JSON, paths, layers, bones, plugin lifecycle, runtime security regressions and every UI language; XML and the embedded WAV are verified. Audible hardware output and audio latency remain unverified. Reproduction and manual acceptance: [docs/browser-tests.md](docs/browser-tests.md). Native GUI screenshots and GDB/REA artifact checks: [docs/verification.md](docs/verification.md).
 
-## Animierte Showcases
+## Animated showcases
 
-[Showcase-Übersicht](examples/showcase.html) · [Interaktive SVGs, direkte Events und unsichtbare States](docs/interactive-svg.md)
+[Showcase overview](examples/showcase.html) · [Interactive SVGs, direct events and invisible states](docs/interactive-svg.md)
 
-- **[Sand / Accord](examples/desert-stickfight.html)** ([editierbare `.sply`](examples/desert-stickfight.sply)):  originaler 20-Sekunden-Kurzfilm mit zwei Bone-Figuren im warmen Cactus-Runner-Wüstenstil, fünf Kampfphasen und freundlichem Ende; Play/Pause/Replay. [Projekt, Erzeugung und echte Firefox-Prüfung](docs/desert-stickfight.md).
-- [Cactus Runner](examples/cactus-runner.html): laufende Bone-Figur, scrollende Kakteen und Klick-Sprung mit echter Walk/Jump-Gewichtsmischung; unabhängige Lauf- und Sprung-States. [Details/Prüfung](docs/cactus-runner.md).
-- [Cinder / Flux – Stickfight](examples/stickfight.html): eigener achtsekündiger animierter Kampf zweier Bone-Rigs, Ausweichen/Gegenangriff, Schatten/Funken und Play/Pause/Neustart; keine kopierten Drunkenstick-Figuren. `python3 scripts/generate-stickfight.py`, Prüfung: `python3 scripts/stickfight-smoke.py`.
-- [Braune Eule](examples/brown-owl.html): Eule auf einem Ast mit direkten Klick-/Hover-States – beim Darüberfahren folgen die Augen dem Zeiger und die Federohren stellen sich auf, ein Klick schließt zufrieden die Augen und hebt die Flügel. Prüfung: `python3 scripts/owl-smoke.py`.
-- [Aoi sagt Hallo](examples/anime-hello.html): eigene Anime-inspirierte Figur mit Bone-Hand. **Lokal erzeugtes WAV ist im SVG eingebettet**; keine Internetverbindung nötig. Klick gibt Audio frei. Reproduktion: `python3 scripts/generate-anime-demo.py` (lokales `espeak-ng`/`espeak` nötig); Browserprüfung: `python3 scripts/anime-smoke.py`.
-
-- [Wassertropfen auf blauer Kugel](examples/water-drop.html): eigenständige SVG-Szene mit Squash/Stretch, Glanz und Ripple; Play/Pause.
-- [Zufallsfiguren](examples/random-figures.html): reproduzierbar per Seed, automatische Zustandsfolge mit Bildunterschriften. **Play** anklicken. Zustandswechsel folgen Clip-Enden.
-- Beide HTML-Dateien betten die benachbarte SVG per `object` ein; keine Server-API. Testserver ist nur ein lokaler Browser-Testhelfer.
-- Erzeugen: `splinely-cli water-drop --help`, `splinely-cli random-figures --help`; vollständige Beispiele in [CLI.md](CLI.md). Browserprüfung: `python3 scripts/showcase-smoke.py --duration 35`.
+- **[Sand / Accord](examples/desert-stickfight.html)** ([editable `.sply`](examples/desert-stickfight.sply)): an original 20-second short with two bone figures in the warm Cactus Runner desert style, five fight phases and a friendly ending; play/pause/replay. [Project, generation and real Firefox check](docs/desert-stickfight.md).
+- [Cactus Runner](examples/cactus-runner.html): running bone figure, scrolling cacti and a click jump with real walk/jump weight blending; independent run and jump states. [Details/check](docs/cactus-runner.md).
+- [Cinder / Flux – Stickfight](examples/stickfight.html): an original eight-second animated fight between two bone rigs with dodges/counters, shadows/sparks and play/pause/restart. `python3 scripts/generate-stickfight.py`, check: `python3 scripts/stickfight-smoke.py`.
+- [Brown owl](examples/brown-owl.html): an owl on a branch with direct click/hover states – on hover the eyes follow the pointer and the ear tufts perk up; a click makes it close its eyes contentedly and lift its wings. Check: `python3 scripts/owl-smoke.py`.
+- [Aoi says hello](examples/anime-hello.html): an original anime-inspired character with a bone hand. **A locally generated WAV is embedded in the SVG**; no internet connection needed. A click unlocks audio. Reproduce: `python3 scripts/generate-anime-demo.py` (needs a local `espeak-ng`/`espeak`); browser check: `python3 scripts/anime-smoke.py`.
+- [Water drop on a blue sphere](examples/water-drop.html): self-contained SVG scene with squash/stretch, highlights and ripple; play/pause.
+- [Random figures](examples/random-figures.html): reproducible by seed, automatic state sequence with captions. Click **Play**. State changes follow clip ends.
+- Both HTML files embed the neighbouring SVG via `object`; no server API. The test server is only a local browser test helper.
+- Generate: `splinely-cli water-drop --help`, `splinely-cli random-figures --help`; full examples in [CLI.md](CLI.md). Browser check: `python3 scripts/showcase-smoke.py --duration 35`.
 
 ## Logo
 
-Eigenständig gezeichnetes SVG-Logo: Vektorpfad und Gelenke als Splinely-Motiv.
+An original SVG logo: an S drawn as a Bézier spline with anchors and a handle, plus a motion trail.
 
-![Splinely-Logo](assets/splinely-logo.svg)
+## License
+
+MIT, see [LICENSE](LICENSE).

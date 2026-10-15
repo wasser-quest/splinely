@@ -89,7 +89,9 @@ impl Editor {
                     } else if apply || (draft.focused && edit.lost_focus()) {
                         finish = Some(true);
                     }
-                    ui.weak("Strg+Enter oder Klick daneben: übernehmen · Esc: abbrechen");
+                    ui.weak(tr(
+                        "Strg+Enter oder Klick daneben: übernehmen · Esc: abbrechen",
+                    ));
                 });
             });
         match finish {
@@ -117,7 +119,7 @@ impl Editor {
             *t = text.to_owned();
         }
         self.commit(next);
-        self.status = "Text geändert · Strg+Z macht es rückgängig.".into();
+        self.status = tr("Text geändert · Strg+Z macht es rückgängig.").into();
     }
 }
 

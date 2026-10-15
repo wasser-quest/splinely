@@ -50,239 +50,255 @@ fn commands() -> Vec<(&'static str, &'static str, Cmd)> {
     use Cmd::*;
     vec![
         (
-            "Neues Rechteck",
+            tr("Neues Rechteck"),
             "rect rectangle box form",
             Shape(NewShape::Rect),
         ),
-        ("Neuer Kreis", "circle ellipse", Shape(NewShape::Circle)),
-        ("Neuer Text", "text label schrift", Shape(NewShape::Text)),
+        (tr("Neuer Kreis"), "circle ellipse", Shape(NewShape::Circle)),
         (
-            "Neues Sechseck",
+            tr("Neuer Text"),
+            "text label schrift",
+            Shape(NewShape::Text),
+        ),
+        (
+            tr("Neues Sechseck"),
             "polygon hexagon",
             Shape(NewShape::Polygon),
         ),
         (
-            "Neues Dreieck",
+            tr("Neues Dreieck"),
             "triangle polygon",
             Shape(NewShape::Triangle),
         ),
-        ("Neuer Stern", "star", Shape(NewShape::Star)),
-        ("Neue Linie", "line strich", Shape(NewShape::Line)),
+        (tr("Neuer Stern"), "star", Shape(NewShape::Star)),
+        (tr("Neue Linie"), "line strich", Shape(NewShape::Line)),
         (
-            "Werkzeug Auswahl",
+            tr("Werkzeug Auswahl"),
             "select move tool",
             Tool(CanvasTool::Selection),
         ),
         (
-            "Werkzeug Pen",
+            tr("Werkzeug Pen"),
             "pen bezier zeichnen tool",
             Tool(CanvasTool::Pen),
         ),
         (
-            "Werkzeug Pfadpunkte",
+            tr("Werkzeug Pfadpunkte"),
             "nodes direct anchor tool",
             Tool(CanvasTool::PathPoints),
         ),
         (
-            "Werkzeug Freihand",
+            tr("Werkzeug Freihand"),
             "brush pencil draw tool",
             Tool(CanvasTool::Freehand),
         ),
-        ("Neues Projekt", "new file document", New),
-        ("Öffnen …", "open load file", File(FileAction::Open)),
-        ("Speichern", "save", Save),
+        (tr("Neues Projekt"), "new file document", New),
+        (tr("Öffnen …"), "open load file", File(FileAction::Open)),
+        (tr("Speichern"), "save", Save),
         (
-            "Speichern unter …",
+            tr("Speichern unter …"),
             "save as",
             File(FileAction::SaveAs { then_close: false }),
         ),
         (
-            "SVG importieren …",
+            tr("SVG importieren …"),
             "import svg",
             File(FileAction::ImportSvg),
         ),
         (
-            "Interaktives SVG exportieren …",
+            tr("Interaktives SVG exportieren …"),
             "export svg interactive",
             File(FileAction::Export { interactive: true }),
         ),
         (
-            "Statisches SVG exportieren …",
+            tr("Statisches SVG exportieren …"),
             "export svg static",
             File(FileAction::Export { interactive: false }),
         ),
         (
-            "Bild als PNG exportieren …",
+            tr("Bild als PNG exportieren …"),
             "export png image bitmap raster",
             ExportPng,
         ),
         (
-            "Animation als GIF exportieren …",
+            tr("Animation als GIF exportieren …"),
             "export gif animation",
             ExportGif,
         ),
-        ("Rückgängig", "undo", Undo),
-        ("Verlauf anzeigen", "history undo steps verlauf", History),
-        ("Wiederholen", "redo", Redo),
-        ("Alles auswählen", "select all", SelectAll),
-        ("Duplizieren", "duplicate copy", Duplicate),
-        ("Löschen", "delete remove", Delete),
-        ("Gruppieren", "group", Arrange(ArrangeOp::Group)),
-        ("Gruppe lösen", "ungroup", Arrange(ArrangeOp::Ungroup)),
+        (tr("Rückgängig"), "undo", Undo),
         (
-            "Links ausrichten",
+            tr("Verlauf anzeigen"),
+            "history undo steps verlauf",
+            History,
+        ),
+        (tr("Wiederholen"), "redo", Redo),
+        (tr("Alles auswählen"), "select all", SelectAll),
+        (tr("Duplizieren"), "duplicate copy", Duplicate),
+        (tr("Löschen"), "delete remove", Delete),
+        (tr("Gruppieren"), "group", Arrange(ArrangeOp::Group)),
+        (tr("Gruppe lösen"), "ungroup", Arrange(ArrangeOp::Ungroup)),
+        (
+            tr("Links ausrichten"),
             "align left",
             Arrange(ArrangeOp::Align(AlignEdge::Left)),
         ),
         (
-            "Horizontal zentrieren",
+            tr("Horizontal zentrieren"),
             "align center horizontal",
             Arrange(ArrangeOp::Align(AlignEdge::HorizontalCenter)),
         ),
         (
-            "Rechts ausrichten",
+            tr("Rechts ausrichten"),
             "align right",
             Arrange(ArrangeOp::Align(AlignEdge::Right)),
         ),
         (
-            "Oben ausrichten",
+            tr("Oben ausrichten"),
             "align top",
             Arrange(ArrangeOp::Align(AlignEdge::Top)),
         ),
         (
-            "Vertikal zentrieren",
+            tr("Vertikal zentrieren"),
             "align middle vertical",
             Arrange(ArrangeOp::Align(AlignEdge::VerticalCenter)),
         ),
         (
-            "Unten ausrichten",
+            tr("Unten ausrichten"),
             "align bottom",
             Arrange(ArrangeOp::Align(AlignEdge::Bottom)),
         ),
         (
-            "Horizontal verteilen",
+            tr("Horizontal verteilen"),
             "distribute spacing",
             Arrange(ArrangeOp::Distribute(Axis::Horizontal)),
         ),
         (
-            "Vertikal verteilen",
+            tr("Vertikal verteilen"),
             "distribute spacing",
             Arrange(ArrangeOp::Distribute(Axis::Vertical)),
         ),
         (
-            "Horizontal spiegeln",
+            tr("Horizontal spiegeln"),
             "flip mirror",
             Arrange(ArrangeOp::Flip(Axis::Horizontal)),
         ),
         (
-            "Vertikal spiegeln",
+            tr("Vertikal spiegeln"),
             "flip mirror",
             Arrange(ArrangeOp::Flip(Axis::Vertical)),
         ),
         (
-            "Ganz nach vorne",
+            tr("Ganz nach vorne"),
             "bring front order",
             Arrange(ArrangeOp::Stack(Stack::Top)),
         ),
         (
-            "Nach vorne",
+            tr("Nach vorne"),
             "raise forward order",
             Arrange(ArrangeOp::Stack(Stack::Raise)),
         ),
         (
-            "Nach hinten",
+            tr("Nach hinten"),
             "lower backward order",
             Arrange(ArrangeOp::Stack(Stack::Lower)),
         ),
         (
-            "Ganz nach hinten",
+            tr("Ganz nach hinten"),
             "send back order",
             Arrange(ArrangeOp::Stack(Stack::Bottom)),
         ),
         (
-            "Vereinigen",
+            tr("Vereinigen"),
             "union boolean combine pathfinder",
             Arrange(ArrangeOp::Boolean(BooleanOp::Union)),
         ),
         (
-            "Abziehen",
+            tr("Abziehen"),
             "difference subtract minus boolean",
             Arrange(ArrangeOp::Boolean(BooleanOp::Difference)),
         ),
         (
-            "Schnittmenge",
+            tr("Schnittmenge"),
             "intersection intersect boolean",
             Arrange(ArrangeOp::Boolean(BooleanOp::Intersection)),
         ),
         (
-            "Ausschluss",
+            tr("Ausschluss"),
             "exclusion xor exclude boolean",
             Arrange(ArrangeOp::Boolean(BooleanOp::Exclusion)),
         ),
         (
-            "Morph: erste › zweite Form",
+            tr("Morph: erste › zweite Form"),
             "morph tween shape animation",
             Arrange(ArrangeOp::Morph),
         ),
-        ("Einpassen", "fit zoom view", Fit),
-        ("Auf Auswahl zoomen", "zoom selection view", ZoomSelection),
-        ("Lineale ein/aus", "rulers view", Rulers),
+        (tr("Einpassen"), "fit zoom view", Fit),
         (
-            "Intelligente Hilfslinien ein/aus",
+            tr("Auf Auswahl zoomen"),
+            "zoom selection view",
+            ZoomSelection,
+        ),
+        (tr("Lineale ein/aus"), "rulers view", Rulers),
+        (
+            tr("Intelligente Hilfslinien ein/aus"),
             "smart guides snapping",
             SmartGuides,
         ),
-        ("Am Raster einrasten ein/aus", "grid snap raster", Grid),
-        ("Zwiebelhaut ein/aus", "onion skin ghost animation", Onion),
-        ("Zeitleiste ein/aus", "timeline", Timeline),
-        ("Abspielen / Pause", "play pause animation", Play),
-        ("Zum Anfang", "rewind start", Rewind),
+        (tr("Am Raster einrasten ein/aus"), "grid snap raster", Grid),
         (
-            "Arbeitsbereich Gestalten",
+            tr("Zwiebelhaut ein/aus"),
+            "onion skin ghost animation",
+            Onion,
+        ),
+        (tr("Zeitleiste ein/aus"), "timeline", Timeline),
+        (tr("Abspielen / Pause"), "play pause animation", Play),
+        (tr("Zum Anfang"), "rewind start", Rewind),
+        (
+            tr("Arbeitsbereich Gestalten"),
             "design workspace",
             Workspace(super::Workspace::Design),
         ),
         (
-            "Arbeitsbereich Animieren",
+            tr("Arbeitsbereich Animieren"),
             "animate workspace",
             Workspace(super::Workspace::Animate),
         ),
         (
-            "Arbeitsbereich Erweitert",
+            tr("Arbeitsbereich Erweitert"),
             "advanced code javascript",
             Workspace(super::Workspace::Advanced),
         ),
         (
-            "Splinely Viewer öffnen",
+            tr("Splinely Viewer öffnen"),
             "viewer preview browser runtime",
             Viewer,
         ),
         (
-            "Tastenkürzel anzeigen",
+            tr("Tastenkürzel anzeigen"),
             "help shortcuts keys hilfe",
             Shortcuts,
         ),
         (
-            "Raster anzeigen ein/aus",
+            tr("Raster anzeigen ein/aus"),
             "grid show visible raster",
             GridVisible,
         ),
-        ("Hineinzoomen", "zoom in bigger", ZoomIn),
-        ("Herauszoomen", "zoom out smaller", ZoomOut),
-        ("Zoom 100 %", "zoom actual size reset", Zoom100),
+        (tr("Hineinzoomen"), "zoom in bigger", ZoomIn),
+        (tr("Herauszoomen"), "zoom out smaller", ZoomOut),
+        (tr("Zoom 100 %"), "zoom actual size reset", Zoom100),
         (
-            "Pipette: Stil übernehmen",
+            tr("Pipette: Stil übernehmen"),
             "eyedropper pick style color",
             Eyedropper,
         ),
         (
-            "Aufnahme (Auto-Key) ein/aus",
+            tr("Aufnahme (Auto-Key) ein/aus"),
             "auto key record animation",
             AutoKey,
         ),
-        ("Befehlspalette", "command palette search", Palette),
+        (tr("Befehlspalette"), "command palette search", Palette),
         (
-            "Einstellungen …",
+            tr("Einstellungen …"),
             "settings preferences options keys shortcuts optionen",
             Settings,
         ),
@@ -415,7 +431,7 @@ impl Editor {
             Cmd::Eyedropper => {
                 self.eyedropper = true;
                 self.status =
-                    "Pipette: Form anklicken, deren Stil übernommen wird · Escape bricht ab."
+                    tr("Pipette: Form anklicken, deren Stil übernommen wird · Escape bricht ab.")
                         .into();
             }
             Cmd::Palette => {
@@ -472,7 +488,7 @@ impl Editor {
             ui.set_width(440.);
             let edit = ui.add(
                 egui::TextEdit::singleline(&mut query)
-                    .hint_text("Befehl suchen … (z. B. „verein“, „align“, „png“)")
+                    .hint_text(tr("Befehl suchen … (z. B. „verein“, „align“, „png“)"))
                     .desired_width(f32::INFINITY),
             );
             edit.request_focus();
@@ -499,7 +515,7 @@ impl Editor {
                         }
                     }
                     if found.is_empty() {
-                        ui.weak("Kein Befehl gefunden.");
+                        ui.weak(tr("Kein Befehl gefunden."));
                     }
                 });
             if ui.input(|i| i.pointer.any_click()) && !ui.ui_contains_pointer() {
@@ -530,13 +546,13 @@ impl Editor {
             })
             .collect();
         let mut customize = false;
-        egui::Window::new("Tastenkürzel")
+        egui::Window::new(tr("Tastenkürzel"))
             .open(&mut open)
             .collapsible(false)
             .resizable(true)
             .default_width(460.)
             .show(ctx, |ui| {
-                if ui.button("Tastenkürzel ändern …").clicked() {
+                if ui.button(tr("Tastenkürzel ändern …")).clicked() {
                     customize = true;
                 }
                 egui::ScrollArea::vertical()
@@ -546,7 +562,7 @@ impl Editor {
                             .striped(true)
                             .num_columns(2)
                             .show(ui, |ui| {
-                                ui.strong("Befehle");
+                                ui.strong(tr("Befehle"));
                                 ui.end_row();
                                 for (keys, what) in &bound {
                                     ui.monospace(keys);
@@ -555,12 +571,12 @@ impl Editor {
                                 }
                                 for (keys, what) in FIXED_SHORTCUTS {
                                     if keys.is_empty() {
-                                        ui.strong(*what);
+                                        ui.strong(tr(what));
                                         ui.end_row();
                                         continue;
                                     }
-                                    ui.monospace(*keys);
-                                    ui.label(*what);
+                                    ui.monospace(tr(keys));
+                                    ui.label(tr(what));
                                     ui.end_row();
                                 }
                             });

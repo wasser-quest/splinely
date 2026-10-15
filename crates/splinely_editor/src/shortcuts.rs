@@ -34,7 +34,7 @@ impl Editor {
         let generated = match kind {
             NewShape::Rect => Ok(Node::rect(id.clone(), cx - 70., cy - 45., 140., 90.)),
             NewShape::Circle => Ok(Node::circle(id.clone(), cx, cy, 50.)),
-            NewShape::Text => Ok(Node::text(id.clone(), cx - 30., cy, "Text")),
+            NewShape::Text => Ok(Node::text(id.clone(), cx - 30., cy, tr("Text"))),
             NewShape::Polygon => Node::polygon(id.clone(), cx, cy, 55., 6),
             NewShape::Triangle => Node::polygon(id.clone(), cx, cy, 60., 3),
             NewShape::Star => Node::star(id.clone(), cx, cy, 60., 5, 0.45),
@@ -48,13 +48,13 @@ impl Editor {
             }
         };
         node.name = match kind {
-            NewShape::Rect => "Rechteck",
-            NewShape::Circle => "Kreis",
-            NewShape::Text => "Text",
-            NewShape::Polygon => "Sechseck",
-            NewShape::Triangle => "Dreieck",
-            NewShape::Star => "Stern",
-            NewShape::Line => "Linie",
+            NewShape::Rect => tr("Rechteck"),
+            NewShape::Circle => tr("Kreis"),
+            NewShape::Text => tr("Text"),
+            NewShape::Polygon => tr("Sechseck"),
+            NewShape::Triangle => tr("Dreieck"),
+            NewShape::Star => tr("Stern"),
+            NewShape::Line => tr("Linie"),
         }
         .into();
         let mut p = self.project.clone();
@@ -71,7 +71,7 @@ impl Editor {
             return;
         }
         if !self.machine_source_clean() {
-            self.status = "Zuerst vorgemerktes Zustands-JSON übernehmen oder neu laden.".into();
+            self.status = tr("Zuerst vorgemerktes Zustands-JSON übernehmen oder neu laden.").into();
             return;
         }
         let mut p = self.project.clone();
@@ -87,11 +87,11 @@ impl Editor {
             self.machine_buffer =
                 serde_json::to_string_pretty(&self.project.state_machines).unwrap_or_default();
             self.status = if ids.len() == 1 {
-                "Form gelöscht · Strg+Z stellt sie wieder her.".into()
+                tr("Form gelöscht · Strg+Z stellt sie wieder her.").into()
             } else {
-                format!(
+                trf(
                     "{} Formen gelöscht · Strg+Z stellt sie wieder her.",
-                    ids.len()
+                    &[format!("{}", ids.len())],
                 )
             };
         }
@@ -220,9 +220,15 @@ impl Editor {
             return false;
         }
         self.status = if nodes.len() == 1 {
-            format!("„{}“ kopiert · Strg+V fügt ein.", display_name(&nodes[0]))
+            trf(
+                "„{}“ kopiert · Strg+V fügt ein.",
+                &[display_name(&nodes[0]).to_string()],
+            )
         } else {
-            format!("{} Formen kopiert · Strg+V fügt ein.", nodes.len())
+            trf(
+                "{} Formen kopiert · Strg+V fügt ein.",
+                &[format!("{}", nodes.len())],
+            )
         };
         self.clipboard = ShapeClipboard {
             nodes,
@@ -362,7 +368,7 @@ impl Editor {
             if pressed(egui::Key::Escape) {
                 if self.eyedropper {
                     self.eyedropper = false;
-                    self.status = "Pipette abgebrochen.".into();
+                    self.status = tr("Pipette abgebrochen.").into();
                 } else {
                     self.set_selection(vec![]);
                 }

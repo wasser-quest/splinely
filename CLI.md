@@ -70,6 +70,12 @@ Error codes include `invalid_arguments`, `read_error`, `invalid_json`,
 `export_error`, `evaluation_error`, `invalid_context`, `invalid_time`, `not_found`,
 `conversion_error`, `check_failed` and `stdout_error`. `hint` is always present
 for these codes except `stdout_error`.
+
+If Splinely itself crashes, it prints `internal_error` instead and exits with
+status 101. That error also carries `reportUrl`: a pre-filled GitHub issue
+(version, system, message, location and Splinely's own backtrace frames; no
+project content, home folder replaced by `~`). Submitting it is optional and
+never happens automatically.
 `--help` and `--version` are human-readable exceptions.
 
 | Command | Result |

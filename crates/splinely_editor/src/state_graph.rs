@@ -3,6 +3,7 @@
 //! No runtime simulation: arrows describe declared transitions, not reachability.
 use eframe::egui::{self, Color32, Pos2, Rect, Sense, Stroke, Vec2};
 use splinely_document::{Event, Project, State, StateMachine, Transition};
+use splinely_editor::i18n::{tr, trf};
 
 const MAX_DRAWN_STATES: usize = 64;
 const MAX_DRAWN_ARROWS: usize = 128;
@@ -29,7 +30,7 @@ impl StateGraph {
     ) -> Option<Project> {
         let Some(machine) = project.state_machines.get(machine_index) else {
             *self = Self::default();
-            ui.label("Zustandsmaschine zum Bearbeiten wählen.");
+            ui.label(tr("Zustandsmaschine zum Bearbeiten wählen."));
             return None;
         };
         if !self
@@ -41,9 +42,9 @@ impl StateGraph {
         }
         let draft = self.draft.as_mut().unwrap();
         ui.push_id(("state_graph", machine_index), |ui| {
-            ui.label("Zustand oder Übergang wählen. Änderungen werden erst mit „Übernehmen“ wirksam.");
-            ui.label("Startzustand ist mit ★ markiert. Bedingungen, Aktionen und Overrides: über das Maschinen-JSON.");
-            ui.label("Zeigt nur deklarierte Übergänge, keine Simulation.");
+            ui.label(tr("Zustand oder Übergang wählen. Änderungen werden erst mit „Übernehmen“ wirksam."));
+            ui.label(tr("Startzustand ist mit ★ markiert. Bedingungen, Aktionen und Overrides: über das Maschinen-JSON."));
+            ui.label(tr("Zeigt nur deklarierte Übergänge, keine Simulation."));
             draw_graph(
                 ui,
                 draft,
@@ -51,9 +52,9 @@ impl StateGraph {
                 &mut self.selected_transition,
             );
             ui.horizontal(|ui| {
-                ui.label("ID des neuen Zustands:");
+                ui.label(tr("ID des neuen Zustands:"));
                 ui.text_edit_singleline(&mut self.new_state);
-                if ui.button("+ Zustand").clicked() {
+                if ui.button(tr("+ Zustand")).clicked() {
                     draft.states.push(State {
                         id: self.new_state.clone(),
                         on_enter: vec![],
@@ -67,12 +68,12 @@ impl StateGraph {
                 state_picker(
                     ui,
                     "source",
-                    "Von",
+                    tr("Von"),
                     &mut self.selected_state,
                     &draft.states,
                 );
                 if ui
-                    .add_enabled(!draft.states.is_empty(), egui::Button::new("+ Übergang"))
+                    .add_enabled(!draft.states.is_empty(), egui::Button::new(tr("+ Übergang")))
                     .clicked()
                 {
                     draft.transitions.push(Transition {
@@ -94,16 +95,7 @@ impl StateGraph {
                 .show_rows(ui, 22.0, draft.transitions.len(), |ui, rows| {
                     for i in rows {
                         let t = &draft.transitions[i];
-                        let label = format!(
-                            "#{} {} › {} · {} [{}] · {} Aktionen{}",
-                            i + 1,
-                            t.from,
-                            t.to,
-                            t.event.name,
-                            t.event.target.as_deref().unwrap_or("beliebig"),
-                            t.actions.len(),
-                            if t.guard.is_some() { " · mit Bedingung" } else { "" }
-                        );
+                        let label = trf("#{} {} › {} · {} [{}] · {} Aktionen{}", &[format!("{}", i + 1), t.from.to_string(), t.to.to_string(), t.event.name.to_string(), t.event.target.as_deref().unwrap_or("beliebig").to_string(), format!("{}", t.actions.len()), (if t.guard.is_some() { " · mit Bedingung" } else { "" }).to_string()]);
                         if ui
                             .selectable_label(self.selected_transition == Some(i), label)
                             .clicked()
@@ -118,16 +110,16 @@ impl StateGraph {
             {
                 let t = &mut draft.transitions[i];
                 ui.horizontal(|ui| {
-                    state_picker(ui, "from", "Von", &mut t.from, &draft.states);
-                    state_picker(ui, "to", "Nach", &mut t.to, &draft.states);
+                    state_picker(ui, "from", tr("Von"), &mut t.from, &draft.states);
+                    state_picker(ui, "to", tr("Nach"), &mut t.to, &draft.states);
                 });
                 ui.horizontal(|ui| {
-                    ui.label("Ereignisname:");
+                    ui.label(tr("Ereignisname:"));
                     ui.text_edit_singleline(&mut t.event.name);
                     egui::ComboBox::from_id_salt("event_target")
-                        .selected_text(t.event.target.as_deref().unwrap_or("Beliebiges Ziel"))
+                        .selected_text(t.event.target.as_deref().unwrap_or(tr("Beliebiges Ziel")))
                         .show_ui(ui, |ui| {
-                            ui.selectable_value(&mut t.event.target, None, "Beliebiges Ziel");
+                            ui.selectable_value(&mut t.event.target, None, tr("Beliebiges Ziel"));
                             for node in &project.nodes {
                                 ui.selectable_value(
                                     &mut t.event.target,
@@ -137,12 +129,8 @@ impl StateGraph {
                             }
                         });
                 });
-                ui.label(format!(
-                    "Bedingung: {} · {} Aktionen (bleiben erhalten; per JSON bearbeiten)",
-                    if t.guard.is_some() { "vorhanden" } else { "none" },
-                    t.actions.len()
-                ));
-                if ui.button("Ausgewählten Übergang entfernen").clicked() {
+                ui.label(trf("Bedingung: {} · {} Aktionen (bleiben erhalten; per JSON bearbeiten)", &[(if t.guard.is_some() { "vorhanden" } else { "none" }).to_string(), format!("{}", t.actions.len())]));
+                if ui.button(tr("Ausgewählten Übergang entfernen")).clicked() {
                     draft.transitions.remove(i);
                     self.selected_transition = None;
                 }
@@ -153,7 +141,7 @@ impl StateGraph {
         let mut discard = false;
         ui.horizontal(|ui| {
             if ui
-                .add_enabled(dirty, egui::Button::new("Graph-Änderungen übernehmen"))
+                .add_enabled(dirty, egui::Button::new(tr("Graph-Änderungen übernehmen")))
                 .clicked()
             {
                 match replacement(project, machine_index, draft.clone()) {
@@ -165,7 +153,10 @@ impl StateGraph {
                 }
             }
             discard = ui
-                .add_enabled(dirty, egui::Button::new("Vorgemerkte Änderungen verwerfen"))
+                .add_enabled(
+                    dirty,
+                    egui::Button::new(tr("Vorgemerkte Änderungen verwerfen")),
+                )
                 .clicked();
         });
         if discard {
@@ -192,7 +183,7 @@ fn replacement(project: &Project, index: usize, machine: StateMachine) -> Result
     let slot = next
         .state_machines
         .get_mut(index)
-        .ok_or("Zustandsmaschine fehlt")?;
+        .ok_or(tr("Zustandsmaschine fehlt"))?;
     *slot = machine;
     next.validate().map_err(|e| e.to_string())?;
     Ok(next)
@@ -216,7 +207,7 @@ fn draw_graph(
 ) {
     let count = machine.states.len().min(MAX_DRAWN_STATES);
     if machine.states.len() > MAX_DRAWN_STATES || machine.transitions.len() > MAX_DRAWN_ARROWS {
-        ui.label("Graphvorschau zeigt höchstens 64 Zustände / 128 Pfeile. Alle Zustände und Übergänge bleiben unten bearbeitbar.");
+        ui.label(tr("Graphvorschau zeigt höchstens 64 Zustände / 128 Pfeile. Alle Zustände und Übergänge bleiben unten bearbeitbar."));
     }
     egui::ScrollArea::both()
         .id_salt("graph_canvas")

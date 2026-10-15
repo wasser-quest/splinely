@@ -104,7 +104,7 @@ fn with_extension(mut path: PathBuf, extension: &str) -> PathBuf {
 
 pub(super) fn file_label(path: &str) -> String {
     if path.is_empty() {
-        "Unbenannt".into()
+        tr("Unbenannt").into()
     } else {
         Path::new(path)
             .file_name()
@@ -172,38 +172,38 @@ impl Editor {
             }
             let picked = match action {
                 FileAction::Open => dialog
-                    .set_title("Projekt öffnen")
-                    .add_filter("Splinely-Projekt", &["sply", "json"])
-                    .add_filter("Alle Dateien", &["*"])
+                    .set_title(tr("Projekt öffnen"))
+                    .add_filter(tr("Splinely-Projekt"), &["sply", "json"])
+                    .add_filter(tr("Alle Dateien"), &["*"])
                     .pick_file(),
                 FileAction::ImportSvg => dialog
-                    .set_title("SVG importieren")
+                    .set_title(tr("SVG importieren"))
                     .add_filter("SVG", &["svg"])
                     .pick_file(),
                 FileAction::SaveAs { .. } => dialog
-                    .set_title("Projekt speichern unter")
-                    .add_filter("Splinely-Projekt", &["sply"])
+                    .set_title(tr("Projekt speichern unter"))
+                    .add_filter(tr("Splinely-Projekt"), &["sply"])
                     .set_file_name(format!("{project_stem}.sply"))
                     .save_file()
                     .map(|p| with_extension(p, "sply")),
                 FileAction::Export { interactive } => dialog
                     .set_title(if interactive {
-                        "Interaktives SVG exportieren"
+                        tr("Interaktives SVG exportieren")
                     } else {
-                        "Statisches SVG exportieren"
+                        tr("Statisches SVG exportieren")
                     })
                     .add_filter("SVG", &["svg"])
                     .set_file_name(format!("{project_stem}.svg"))
                     .save_file()
                     .map(|p| with_extension(p, "svg")),
                 FileAction::ExportPng => dialog
-                    .set_title("Bild als PNG exportieren")
+                    .set_title(tr("Bild als PNG exportieren"))
                     .add_filter("PNG", &["png"])
                     .set_file_name(format!("{project_stem}.png"))
                     .save_file()
                     .map(|p| with_extension(p, "png")),
                 FileAction::ExportGif => dialog
-                    .set_title("Animation als GIF exportieren")
+                    .set_title(tr("Animation als GIF exportieren"))
                     .add_filter("GIF", &["gif"])
                     .set_file_name(format!("{project_stem}.gif"))
                     .save_file()
@@ -227,7 +227,7 @@ impl Editor {
             }
             Err(std::sync::mpsc::TryRecvError::Disconnected) => {
                 self.status =
-                    "Dateidialog nicht verfügbar · Pfad unter Datei › Pfade manuell eingeben."
+                    tr("Dateidialog nicht verfügbar · Pfad unter Datei › Pfade manuell eingeben.")
                         .into();
                 None
             }
@@ -289,7 +289,7 @@ impl Editor {
             let duration = project.animation_duration();
             if duration <= 0. {
                 Err(splinely_document::DocumentError(
-                    "kein Clip zum Animieren · erst eine Animation anlegen".into(),
+                    tr("kein Clip zum Animieren · erst eine Animation anlegen").into(),
                 ))
             } else {
                 project.render_gif(duration, fps, width, splinely_document::Color::rgb(r, g, b))
@@ -302,8 +302,14 @@ impl Editor {
             .map_err(|e| e.to_string())
             .and_then(|bytes| atomic_save_bytes(path, &bytes).map(|_| bytes.len()))
         {
-            Ok(bytes) => format!("Exportiert: {} ({} KB)", file_label(path), bytes / 1024),
-            Err(error) => format!("Export fehlgeschlagen: {error}"),
+            Ok(bytes) => trf(
+                "Exportiert: {} ({} KB)",
+                &[file_label(path).to_string(), format!("{}", bytes / 1024)],
+            ),
+            Err(error) => trf(
+                "Export fehlgeschlagen: {error}",
+                std::slice::from_ref(&error),
+            ),
         };
     }
 
@@ -328,12 +334,17 @@ impl Editor {
                 self.sync_buffers();
                 self.dirty = true;
                 self.path = String::new();
-                self.status = format!(
+                self.status = trf(
                     "„{}“ als bearbeitbare Pfade importiert · rückgängig möglich.",
-                    file_label(path)
+                    &[file_label(path).to_string()],
                 );
             }
-            Err(error) => self.status = format!("SVG-Import fehlgeschlagen: {error}"),
+            Err(error) => {
+                self.status = trf(
+                    "SVG-Import fehlgeschlagen: {error}",
+                    std::slice::from_ref(&error),
+                )
+            }
         }
     }
 
@@ -341,7 +352,7 @@ impl Editor {
         let (width, height, name) =
             self.new_size
                 .take()
-                .unwrap_or((800., 600., "Unbenannt".into()));
+                .unwrap_or((800., 600., tr("Unbenannt").into()));
         self.replace_document(Project {
             name,
             width,
@@ -349,14 +360,17 @@ impl Editor {
             ..Project::default()
         });
         self.path = String::new();
-        self.status = format!("Neues Projekt {width} × {height} · R, E oder T fügt eine Form ein.");
+        self.status = trf(
+            "Neues Projekt {width} × {height} · R, E oder T fügt eine Form ein.",
+            &[format!("{width}"), format!("{height}")],
+        );
     }
 
     /// Ask for name and size before creating a new project.
     pub(super) fn open_new_dialog(&mut self) {
         if !self.modal_open() {
             self.new_dialog = Some(NewProjectDraft {
-                name: "Unbenannt".into(),
+                name: tr("Unbenannt").into(),
                 width: 800.,
                 height: 600.,
             });
@@ -370,13 +384,13 @@ impl Editor {
         let mut keep = true;
         egui::Modal::new(egui::Id::new("splinely_new_project")).show(ctx, |ui| {
             ui.set_width(420.);
-            ui.heading("Neues Projekt");
+            ui.heading(tr("Neues Projekt"));
             ui.horizontal(|ui| {
-                ui.label("Name");
+                ui.label(tr("Name"));
                 ui.add(egui::TextEdit::singleline(&mut draft.name).desired_width(f32::INFINITY));
             });
             ui.add_space(6.);
-            ui.weak("Format");
+            ui.weak(tr("Format"));
             ui.horizontal_wrapped(|ui| {
                 for (label, w, h) in NEW_PRESETS {
                     let selected = draft.width == *w && draft.height == *h;
@@ -391,20 +405,20 @@ impl Editor {
                 }
             });
             ui.horizontal(|ui| {
-                ui.label("Breite");
+                ui.label(tr("Breite"));
                 ui.add(
                     egui::DragValue::new(&mut draft.width)
                         .range(1.0..=100_000.0)
                         .speed(1.),
                 );
                 if ui
-                    .small_button("Drehen")
-                    .on_hover_text("Hoch-/Querformat tauschen")
+                    .small_button(tr("Drehen"))
+                    .on_hover_text(tr("Hoch-/Querformat tauschen"))
                     .clicked()
                 {
                     std::mem::swap(&mut draft.width, &mut draft.height);
                 }
-                ui.label("Höhe");
+                ui.label(tr("Höhe"));
                 ui.add(
                     egui::DragValue::new(&mut draft.height)
                         .range(1.0..=100_000.0)
@@ -413,17 +427,18 @@ impl Editor {
             });
             ui.add_space(8.);
             ui.horizontal(|ui| {
-                if ui.button("Erstellen").clicked() || ui.input(|i| i.key_pressed(egui::Key::Enter))
+                if ui.button(tr("Erstellen")).clicked()
+                    || ui.input(|i| i.key_pressed(egui::Key::Enter))
                 {
                     let name = if draft.name.trim().is_empty() {
-                        "Unbenannt".to_owned()
+                        tr("Unbenannt").to_owned()
                     } else {
                         draft.name.trim().to_owned()
                     };
                     self.new_size = Some((draft.width, draft.height, name));
                     keep = false;
                 }
-                if ui.button("Abbrechen").clicked()
+                if ui.button(tr("Abbrechen")).clicked()
                     || ui.input(|i| i.key_pressed(egui::Key::Escape))
                 {
                     keep = false;
@@ -472,31 +487,28 @@ impl Editor {
             .ok()
             .and_then(|t| t.elapsed().ok())
             .map(|d| match d.as_secs() {
-                s if s < 120 => "gerade eben".to_owned(),
-                s if s < 7200 => format!("vor {} Minuten", s / 60),
-                s if s < 172_800 => format!("vor {} Stunden", s / 3600),
-                s => format!("vor {} Tagen", s / 86_400),
+                s if s < 120 => tr("gerade eben").to_owned(),
+                s if s < 7200 => trf("vor {} Minuten", &[format!("{}", s / 60)]),
+                s if s < 172_800 => trf("vor {} Stunden", &[format!("{}", s / 3600)]),
+                s => trf("vor {} Tagen", &[format!("{}", s / 86_400)]),
             })
             .unwrap_or_default();
         egui::Modal::new(egui::Id::new("splinely_recovery")).show(ctx, |ui| {
             ui.set_width(380.);
-            ui.heading("Ungespeicherte Arbeit gefunden");
-            ui.label(format!(
-                "Für „{}“ gibt es eine automatische Sicherung ({age}), die neuer ist als die gespeicherte Datei.",
-                file_label(&self.path)
-            ));
+            ui.heading(tr("Ungespeicherte Arbeit gefunden"));
+            ui.label(trf("Für „{}“ gibt es eine automatische Sicherung ({age}), die neuer ist als die gespeicherte Datei.", &[file_label(&self.path).to_string(), age.to_string()]));
             ui.add_space(8.);
             ui.horizontal(|ui| {
-                if ui.button("Wiederherstellen").clicked() {
+                if ui.button(tr("Wiederherstellen")).clicked() {
                     if let Some((_, project)) = self.recovery.take() {
                         let path = std::mem::take(&mut self.path);
                         self.replace_document(project);
                         self.path = path;
                         self.dirty = true;
-                        self.status = "Sicherung wiederhergestellt · zum Behalten speichern (Strg+S).".into();
+                        self.status = tr("Sicherung wiederhergestellt · zum Behalten speichern (Strg+S).").into();
                     }
                 }
-                if ui.button("Verwerfen").clicked() {
+                if ui.button(tr("Verwerfen")).clicked() {
                     if let Some((autosave, _)) = self.recovery.take() {
                         let _ = fs::remove_file(autosave);
                     }
@@ -507,10 +519,12 @@ impl Editor {
 
     /// Window title with file name and unsaved marker; close guard dialog.
     pub(super) fn window_chrome(&mut self, ctx: &egui::Context) {
-        let title = format!(
+        let title = trf(
             "{}{} — Splinely",
-            if self.dirty { "• " } else { "" },
-            file_label(&self.path)
+            &[
+                (if self.dirty { "• " } else { "" }).to_string(),
+                file_label(&self.path).to_string(),
+            ],
         );
         if title != self.window_title {
             ctx.send_viewport_cmd(egui::ViewportCommand::Title(title.clone()));
@@ -527,14 +541,14 @@ impl Editor {
         }
         egui::Modal::new(egui::Id::new("splinely_close_prompt")).show(ctx, |ui| {
             ui.set_width(340.);
-            ui.heading("Änderungen speichern?");
-            ui.label(format!(
+            ui.heading(tr("Änderungen speichern?"));
+            ui.label(trf(
                 "„{}“ hat ungespeicherte Änderungen.",
-                file_label(&self.path)
+                &[file_label(&self.path).to_string()],
             ));
             ui.add_space(8.);
             ui.horizontal(|ui| {
-                if ui.button("Speichern").clicked() {
+                if ui.button(tr("Speichern")).clicked() {
                     self.close_prompt = false;
                     if self.path.is_empty() {
                         self.start_dialog(FileAction::SaveAs { then_close: true });
@@ -546,7 +560,7 @@ impl Editor {
                         }
                     }
                 }
-                if ui.button("Nicht speichern").clicked() {
+                if ui.button(tr("Nicht speichern")).clicked() {
                     self.close_prompt = false;
                     // Discarding on purpose: no recovery offer next time.
                     if let Some(autosave) = autosave_path(&self.path) {
@@ -555,7 +569,7 @@ impl Editor {
                     self.allow_close = true;
                     ctx.send_viewport_cmd(egui::ViewportCommand::Close);
                 }
-                if ui.button("Abbrechen").clicked()
+                if ui.button(tr("Abbrechen")).clicked()
                     || ui.input(|i| i.key_pressed(egui::Key::Escape))
                 {
                     self.close_prompt = false;
@@ -570,7 +584,7 @@ impl Editor {
         if ui
             .add_enabled(
                 !busy,
-                egui::Button::new("Neues Projekt").shortcut_text(self.binding_label(&Cmd::New)),
+                egui::Button::new(tr("Neues Projekt")).shortcut_text(self.binding_label(&Cmd::New)),
             )
             .clicked()
         {
@@ -580,7 +594,7 @@ impl Editor {
         if ui
             .add_enabled(
                 !busy,
-                egui::Button::new("Öffnen …")
+                egui::Button::new(tr("Öffnen …"))
                     .shortcut_text(self.binding_label(&Cmd::File(FileAction::Open))),
             )
             .clicked()
@@ -590,7 +604,7 @@ impl Editor {
         }
         let recent = self.recent.clone();
         ui.add_enabled_ui(!recent.is_empty(), |ui| {
-            ui.menu_button("Zuletzt geöffnet", |ui| {
+            ui.menu_button(tr("Zuletzt geöffnet"), |ui| {
                 for path in recent {
                     if ui.button(file_label(&path)).on_hover_text(&path).clicked() {
                         ui.close_menu();
@@ -602,9 +616,9 @@ impl Editor {
         ui.separator();
         if ui
             .button(if self.dirty {
-                "Speichern *"
+                tr("Speichern *")
             } else {
-                "Speichern"
+                tr("Speichern")
             })
             .on_hover_text(self.binding_label(&Cmd::Save))
             .clicked()
@@ -615,7 +629,7 @@ impl Editor {
         if ui
             .add_enabled(
                 !busy,
-                egui::Button::new("Speichern unter …").shortcut_text(
+                egui::Button::new(tr("Speichern unter …")).shortcut_text(
                     self.binding_label(&Cmd::File(FileAction::SaveAs { then_close: false })),
                 ),
             )
@@ -626,7 +640,7 @@ impl Editor {
         }
         ui.separator();
         if ui
-            .add_enabled(!busy, egui::Button::new("SVG importieren …"))
+            .add_enabled(!busy, egui::Button::new(tr("SVG importieren …")))
             .clicked()
         {
             ui.close_menu();
@@ -635,28 +649,28 @@ impl Editor {
         if ui
             .add_enabled(
                 !busy,
-                egui::Button::new("Interaktives SVG exportieren …").shortcut_text(
+                egui::Button::new(tr("Interaktives SVG exportieren …")).shortcut_text(
                     self.binding_label(&Cmd::File(FileAction::Export { interactive: true })),
                 ),
             )
-            .on_hover_text("Mit Runtime, Zuständen und Audio · im Browser öffnen")
+            .on_hover_text(tr("Mit Runtime, Zuständen und Audio · im Browser öffnen"))
             .clicked()
         {
             ui.close_menu();
             self.start_dialog(FileAction::Export { interactive: true });
         }
         if ui
-            .add_enabled(!busy, egui::Button::new("Bild als PNG exportieren …"))
-            .on_hover_text("Aktuelles Bild in Dokumentgröße")
+            .add_enabled(!busy, egui::Button::new(tr("Bild als PNG exportieren …")))
+            .on_hover_text(tr("Aktuelles Bild in Dokumentgröße"))
             .clicked()
         {
             ui.close_menu();
             self.start_dialog(FileAction::ExportPng);
         }
         if ui
-            .add_enabled(!busy, egui::Button::new("Animation als GIF exportieren …"))
+            .add_enabled(!busy, egui::Button::new(tr("Animation als GIF exportieren …")))
             .on_hover_text(
-                "Gewählter Clip als endlos laufendes GIF · Bildrate, Breite und Hintergrund in den Einstellungen",
+                tr("Gewählter Clip als endlos laufendes GIF · Bildrate, Breite und Hintergrund in den Einstellungen"),
             )
             .clicked()
         {
@@ -664,8 +678,8 @@ impl Editor {
             self.start_dialog(FileAction::ExportGif);
         }
         if ui
-            .add_enabled(!busy, egui::Button::new("Statisches SVG exportieren …"))
-            .on_hover_text("Bild des aktuellen Zeitpunkts ohne Skripte")
+            .add_enabled(!busy, egui::Button::new(tr("Statisches SVG exportieren …")))
+            .on_hover_text(tr("Bild des aktuellen Zeitpunkts ohne Skripte"))
             .clicked()
         {
             ui.close_menu();
@@ -674,7 +688,7 @@ impl Editor {
         ui.separator();
         if ui
             .add(
-                egui::Button::new("Befehlspalette …")
+                egui::Button::new(tr("Befehlspalette …"))
                     .shortcut_text(self.binding_label(&Cmd::Palette)),
             )
             .clicked()
@@ -684,7 +698,7 @@ impl Editor {
         }
         if ui
             .add(
-                egui::Button::new("Tastenkürzel")
+                egui::Button::new(tr("Tastenkürzel"))
                     .shortcut_text(self.binding_label(&Cmd::Shortcuts)),
             )
             .clicked()
@@ -694,7 +708,7 @@ impl Editor {
         }
         if ui
             .add(
-                egui::Button::new("Einstellungen …")
+                egui::Button::new(tr("Einstellungen …"))
                     .shortcut_text(self.binding_label(&Cmd::Settings)),
             )
             .clicked()
@@ -702,27 +716,35 @@ impl Editor {
             ui.close_menu();
             self.settings_open = true;
         }
+        if ui
+            .button(tr("Problem melden …"))
+            .on_hover_text(tr("Öffnet ein vorausgefülltes GitHub-Issue im Browser. Gesendet wird erst, wenn du es dort abschickst."))
+            .clicked()
+        {
+            ui.close_menu();
+            self.open_issue(None);
+        }
         ui.separator();
-        ui.collapsing("Pfade manuell eingeben", |ui| {
-            ui.label("Projekt / SVG-Importpfad");
+        ui.collapsing(tr("Pfade manuell eingeben"), |ui| {
+            ui.label(tr("Projekt / SVG-Importpfad"));
             ui.add(egui::TextEdit::singleline(&mut self.path).desired_width(250.))
-                .on_hover_text("Eine .sply-Datei enthält dein ganzes Projekt einschließlich Animation, Zuständen und eingebettetem Audio. Alte JSON-Projekte bleiben lesbar.");
+                .on_hover_text(tr("Eine .sply-Datei enthält dein ganzes Projekt einschließlich Animation, Zuständen und eingebettetem Audio. Alte JSON-Projekte bleiben lesbar."));
             ui.horizontal(|ui| {
-                if ui.button("Projekt laden").clicked() {
+                if ui.button(tr("Projekt laden")).clicked() {
                     self.load();
                 }
-                if ui.button("SVG importieren").clicked() {
+                if ui.button(tr("SVG importieren")).clicked() {
                     let path = self.path.clone();
                     self.import_svg(&path);
                 }
             });
-            ui.label("SVG-Exportpfad");
+            ui.label(tr("SVG-Exportpfad"));
             ui.add(egui::TextEdit::singleline(&mut self.export_path).desired_width(250.));
             ui.horizontal(|ui| {
-                if ui.button("Interaktiv exportieren").clicked() {
+                if ui.button(tr("Interaktiv exportieren")).clicked() {
                     self.export(true);
                 }
-                if ui.button("Statisch exportieren").clicked() {
+                if ui.button(tr("Statisch exportieren")).clicked() {
                     self.export(false);
                 }
             });

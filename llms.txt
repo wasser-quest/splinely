@@ -54,6 +54,9 @@ glibc 2.35 or newer (Ubuntu 22.04+, Debian 12+, Fedora 36+).
 - `splinely-cli COMMAND --help` documents every command; output is JSON.
 - Only pass `--trusted-js` to `export` when the user explicitly approves the
   project's custom JavaScript.
+- If a command fails with error code `internal_error`, Splinely itself crashed.
+  Tell the user and show them the `reportUrl` (a pre-filled GitHub issue they
+  may submit). Never submit it yourself.
 - Exported SVGs need a script-capable browser (open directly or via `<object>`,
   not `<img>`); audio starts only after a user click.
 

@@ -34,29 +34,34 @@ impl Editor {
                 .clicked()
         };
         if count == 0 {
-            if button(ui, !self.clipboard.nodes.is_empty(), "Einfügen", "Strg+V") {
+            if button(
+                ui,
+                !self.clipboard.nodes.is_empty(),
+                tr("Einfügen"),
+                "Strg+V",
+            ) {
                 self.paste_from_menu();
                 ui.close_menu();
             }
             if button(
                 ui,
                 !self.project.nodes.is_empty(),
-                "Alles auswählen",
+                tr("Alles auswählen"),
                 &self.binding_label(&Cmd::SelectAll),
             ) {
                 self.select_all();
                 ui.close_menu();
             }
             ui.separator();
-            ui.menu_button("Neue Form", |ui| {
+            ui.menu_button(tr("Neue Form"), |ui| {
                 for (shape, label) in [
-                    (shortcuts::NewShape::Rect, "Rechteck"),
-                    (shortcuts::NewShape::Circle, "Kreis"),
-                    (shortcuts::NewShape::Text, "Text"),
-                    (shortcuts::NewShape::Polygon, "Sechseck"),
-                    (shortcuts::NewShape::Triangle, "Dreieck"),
-                    (shortcuts::NewShape::Star, "☆ Stern"),
-                    (shortcuts::NewShape::Line, "Linie"),
+                    (shortcuts::NewShape::Rect, tr("Rechteck")),
+                    (shortcuts::NewShape::Circle, tr("Kreis")),
+                    (shortcuts::NewShape::Text, tr("Text")),
+                    (shortcuts::NewShape::Polygon, tr("Sechseck")),
+                    (shortcuts::NewShape::Triangle, tr("Dreieck")),
+                    (shortcuts::NewShape::Star, tr("☆ Stern")),
+                    (shortcuts::NewShape::Line, tr("Linie")),
                 ] {
                     if ui.button(label).clicked() {
                         self.add_shape(shape);
@@ -64,52 +69,57 @@ impl Editor {
                     }
                 }
             });
-            if button(ui, true, "Alles einpassen", "F") {
+            if button(ui, true, tr("Alles einpassen"), "F") {
                 self.fit_requested = true;
                 ui.close_menu();
             }
             return;
         }
         ui.weak(if count == 1 {
-            "1 Form".to_owned()
+            tr("1 Form").to_owned()
         } else {
-            format!("{count} Formen")
+            trf("{count} Formen", &[format!("{count}")])
         });
-        if button(ui, editable > 0, "Ausschneiden", "Strg+X") {
+        if button(ui, editable > 0, tr("Ausschneiden"), "Strg+X") {
             self.copy_selection_to(ui.ctx());
             self.delete_selected();
             ui.close_menu();
         }
-        if button(ui, true, "Kopieren", "Strg+C") {
+        if button(ui, true, tr("Kopieren"), "Strg+C") {
             self.copy_selection_to(ui.ctx());
             ui.close_menu();
         }
-        if button(ui, !self.clipboard.nodes.is_empty(), "Einfügen", "Strg+V") {
+        if button(
+            ui,
+            !self.clipboard.nodes.is_empty(),
+            tr("Einfügen"),
+            "Strg+V",
+        ) {
             self.paste_from_menu();
             ui.close_menu();
         }
         if button(
             ui,
             editable > 0,
-            "Duplizieren",
+            tr("Duplizieren"),
             &self.binding_label(&Cmd::Duplicate),
         ) {
             self.duplicate_selected();
             ui.close_menu();
         }
-        if button(ui, editable > 0, "Löschen", "Entf") {
+        if button(ui, editable > 0, tr("Löschen"), "Entf") {
             self.delete_selected();
             ui.close_menu();
         }
         ui.separator();
-        if button(ui, true, "Stil kopieren", "") {
+        if button(ui, true, tr("Stil kopieren"), "") {
             self.copy_style();
             ui.close_menu();
         }
         if button(
             ui,
             self.style_clipboard.is_some() && editable > 0,
-            "Stil einfügen",
+            tr("Stil einfügen"),
             "",
         ) {
             self.paste_style();
@@ -118,12 +128,13 @@ impl Editor {
         if button(
             ui,
             editable > 0,
-            "Pipette: Stil übernehmen …",
+            tr("Pipette: Stil übernehmen …"),
             &self.binding_label(&Cmd::Eyedropper),
         ) {
             self.eyedropper = true;
             self.status =
-                "Pipette: Form anklicken, deren Stil übernommen wird · Escape bricht ab.".into();
+                tr("Pipette: Form anklicken, deren Stil übernommen wird · Escape bricht ab.")
+                    .into();
             ui.close_menu();
         }
         ui.separator();
@@ -133,12 +144,12 @@ impl Editor {
             .map(|s| key(ArrangeOp::Stack(s)));
         let flip_keys = [Axis::Horizontal, Axis::Vertical].map(|a| key(ArrangeOp::Flip(a)));
         let (group_key, ungroup_key) = (key(ArrangeOp::Group), key(ArrangeOp::Ungroup));
-        ui.menu_button("Anordnen", |ui| {
+        ui.menu_button(tr("Anordnen"), |ui| {
             for ((label, stack), shortcut) in [
-                ("Ganz nach vorne", Stack::Top),
-                ("Nach vorne", Stack::Raise),
-                ("Nach hinten", Stack::Lower),
-                ("Ganz nach hinten", Stack::Bottom),
+                (tr("Ganz nach vorne"), Stack::Top),
+                (tr("Nach vorne"), Stack::Raise),
+                (tr("Nach hinten"), Stack::Lower),
+                (tr("Ganz nach hinten"), Stack::Bottom),
             ]
             .into_iter()
             .zip(&stack_keys)
@@ -153,25 +164,25 @@ impl Editor {
             }
             ui.separator();
             if ui
-                .add(egui::Button::new("Horizontal spiegeln").shortcut_text(&flip_keys[0]))
+                .add(egui::Button::new(tr("Horizontal spiegeln")).shortcut_text(&flip_keys[0]))
                 .clicked()
             {
                 op = Some(ArrangeOp::Flip(Axis::Horizontal));
                 ui.close_menu();
             }
             if ui
-                .add(egui::Button::new("Vertikal spiegeln").shortcut_text(&flip_keys[1]))
+                .add(egui::Button::new(tr("Vertikal spiegeln")).shortcut_text(&flip_keys[1]))
                 .clicked()
             {
                 op = Some(ArrangeOp::Flip(Axis::Vertical));
                 ui.close_menu();
             }
         });
-        if count == 2 && button(ui, editable > 0, "Morph: erste › zweite Form", "") {
+        if count == 2 && button(ui, editable > 0, tr("Morph: erste › zweite Form"), "") {
             op = Some(ArrangeOp::Morph);
             ui.close_menu();
         }
-        if count > 1 && button(ui, editable > 1, "Gruppieren", &group_key) {
+        if count > 1 && button(ui, editable > 1, tr("Gruppieren"), &group_key) {
             op = Some(ArrangeOp::Group);
             ui.close_menu();
         }
@@ -181,7 +192,7 @@ impl Editor {
                 .iter()
                 .any(|n| &n.id == id && n.group.is_some())
         });
-        if grouped && button(ui, true, "Gruppe lösen", &ungroup_key) {
+        if grouped && button(ui, true, tr("Gruppe lösen"), &ungroup_key) {
             op = Some(ArrangeOp::Ungroup);
             ui.close_menu();
         }
@@ -189,18 +200,18 @@ impl Editor {
             self.apply_arrange(op);
         }
         ui.separator();
-        if button(ui, editable > 0, "Sperren", "") {
+        if button(ui, editable > 0, tr("Sperren"), "") {
             self.set_flags(Some(true), None);
             ui.close_menu();
         }
-        if button(ui, editable > 0, "Ausblenden", "") {
+        if button(ui, editable > 0, tr("Ausblenden"), "") {
             self.set_flags(None, Some(false));
             ui.close_menu();
         }
         if button(
             ui,
             true,
-            "Auf Auswahl zoomen",
+            tr("Auf Auswahl zoomen"),
             &self.binding_label(&Cmd::ZoomSelection),
         ) {
             self.zoom_selection_requested = true;
@@ -227,7 +238,7 @@ impl Editor {
             .find(|n| Some(&n.id) == self.selected.as_ref())
         {
             self.style_clipboard = Some((node.style, node.gradient.clone()));
-            self.status = "Stil kopiert · Rechtsklick › Stil einfügen überträgt Füllung/Verlauf, Rand und Deckkraft.".into();
+            self.status = tr("Stil kopiert · Rechtsklick › Stil einfügen überträgt Füllung/Verlauf, Rand und Deckkraft.").into();
         }
     }
 
@@ -242,7 +253,10 @@ impl Editor {
             node.gradient = gradient.clone();
         }
         self.commit(next);
-        self.status = format!("Stil auf {} Form(en) übertragen.", ids.len());
+        self.status = trf(
+            "Stil auf {} Form(en) übertragen.",
+            &[format!("{}", ids.len())],
+        );
     }
 
     /// Pipette click: take style and gradient from the shape under the pointer.
@@ -264,7 +278,7 @@ impl Editor {
                 self.paste_style();
                 self.style_clipboard = previous;
             }
-            None => self.status = "Pipette: keine Form getroffen.".into(),
+            None => self.status = tr("Pipette: keine Form getroffen.").into(),
         }
         true
     }
@@ -285,9 +299,9 @@ impl Editor {
         if locked == Some(true) || visible == Some(false) {
             self.set_selection(vec![]);
             self.status = if locked.is_some() {
-                "Gesperrt · Entsperren über das Schloss in der Ebenenliste.".into()
+                tr("Gesperrt · Entsperren über das Schloss in der Ebenenliste.").into()
             } else {
-                "Ausgeblendet · Einblenden über das Auge in der Ebenenliste.".into()
+                tr("Ausgeblendet · Einblenden über das Auge in der Ebenenliste.").into()
             };
         }
     }
@@ -302,7 +316,7 @@ impl Editor {
             .map(selection::scene_rect)
             .reduce(|a, b| a.union(b))
         else {
-            self.status = "Nichts ausgewählt.".into();
+            self.status = tr("Nichts ausgewählt.").into();
             return;
         };
         let size = bounds.size().max(Vec2::splat(1.));

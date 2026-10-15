@@ -49,7 +49,7 @@ impl Editor {
             let id = next.unused_id("animation");
             next.clips.push(Clip {
                 id,
-                name: "Animation".into(),
+                name: tr("Animation").into(),
                 duration: self.time.max(2.),
                 looping: true,
                 autoplay: true,
@@ -102,7 +102,10 @@ impl Editor {
             }
         }
         self.preview_animation = true;
-        self.status = format!("Aufnahme: Schlüsselbild bei {:.2} s gesetzt.", time);
+        self.status = trf(
+            "Aufnahme: Schlüsselbild bei {:.2} s gesetzt.",
+            &[format!("{:.2}", time)],
+        );
     }
 
     /// While dragging/transforming, show the edited base pose of the selection
@@ -135,9 +138,9 @@ impl Editor {
 
     pub(super) fn autokey_toggle_ui(&mut self, ui: &mut egui::Ui) {
         let label = if self.auto_key {
-            "🔴 Aufnahme an"
+            tr("🔴 Aufnahme an")
         } else {
-            "🔴 Aufnahme"
+            tr("🔴 Aufnahme")
         };
         let text = egui::RichText::new(label).color(if self.auto_key {
             Color32::from_rgb(240, 80, 80)
@@ -146,7 +149,7 @@ impl Editor {
         });
         if ui
             .add(egui::Button::new(text).selected(self.auto_key))
-            .on_hover_text("Auto-Key: Änderungen an Formen werden zu Schlüsselbildern am Abspielkopf statt die Grundpose zu ändern.")
+            .on_hover_text(tr("Auto-Key: Änderungen an Formen werden zu Schlüsselbildern am Abspielkopf statt die Grundpose zu ändern."))
             .clicked()
         {
             self.auto_key = !self.auto_key;

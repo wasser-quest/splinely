@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="960" height="640" viewBox="0 0 960 640" data-splinely-version="1">
-<!-- Created with Splinely 0.3.0 -->
-<metadata><splinely:generator xmlns:splinely="urn:splinely:metadata" name="Splinely" version="0.3.0" schemaVersion="1"/></metadata>
+<!-- Created with Splinely 0.4.0 -->
+<metadata><splinely:generator xmlns:splinely="urn:splinely:metadata" name="Splinely" version="0.4.0" schemaVersion="1"/></metadata>
 <title>The shape conversation</title>
 <rect id="background" data-splinely-node="background" transform="translate(0 0) rotate(0) scale(1 1)" fill="rgb(4.705882352941177% 9.019607843137255% 16.862745098039216%)" fill-opacity="1" stroke="none" stroke-opacity="1" stroke-width="1" opacity="1" x="0" y="0" width="960" height="640" rx="0"/>
 <circle id="ambient" data-splinely-node="ambient" transform="translate(0 0) rotate(0) scale(1 1)" fill="rgb(6.2745098039215685% 13.333333333333334% 22.35294117647059%)" fill-opacity="1" stroke="none" stroke-opacity="1" stroke-width="1" opacity="1" cx="840" cy="180" r="270"/>

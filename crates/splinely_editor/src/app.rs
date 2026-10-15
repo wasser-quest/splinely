@@ -1,6 +1,7 @@
 use eframe::egui::{self, Color32, Pos2, Rect, Sense, Vec2};
 use splinely_document::*;
 use splinely_editor::ecs::{Projection, SceneNode, Shape};
+use splinely_editor::i18n::{tr, trf};
 #[cfg(test)]
 use splinely_editor::projection::project_node;
 use std::{fs, time::Instant};
@@ -175,7 +176,7 @@ impl Workspace {
                 (Tab::Canvas, "Zeichenfläche / Zeitleiste"),
                 (Tab::Bones, "Skelett"),
                 (Tab::States, "Zustände"),
-                (Tab::Audio, "Audio / Sprache"),
+                (Tab::Audio, "Audio"),
             ],
             Self::Advanced => &[(Tab::JavaScript, "JavaScript"), (Tab::Svg, "SVG-Quelltext")],
         }
@@ -194,6 +195,10 @@ pub struct Editor {
     settings: settings::Settings,
     saved_settings: Option<settings::Settings>,
     applied_theme: Option<settings::Theme>,
+    /// Language whose fonts are installed in the egui context.
+    applied_language: Option<splinely_editor::i18n::Lang>,
+    /// Report saved by the last crash, offered once for a GitHub issue.
+    crash_report: Option<splinely_editor::crash::CrashReport>,
     settings_open: bool,
     settings_tab: settings::SettingsTab,
     capturing_key: Option<String>,
@@ -313,6 +318,7 @@ impl Default for Editor {
             .add_plugin(splinely_editor::plugins::SelectionHighlightPlugin)
             .unwrap();
         let settings = settings::Settings::load();
+        splinely_editor::i18n::set_language(settings.effective_language());
         Self {
             code_buffer: project.custom_js.clone(),
             svg_buffer: project.raw_svg.clone(),
@@ -320,6 +326,12 @@ impl Default for Editor {
             variables_buffer: serde_json::to_string_pretty(&project.variables).unwrap(),
             saved_settings: Some(settings.clone()),
             applied_theme: None,
+            applied_language: None,
+            crash_report: if cfg!(test) {
+                None
+            } else {
+                splinely_editor::crash::pending()
+            },
             settings_open: false,
             settings_tab: settings::SettingsTab::General,
             capturing_key: None,
@@ -340,7 +352,7 @@ impl Default for Editor {
             workspace: Workspace::Design,
             path: String::new(),
             export_path: "splinely.svg".into(),
-            status: "Hallo! Zeichne eine Form oder zieh eine .sply-Datei herein.".into(),
+            status: tr("Hallo! Zeichne eine Form oder zieh eine .sply-Datei herein.").into(),
             time: 0.,
             playing: false,
             preview_animation: false,
@@ -467,9 +479,7 @@ impl Editor {
             self.history.clear();
             self.history_bytes = 0;
             self.history_steps = 0;
-            self.status = format!(
-                "Ältere Rückgängig-Schritte verworfen (Grenze: {limit} Schritte / ~128 MiB · änderbar in den Einstellungen)."
-            );
+            self.status = trf("Ältere Rückgängig-Schritte verworfen (Grenze: {limit} Schritte / ~128 MiB · änderbar in den Einstellungen).", &[format!("{limit}")]);
         }
         let label = history_panel::describe_change(&self.project, &next);
         match self
@@ -586,13 +596,13 @@ impl Editor {
         match Project::load_file(&path) {
             Ok(project) => {
                 self.replace_document(project);
-                self.status = format!("„{}“ geöffnet.", files::file_label(&path));
+                self.status = trf("„{}“ geöffnet.", &[files::file_label(&path).to_string()]);
                 self.opened(&path);
                 self.path = path;
                 self.check_recovery();
             }
             Err(error) => {
-                self.status = format!("Öffnen fehlgeschlagen: {error}");
+                self.status = trf("Öffnen fehlgeschlagen: {error}", &[format!("{error}")]);
                 self.recent.retain(|p| p != &path);
             }
         }
@@ -601,14 +611,14 @@ impl Editor {
         let dropped = ctx.input(|input| input.raw.dropped_files.clone());
         if !dropped.is_empty() {
             if dropped.len() != 1 {
-                self.status = "Bitte nur eine Projektdatei hereinziehen.".into();
+                self.status = tr("Bitte nur eine Projektdatei hereinziehen.").into();
             } else if let Some(path) = &dropped[0].path {
                 let extension = path.extension().and_then(|s| s.to_str()).unwrap_or("");
                 if extension.eq_ignore_ascii_case("sply") || extension.eq_ignore_ascii_case("json")
                 {
                     self.request_open(path.to_string_lossy().into());
                 } else {
-                    self.status = "Hier .sply oder ältere JSON-Projekte ablegen; SVG über Datei & Export importieren.".into();
+                    self.status = tr("Hier .sply oder ältere JSON-Projekte ablegen; SVG über Datei & Export importieren.").into();
                 }
             }
         }
@@ -617,19 +627,19 @@ impl Editor {
             let new = path.is_empty();
             egui::Modal::new(egui::Id::new("splinely_switch_prompt")).show(ctx, |ui| {
                 ui.set_width(360.);
-                ui.heading(if new { "Neues Projekt beginnen?" } else { "Projekt wechseln?" });
-                ui.label("Ungespeicherte Änderungen oder Zeichen-/Quelltextentwürfe gehen sonst verloren.");
+                ui.heading(if new { tr("Neues Projekt beginnen?") } else { tr("Projekt wechseln?") });
+                ui.label(tr("Ungespeicherte Änderungen oder Zeichen-/Quelltextentwürfe gehen sonst verloren."));
                 if !new {
                     ui.weak(&path);
                 }
                 ui.add_space(8.);
                 ui.horizontal(|ui| {
-                    let label = if new { "Verwerfen & neu" } else { "Verwerfen & öffnen" };
+                    let label = if new { tr("Verwerfen & neu") } else { tr("Verwerfen & öffnen") };
                     if ui.button(label).clicked() {
                         self.pending_open = None;
                         if new { self.new_project(); } else { self.open_dropped_project(path); }
                     }
-                    if ui.button("Abbrechen").clicked() || ui.input(|i| i.key_pressed(egui::Key::Escape)) {
+                    if ui.button(tr("Abbrechen")).clicked() || ui.input(|i| i.key_pressed(egui::Key::Escape)) {
                         self.pending_open = None;
                     }
                 });
@@ -644,7 +654,7 @@ impl Editor {
             ..Self::default()
         };
         editor.sync_buffers();
-        editor.status = format!("„{}“ geöffnet.", files::file_label(path));
+        editor.status = trf("„{}“ geöffnet.", &[files::file_label(path).to_string()]);
         editor.opened(path);
         editor.check_recovery();
         Ok(editor)
@@ -656,7 +666,10 @@ impl Editor {
             .map_err(|e| e.to_string());
         match result {
             Ok(()) => {
-                self.status = format!("Gespeichert: {}", files::file_label(&self.path));
+                self.status = trf(
+                    "Gespeichert: {}",
+                    &[files::file_label(&self.path).to_string()],
+                );
                 self.dirty = false;
                 let path = self.path.clone();
                 self.opened(&path);
@@ -695,7 +708,7 @@ impl Editor {
         };
         self.status = match result {
             Ok(svg) => match fs::write(&self.export_path, svg) {
-                Ok(()) => format!("Exportiert: {}", self.export_path),
+                Ok(()) => trf("Exportiert: {}", std::slice::from_ref(&self.export_path)),
                 Err(e) => e.to_string(),
             },
             Err(e) => e.to_string(),
@@ -708,7 +721,7 @@ impl Editor {
                 if ui
                     .add_enabled(
                         self.history.can_undo() || self.edit_start.is_some(),
-                        egui::Button::new("Rückgängig"),
+                        egui::Button::new(tr("Rückgängig")),
                     )
                     .clicked()
                 {
@@ -719,7 +732,7 @@ impl Editor {
                     self.sync_buffers();
                 }
                 if ui
-                    .add_enabled(self.history.can_redo(), egui::Button::new("Wiederholen"))
+                    .add_enabled(self.history.can_redo(), egui::Button::new(tr("Wiederholen")))
                     .clicked()
                 {
                     self.finish_edit();
@@ -730,30 +743,30 @@ impl Editor {
                 }
                 if ui
                     .button(if self.dirty {
-                        "Speichern *"
+                        tr("Speichern *")
                     } else {
-                        "Speichern"
+                        tr("Speichern")
                     })
-                    .on_hover_text("Projekt speichern · Strg+S")
+                    .on_hover_text(tr("Projekt speichern · Strg+S"))
                     .clicked()
                 {
                     self.save_or_ask();
                 }
                 if ui
                     .button(if self.playing {
-                        "⏸ Pause"
+                        tr("⏸ Pause")
                     } else {
-                        "▶ Abspielen"
+                        tr("▶ Abspielen")
                     })
-                    .on_hover_text("Animation abspielen · Leertaste kurz drücken")
+                    .on_hover_text(tr("Animation abspielen · Leertaste kurz drücken"))
                     .clicked()
                 {
                     self.playing = !self.playing;
                     self.preview_animation = true;
                 }
                 if ui
-                    .selectable_label(self.preview_mode, "Vorschau")
-                    .on_hover_text("Formen anklicken, um Zustände zu testen. Ein Zeichenwerkzeug wechselt zurück zur Bearbeitung.")
+                    .selectable_label(self.preview_mode, tr("Vorschau"))
+                    .on_hover_text(tr("Formen anklicken, um Zustände zu testen. Ein Zeichenwerkzeug wechselt zurück zur Bearbeitung."))
                     .clicked()
                 {
                     let preview = !self.preview_mode;
@@ -761,24 +774,24 @@ impl Editor {
                     self.preview_mode = preview;
                 }
                 self.viewer_button(ui);
-                ui.menu_button("Datei", |ui| self.file_menu(ui));
+                ui.menu_button(tr("Datei"), |ui| self.file_menu(ui));
             });
             ui.horizontal_wrapped(|ui| {
                 for (workspace, label, hint) in [
                     (
                         Workspace::Design,
-                        "Gestalten",
-                        "Formen zeichnen, auswählen und bearbeiten.",
+                        tr("Gestalten"),
+                        tr("Formen zeichnen, auswählen und bearbeiten."),
                     ),
                     (
                         Workspace::Animate,
-                        "Animieren",
-                        "Zeitleiste, Skelett, Zustände und Audio.",
+                        tr("Animieren"),
+                        tr("Zeitleiste, Skelett, Zustände und Audio."),
                     ),
                     (
                         Workspace::Advanced,
-                        "Erweitert",
-                        "JavaScript und bewahrter SVG-Quelltext.",
+                        tr("Erweitert"),
+                        tr("JavaScript und bewahrter SVG-Quelltext."),
                     ),
                 ] {
                     if ui
@@ -795,13 +808,13 @@ impl Editor {
                         }
                     }
                 }
-                ui.checkbox(&mut self.timeline_visible, "Zeitleiste");
+                ui.checkbox(&mut self.timeline_visible, tr("Zeitleiste"));
             });
             if self.workspace != Workspace::Design {
                 ui.horizontal_wrapped(|ui| {
-                    ui.label("Bereich:");
+                    ui.label(tr("Bereich:"));
                     for &(tab, label) in self.workspace.sections() {
-                        if ui.selectable_label(self.tab == tab, label).clicked() {
+                        if ui.selectable_label(self.tab == tab, tr(label)).clicked() {
                             self.finish_edit();
                             self.finish_drag();
                             self.tab = tab;
@@ -815,8 +828,8 @@ impl Editor {
         });
     }
     fn viewer_button(&mut self, ui: &mut egui::Ui) {
-        if ui.button("Splinely Viewer öffnen")
-            .on_hover_text("Echte SVG-Runtime in einem eigenen Fenster. Momentaufnahme; zum Aktualisieren erneut öffnen.").clicked() {
+        if ui.button(tr("Splinely Viewer öffnen"))
+            .on_hover_text(tr("Echte SVG-Runtime in einem eigenen Fenster. Momentaufnahme; zum Aktualisieren erneut öffnen.")).clicked() {
             self.open_viewer();
         }
     }
@@ -830,7 +843,7 @@ impl Editor {
             {
                 Ok(viewer) => {
                     self.viewer = Some(viewer);
-                    self.status = "Viewer geöffnet · eigenen Code nur nach Freigabe unter Erweitert ausführen.".into();
+                    self.status = tr("Viewer geöffnet · eigenen Code nur nach Freigabe unter Erweitert ausführen.").into();
                 }
                 Err(error) => self.status = error,
             }
@@ -894,7 +907,7 @@ impl Editor {
             }
             boundaries += 1;
             if boundaries >= 1024 || (step == 0. && !completed) {
-                self.status = "Grenze der nativen Wiedergabe erreicht".into();
+                self.status = tr("Grenze der nativen Wiedergabe erreicht").into();
                 break;
             }
         }
@@ -989,67 +1002,70 @@ impl Editor {
             // Returning to authoring must also end independent clocks/fades;
             // pausing a layer alone intentionally does not pause its weight ramp.
             self.blend_preview = Default::default();
-            self.status = "Ebenenvorschau beendet · bereit zum Gestalten.".into();
+            self.status = tr("Ebenenvorschau beendet · bereit zum Gestalten.").into();
         }
     }
     fn canvas(&mut self, ui: &mut egui::Ui) {
         ui.horizontal_wrapped(|ui| {
             for (shape, label) in [
-                (shortcuts::NewShape::Rect, "+ Rechteck"),
-                (shortcuts::NewShape::Circle, "+ Kreis"),
-                (shortcuts::NewShape::Text, "+ Text"),
+                (shortcuts::NewShape::Rect, tr("+ Rechteck")),
+                (shortcuts::NewShape::Circle, tr("+ Kreis")),
+                (shortcuts::NewShape::Text, tr("+ Text")),
             ] {
                 let key = self.binding_label(&palette::Cmd::Shape(shape));
                 if ui
                     .button(label)
-                    .on_hover_text(format!("In der Bildmitte einfügen · Taste {key}"))
+                    .on_hover_text(trf(
+                        "In der Bildmitte einfügen · Taste {key}",
+                        std::slice::from_ref(&key),
+                    ))
                     .clicked()
                 {
                     self.add_shape(shape);
                 }
             }
-            ui.menu_button("+ Mehr ⏷", |ui| {
+            ui.menu_button(tr("+ Mehr ⏷"), |ui| {
                 for (shape, label) in [
-                    (shortcuts::NewShape::Polygon, "Sechseck"),
-                    (shortcuts::NewShape::Triangle, "Dreieck"),
-                    (shortcuts::NewShape::Star, "☆ Stern"),
-                    (shortcuts::NewShape::Line, "/ Linie"),
+                    (shortcuts::NewShape::Polygon, tr("Sechseck")),
+                    (shortcuts::NewShape::Triangle, tr("Dreieck")),
+                    (shortcuts::NewShape::Star, tr("☆ Stern")),
+                    (shortcuts::NewShape::Line, tr("/ Linie")),
                 ] {
                     if ui.button(label).clicked() {
                         ui.close_menu();
                         self.add_shape(shape);
                     }
                 }
-                ui.weak("Wird als bearbeitbarer Pfad angelegt.");
+                ui.weak(tr("Wird als bearbeitbarer Pfad angelegt."));
             });
         });
         ui.horizontal_wrapped(|ui| {
             for (tool, label, hint) in [
-                (CanvasTool::Selection, "Auswahl", "Form anklicken und verschieben. Pfeiltasten verschieben (Shift: großer Schritt) · Entf: löschen · Strg+C/V: kopieren/einfügen."),
-                (CanvasTool::Pen, "Pen", "Anker klicken, für Tangenten ziehen. Enter: fertig · Escape: verwerfen."),
-                (CanvasTool::PathPoints, "Pfadpunkte", "Anker und Tangenten ziehen. Doppelklick auf eine Kante: Anker einfügen. Shift: Tangenten koppeln · Shift+Alt: gegenüberliegende Länge erhalten · Escape: abbrechen."),
-                (CanvasTool::Freehand, "Freihand", "Mit Maus oder Tablet zeichnen. Ein Strich = ein Rückgängig-Schritt. Druck nur bei gelieferten Touch-Force-Events."),
+                (CanvasTool::Selection, tr("Auswahl"), tr("Form anklicken und verschieben. Pfeiltasten verschieben (Shift: großer Schritt) · Entf: löschen · Strg+C/V: kopieren/einfügen.")),
+                (CanvasTool::Pen, tr("Pen"), tr("Anker klicken, für Tangenten ziehen. Enter: fertig · Escape: verwerfen.")),
+                (CanvasTool::PathPoints, tr("Pfadpunkte"), tr("Anker und Tangenten ziehen. Doppelklick auf eine Kante: Anker einfügen. Shift: Tangenten koppeln · Shift+Alt: gegenüberliegende Länge erhalten · Escape: abbrechen.")),
+                (CanvasTool::Freehand, tr("Freihand"), tr("Mit Maus oder Tablet zeichnen. Ein Strich = ein Rückgängig-Schritt. Druck nur bei gelieferten Touch-Force-Events.")),
             ] {
                 let key = self.binding_label(&palette::Cmd::Tool(tool));
-                let hint = if key.is_empty() { hint.to_owned() } else { format!("{hint} · Taste {key}") };
+                let hint = if key.is_empty() { hint.to_owned() } else { trf("{hint} · Taste {key}", &[hint.to_string(), key.to_string()]) };
                 if ui.selectable_label(self.canvas_tool() == tool, label).on_hover_text(hint).clicked() {
                     self.choose_tool(tool);
                 }
             }
             if self.freehand_mode {
-                ui.add(egui::DragValue::new(&mut self.freehand.options.width).range(0.1..=100.).prefix("Stiftbreite "));
-                ui.checkbox(&mut self.freehand.options.pressure_outline, "Druck › Kontur");
+                ui.add(egui::DragValue::new(&mut self.freehand.options.width).range(0.1..=100.).prefix(tr("Stiftbreite ")));
+                ui.checkbox(&mut self.freehand.options.pressure_outline, tr("Druck › Kontur"));
             }
-            ui.menu_button("Ansicht", |ui| {
-                ui.checkbox(&mut self.show_rulers, "Lineale");
-                ui.checkbox(&mut self.highlight, "Auswahl hervorheben (Plugin)");
-                if ui.button("Auf Auswahl zoomen").on_hover_text(self.binding_label(&palette::Cmd::ZoomSelection)).clicked() {
+            ui.menu_button(tr("Ansicht"), |ui| {
+                ui.checkbox(&mut self.show_rulers, tr("Lineale"));
+                ui.checkbox(&mut self.highlight, tr("Auswahl hervorheben (Plugin)"));
+                if ui.button(tr("Auf Auswahl zoomen")).on_hover_text(self.binding_label(&palette::Cmd::ZoomSelection)).clicked() {
                     self.zoom_selection_requested = true;
                     ui.close_menu();
                 }
                 if ui
-                    .add_enabled(!self.project.guides.is_empty(), egui::Button::new("Hilfslinien löschen"))
-                    .on_hover_text("Neue Hilfslinien: vom Lineal auf die Zeichenfläche ziehen.")
+                    .add_enabled(!self.project.guides.is_empty(), egui::Button::new(tr("Hilfslinien löschen")))
+                    .on_hover_text(tr("Neue Hilfslinien: vom Lineal auf die Zeichenfläche ziehen."))
                     .clicked()
                 {
                     let mut next = self.project.clone();
@@ -1057,19 +1073,19 @@ impl Editor {
                     self.commit(next);
                     ui.close_menu();
                 }
-                if ui.button("Verlauf …").on_hover_text("Alle Rückgängig-Schritte · Klick springt dorthin").clicked() {
+                if ui.button(tr("Verlauf …")).on_hover_text(tr("Alle Rückgängig-Schritte · Klick springt dorthin")).clicked() {
                     self.history_open = true;
                     ui.close_menu();
                 }
-                ui.checkbox(&mut self.onion_skin, "Zwiebelhaut (Animation)")
-                    .on_hover_text("Blasse Geister der animierten Formen am vorherigen (rot) und nächsten (blau) Schlüsselbild.");
-                ui.checkbox(&mut self.smart_guides, "Intelligente Hilfslinien")
-                    .on_hover_text("Beim Verschieben an Kanten und Mitten anderer Formen und der Zeichenfläche einrasten.");
-                ui.checkbox(&mut self.settings.show_grid, "Raster anzeigen");
-                ui.checkbox(&mut self.snap_grid, format!("Am Raster einrasten ({})", self.settings.grid_size))
-                    .on_hover_text("Beim Loslassen die lokale Position der Form am Raster ausrichten · Rastergröße in den Einstellungen.");
+                ui.checkbox(&mut self.onion_skin, tr("Zwiebelhaut (Animation)"))
+                    .on_hover_text(tr("Blasse Geister der animierten Formen am vorherigen (rot) und nächsten (blau) Schlüsselbild."));
+                ui.checkbox(&mut self.smart_guides, tr("Intelligente Hilfslinien"))
+                    .on_hover_text(tr("Beim Verschieben an Kanten und Mitten anderer Formen und der Zeichenfläche einrasten."));
+                ui.checkbox(&mut self.settings.show_grid, tr("Raster anzeigen"));
+                ui.checkbox(&mut self.snap_grid, trf("Am Raster einrasten ({})", &[format!("{}", self.settings.grid_size)]))
+                    .on_hover_text(tr("Beim Loslassen die lokale Position der Form am Raster ausrichten · Rastergröße in den Einstellungen."));
                 ui.separator();
-                if ui.button("Einstellungen …").on_hover_text(self.binding_label(&palette::Cmd::Settings)).clicked() {
+                if ui.button(tr("Einstellungen …")).on_hover_text(self.binding_label(&palette::Cmd::Settings)).clicked() {
                     self.settings_open = true;
                     ui.close_menu();
                 }
@@ -1081,8 +1097,8 @@ impl Editor {
                     .custom_formatter(|v, _| format!("{:.0} %", v * 100.))
                     .custom_parser(|t| t.trim().trim_end_matches('%').trim().replace(',', ".").parse::<f64>().ok().map(|v| v / 100.)),
             )
-            .on_hover_text("Strg+Mausrad oder Touchpad-Geste zoomt zum Mauszeiger · +/- · 0 = 100 %");
-            if ui.button("Einpassen").on_hover_text(format!("Dokument zentrieren · {}", self.binding_label(&palette::Cmd::Fit))).clicked() {
+            .on_hover_text(tr("Strg+Mausrad oder Touchpad-Geste zoomt zum Mauszeiger · +/- · 0 = 100 %"));
+            if ui.button(tr("Einpassen")).on_hover_text(trf("Dokument zentrieren · {}", &[self.binding_label(&palette::Cmd::Fit).to_string()])).clicked() {
                 self.fit_requested = true;
             }
         });
@@ -1090,7 +1106,7 @@ impl Editor {
             // Keep the existing staged path actions, including Close/Finish/Cancel.
             // Their legacy switches are normalized into the exclusive tool choice.
             let handles_before = self.edit_path_handles;
-            egui::CollapsingHeader::new("Pfadaktionen · schließen / fertig / verwerfen")
+            egui::CollapsingHeader::new(tr("Pfadaktionen · schließen / fertig / verwerfen"))
                 .default_open(true)
                 .show(ui, |ui| self.vector_toolbar(ui));
             if self.edit_path_handles && !handles_before {
@@ -1101,17 +1117,19 @@ impl Editor {
             }
         }
         ui.small(if self.preview_mode {
-            "Vorschau: Form anklicken › Zustandsereignis. Zum Bearbeiten Vorschau ausschalten."
+            tr("Vorschau: Form anklicken › Zustandsereignis. Zum Bearbeiten Vorschau ausschalten.")
         } else {
             match self.canvas_tool() {
-                CanvasTool::Selection => "Form anklicken und ziehen · Eigenschaften rechts.",
-                CanvasTool::Pen => "Anker klicken oder Tangenten ziehen · Enter: fertig · Escape: verwerfen.",
-                CanvasTool::PathPoints => "Pfad auswählen · Punkte ziehen · Doppelklick auf Kante: neuer Anker.",
-                CanvasTool::Freehand => "Loszeichnen! Mit Maus oder Tablet · ein Strich, ein Rückgängig-Schritt.",
+                CanvasTool::Selection => tr("Form anklicken und ziehen · Eigenschaften rechts."),
+                CanvasTool::Pen => tr("Anker klicken oder Tangenten ziehen · Enter: fertig · Escape: verwerfen."),
+                CanvasTool::PathPoints => tr("Pfad auswählen · Punkte ziehen · Doppelklick auf Kante: neuer Anker."),
+                CanvasTool::Freehand => tr("Loszeichnen! Mit Maus oder Tablet · ein Strich, ein Rückgängig-Schritt."),
             }
-        }).on_hover_text("Ansicht verschieben: Mitteltaste oder Leertaste+Ziehen. F/Home: einpassen. Leertaste kurz drücken: abspielen. Pfadentwürfe bleiben beim Verschieben der Ansicht erhalten.");
+        }).on_hover_text(tr("Ansicht verschieben: Mitteltaste oder Leertaste+Ziehen. F/Home: einpassen. Leertaste kurz drücken: abspielen. Pfadentwürfe bleiben beim Verschieben der Ansicht erhalten."));
         if self.project.nodes.is_empty() {
-            ui.label("Platz für deine Idee! Füge eine Form hinzu oder zeichne los.");
+            ui.label(tr(
+                "Platz für deine Idee! Füge eine Form hinzu oder zeichne los.",
+            ));
         }
         if self.fit_requested {
             let available = if self.show_rulers {
@@ -1213,7 +1231,7 @@ impl Editor {
                 self.project.height,
                 &scene,
             ) {
-                self.status = format!("Vorschaufehler: {error}");
+                self.status = trf("Vorschaufehler: {error}", std::slice::from_ref(&error));
             }
             self.paint_onion(&painter, document_rect);
             self.paint_grid(&painter, document_rect);
@@ -1493,6 +1511,7 @@ impl eframe::App for Editor {
         self.palette_ui(ctx);
         self.history_window(ctx);
         self.settings_window(ctx);
+        self.crash_report_window(ctx);
         if let Some(viewer) = self.viewer.as_mut() {
             match viewer.finished() {
                 Ok(true) => self.viewer = None,
@@ -1531,7 +1550,7 @@ impl eframe::App for Editor {
                 (self.project.to_json(), files::autosave_path(&self.path))
             {
                 if let Err(e) = atomic_save(&target, &json) {
-                    self.status = format!("Autosave: {e}");
+                    self.status = trf("Autosave: {e}", std::slice::from_ref(&e));
                 }
             }
         }

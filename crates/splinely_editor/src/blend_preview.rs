@@ -24,11 +24,9 @@ pub(super) struct BlendPreview {
 }
 impl BlendPreview {
     fn layer(&mut self, project: &Project, id: &str) -> Result<&mut Layer, String> {
-        let clip = project
-            .clips
-            .iter()
-            .find(|c| c.id == id)
-            .ok_or_else(|| format!("Unbekannter Vorschau-Clip: {id}"))?;
+        let clip = project.clips.iter().find(|c| c.id == id).ok_or_else(|| {
+            splinely_editor::i18n::trf("Unbekannter Vorschau-Clip: {id}", &[id.to_string()])
+        })?;
         Ok(self.layers.entry(id.into()).or_insert(Layer {
             time: 0.,
             active: false,
@@ -42,7 +40,9 @@ impl BlendPreview {
             .clips
             .iter()
             .find(|c| c.id == id)
-            .ok_or_else(|| format!("Unbekannter Vorschau-Clip: {id}"))?
+            .ok_or_else(|| {
+                splinely_editor::i18n::trf("Unbekannter Vorschau-Clip: {id}", &[id.to_string()])
+            })?
             .duration;
         let layer = self.layer(project, id)?;
         if layer.time >= duration {
@@ -79,16 +79,18 @@ impl BlendPreview {
             || !duration.is_finite()
             || duration < 0.
         {
-            return Err("Mischvorschau braucht ein Gewicht in [0, 1] und eine Dauer ≥ 0".into());
+            return Err(splinely_editor::i18n::tr(
+                "Mischvorschau braucht ein Gewicht in [0, 1] und eine Dauer ≥ 0",
+            )
+            .into());
         }
-        let clip = project
-            .clips
-            .iter()
-            .find(|c| c.id == id)
-            .ok_or_else(|| format!("Unbekannter Vorschau-Clip: {id}"))?;
+        let clip = project.clips.iter().find(|c| c.id == id).ok_or_else(|| {
+            splinely_editor::i18n::trf("Unbekannter Vorschau-Clip: {id}", &[id.to_string()])
+        })?;
         if clip.blend_mode != BlendMode::Weighted {
-            return Err(format!(
-                "Mischvorschau braucht einen gewichteten Clip: {id}"
+            return Err(splinely_editor::i18n::trf(
+                "Mischvorschau braucht einen gewichteten Clip: {id}",
+                &[id.to_string()],
             ));
         }
         let layer = self.layer(project, id)?;

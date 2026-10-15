@@ -1,5 +1,6 @@
 //! Small, atomic authoring candidates. Nothing here mutates the input project.
 use splinely_document::*;
+use splinely_editor::i18n::tr;
 
 fn validated(project: Project) -> Result<Project, String> {
     project.validate().map_err(|e| e.to_string())?;
@@ -9,14 +10,14 @@ fn validated(project: Project) -> Result<Project, String> {
 fn editable(project: &Project, target: &str) -> Result<(), String> {
     if let Some(node) = project.nodes.iter().find(|n| n.id == target) {
         if node.locked {
-            return Err("Diese Form ist geschützt. Zuerst entsperren.".into());
+            return Err(tr("Diese Form ist geschützt. Zuerst entsperren.").into());
         }
         return Ok(());
     }
     if project.bones.iter().any(|b| b.id == target) {
         return Ok(());
     }
-    Err("Bitte eine Form oder einen Knochen auswählen.".into())
+    Err(tr("Bitte eine Form oder einen Knochen auswählen.").into())
 }
 
 pub(super) fn keyframe_candidate(
@@ -33,9 +34,9 @@ pub(super) fn keyframe_candidate(
         .clips
         .iter_mut()
         .find(|c| c.id == clip_id)
-        .ok_or("Bitte zuerst einen Clip erstellen.")?;
+        .ok_or(tr("Bitte zuerst einen Clip erstellen."))?;
     if !time.is_finite() || time < 0. || time > clip.duration {
-        return Err("Zeit muss innerhalb des Clips liegen.".into());
+        return Err(tr("Zeit muss innerhalb des Clips liegen.").into());
     }
     if !clip
         .tracks
@@ -91,13 +92,13 @@ pub(super) fn preset_candidate(
         .clips
         .iter()
         .find(|c| c.id == clip_id)
-        .ok_or("Bitte zuerst einen Clip erstellen.")?;
+        .ok_or(tr("Bitte zuerst einen Clip erstellen."))?;
     if clip
         .tracks
         .iter()
         .any(|t| t.node_id == target && t.property == property)
     {
-        return Err("Diese Spur enthält schon Schlüssel. Einen neuen Clip wählen oder die Spur bewusst im Expertenbereich entfernen.".into());
+        return Err(tr("Diese Spur enthält schon Schlüssel. Einen neuen Clip wählen oder die Spur bewusst im Expertenbereich entfernen.").into());
     }
     let middle = match preset {
         Preset::Bounce => base - 30.,
@@ -160,8 +161,8 @@ pub(super) struct MachineDraft {
 impl Default for MachineDraft {
     fn default() -> Self {
         Self {
-            idle: "Ruhe".into(),
-            active: "Aktiv".into(),
+            idle: tr("Ruhe").into(),
+            active: tr("Aktiv").into(),
             initial_active: false,
             target: String::new(),
             hover: false,
@@ -185,10 +186,10 @@ pub(super) fn machine_candidate(
     draft: &MachineDraft,
 ) -> Result<Project, String> {
     if draft.idle.trim().is_empty() || draft.active.trim().is_empty() {
-        return Err("Beide Zustände brauchen einen Namen.".into());
+        return Err(tr("Beide Zustände brauchen einen Namen.").into());
     }
     if !project.nodes.iter().any(|n| n.id == draft.target) {
-        return Err("Als Ereignisziel eine Form wählen (kein Knochen).".into());
+        return Err(tr("Als Ereignisziel eine Form wählen (kein Knochen).").into());
     }
     let mut next = project.clone();
     next.state_machines.push(StateMachine {

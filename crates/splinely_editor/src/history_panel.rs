@@ -23,21 +23,26 @@ pub(super) fn describe_change(before: &Project, after: &Project) -> String {
         .filter(|n| !after.nodes.iter().any(|a| a.id == n.id))
         .collect();
     match (added.len(), removed.len()) {
-        (1, 0) => return format!("„{}“ hinzugefügt", node_name(added[0])),
-        (n, 0) if n > 1 => return format!("{n} Formen hinzugefügt"),
-        (0, 1) => return format!("„{}“ gelöscht", node_name(removed[0])),
-        (0, n) if n > 1 => return format!("{n} Formen gelöscht"),
-        (a, r) if a > 0 && r > 0 => return format!("{r} Formen zu {a} kombiniert"),
+        (1, 0) => return trf("„{}“ hinzugefügt", &[node_name(added[0]).to_string()]),
+        (n, 0) if n > 1 => return trf("{n} Formen hinzugefügt", &[format!("{n}")]),
+        (0, 1) => return trf("„{}“ gelöscht", &[node_name(removed[0]).to_string()]),
+        (0, n) if n > 1 => return trf("{n} Formen gelöscht", &[format!("{n}")]),
+        (a, r) if a > 0 && r > 0 => {
+            return trf(
+                "{r} Formen zu {a} kombiniert",
+                &[format!("{r}"), format!("{a}")],
+            )
+        }
         _ => {}
     }
     if before.clips != after.clips {
-        return "Animation geändert".into();
+        return tr("Animation geändert").into();
     }
     if before.groups != after.groups {
-        return "Gruppen geändert".into();
+        return tr("Gruppen geändert").into();
     }
     if before.guides != after.guides {
-        return "Hilfslinien geändert".into();
+        return tr("Hilfslinien geändert").into();
     }
     let order_changed = before
         .nodes
@@ -52,18 +57,18 @@ pub(super) fn describe_change(before: &Project, after: &Project) -> String {
         .collect();
     if changed.is_empty() {
         return if order_changed {
-            "Reihenfolge geändert".into()
+            tr("Reihenfolge geändert").into()
         } else if before.state_machines != after.state_machines {
-            "Zustände geändert".into()
+            tr("Zustände geändert").into()
         } else if before.bones != after.bones {
-            "Skelett geändert".into()
+            tr("Skelett geändert").into()
         } else if before.name != after.name
             || before.width != after.width
             || before.height != after.height
         {
-            "Projekt geändert".into()
+            tr("Projekt geändert").into()
         } else {
-            "Änderung".into()
+            tr("Änderung").into()
         };
     }
     let what = {
@@ -71,21 +76,27 @@ pub(super) fn describe_change(before: &Project, after: &Project) -> String {
         if b.transform != a.transform {
             "verschoben/transformiert"
         } else if b.style != a.style || b.gradient != a.gradient {
-            "Darstellung geändert"
+            tr("Darstellung geändert")
         } else if b.kind != a.kind {
-            "Form geändert"
+            tr("Form geändert")
         } else if b.visible != a.visible || b.locked != a.locked {
-            "Sichtbarkeit/Sperre geändert"
+            tr("Sichtbarkeit/Sperre geändert")
         } else if b.name != a.name {
             "umbenannt"
         } else {
-            "geändert"
+            tr("geändert")
         }
     };
     if changed.len() == 1 {
-        format!("„{}“ {what}", node_name(changed[0].1))
+        trf(
+            "„{}“ {what}",
+            &[node_name(changed[0].1).to_string(), what.to_string()],
+        )
     } else {
-        format!("{} Formen {what}", changed.len())
+        trf(
+            "{} Formen {what}",
+            &[format!("{}", changed.len()), what.to_string()],
+        )
     }
 }
 
@@ -118,7 +129,7 @@ impl Editor {
     pub(super) fn history_window(&mut self, ctx: &egui::Context) {
         let mut open = self.history_open;
         let mut jump = None;
-        egui::Window::new("Verlauf")
+        egui::Window::new(tr("Verlauf"))
             .open(&mut open)
             .default_width(260.)
             .resizable(true)
@@ -128,13 +139,17 @@ impl Editor {
                     .max_height(360.)
                     .show(ui, |ui| {
                         if ui
-                            .selectable_label(done.is_empty(), "Ausgangszustand")
+                            .selectable_label(done.is_empty(), tr("Ausgangszustand"))
                             .clicked()
                         {
                             jump = Some(0);
                         }
                         for (i, label) in done.iter().enumerate() {
-                            let text = if label.is_empty() { "Änderung" } else { label };
+                            let text = if label.is_empty() {
+                                tr("Änderung")
+                            } else {
+                                label
+                            };
                             let current = i + 1 == done.len();
                             if ui
                                 .selectable_label(current, format!("{}. {text}", i + 1))
@@ -144,7 +159,11 @@ impl Editor {
                             }
                         }
                         for (i, label) in undone.iter().enumerate() {
-                            let text = if label.is_empty() { "Änderung" } else { label };
+                            let text = if label.is_empty() {
+                                tr("Änderung")
+                            } else {
+                                label
+                            };
                             let number = done.len() + i + 1;
                             if ui
                                 .add(
@@ -153,16 +172,16 @@ impl Editor {
                                     )
                                     .frame(false),
                                 )
-                                .on_hover_text(
+                                .on_hover_text(tr(
                                     "Rückgängig gemacht · Klick stellt bis hierhin wieder her",
-                                )
+                                ))
                                 .clicked()
                             {
                                 jump = Some(number);
                             }
                         }
                     });
-                ui.weak("Klick auf einen Schritt springt dorthin.");
+                ui.weak(tr("Klick auf einen Schritt springt dorthin."));
             });
         self.history_open = open;
         if let Some(done) = jump {

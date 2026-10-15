@@ -87,27 +87,27 @@ impl KeyCombo {
         Some(combo)
     }
 
-    /// German display form, e.g. "Strg+Umschalt+S".
+    /// Display form in the UI language, e.g. "Strg+Umschalt+S" in German.
     pub fn label(self) -> String {
         let mut parts: Vec<String> = vec![];
         if self.ctrl {
-            parts.push("Strg".into());
+            parts.push(tr("Strg").into());
         }
         if self.shift {
-            parts.push("Umschalt".into());
+            parts.push(tr("Umschalt").into());
         }
         if self.alt {
             parts.push("Alt".into());
         }
         parts.push(
             match self.key {
-                egui::Key::PageUp => "Bild⬆",
-                egui::Key::PageDown => "Bild⬇",
-                egui::Key::Space => "Leertaste",
-                egui::Key::Delete => "Entf",
+                egui::Key::PageUp => tr("Bild⬆"),
+                egui::Key::PageDown => tr("Bild⬇"),
+                egui::Key::Space => tr("Leertaste"),
+                egui::Key::Delete => tr("Entf"),
                 egui::Key::Escape => "Esc",
-                egui::Key::Home => "Pos1",
-                egui::Key::End => "Ende",
+                egui::Key::Home => tr("Pos1"),
+                egui::Key::End => tr("Ende"),
                 egui::Key::Enter => "Enter",
                 other => other.name(),
             }
@@ -125,8 +125,8 @@ pub(super) fn command_id(cmd: &Cmd) -> String {
 /// Shortcut text for commands on fixed (non-configurable) keys.
 pub(super) fn fixed_label(cmd: &Cmd) -> &'static str {
     match cmd {
-        Cmd::Delete => "Entf",
-        Cmd::Play => "Leertaste",
+        Cmd::Delete => tr("Entf"),
+        Cmd::Play => tr("Leertaste"),
         _ => "",
     }
 }
@@ -355,15 +355,15 @@ impl Editor {
             }
         }
         ui.horizontal(|ui| {
-            ui.label("Suchen");
+            ui.label(tr("Suchen"));
             ui.add(
                 egui::TextEdit::singleline(&mut self.keymap_filter)
-                    .hint_text("z. B. speichern, zoom, gruppe"),
+                    .hint_text(tr("z. B. speichern, zoom, gruppe")),
             );
         });
-        ui.weak(
+        ui.weak(tr(
             "Klick auf ein Kürzel und dann die neue Taste(nkombination) drücken · Esc bricht ab.",
-        );
+        ));
         ui.add_space(4.);
         let filter = self.keymap_filter.to_lowercase();
         let bindings = self.bindings();
@@ -381,7 +381,7 @@ impl Editor {
                     ui.label(label);
                     let capturing = self.capturing_key.as_deref() == Some(id.as_str());
                     let text = if capturing {
-                        "Taste drücken …".to_owned()
+                        tr("Taste drücken …").to_owned()
                     } else if combos.is_empty() {
                         "—".to_owned()
                     } else {
@@ -403,14 +403,14 @@ impl Editor {
                     }
                     ui.horizontal(|ui| {
                         if ui
-                            .small_button("Leeren")
-                            .on_hover_text("Kein Kürzel")
+                            .small_button(tr("Leeren"))
+                            .on_hover_text(tr("Kein Kürzel"))
                             .clicked()
                         {
                             self.settings.keybindings.insert(id.clone(), vec![]);
                         }
                         if self.settings.keybindings.contains_key(&id)
-                            && ui.small_button("Standard").clicked()
+                            && ui.small_button(tr("Standard")).clicked()
                         {
                             self.settings.keybindings.remove(&id);
                         }
@@ -419,7 +419,7 @@ impl Editor {
                 }
             });
         ui.add_space(6.);
-        ui.weak("Fest belegt: Pfeiltasten (verschieben), Entf (löschen), Esc, Leertaste (abspielen / mit Ziehen: Ansicht verschieben), Strg+C/X/V.");
+        ui.weak(tr("Fest belegt: Pfeiltasten (verschieben), Entf (löschen), Esc, Leertaste (abspielen / mit Ziehen: Ansicht verschieben), Strg+C/X/V."));
     }
 }
 

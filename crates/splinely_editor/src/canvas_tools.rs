@@ -4,10 +4,10 @@ use eframe::egui::Stroke;
 impl Editor {
     pub(super) fn vector_toolbar(&mut self, ui: &mut egui::Ui) {
         if ui
-            .button("Pen")
-            .on_hover_text(
+            .button(tr("Pen"))
+            .on_hover_text(tr(
                 "Anker klicken, für Tangenten ziehen · Enter: fertig · Escape: verwerfen.",
-            )
+            ))
             .clicked()
         {
             self.pen = Some(PenPath::default());
@@ -18,18 +18,18 @@ impl Editor {
             self.preview_animation = false;
             self.preview_mode = false;
         }
-        ui.checkbox(&mut self.edit_path_handles, "Pfadpunkte")
-            .on_hover_text("Doppelklick nahe einer Kante fügt einen Anker ein, ohne die Form zu ändern. Runde Tangenten ziehen; Shift koppelt symmetrisch, Shift+Alt erhält die Gegenlänge. Escape bricht ab.");
+        ui.checkbox(&mut self.edit_path_handles, tr("Pfadpunkte"))
+            .on_hover_text(tr("Doppelklick nahe einer Kante fügt einen Anker ein, ohne die Form zu ändern. Runde Tangenten ziehen; Shift koppelt symmetrisch, Shift+Alt erhält die Gegenlänge. Escape bricht ab."));
         if self.pen.is_some() {
-            if ui.button("Pfad schließen").clicked() {
+            if ui.button(tr("Pfad schließen")).clicked() {
                 if let Err(error) = self.pen.as_mut().unwrap().close() {
                     self.status = error;
                 }
             }
-            if ui.button("Pfad fertigstellen").clicked() {
+            if ui.button(tr("Pfad fertigstellen")).clicked() {
                 self.finish_pen();
             }
-            if ui.button("Pfad verwerfen").clicked() {
+            if ui.button(tr("Pfad verwerfen")).clicked() {
                 self.pen = None;
                 self.pen_press = None;
             }
@@ -49,7 +49,7 @@ impl Editor {
                     self.pen = None;
                     self.pen_press = None;
                     self.edit_path_handles = true;
-                    self.status = "Pfad erstellt · eckige Anker oder runde Griffe ziehen; Rückgängig entfernt den ganzen Pfad.".into();
+                    self.status = tr("Pfad erstellt · eckige Anker oder runde Griffe ziehen; Rückgängig entfernt den ganzen Pfad.").into();
                 }
                 Err(error) => self.status = error,
             }
@@ -130,9 +130,9 @@ impl Editor {
                 painter.text(
                     origin + Vec2::new(12., 12.),
                     egui::Align2::LEFT_TOP,
-                    format!(
+                    trf(
                         "Pen: {} Segmente · Enter: fertig · Escape: verwerfen",
-                        pen.path().segments().len()
+                        &[format!("{}", pen.path().segments().len())],
                     ),
                     egui::FontId::proportional(12.),
                     Color32::from_rgb(20, 100, 190),
@@ -188,9 +188,9 @@ impl Editor {
                                 match PathGesture::insert_candidate(&self.project, &node.id, pointer, &map, 8.) {
                                     Ok(Some(next)) => {
                                         self.commit(next);
-                                        self.status = "Anker eingefügt, Kurvenform erhalten · Shift+Ziehen koppelt die Gegentangente.".into();
+                                        self.status = tr("Anker eingefügt, Kurvenform erhalten · Shift+Ziehen koppelt die Gegentangente.").into();
                                     }
-                                    Ok(None) => self.status = "Doppelklick innerhalb von 8 Pixeln einer Kante, abseits vorhandener Endpunkte.".into(),
+                                    Ok(None) => self.status = tr("Doppelklick innerhalb von 8 Pixeln einer Kante, abseits vorhandener Endpunkte.").into(),
                                     Err(error) => self.status = error,
                                 }
                             }

@@ -125,8 +125,9 @@ impl Draft {
             }
         }
         if self.points.len() >= MAX_POINTS {
-            return Err(format!(
-                "Freihand ist auf {MAX_POINTS} Punkte begrenzt · Strich abgebrochen"
+            return Err(crate::i18n::trf(
+                "Freihand ist auf {MAX_POINTS} Punkte begrenzt · Strich abgebrochen",
+                &[format!("{MAX_POINTS}")],
             ));
         }
         self.points.push(sample);
@@ -266,9 +267,10 @@ impl FreehandTool {
         if let Some(d) = &self.draft {
             if d.viewport != viewport || d.before != *project {
                 self.cancel();
-                return Err(
-                    "Ansicht oder Dokument hat sich während des Freihandstrichs geändert".into(),
-                );
+                return Err(crate::i18n::tr(
+                    "Ansicht oder Dokument hat sich während des Freihandstrichs geändert",
+                )
+                .into());
             }
         }
         // Touch and its synthetic pointer events often coexist. Never record both.
@@ -501,7 +503,7 @@ pub fn stroke_candidate(
     let mut next = project.clone();
     next.nodes.push(node);
     next.validate()
-        .map_err(|e| format!("Freihandpfad abgelehnt: {e}"))?;
+        .map_err(|e| crate::i18n::trf("Freihandpfad abgelehnt: {e}", &[format!("{e}")]))?;
     Ok(next)
 }
 

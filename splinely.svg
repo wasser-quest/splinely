@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="800" height="600" viewBox="0 0 800 600" data-splinely-version="1">
-<!-- Created with Splinely 0.3.0 -->
-<metadata><splinely:generator xmlns:splinely="urn:splinely:metadata" name="Splinely" version="0.3.0" schemaVersion="1"/></metadata>
+<!-- Created with Splinely 0.4.0 -->
+<metadata><splinely:generator xmlns:splinely="urn:splinely:metadata" name="Splinely" version="0.4.0" schemaVersion="1"/></metadata>
 <title>Splinely demo</title>
 <circle id="circle" data-splinely-node="circle" transform="translate(0 76) rotate(0) scale(1 1)" fill="rgb(25.49019607843137% 56.86274509803921% 92.15686274509804%)" fill-opacity="1" stroke="none" stroke-opacity="1" stroke-width="1" opacity="1" cx="180" cy="180" r="50"/>
 <text id="caption" data-splinely-node="caption" transform="translate(0 0) rotate(0) scale(1 1)" fill="rgb(31.372549019607842% 54.90196078431373% 94.11764705882352%)" fill-opacity="1" stroke="none" stroke-opacity="1" stroke-width="1" opacity="1" x="50" y="70" font-size="16">Click the circle; edit, animate, export.</text>

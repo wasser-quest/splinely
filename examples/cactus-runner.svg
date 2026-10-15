@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="960" height="540" viewBox="0 0 960 540" data-splinely-version="1">
-<!-- Created with Splinely 0.3.0 -->
-<metadata><splinely:generator xmlns:splinely="urn:splinely:metadata" name="Splinely" version="0.3.0" schemaVersion="1"/></metadata>
+<!-- Created with Splinely 0.4.0 -->
+<metadata><splinely:generator xmlns:splinely="urn:splinely:metadata" name="Splinely" version="0.4.0" schemaVersion="1"/></metadata>
 <title>Dune / Stride — original cactus runner</title>
 <path id="sky" data-splinely-node="sky" transform="translate(0 0) rotate(0) scale(1 1)" fill="rgb(93.33333333333333% 85.88235294117646% 70.58823529411765%)" fill-opacity="1" stroke="none" stroke-opacity="1" stroke-width="1" opacity="1" d="M0 0 L960 0 L960 540 L0 540 Z " fill-rule="nonzero"/>
 <path id="sun-ring" data-splinely-node="sun-ring" transform="translate(0 0) rotate(0) scale(1 1)" fill="rgb(90.58823529411765% 78.03921568627452% 59.21568627450981%)" fill-opacity="1" stroke="none" stroke-opacity="1" stroke-width="1" opacity="1" d="M822 118 C822 152.79395 793.79395 181 759 181 C724.20605 181 696 152.79395 696 118 C696 83.20606 724.20605 55 759 55 C793.79395 55 822 83.20606 822 118 Z " fill-rule="nonzero"/>

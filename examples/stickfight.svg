@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="960" height="540" viewBox="0 0 960 540" data-splinely-version="1">
-<!-- Created with Splinely 0.3.0 -->
-<metadata><splinely:generator xmlns:splinely="urn:splinely:metadata" name="Splinely" version="0.3.0" schemaVersion="1"/></metadata>
+<!-- Created with Splinely 0.4.0 -->
+<metadata><splinely:generator xmlns:splinely="urn:splinely:metadata" name="Splinely" version="0.4.0" schemaVersion="1"/></metadata>
 <title>Cinder / Flux · original stickfight</title>
 <path id="stage" data-splinely-node="stage" transform="translate(0 0) rotate(0) scale(1 1)" fill="rgb(4.313725490196078% 6.2745098039215685% 11.372549019607844%)" fill-opacity="1" stroke="none" stroke-opacity="1" stroke-width="1" opacity="1" d="M0 0 L960 0 L960 540 L0 540 Z " fill-rule="nonzero"/>
 <path id="orb-outer" data-splinely-node="orb-outer" transform="translate(0 0) rotate(0) scale(1 1)" fill="rgb(6.666666666666667% 11.372549019607844% 18.823529411764707%)" fill-opacity="1" stroke="none" stroke-opacity="1" stroke-width="1" opacity="1" d="M685 246 C685 359.21838 593.2184 451 480 451 C366.78162 451 275 359.21838 275 246 C275 132.78163 366.78162 41 480 41 C593.2184 41 685 132.78163 685 246 Z " fill-rule="nonzero"/>

@@ -254,7 +254,7 @@ impl Editor {
                     modifiers.shift || gesture.uniform_only,
                     modifiers.alt,
                 );
-                self.status = "Skalieren · Umschalt: proportional · Alt: von der Mitte".into();
+                self.status = tr("Skalieren · Umschalt: proportional · Alt: von der Mitte").into();
                 self.pointer_hint = Some(format!("{:.0} % × {:.0} %", sx * 100., sy * 100.));
                 next.scale_nodes(
                     &gesture.ids,
@@ -271,8 +271,8 @@ impl Editor {
                 if modifiers.shift {
                     degrees = (degrees / 15.).round() * 15.;
                 }
-                self.status = "Drehen · Umschalt: 15°-Schritte".into();
-                self.pointer_hint = Some(format!("{degrees:.1}°"));
+                self.status = tr("Drehen · Umschalt: 15°-Schritte").into();
+                self.pointer_hint = Some(trf("{degrees:.1}°", &[format!("{degrees:.1}")]));
                 next.rotate_nodes(&gesture.ids, degrees, (c.x as f64, c.y as f64))
             }
         };

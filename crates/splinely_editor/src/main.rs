@@ -6,6 +6,12 @@ mod viewer;
 const RUNTIME: &str = include_str!("../../../runtime/src/splinely.js");
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
+    splinely_editor::crash::install(
+        "editor",
+        env!("CARGO_PKG_VERSION"),
+        || splinely_editor::i18n::language().code().to_owned(),
+        true,
+    );
     let args: Vec<String> = std::env::args().collect();
     match args.get(1).map(String::as_str) {
         Some("--help" | "-h") => {

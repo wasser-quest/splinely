@@ -143,7 +143,7 @@ impl Editor {
         if next.validate().is_ok() {
             self.project = next;
             self.set_selection(new_ids);
-            self.status = "Kopie wird verschoben · Alt+Ziehen dupliziert.".into();
+            self.status = tr("Kopie wird verschoben · Alt+Ziehen dupliziert.").into();
         }
     }
 
@@ -291,8 +291,14 @@ impl Editor {
                 Guide::Y(_) => egui::CursorIcon::ResizeVertical,
             });
             self.status = match guide {
-                Guide::X(x) => format!("Hilfslinie x = {x} · zurück aufs Lineal ziehen löscht sie"),
-                Guide::Y(y) => format!("Hilfslinie y = {y} · zurück aufs Lineal ziehen löscht sie"),
+                Guide::X(x) => trf(
+                    "Hilfslinie x = {x} · zurück aufs Lineal ziehen löscht sie",
+                    &[format!("{x}")],
+                ),
+                Guide::Y(y) => trf(
+                    "Hilfslinie y = {y} · zurück aufs Lineal ziehen löscht sie",
+                    &[format!("{y}")],
+                ),
             };
         }
         if response.drag_stopped() || !ui.input(|i| i.pointer.primary_down()) {
@@ -303,7 +309,7 @@ impl Editor {
                 (Some(i), true) => next.guides[i] = guide.to_line(),
                 (Some(i), false) => {
                     next.guides.remove(i);
-                    self.status = "Hilfslinie entfernt.".into();
+                    self.status = tr("Hilfslinie entfernt.").into();
                 }
                 (None, true) => next.guides.push(guide.to_line()),
                 (None, false) => {}

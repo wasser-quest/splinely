@@ -930,6 +930,7 @@ fn run(cli: Cli) -> Result<Value> {
 }
 
 fn main() {
+    splinely_document::crash::install("cli", env!("CARGO_PKG_VERSION"), || "en".to_owned(), false);
     let args = assist::prepare_args(std::env::args_os().collect());
     let parsed = assist::command()
         .try_get_matches_from(&args)

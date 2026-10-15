@@ -79,23 +79,26 @@ impl Editor {
                     n.name.clone()
                 }
             })
-            .unwrap_or_else(|| format!("Knochen {}", track.node_id));
+            .unwrap_or_else(|| trf("Knochen {}", std::slice::from_ref(&track.node_id)));
         let property = serde_json::to_value(track.property)
             .ok()
             .and_then(|v| v.as_str().map(str::to_owned))
             .unwrap_or_default();
-        format!("{name} · {property}")
+        trf(
+            "{name} · {property}",
+            &[name.to_string(), property.to_string()],
+        )
     }
 
     pub(super) fn dopesheet_ui(&mut self, ui: &mut egui::Ui) {
         ui.horizontal(|ui| {
             self.autokey_toggle_ui(ui);
             if self.auto_key {
-                ui.weak("Formen verschieben, drehen oder umfärben setzt Schlüsselbilder am Abspielkopf.");
+                ui.weak(tr("Formen verschieben, drehen oder umfärben setzt Schlüsselbilder am Abspielkopf."));
             }
         });
         let Some(clip) = self.project.clips.get(self.active_clip).cloned() else {
-            ui.weak("Noch kein Clip · „+ Clip“ legt einen an, dann Formen mit „◼ Aktuellen Wert merken“ animieren.");
+            ui.weak(tr("Noch kein Clip · „+ Clip“ legt einen an, dann Formen mit „◼ Aktuellen Wert merken“ animieren."));
             return;
         };
         let duration = clip.duration.max(0.001);
@@ -204,7 +207,7 @@ impl Editor {
             painter.text(
                 row_rect(0).center(),
                 egui::Align2::CENTER_CENTER,
-                "Keine Spuren · Form wählen und im Inspektor „◼ Aktuellen Wert merken“",
+                tr("Keine Spuren · Form wählen und im Inspektor „◼ Aktuellen Wert merken“"),
                 egui::FontId::proportional(12.),
                 visuals.weak_text_color(),
             );
@@ -326,31 +329,31 @@ impl Editor {
         let menu_key = self.selected_key;
         response
             .on_hover_text(
-                "Lineal/Leerraum: Abspielkopf ziehen · Raute ziehen: Zeit ändern (Alt: ohne Raster) · Doppelklick: Schlüsselbild einfügen · Rechtsklick: Übergang wählen · Entf: löschen · Name: Form wählen",
+                tr("Lineal/Leerraum: Abspielkopf ziehen · Raute ziehen: Zeit ändern (Alt: ohne Raster) · Doppelklick: Schlüsselbild einfügen · Rechtsklick: Übergang wählen · Entf: löschen · Name: Form wählen"),
             )
             .context_menu(|ui| {
                 let Some(key) = menu_key else {
-                    ui.weak("Rechtsklick auf eine Raute");
+                    ui.weak(tr("Rechtsklick auf eine Raute"));
                     return;
                 };
-                ui.weak("Übergang zum nächsten Schlüsselbild");
+                ui.weak(tr("Übergang zum nächsten Schlüsselbild"));
                 for (label, easing) in EASINGS {
-                    if ui.button(*label).clicked() {
+                    if ui.button(tr(label)).clicked() {
                         self.set_easing(key, *easing, false);
                         ui.close_menu();
                     }
                 }
                 ui.separator();
-                ui.menu_button("Für die ganze Spur", |ui| {
+                ui.menu_button(tr("Für die ganze Spur"), |ui| {
                     for (label, easing) in EASINGS {
-                        if ui.button(*label).clicked() {
+                        if ui.button(tr(label)).clicked() {
                             self.set_easing(key, *easing, true);
                             ui.close_menu();
                         }
                     }
                 });
                 ui.separator();
-                if ui.button("Schlüsselbild löschen").clicked() {
+                if ui.button(tr("Schlüsselbild löschen")).clicked() {
                     self.selected_key = None;
                     self.delete_key(key);
                     ui.close_menu();
@@ -376,7 +379,7 @@ impl Editor {
             k.easing = easing;
         }
         self.commit(next);
-        self.status = "Übergang geändert.".into();
+        self.status = tr("Übergang geändert.").into();
     }
 
     /// Retime one keyframe, kept strictly between its neighbours.
@@ -437,7 +440,7 @@ impl Editor {
         self.time = time;
         self.preview_animation = true;
         self.status =
-            "Schlüsselbild eingefügt · Wert im Inspektor ändern und erneut merken.".into();
+            tr("Schlüsselbild eingefügt · Wert im Inspektor ändern und erneut merken.").into();
     }
 
     pub(super) fn delete_key(&mut self, key: KeyRef) {
@@ -456,7 +459,7 @@ impl Editor {
             clip.tracks.remove(key.track);
         }
         self.commit(next);
-        self.status = "Schlüsselbild gelöscht · Strg+Z stellt es wieder her.".into();
+        self.status = tr("Schlüsselbild gelöscht · Strg+Z stellt es wieder her.").into();
     }
 }
 

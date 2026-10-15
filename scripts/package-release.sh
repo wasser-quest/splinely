@@ -14,7 +14,7 @@ for bin in splinely splinely-cli splinely-viewer splinely-runtime; do
 done
 install -m 755 target/release/libsplinely_runtime.so "$stage/lib/"
 install -m 644 crates/splinely_runtime/include/splinely_runtime.h "$stage/include/"
-cp -r LICENSE README.md llms.txt LLM.md CLI.md RUNTIME_API.md CORE_API.md docs/INSTALL-BINARIES.md prompts examples "$stage/"
+cp -r LICENSE README*.md llms.txt LLM.md CLI.md RUNTIME_API.md CORE_API.md docs/INSTALL-BINARIES.md prompts examples "$stage/"
 rm -rf "$stage/examples/native-runtime/__pycache__"
 tar -C dist -czf "dist/$name.tar.gz" "$name"
 (cd dist && sha256sum "$name.tar.gz" > "$name.tar.gz.sha256")

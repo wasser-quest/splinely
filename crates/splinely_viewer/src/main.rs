@@ -76,6 +76,12 @@ fn run() -> ViewerResult<()> {
 }
 
 fn main() {
+    splinely_document::crash::install(
+        "viewer",
+        env!("CARGO_PKG_VERSION"),
+        || "en".to_owned(),
+        true,
+    );
     if let Err(error) = run() {
         eprintln!("splinely-viewer: {error}");
         std::process::exit(1);

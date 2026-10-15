@@ -3,6 +3,7 @@
 //! Unknown or missing fields fall back to defaults, so older files keep working.
 use super::*;
 use serde::{Deserialize, Serialize};
+use splinely_editor::i18n::{self, Lang};
 use std::collections::BTreeMap;
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize)]
@@ -25,6 +26,8 @@ pub(super) enum OnionMode {
 #[serde(rename_all = "camelCase", default)]
 pub(super) struct Settings {
     // General
+    /// UI language code ("de", "en", "ja" …); empty follows the system.
+    pub language: String,
     pub ui_scale: f32,
     pub theme: Theme,
     pub autosave_seconds: u64,
@@ -63,6 +66,7 @@ pub(super) struct Settings {
 impl Default for Settings {
     fn default() -> Self {
         Self {
+            language: String::new(),
             ui_scale: 1.,
             theme: Theme::Dark,
             autosave_seconds: 30,
@@ -98,6 +102,9 @@ impl Default for Settings {
 impl Settings {
     /// Keep every value in a sensible range (hand-edited files included).
     pub fn sanitized(mut self) -> Self {
+        if Lang::from_code(&self.language).is_none() {
+            self.language.clear();
+        }
         self.ui_scale = self.ui_scale.clamp(0.5, 3.);
         self.autosave_seconds = self.autosave_seconds.clamp(5, 3600);
         self.undo_steps = self.undo_steps.clamp(10, 1000);
@@ -140,6 +147,17 @@ impl Settings {
         self.gif_max_width = self.gif_max_width.clamp(16, 8192);
         self.png_scale = self.png_scale.clamp(0.1, 8.);
         self
+    }
+
+    /// The chosen language, or the system language (German in tests).
+    pub fn effective_language(&self) -> Lang {
+        Lang::from_code(&self.language).unwrap_or_else(|| {
+            if cfg!(test) {
+                Lang::De
+            } else {
+                Lang::from_environment()
+            }
+        })
     }
 
     pub fn load() -> Self {
@@ -207,16 +225,47 @@ impl Editor {
         if ctx.zoom_factor() != self.settings.ui_scale {
             ctx.set_zoom_factor(self.settings.ui_scale);
         }
+        let language = self.settings.effective_language();
+        if self.applied_language != Some(language) {
+            i18n::set_language(language);
+            self.install_fonts(ctx, language);
+            self.applied_language = Some(language);
+        }
         if self.applied_theme != Some(self.settings.theme) {
             apply_theme(ctx, self.settings.theme == Theme::Light);
             self.applied_theme = Some(self.settings.theme);
         }
         if self.saved_settings.as_ref() != Some(&self.settings) {
             if let Err(error) = self.settings.save() {
-                self.status = format!("Einstellungen nicht gespeichert: {error}");
+                self.status = trf(
+                    "Einstellungen nicht gespeichert: {error}",
+                    std::slice::from_ref(&error),
+                );
             }
             self.saved_settings = Some(self.settings.clone());
         }
+    }
+
+    /// egui bundles no Chinese/Japanese glyphs: add an installed system font
+    /// as fallback for those languages, and drop it again for the others.
+    fn install_fonts(&mut self, ctx: &egui::Context, language: Lang) {
+        let mut fonts = egui::FontDefinitions::default();
+        if language.needs_cjk_font() {
+            match i18n::system_cjk_font() {
+                Some(data) => {
+                    fonts
+                        .font_data
+                        .insert("cjk".into(), egui::FontData::from_owned(data).into());
+                    for family in [egui::FontFamily::Proportional, egui::FontFamily::Monospace] {
+                        fonts.families.entry(family).or_default().push("cjk".into());
+                    }
+                }
+                None => {
+                    self.status = tr("Keine Schrift für Chinesisch/Japanisch gefunden · bitte z. B. Noto Sans CJK installieren.").into();
+                }
+            }
+        }
+        ctx.set_fonts(fonts);
     }
 
     /// Visible document grid (only the lines inside the view are drawn;
@@ -263,7 +312,7 @@ impl Editor {
 
     pub(super) fn settings_window(&mut self, ctx: &egui::Context) {
         let mut open = self.settings_open;
-        egui::Window::new("Einstellungen")
+        egui::Window::new(tr("Einstellungen"))
             .open(&mut open)
             // Fixed size, centred: switching tabs or themes must not move it.
             .fixed_size(egui::vec2(620., 470.))
@@ -272,12 +321,12 @@ impl Editor {
             .show(ctx, |ui| {
                 ui.horizontal_wrapped(|ui| {
                     for (tab, label) in [
-                        (SettingsTab::General, "Allgemein"),
-                        (SettingsTab::Canvas, "Zeichenfläche"),
-                        (SettingsTab::Editing, "Bearbeiten"),
-                        (SettingsTab::Animation, "Animation"),
-                        (SettingsTab::Export, "Export"),
-                        (SettingsTab::Keys, "Tastenkürzel"),
+                        (SettingsTab::General, tr("Allgemein")),
+                        (SettingsTab::Canvas, tr("Zeichenfläche")),
+                        (SettingsTab::Editing, tr("Bearbeiten")),
+                        (SettingsTab::Animation, tr("Animation")),
+                        (SettingsTab::Export, tr("Export")),
+                        (SettingsTab::Keys, tr("Tastenkürzel")),
                     ] {
                         if ui
                             .selectable_label(self.settings_tab == tab, label)
@@ -302,14 +351,18 @@ impl Editor {
                 ui.separator();
                 ui.horizontal(|ui| {
                     if ui
-                        .button("Alles zurücksetzen")
-                        .on_hover_text("Alle Einstellungen und Tastenkürzel auf die Standardwerte")
+                        .button(tr("Alles zurücksetzen"))
+                        .on_hover_text(tr(
+                            "Alle Einstellungen und Tastenkürzel auf die Standardwerte",
+                        ))
                         .clicked()
                     {
                         self.settings = Settings::default();
                         self.apply_settings_to_fields();
                     }
-                    ui.weak("Änderungen gelten sofort und werden automatisch gespeichert.");
+                    ui.weak(tr(
+                        "Änderungen gelten sofort und werden automatisch gespeichert.",
+                    ));
                 });
             });
         self.settings_open = open;
@@ -324,52 +377,76 @@ impl Editor {
             .num_columns(2)
             .spacing([16., 8.])
             .show(ui, |ui| {
-                ui.label("Oberflächengröße");
+                ui.label("Sprache / Language");
+                egui::ComboBox::from_id_salt("language")
+                    .selected_text(match Lang::from_code(&s.language) {
+                        Some(lang) => lang.native_name(),
+                        None => tr("Automatisch (System)"),
+                    })
+                    .show_ui(ui, |ui| {
+                        ui.selectable_value(
+                            &mut s.language,
+                            String::new(),
+                            tr("Automatisch (System)"),
+                        );
+                        for lang in Lang::ALL {
+                            ui.selectable_value(
+                                &mut s.language,
+                                lang.code().to_owned(),
+                                lang.native_name(),
+                            );
+                        }
+                    });
+                ui.end_row();
+                ui.label(tr("Oberflächengröße"));
                 ui.add(
                     egui::Slider::new(&mut s.ui_scale, 0.75..=2.0)
                         .step_by(0.05)
                         .custom_formatter(|v, _| format!("{:.0} %", v * 100.)),
                 );
                 ui.end_row();
-                ui.label("Erscheinungsbild");
+                ui.label(tr("Erscheinungsbild"));
                 ui.horizontal(|ui| {
-                    ui.selectable_value(&mut s.theme, Theme::Dark, "Dunkel");
-                    ui.selectable_value(&mut s.theme, Theme::Light, "Hell");
+                    ui.selectable_value(&mut s.theme, Theme::Dark, tr("Dunkel"));
+                    ui.selectable_value(&mut s.theme, Theme::Light, tr("Hell"));
                 });
                 ui.end_row();
-                ui.label("Automatisch sichern alle");
+                ui.label(tr("Automatisch sichern alle"));
                 ui.add(
                     egui::DragValue::new(&mut s.autosave_seconds)
                         .range(5..=3600)
                         .suffix(" s"),
                 );
                 ui.end_row();
-                ui.label("Rückgängig-Schritte");
+                ui.label(tr("Rückgängig-Schritte"));
                 ui.add(egui::DragValue::new(&mut s.undo_steps).range(10..=1000));
                 ui.end_row();
             });
     }
 
     fn canvas_settings(&mut self, ui: &mut egui::Ui) {
-        ui.checkbox(&mut self.show_rulers, "Lineale anzeigen");
-        ui.checkbox(&mut self.settings.show_grid, "Raster anzeigen");
-        ui.checkbox(&mut self.snap_grid, "Beim Loslassen am Raster einrasten");
+        ui.checkbox(&mut self.show_rulers, tr("Lineale anzeigen"));
+        ui.checkbox(&mut self.settings.show_grid, tr("Raster anzeigen"));
+        ui.checkbox(
+            &mut self.snap_grid,
+            tr("Beim Loslassen am Raster einrasten"),
+        );
         ui.horizontal(|ui| {
-            ui.label("Rastergröße");
+            ui.label(tr("Rastergröße"));
             ui.add(
                 egui::DragValue::new(&mut self.settings.grid_size)
                     .range(1.0..=1000.0)
                     .speed(1.)
-                    .suffix(" Einheiten"),
+                    .suffix(tr(" Einheiten")),
             );
         });
         ui.separator();
         ui.checkbox(
             &mut self.smart_guides,
-            "Intelligente Hilfslinien (an Formen und Zeichenfläche einrasten)",
+            tr("Intelligente Hilfslinien (an Formen und Zeichenfläche einrasten)"),
         );
         ui.horizontal(|ui| {
-            ui.label("Fangabstand");
+            ui.label(tr("Fangabstand"));
             ui.add(egui::Slider::new(&mut self.settings.snap_distance, 1.0..=30.0).suffix(" px"));
         });
     }
@@ -380,28 +457,28 @@ impl Editor {
             .num_columns(2)
             .spacing([16., 8.])
             .show(ui, |ui| {
-                ui.label("Pfeiltaste");
+                ui.label(tr("Pfeiltaste"));
                 ui.add(
                     egui::DragValue::new(&mut s.nudge_small)
                         .range(0.01..=1000.0)
                         .speed(0.1),
                 );
                 ui.end_row();
-                ui.label("Umschalt + Pfeiltaste");
+                ui.label(tr("Umschalt + Pfeiltaste"));
                 ui.add(
                     egui::DragValue::new(&mut s.nudge_large)
                         .range(0.01..=1000.0)
                         .speed(1.),
                 );
                 ui.end_row();
-                ui.label("Versatz beim Duplizieren");
+                ui.label(tr("Versatz beim Duplizieren"));
                 ui.add(
                     egui::DragValue::new(&mut s.duplicate_offset)
                         .range(0.0..=1000.0)
                         .speed(1.),
                 );
                 ui.end_row();
-                ui.label("Versatz beim Einfügen");
+                ui.label(tr("Versatz beim Einfügen"));
                 ui.add(
                     egui::DragValue::new(&mut s.paste_offset)
                         .range(0.0..=1000.0)
@@ -409,23 +486,31 @@ impl Editor {
                 );
                 ui.end_row();
             });
-        ui.weak(
+        ui.weak(tr(
             "Strg+D wiederholt außerdem den Abstand, um den du die letzte Kopie verschoben hast.",
-        );
+        ));
     }
 
     fn animation_settings(&mut self, ui: &mut egui::Ui) {
-        ui.checkbox(&mut self.onion_skin, "Zwiebelhaut anzeigen");
+        ui.checkbox(&mut self.onion_skin, tr("Zwiebelhaut anzeigen"));
         let s = &mut self.settings;
         ui.add_enabled_ui(self.onion_skin, |ui| {
             ui.horizontal(|ui| {
-                ui.label("Geister an");
-                ui.selectable_value(&mut s.onion_mode, OnionMode::Keyframes, "Schlüsselbildern");
-                ui.selectable_value(&mut s.onion_mode, OnionMode::Interval, "festen Abständen");
+                ui.label(tr("Geister an"));
+                ui.selectable_value(
+                    &mut s.onion_mode,
+                    OnionMode::Keyframes,
+                    tr("Schlüsselbildern"),
+                );
+                ui.selectable_value(
+                    &mut s.onion_mode,
+                    OnionMode::Interval,
+                    tr("festen Abständen"),
+                );
             });
             if s.onion_mode == OnionMode::Interval {
                 ui.horizontal(|ui| {
-                    ui.label("Abstand");
+                    ui.label(tr("Abstand"));
                     ui.add(
                         egui::DragValue::new(&mut s.onion_interval)
                             .range(0.01..=10.0)
@@ -435,31 +520,33 @@ impl Editor {
                 });
             }
             ui.horizontal(|ui| {
-                ui.label("Davor");
+                ui.label(tr("Davor"));
                 ui.add(egui::DragValue::new(&mut s.onion_before).range(0..=5));
-                ui.label("Danach");
+                ui.label(tr("Danach"));
                 ui.add(egui::DragValue::new(&mut s.onion_after).range(0..=5));
             });
             ui.horizontal(|ui| {
-                ui.label("Deckkraft");
+                ui.label(tr("Deckkraft"));
                 ui.add(
                     egui::Slider::new(&mut s.onion_opacity, 0.05..=1.0)
                         .custom_formatter(|v, _| format!("{:.0} %", v * 100.)),
                 );
             });
-            color_row(ui, "Farbe davor", &mut s.onion_color_before);
-            color_row(ui, "Farbe danach", &mut s.onion_color_after);
+            color_row(ui, tr("Farbe davor"), &mut s.onion_color_before);
+            color_row(ui, tr("Farbe danach"), &mut s.onion_color_after);
         });
         ui.separator();
         ui.horizontal(|ui| {
-            ui.label("Zeitraster der Zeitleiste");
+            ui.label(tr("Zeitraster der Zeitleiste"));
             ui.add(
                 egui::DragValue::new(&mut self.settings.key_snap)
                     .range(0.0..=1.0)
                     .speed(0.005)
                     .suffix(" s"),
             )
-            .on_hover_text("0 = frei. Mit Alt wird beim Ziehen immer frei positioniert.");
+            .on_hover_text(tr(
+                "0 = frei. Mit Alt wird beim Ziehen immer frei positioniert.",
+            ));
         });
     }
 
@@ -469,27 +556,27 @@ impl Editor {
             .num_columns(2)
             .spacing([16., 8.])
             .show(ui, |ui| {
-                ui.label("GIF: Bilder pro Sekunde");
+                ui.label(tr("GIF: Bilder pro Sekunde"));
                 ui.add(
                     egui::DragValue::new(&mut s.gif_fps)
                         .range(1.0..=50.0)
                         .speed(1.),
                 );
                 ui.end_row();
-                ui.label("GIF: höchstens so breit");
+                ui.label(tr("GIF: höchstens so breit"));
                 ui.add(
                     egui::DragValue::new(&mut s.gif_max_width)
                         .range(16..=8192)
                         .suffix(" px"),
                 );
                 ui.end_row();
-                ui.label("GIF: Hintergrund");
+                ui.label(tr("GIF: Hintergrund"));
                 let mut color = rgb(s.gif_background);
                 if ui.color_edit_button_srgba(&mut color).changed() {
                     s.gif_background = [color.r(), color.g(), color.b()];
                 }
                 ui.end_row();
-                ui.label("PNG: Skalierung");
+                ui.label(tr("PNG: Skalierung"));
                 ui.add(
                     egui::DragValue::new(&mut s.png_scale)
                         .range(0.1..=8.0)
@@ -498,6 +585,61 @@ impl Editor {
                 );
                 ui.end_row();
             });
+    }
+}
+
+impl Editor {
+    /// After a crash: offer (never force) a pre-filled GitHub issue.
+    pub(super) fn crash_report_window(&mut self, ctx: &egui::Context) {
+        let Some(report) = self.crash_report.clone() else {
+            return;
+        };
+        let mut close = false;
+        egui::Window::new(tr("Splinely ist abgestürzt"))
+            .collapsible(false)
+            .resizable(false)
+            .anchor(egui::Align2::CENTER_CENTER, egui::vec2(0., 0.))
+            .show(ctx, |ui| {
+                ui.label(tr("Beim letzten Mal ist Splinely unerwartet beendet worden. Möchtest du den Fehler melden? Der Link öffnet ein vorausgefülltes GitHub-Issue; gesendet wird erst, wenn du es dort abschickst."));
+                ui.label(tr("Bitte ergänze dort, was du gerade getan hast, damit wir den Fehler nachstellen können."));
+                ui.collapsing(tr("Was im Bericht steht"), |ui| {
+                    ui.monospace(format!(
+                        "Splinely {} · {} · {}
+{}
+{}",
+                        report.version, report.os, report.language, report.message, report.location
+                    ));
+                    ui.weak(tr("Keine Projektinhalte; dein Home-Verzeichnis wird durch ~ ersetzt."));
+                });
+                ui.horizontal(|ui| {
+                    if ui.button(tr("Auf GitHub melden …")).clicked() {
+                        self.open_issue(Some(&report));
+                        close = true;
+                    }
+                    if ui.button(tr("Link kopieren")).clicked() {
+                        ctx.copy_text(splinely_editor::crash::issue_url(Some(&report)));
+                        self.status = tr("Link kopiert.").into();
+                    }
+                    if ui.button(tr("Nicht melden")).clicked() {
+                        close = true;
+                    }
+                });
+            });
+        if close {
+            splinely_editor::crash::dismiss();
+            self.crash_report = None;
+        }
+    }
+
+    /// Open a pre-filled GitHub issue (crash report or ordinary bug report).
+    pub(super) fn open_issue(&mut self, report: Option<&splinely_editor::crash::CrashReport>) {
+        let url = splinely_editor::crash::issue_url(report);
+        if let Err(error) = splinely_editor::crash::open_in_browser(&url) {
+            self.status = trf(
+                "Browser konnte nicht geöffnet werden: {error}",
+                &[error.to_string()],
+            );
+        }
     }
 }
 

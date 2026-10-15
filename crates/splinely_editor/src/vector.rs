@@ -1,6 +1,7 @@
 //! Vector inspector and transactional authoring commands, without app state.
 use eframe::egui;
 use splinely_document::{Color, NodeKind, Project};
+use splinely_editor::i18n::{tr, trf};
 
 #[path = "vector_tools.rs"]
 pub(crate) mod tools;
@@ -25,9 +26,9 @@ pub(crate) fn apply_vector_command(
         .nodes
         .iter_mut()
         .find(|n| n.id == id)
-        .ok_or_else(|| format!("Ebene {id} fehlt"))?;
+        .ok_or_else(|| trf("Ebene {id} fehlt", &[id.to_string()]))?;
     if node.locked {
-        return Err("Ebene zuerst entsperren".into());
+        return Err(tr("Ebene zuerst entsperren").into());
     }
     if matches!(command, VectorCommand::ConvertToPath) && matches!(node.kind, NodeKind::Text { .. })
     {
@@ -41,7 +42,7 @@ pub(crate) fn apply_vector_command(
         VectorCommand::ConvertBack => node.convert_back().map_err(|e| e.to_string())?,
         VectorCommand::SetPath(d) => {
             let NodeKind::Path { d: data, .. } = &mut node.kind else {
-                return Err("Zum Bearbeiten der Pfaddaten einen Pfad wählen".into());
+                return Err(tr("Zum Bearbeiten der Pfaddaten einen Pfad wählen").into());
             };
             if *data == d {
                 // Do not quantize generated bounds or invalidate exact shape
@@ -62,7 +63,7 @@ pub(crate) fn apply_vector_command(
         }
     }
     next.validate()
-        .map_err(|e| format!("Änderung abgelehnt: {e}"))?;
+        .map_err(|e| trf("Änderung abgelehnt: {e}", &[format!("{e}")]))?;
     *project = next;
     Ok(())
 }
@@ -141,7 +142,7 @@ fn swatches_ui(ui: &mut egui::Ui, node: &mut splinely_document::Node, colors: &[
                 egui::Stroke::new(1_f32, ui.visuals().widgets.noninteractive.bg_stroke.color),
                 egui::StrokeKind::Inside,
             );
-            let response = response.on_hover_text("Klick: als Füllung · Rechtsklick: als Rand");
+            let response = response.on_hover_text(tr("Klick: als Füllung · Rechtsklick: als Rand"));
             if response.clicked() {
                 node.gradient = None;
                 node.style.fill = *c;
@@ -170,11 +171,11 @@ fn gradient_ui(ui: &mut egui::Ui, node: &mut splinely_document::Node, colors: &[
     };
     let mut next = None;
     ui.horizontal(|ui| {
-        ui.label("Füllung");
+        ui.label(tr("Füllung"));
         for (m, label) in [
-            (Mode::Color, "Farbe"),
-            (Mode::Linear, "Verlauf"),
-            (Mode::Radial, "Radial"),
+            (Mode::Color, tr("Farbe")),
+            (Mode::Linear, tr("Farbverlauf")),
+            (Mode::Radial, tr("Radial")),
         ] {
             if ui.selectable_label(mode == m, label).clicked() && mode != m {
                 next = Some(m);
@@ -209,9 +210,9 @@ fn gradient_ui(ui: &mut egui::Ui, node: &mut splinely_document::Node, colors: &[
         None => {}
     }
     let Some(gradient) = &mut node.gradient else {
-        color_picker(ui, "Farbe", &mut node.style.fill);
+        color_picker(ui, tr("Farbe"), &mut node.style.fill);
         if !colors.is_empty() {
-            ui.weak("Dokumentfarben");
+            ui.weak(tr("Dokumentfarben"));
             swatches_ui(ui, node, colors);
         }
         return;
@@ -220,9 +221,9 @@ fn gradient_ui(ui: &mut egui::Ui, node: &mut splinely_document::Node, colors: &[
         ui.add(
             egui::Slider::new(&mut gradient.angle, -180.0..=180.0)
                 .suffix("°")
-                .text("Richtung"),
+                .text(tr("Richtung")),
         )
-        .on_hover_text("0° links › rechts, 90° oben › unten");
+        .on_hover_text(tr("0° links › rechts, 90° oben › unten"));
     }
     let mut remove = None;
     let count = gradient.stops.len();
@@ -252,7 +253,7 @@ fn gradient_ui(ui: &mut egui::Ui, node: &mut splinely_document::Node, colors: &[
             if count > 2
                 && ui
                     .small_button("🗑")
-                    .on_hover_text("Farbstopp entfernen")
+                    .on_hover_text(tr("Farbstopp entfernen"))
                     .clicked()
             {
                 remove = Some(i);
@@ -264,7 +265,7 @@ fn gradient_ui(ui: &mut egui::Ui, node: &mut splinely_document::Node, colors: &[
     }
     // Keep offsets ordered so validation never rejects a slider drag.
     gradient.stops.sort_by(|a, b| a.offset.total_cmp(&b.offset));
-    if gradient.stops.len() < 16 && ui.button("+ Farbstopp").clicked() {
+    if gradient.stops.len() < 16 && ui.button(tr("+ Farbstopp")).clicked() {
         // Insert in the widest gap, with the colour halfway between.
         let (index, _) = gradient
             .stops
@@ -300,13 +301,15 @@ pub(crate) fn vector_inspector_ui(
     ui: &mut egui::Ui,
     selection: &mut Option<String>,
 ) -> bool {
-    ui.heading("Darstellung");
+    ui.heading(tr("Darstellung"));
     let Some(id) = selection.as_deref() else {
-        ui.label("Form wählen, um Füllung und Rand zu bearbeiten.");
+        ui.label(tr("Form wählen, um Füllung und Rand zu bearbeiten."));
         return false;
     };
     let Some(index) = project.nodes.iter().position(|n| n.id == id) else {
-        ui.label("Auswahl nicht gefunden · Form auf der Zeichenfläche oder in den Ebenen wählen.");
+        ui.label(tr(
+            "Auswahl nicht gefunden · Form auf der Zeichenfläche oder in den Ebenen wählen.",
+        ));
         return false;
     };
     let error_id = ui.make_persistent_id(("vector_error", id));
@@ -316,21 +319,23 @@ pub(crate) fn vector_inspector_ui(
     let node = &mut next.nodes[index];
     let mut command = None;
     if node.locked {
-        ui.label("Ebene ist gesperrt · zum Bearbeiten in den Ebenen entsperren.");
+        ui.label(tr(
+            "Ebene ist gesperrt · zum Bearbeiten in den Ebenen entsperren.",
+        ));
     }
     ui.add_enabled_ui(!node.locked, |ui| {
         gradient_ui(ui, node, &colors);
         let mut opacity = node.style.opacity * 100.0;
         if ui
-            .add(egui::Slider::new(&mut opacity, 0.0..=100.0).suffix(" %").text("Deckkraft"))
-            .on_hover_text("0 % unsichtbar, 100 % deckend. Der Alphawert der Farbe wirkt zusätzlich.")
+            .add(egui::Slider::new(&mut opacity, 0.0..=100.0).suffix(" %").text(tr("Deckkraft")))
+            .on_hover_text(tr("0 % unsichtbar, 100 % deckend. Der Alphawert der Farbe wirkt zusätzlich."))
             .changed()
         {
             node.style.opacity = opacity / 100.0;
         }
         let mut stroke = node.style.stroke.is_some();
-        if ui.checkbox(&mut stroke, "Rand (Kontur)")
-            .on_hover_text("Rand um die Form ein-/ausschalten. Die Füllung färbt das Innere.")
+        if ui.checkbox(&mut stroke, tr("Rand (Kontur)"))
+            .on_hover_text(tr("Rand um die Form ein-/ausschalten. Die Füllung färbt das Innere."))
             .changed()
         {
             node.style.stroke = stroke.then(|| Color::rgb(0, 0, 0));
@@ -339,44 +344,44 @@ pub(crate) fn vector_inspector_ui(
             }
         }
         if let Some(color) = &mut node.style.stroke {
-            color_picker(ui, "Randfarbe", color);
+            color_picker(ui, tr("Randfarbe"), color);
         }
         ui.horizontal(|ui| {
-            ui.label("Randstärke");
+            ui.label(tr("Randstärke"));
             ui.add(
                 egui::DragValue::new(&mut node.style.stroke_width)
                     .speed(0.1)
                     .range(0.0..=1000.0)
                     .clamp_existing_to_range(false)
                     .suffix(" px"),
-            ).on_hover_text("Randstärke in lokalen SVG-Einheiten vor Skalierung · 0–1000 px · 0 blendet den Rand aus.");
+            ).on_hover_text(tr("Randstärke in lokalen SVG-Einheiten vor Skalierung · 0–1000 px · 0 blendet den Rand aus."));
         });
         ui.horizontal(|ui| {
-            if ui.button("−").on_hover_text("Rand 1 px dünner").clicked() {
+            if ui.button("−").on_hover_text(tr("Rand 1 px dünner")).clicked() {
                 node.style.stroke_width = (node.style.stroke_width - 1.0).clamp(0.0, 1000.0);
             }
             for width in [1.0, 2.0, 4.0, 8.0] {
-                if ui.button(format!("{width} px")).on_hover_text("Randstärke setzen").clicked() {
+                if ui.button(format!("{width} px")).on_hover_text(tr("Randstärke setzen")).clicked() {
                     node.style.stroke_width = width;
                 }
             }
-            if ui.button("+").on_hover_text("Rand 1 px dicker").clicked() {
+            if ui.button("+").on_hover_text(tr("Rand 1 px dicker")).clicked() {
                 node.style.stroke_width = (node.style.stroke_width + 1.0).clamp(0.0, 1000.0);
             }
         });
         if !stroke {
-            ui.small("Rand ist aus · „Rand (Kontur)“ einschalten, um ihn zu zeigen.");
+            ui.small(tr("Rand ist aus · „Rand (Kontur)“ einschalten, um ihn zu zeigen."));
         }
         match &mut node.kind {
             NodeKind::Rect { .. } | NodeKind::Circle { .. } => {
-                if ui.button("In Pfad umwandeln").clicked() {
+                if ui.button(tr("In Pfad umwandeln")).clicked() {
                     command = Some(VectorCommand::ConvertToPath);
                 }
             }
             NodeKind::Path { d, bounds, evenodd } => {
-                ui.checkbox(evenodd, "Gerade-ungerade-Füllung (Löcher)");
-                ui.weak(format!("Begrenzung: x {:.1} · y {:.1} · {:.1} × {:.1}", bounds[0], bounds[1], bounds[2], bounds[3]));
-                ui.small("Werkzeug Pfadpunkte (A): eckige Anker, runde Bézier-Griffe ziehen · Doppelklick auf Kante fügt Anker ein · Shift koppelt Tangenten, Shift+Alt erhält die Länge.");
+                ui.checkbox(evenodd, tr("Gerade-ungerade-Füllung (Löcher)"));
+                ui.weak(trf("Begrenzung: x {:.1} · y {:.1} · {:.1} × {:.1}", &[format!("{:.1}", bounds[0]), format!("{:.1}", bounds[1]), format!("{:.1}", bounds[2]), format!("{:.1}", bounds[3])]));
+                ui.small(tr("Werkzeug Pfadpunkte (A): eckige Anker, runde Bézier-Griffe ziehen · Doppelklick auf Kante fügt Anker ein · Shift koppelt Tangenten, Shift+Alt erhält die Länge."));
                 let mut draft = ui
                     .ctx()
                     .data(|data| data.get_temp::<PathDraft>(draft_id))
@@ -391,7 +396,7 @@ pub(crate) fn vector_inspector_ui(
                     draft.source = d.clone();
                     draft.text = d.clone();
                 }
-                egui::CollapsingHeader::new("SVG-Pfaddaten d (lokal)")
+                egui::CollapsingHeader::new(tr("SVG-Pfaddaten d (lokal)"))
                     .id_salt(("path_data", draft_id))
                     .show(ui, |ui| {
                     ui.add(
@@ -401,12 +406,12 @@ pub(crate) fn vector_inspector_ui(
                             .code_editor(),
                     );
                     ui.horizontal(|ui| {
-                        ui.label("Punkt X / Y");
+                        ui.label(tr("Punkt X / Y"));
                         ui.add(egui::DragValue::new(&mut draft.point[0]).speed(0.5));
                         ui.add(egui::DragValue::new(&mut draft.point[1]).speed(0.5));
                     });
                     ui.horizontal(|ui| {
-                        for (label, prefix) in [("+ Sprung (M)", "M"), ("+ Linie (L)", "L")] {
+                        for (label, prefix) in [(tr("+ Sprung (M)"), "M"), (tr("+ Linie (L)"), "L")] {
                             if ui.button(label).clicked() {
                                 draft.text.push_str(&format!(
                                     " {prefix}{} {}",
@@ -415,25 +420,25 @@ pub(crate) fn vector_inspector_ui(
                                 command = Some(VectorCommand::SetPath(draft.text.clone()));
                             }
                         }
-                        if ui.button("Schließen (Z)").clicked() {
+                        if ui.button(tr("Schließen (Z)")).clicked() {
                             draft.text.push_str(" Z");
                             command = Some(VectorCommand::SetPath(draft.text.clone()));
                         }
                     });
                     ui.horizontal(|ui| {
-                        if ui.button("Pfad übernehmen").clicked() {
+                        if ui.button(tr("Pfad übernehmen")).clicked() {
                             command = Some(VectorCommand::SetPath(draft.text.clone()));
                         }
-                        if ui.button("Entwurf zurücksetzen").clicked() {
+                        if ui.button(tr("Entwurf zurücksetzen")).clicked() {
                             draft.text = d.clone();
                             ui.ctx().data_mut(|data| data.remove::<String>(error_id));
                         }
                         if ui
                             .add_enabled(
                                 node.original_kind.is_some(),
-                                egui::Button::new("Ursprungsform wiederherstellen"),
+                                egui::Button::new(tr("Ursprungsform wiederherstellen")),
                             )
-                            .on_hover_text("Nur unveränderte, umgewandelte Pfade lassen sich zurückverwandeln")
+                            .on_hover_text(tr("Nur unveränderte, umgewandelte Pfade lassen sich zurückverwandeln"))
                             .clicked()
                         {
                             command = Some(VectorCommand::ConvertBack);
@@ -444,8 +449,8 @@ pub(crate) fn vector_inspector_ui(
             }
             NodeKind::Text { .. } => {
                 if ui
-                    .button("In Pfad umwandeln")
-                    .on_hover_text("Buchstaben werden zu bearbeitbaren Umrissen (lokale Systemschrift). Danach ist der Text nicht mehr editierbar.")
+                    .button(tr("In Pfad umwandeln"))
+                    .on_hover_text(tr("Buchstaben werden zu bearbeitbaren Umrissen (lokale Systemschrift). Danach ist der Text nicht mehr editierbar."))
                     .clicked()
                 {
                     command = Some(VectorCommand::ConvertToPath);

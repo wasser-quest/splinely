@@ -514,7 +514,7 @@ fn inspector_switches_between_colour_linear_and_radial_gradients() {
         &context,
         &mut project,
         &mut selected,
-        "Verlauf"
+        "Farbverlauf"
     ));
     let gradient = project.nodes[0].gradient.clone().expect("gradient created");
     assert!(!gradient.radial);

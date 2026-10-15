@@ -183,7 +183,7 @@ impl Editor {
                 &scene,
                 tint,
             ) {
-                self.status = format!("Zwiebelhaut: {error}");
+                self.status = trf("Zwiebelhaut: {error}", std::slice::from_ref(&error));
             }
         }
     }

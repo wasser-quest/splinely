@@ -14,7 +14,7 @@ impl Editor {
                 .iter()
                 .any(|b| Some(&b.id) == parent.as_ref())
         {
-            self.status = "Zuerst einen Elternknochen wählen.".into();
+            self.status = tr("Zuerst einen Elternknochen wählen.").into();
             return;
         }
         let id = self.new_id("bone");
@@ -38,12 +38,12 @@ impl Editor {
             .iter()
             .position(|n| Some(&n.id) == self.selected.as_ref())
         else {
-            self.status = "Zuerst eine Form auswählen.".into();
+            self.status = tr("Zuerst eine Form auswählen.").into();
             return;
         };
         let node = &self.project.nodes[index];
         if node.locked {
-            self.status = "Form vor dem Binden entsperren.".into();
+            self.status = tr("Form vor dem Binden entsperren.").into();
             return;
         }
         let changes_transform = |id: &str, property: Property| {
@@ -65,7 +65,7 @@ impl Editor {
                 .iter()
                 .any(|t| t.actions.iter().any(&action_changes_transform))
         }) {
-            self.status = "Binden ändert das Koordinatensystem. Zuerst X/Y/Drehungs-Spuren und Zustandsaktionen/-overrides der Form entfernen und stattdessen den Knochen animieren.".into();
+            self.status = tr("Binden ändert das Koordinatensystem. Zuerst X/Y/Drehungs-Spuren und Zustandsaktionen/-overrides der Form entfernen und stattdessen den Knochen animieren.").into();
             return;
         }
         let mut base = self.project.clone();
@@ -117,7 +117,7 @@ impl Editor {
         };
         let mut p = self.project.clone();
         let Some(clip) = p.clips.get_mut(self.active_clip) else {
-            self.status = "Zuerst in der Zeitleiste einen Clip anlegen.".into();
+            self.status = tr("Zuerst in der Zeitleiste einen Clip anlegen.").into();
             return;
         };
         for (property, value) in [
@@ -158,18 +158,21 @@ impl Editor {
             track.keyframes.sort_by(|a, b| a.time.total_cmp(&b.time));
         }
         self.commit(p);
-        self.status = "Knochen-X/Y/Drehung als Schlüsselbild gesetzt · Werte/Easing in der Zeitleiste bearbeiten.".into();
+        self.status = tr("Knochen-X/Y/Drehung als Schlüsselbild gesetzt · Werte/Easing in der Zeitleiste bearbeiten.").into();
     }
 
     pub(super) fn bones_ui(&mut self, ui: &mut egui::Ui) {
-        ui.heading("Skelett");
-        ui.label("Wurzel anlegen, auswählen, dann Kinder hinzufügen. Gelenke auf der Zeichenfläche anklicken. Kinder beginnen an der Spitze des Elternknochens.");
+        ui.heading(tr("Skelett"));
+        ui.label(tr("Wurzel anlegen, auswählen, dann Kinder hinzufügen. Gelenke auf der Zeichenfläche anklicken. Kinder beginnen an der Spitze des Elternknochens."));
         ui.horizontal(|ui| {
-            if ui.button("+ Wurzel").clicked() {
+            if ui.button(tr("+ Wurzel")).clicked() {
                 self.add_bone(false);
             }
             if ui
-                .add_enabled(self.selected_bone.is_some(), egui::Button::new("+ Kind"))
+                .add_enabled(
+                    self.selected_bone.is_some(),
+                    egui::Button::new(tr("+ Kind")),
+                )
                 .clicked()
             {
                 self.add_bone(true);
@@ -193,19 +196,21 @@ impl Editor {
             let bone = &mut p.bones[index];
             ui.separator();
             egui::ComboBox::from_id_salt("bone_parent")
-                .selected_text(bone.parent_id.as_deref().unwrap_or("Szenenwurzel"))
+                .selected_text(bone.parent_id.as_deref().unwrap_or(tr("Szenenwurzel")))
                 .show_ui(ui, |ui| {
-                    ui.selectable_value(&mut bone.parent_id, None, "Szenenwurzel");
+                    ui.selectable_value(&mut bone.parent_id, None, tr("Szenenwurzel"));
                     for id in choices.iter().filter(|id| **id != bone.id) {
                         ui.selectable_value(&mut bone.parent_id, Some(id.clone()), id);
                     }
                 });
-            ui.label("Grundpose lokal (Zyklen und ungültige Längen werden abgelehnt)");
+            ui.label(tr(
+                "Grundpose lokal (Zyklen und ungültige Längen werden abgelehnt)",
+            ));
             for (label, value) in [
                 ("X", &mut bone.x),
                 ("Y", &mut bone.y),
-                ("Drehung °", &mut bone.rotation),
-                ("Länge", &mut bone.length),
+                (tr("Drehung °"), &mut bone.rotation),
+                (tr("Länge"), &mut bone.length),
             ] {
                 ui.horizontal(|ui| {
                     ui.label(label);
@@ -214,50 +219,57 @@ impl Editor {
             }
             self.commit(p);
             if ui
-                .button("◼ Pose am Abspielkopf merken (X/Y/Drehung)")
+                .button(tr("◼ Pose am Abspielkopf merken (X/Y/Drehung)"))
                 .clicked()
             {
                 self.key_bone();
             }
-            ui.label("Animieren: Pose bei 0 merken, Abspielkopf verschieben, Pose ändern, erneut merken, dann abspielen. „Clip auswerten“ ausschalten, um die Grundpose zu sehen.");
-            ui.collapsing("IK-Pose (zwei Knochen)", |ui| {
-                ui.label("Unteren Knochen wählen; sein direkter Elternknochen ist der obere, der Gelenkversatz muss 0 sein. Ziel in Szenenkoordinaten. Ändert die Grunddrehungen; zum Animieren beide Knochen merken.");
+            ui.label(tr("Animieren: Pose bei 0 merken, Abspielkopf verschieben, Pose ändern, erneut merken, dann abspielen. „Clip auswerten“ ausschalten, um die Grundpose zu sehen."));
+            ui.collapsing(tr("IK-Pose (zwei Knochen)"), |ui| {
+                ui.label(tr("Unteren Knochen wählen; sein direkter Elternknochen ist der obere, der Gelenkversatz muss 0 sein. Ziel in Szenenkoordinaten. Ändert die Grunddrehungen; zum Animieren beide Knochen merken."));
                 ui.horizontal(|ui| {
-                    ui.label("Ziel X/Y");
+                    ui.label(tr("Ziel X/Y"));
                     ui.add(egui::DragValue::new(&mut self.ik_target[0]).speed(1.));
                     ui.add(egui::DragValue::new(&mut self.ik_target[1]).speed(1.));
                 });
-                ui.checkbox(&mut self.ik_bend_positive, "Positiv beugen");
-                if ui.button("Pose berechnen").clicked() {
+                ui.checkbox(&mut self.ik_bend_positive, tr("Positiv beugen"));
+                if ui.button(tr("Pose berechnen")).clicked() {
                     let lower = &self.project.bones[index];
                     let result = lower.parent_id.as_deref()
-                        .ok_or_else(|| DocumentError("Unteren Knochen mit Elternknochen wählen".into()))
+                        .ok_or_else(|| DocumentError(tr("Unteren Knochen mit Elternknochen wählen").into()))
                         .and_then(|upper| self.project.pose_two_bone_ik(upper, &lower.id, self.ik_target, self.ik_bend_positive));
                     match result {
-                        Ok(next) => { self.commit(next); self.status = "IK-Pose berechnet (unerreichbare Ziele werden begrenzt) · beide Knochen merken, um zu animieren.".into(); }
+                        Ok(next) => { self.commit(next); self.status = tr("IK-Pose berechnet (unerreichbare Ziele werden begrenzt) · beide Knochen merken, um zu animieren.").into(); }
                         Err(error) => self.status = error.to_string(),
                     }
                 }
             });
-            ui.label(format!(
+            ui.label(trf(
                 "Form: {}",
-                self.selected.as_deref().unwrap_or("keine ausgewählt")
+                &[self
+                    .selected
+                    .as_deref()
+                    .unwrap_or("keine ausgewählt")
+                    .to_string()],
             ));
             ui.horizontal(|ui| {
                 if ui
-                    .add_enabled(self.selected.is_some(), egui::Button::new("Form binden"))
+                    .add_enabled(
+                        self.selected.is_some(),
+                        egui::Button::new(tr("Form binden")),
+                    )
                     .clicked()
                 {
                     self.bind_selected(true);
                 }
                 if ui
-                    .add_enabled(self.selected.is_some(), egui::Button::new("Lösen"))
+                    .add_enabled(self.selected.is_some(), egui::Button::new(tr("Lösen")))
                     .clicked()
                 {
                     self.bind_selected(false);
                 }
             });
-            ui.label("Binden erhält die sichtbare Lage. Die Transformation der Form wird relativ zur Knochenwurzel, die Geometrie bleibt unverändert. Transformationsspuren/Zustandsaktionen der Form vorher entfernen.");
+            ui.label(tr("Binden erhält die sichtbare Lage. Die Transformation der Form wird relativ zur Knochenwurzel, die Geometrie bleibt unverändert. Transformationsspuren/Zustandsaktionen der Form vorher entfernen."));
         }
     }
 

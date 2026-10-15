@@ -182,13 +182,13 @@ impl ExtensionRegistry {
             .plugins
             .iter()
             .find(|p| p.id == plugin_id)
-            .ok_or("Unbekanntes Plugin")?;
+            .ok_or(crate::i18n::tr("Unbekanntes Plugin"))?;
         let tool = plugin
             .tools
             .iter()
             .chain(&plugin.palette)
             .find(|t| t.id == tool_id)
-            .ok_or("Unbekanntes Plugin-Werkzeug")?;
+            .ok_or(crate::i18n::tr("Unbekanntes Plugin-Werkzeug"))?;
         if project.nodes.len() > MAX_NODES {
             return Err("Plugin output node limit exceeded".into());
         }
@@ -204,20 +204,20 @@ impl ExtensionRegistry {
                 next.nodes.push(node);
             }
             Action::Style(style) => {
-                let selected = selected.ok_or("Zuerst eine Form auswählen")?;
+                let selected = selected.ok_or(crate::i18n::tr("Zuerst eine Form auswählen"))?;
                 let node = next
                     .nodes
                     .iter_mut()
                     .find(|n| n.id == selected)
-                    .ok_or("Ausgewählte Form existiert nicht mehr")?;
+                    .ok_or(crate::i18n::tr("Ausgewählte Form existiert nicht mehr"))?;
                 if node.locked {
-                    return Err("Ausgewählte Form ist gesperrt".into());
+                    return Err(crate::i18n::tr("Ausgewählte Form ist gesperrt").into());
                 }
                 style.apply(node);
             }
         }
         next.validate()
-            .map_err(|e| format!("Plugin-Ergebnis abgelehnt: {e}"))?;
+            .map_err(|e| crate::i18n::trf("Plugin-Ergebnis abgelehnt: {e}", &[format!("{e}")]))?;
         check_output_size(&next)?;
         Ok(next)
     }
@@ -230,24 +230,32 @@ impl ExtensionRegistry {
         project: &Project,
         selected: Option<&str>,
     ) -> Result<Option<Project>> {
-        ui.heading("Drop-in-Plugins");
+        ui.heading(crate::i18n::tr("Drop-in-Plugins"));
         if let Some(directory) = &self.directory {
-            ui.small(format!("Ordner: {}", directory.display()));
+            ui.small(crate::i18n::trf(
+                "Ordner: {}",
+                &[format!("{}", directory.display())],
+            ));
         }
-        ui.small("splinely-plugin.json einlegen › Neustart. Nur Daten-Werkzeuge, kein Fremdcode.");
+        ui.small(crate::i18n::tr(
+            "splinely-plugin.json einlegen › Neustart. Nur Daten-Werkzeuge, kein Fremdcode.",
+        ));
         for diagnostic in &self.diagnostics {
             ui.colored_label(egui::Color32::YELLOW, diagnostic);
         }
         if self.plugins.is_empty() {
-            ui.label("Keine Plugins geladen (nach dem Installieren neu starten).");
+            ui.label(crate::i18n::tr(
+                "Keine Plugins geladen (nach dem Installieren neu starten).",
+            ));
         }
         for plugin in &self.plugins {
             let mut clicked = None;
             ui.push_id(&plugin.id, |ui| {
                 ui.collapsing(&plugin.title, |ui| {
-                    for (label, tools) in
-                        [("Werkzeuge", &plugin.tools), ("Palette", &plugin.palette)]
-                    {
+                    for (label, tools) in [
+                        (crate::i18n::tr("Werkzeuge"), &plugin.tools),
+                        (crate::i18n::tr("Palette"), &plugin.palette),
+                    ] {
                         if tools.is_empty() {
                             continue;
                         }

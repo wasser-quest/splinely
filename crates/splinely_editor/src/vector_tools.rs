@@ -5,6 +5,7 @@
 use eframe::egui::{self, Color32, Pos2, Stroke};
 use resvg::{tiny_skia, usvg};
 use splinely_document::{Node, NodeKind, Project};
+use splinely_editor::i18n::{tr, trf};
 use std::fmt::Write;
 
 pub type Point = [f64; 2];
@@ -752,12 +753,12 @@ impl PathGesture {
             .nodes
             .iter()
             .find(|n| n.id == id)
-            .ok_or("Pfad fehlt")?;
+            .ok_or(tr("Pfad fehlt"))?;
         if node.locked || !node.visible {
-            return Err("Pfad ist gesperrt oder ausgeblendet".into());
+            return Err(tr("Pfad ist gesperrt oder ausgeblendet").into());
         }
         let NodeKind::Path { d, .. } = &node.kind else {
-            return Err("Pfad wählen, um Punkte zu bearbeiten".into());
+            return Err(tr("Pfad wählen, um Punkte zu bearbeiten").into());
         };
         let path = EditablePath::parse(d)?;
         map.validate()?;
@@ -813,12 +814,12 @@ impl PathGesture {
             .nodes
             .iter()
             .find(|n| n.id == id)
-            .ok_or("Pfad fehlt")?;
+            .ok_or(tr("Pfad fehlt"))?;
         if node.locked || !node.visible {
-            return Err("Pfad ist gesperrt oder ausgeblendet".into());
+            return Err(tr("Pfad ist gesperrt oder ausgeblendet").into());
         }
         let NodeKind::Path { d, .. } = &node.kind else {
-            return Err("Pfad wählen, um einen Anker einzufügen".into());
+            return Err(tr("Pfad wählen, um einen Anker einzufügen").into());
         };
         let Some(path) = EditablePath::parse(d)?.insert_nearest(screen, map, max_distance)? else {
             return Ok(None);
@@ -833,10 +834,10 @@ impl PathGesture {
     }
     pub fn candidate(&self, current: &Project) -> Result<Project, String> {
         if *current != self.before {
-            return Err(
-                "Dokument hat sich während der Pfadgeste geändert · abbrechen und erneut versuchen"
-                    .into(),
-            );
+            return Err(tr(
+                "Dokument hat sich während der Pfadgeste geändert · abbrechen und erneut versuchen",
+            )
+            .into());
         }
         let mut next = current.clone();
         super::apply_vector_command(
@@ -879,7 +880,7 @@ impl PenPath {
             valid_point(p)?;
         }
         if self.closed {
-            return Err("Pen-Pfad ist geschlossen · fertigstellen oder verwerfen".into());
+            return Err(tr("Pen-Pfad ist geschlossen · fertigstellen oder verwerfen").into());
         }
         if self.path.segments.len() >= 50_000 {
             return Err("SVG path segment limit is 50000".into());
@@ -915,7 +916,7 @@ impl PenPath {
             return Ok(());
         }
         if self.path.segments.len() < 2 {
-            return Err("Vor dem Schließen mindestens zwei Anker setzen".into());
+            return Err(tr("Vor dem Schließen mindestens zwei Anker setzen").into());
         }
         if self.path.segments.len() >= 50_000 {
             return Err("SVG path segment limit is 50000".into());
@@ -941,7 +942,7 @@ impl PenPath {
             },
         ));
         next.validate()
-            .map_err(|e| format!("Pen-Pfad abgelehnt: {e}"))?;
+            .map_err(|e| trf("Pen-Pfad abgelehnt: {e}", &[format!("{e}")]))?;
         Ok(next)
     }
 }

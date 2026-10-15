@@ -1,6 +1,7 @@
 //! Layer controls independent of the application and its undo/history policy.
 use eframe::egui;
 use splinely_document::Project;
+use splinely_editor::i18n::{tr, trf};
 
 #[derive(Clone, Debug)]
 pub(crate) enum LayerCommand {
@@ -53,7 +54,7 @@ pub(crate) fn apply_layer_command(
                 }
             }
             next.validate()
-                .map_err(|e| format!("Ebenenänderung abgelehnt: {e}"))?;
+                .map_err(|e| trf("Ebenenänderung abgelehnt: {e}", &[format!("{e}")]))?;
             *project = next;
             return Ok(());
         }
@@ -76,9 +77,9 @@ pub(crate) fn apply_layer_command(
         .nodes
         .iter()
         .position(|n| &n.id == id)
-        .ok_or_else(|| format!("Ebene {id} fehlt"))?;
+        .ok_or_else(|| trf("Ebene {id} fehlt", std::slice::from_ref(id)))?;
     if next.nodes[index].locked && !matches!(command, LayerCommand::Lock { .. }) {
-        return Err("Ebene zuerst entsperren".into());
+        return Err(tr("Ebene zuerst entsperren").into());
     }
     let mut selected = selection.clone();
     match command {
@@ -114,11 +115,11 @@ pub(crate) fn apply_layer_command(
                 }
                 suffix = suffix
                     .checked_add(1)
-                    .ok_or("Keine freie ID für die Kopie")?;
+                    .ok_or(tr("Keine freie ID für die Kopie"))?;
             };
             copy.id = new_id.clone();
             if !copy.name.is_empty() {
-                copy.name.push_str(" Kopie");
+                copy.name.push_str(tr(" Kopie"));
             }
             next.nodes.insert(index + 1, copy);
             for clip in &mut next.clips {
@@ -146,7 +147,7 @@ pub(crate) fn apply_layer_command(
         LayerCommand::GroupFlags { .. } | LayerCommand::RenameGroup { .. } => unreachable!(),
     }
     next.validate()
-        .map_err(|e| format!("Ebenenänderung abgelehnt: {e}"))?;
+        .map_err(|e| trf("Ebenenänderung abgelehnt: {e}", &[format!("{e}")]))?;
     *project = next;
     *selection = selected;
     Ok(())
@@ -174,7 +175,7 @@ pub(crate) fn layers_ui_multi(
     let filter_id = ui.make_persistent_id("layers_filter");
     let mut command = None;
     ui.horizontal(|ui| {
-        ui.heading("Ebenen");
+        ui.heading(tr("Ebenen"));
         ui.weak(project.nodes.len().to_string());
     });
     let mut filter = ui
@@ -182,7 +183,7 @@ pub(crate) fn layers_ui_multi(
         .data(|d| d.get_temp::<String>(filter_id))
         .unwrap_or_default();
     if project.nodes.len() > 8 {
-        ui.add(egui::TextEdit::singleline(&mut filter).hint_text("🔍 Ebenen filtern"));
+        ui.add(egui::TextEdit::singleline(&mut filter).hint_text(tr("🔍 Ebenen filtern")));
         ui.ctx()
             .data_mut(|d| d.insert_temp(filter_id, filter.clone()));
     }
@@ -251,7 +252,7 @@ pub(crate) fn layers_ui_multi(
                                         .frame(false)
                                         .min_size(egui::vec2(22., 0.)),
                                 )
-                                .on_hover_text("Ganze Gruppe ein-/ausblenden")
+                                .on_hover_text(tr("Ganze Gruppe ein-/ausblenden"))
                                 .clicked()
                             {
                                 command = Some(LayerCommand::GroupFlags {
@@ -274,7 +275,7 @@ pub(crate) fn layers_ui_multi(
                                         .frame(false)
                                         .min_size(egui::vec2(22., 0.)),
                                 )
-                                .on_hover_text("Ganze Gruppe sperren/entsperren")
+                                .on_hover_text(tr("Ganze Gruppe sperren/entsperren"))
                                 .clicked()
                             {
                                 command = Some(LayerCommand::GroupFlags {
@@ -287,7 +288,11 @@ pub(crate) fn layers_ui_multi(
                                 .add(
                                     egui::Button::new(if *folded { "›" } else { "⏷" }).frame(false),
                                 )
-                                .on_hover_text(if *folded { "Aufklappen" } else { "Zuklappen" })
+                                .on_hover_text(if *folded {
+                                    tr("Aufklappen")
+                                } else {
+                                    tr("Zuklappen")
+                                })
                                 .clicked()
                             {
                                 if *folded {
@@ -351,7 +356,10 @@ pub(crate) fn layers_ui_multi(
                             ui.painter().with_clip_rect(rect).text(
                                 rect.left_center() + egui::vec2(6., 0.),
                                 egui::Align2::LEFT_CENTER,
-                                format!("▣  {label}  ({})", members.len()),
+                                trf(
+                                    "▣  {label}  ({})",
+                                    &[label.to_string(), format!("{}", members.len())],
+                                ),
                                 egui::TextStyle::Body.resolve(ui.style()),
                                 if is_selected {
                                     visuals.selection.stroke.color
@@ -359,9 +367,9 @@ pub(crate) fn layers_ui_multi(
                                     visuals.strong_text_color()
                                 },
                             );
-                            let response = response.on_hover_text(
+                            let response = response.on_hover_text(tr(
                                 "Klick: ganze Gruppe wählen · Doppelklick: umbenennen",
-                            );
+                            ));
                             if response.double_clicked() {
                                 renaming = Some((id.clone(), name.clone(), false));
                             } else if response.clicked() && !members.is_empty() {
@@ -405,9 +413,9 @@ pub(crate) fn layers_ui_multi(
                                         .min_size(egui::vec2(22., 0.)),
                                 )
                                 .on_hover_text(if node.visible {
-                                    "Ausblenden"
+                                    tr("Ausblenden")
                                 } else {
-                                    "Einblenden"
+                                    tr("Einblenden")
                                 })
                                 .clicked()
                             {
@@ -429,9 +437,9 @@ pub(crate) fn layers_ui_multi(
                                         .min_size(egui::vec2(22., 0.)),
                                 )
                                 .on_hover_text(if node.locked {
-                                    "Entsperren"
+                                    tr("Entsperren")
                                 } else {
-                                    "Sperren (vor versehentlichem Bearbeiten schützen)"
+                                    tr("Sperren (vor versehentlichem Bearbeiten schützen)")
                                 })
                                 .clicked()
                             {
@@ -488,7 +496,8 @@ pub(crate) fn layers_ui_multi(
                                 egui::TextStyle::Body.resolve(ui.style()),
                                 color,
                             );
-                            let response = response.on_hover_text(format!("ID: {}", node.id));
+                            let response = response
+                                .on_hover_text(trf("ID: {}", std::slice::from_ref(&node.id)));
                             if response.clicked() {
                                 let toggle = ui.input(|i| i.modifiers.shift || i.modifiers.command);
                                 let id = node.id.clone();
@@ -526,20 +535,20 @@ pub(crate) fn layers_ui_multi(
             ui.horizontal(|ui| {
                 if ui
                     .add_enabled(!locked && index + 1 < project.nodes.len(), egui::Button::new("⬆"))
-                    .on_hover_text("Eine Ebene nach vorne")
+                    .on_hover_text(tr("Eine Ebene nach vorne"))
                     .clicked()
                 {
                     command = Some(LayerCommand::Raise(id.clone()));
                 }
                 if ui
                     .add_enabled(!locked && index > 0, egui::Button::new("⬇"))
-                    .on_hover_text("Eine Ebene nach hinten")
+                    .on_hover_text(tr("Eine Ebene nach hinten"))
                     .clicked()
                 {
                     command = Some(LayerCommand::Lower(id.clone()));
                 }
                 if ui
-                    .add_enabled(!locked, egui::Button::new("Duplizieren"))
+                    .add_enabled(!locked, egui::Button::new(tr("Duplizieren")))
                     .on_hover_text("Strg+D")
                     .clicked()
                 {
@@ -547,7 +556,7 @@ pub(crate) fn layers_ui_multi(
                 }
                 if ui
                     .add_enabled(!locked, egui::Button::new("🗑"))
-                    .on_hover_text("Ebene löschen · Entf. Ebenen mit Animations- oder Zustandsbezügen über „Form löschen“ entfernen.")
+                    .on_hover_text(tr("Ebene löschen · Entf. Ebenen mit Animations- oder Zustandsbezügen über „Form löschen“ entfernen."))
                     .clicked()
                 {
                     command = Some(LayerCommand::Delete(id.clone()));

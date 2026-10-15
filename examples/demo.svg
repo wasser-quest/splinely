@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="640" height="360" viewBox="0 0 640 360" data-splinely-version="1">
-<!-- Created with Splinely 0.3.0 -->
-<metadata><splinely:generator xmlns:splinely="urn:splinely:metadata" name="Splinely" version="0.3.0" schemaVersion="1"/></metadata>
+<!-- Created with Splinely 0.4.0 -->
+<metadata><splinely:generator xmlns:splinely="urn:splinely:metadata" name="Splinely" version="0.4.0" schemaVersion="1"/></metadata>
 <title>Splinely: Klick, Keyframes und eingebetteter Ton</title>
 <rect id="background" data-splinely-node="background" transform="translate(0 0) rotate(0) scale(1 1)" fill="rgb(6% 8% 14.000000000000002%)" fill-opacity="1" stroke="none" stroke-opacity="1" stroke-width="1" opacity="1" x="0" y="0" width="640" height="360" rx="0"/>
 <circle id="ball" data-splinely-node="ball" transform="translate(0 0) rotate(0) scale(1 1)" fill="rgb(20% 70% 100%)" fill-opacity="1" stroke="none" stroke-opacity="1" stroke-width="1" opacity="1" cx="80" cy="180" r="32"/>

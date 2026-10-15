@@ -6,6 +6,7 @@ mod bones;
 mod boolean;
 mod browser_host;
 mod conversion;
+pub mod crash;
 mod geometry;
 mod groups;
 mod history;

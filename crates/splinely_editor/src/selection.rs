@@ -193,7 +193,10 @@ impl Editor {
         let count = next.len();
         self.set_selection(next);
         if count > 1 {
-            self.status = format!("{count} Formen ausgewählt · Anordnen rechts, Strg+G gruppiert.");
+            self.status = trf(
+                "{count} Formen ausgewählt · Anordnen rechts, Strg+G gruppiert.",
+                &[format!("{count}")],
+            );
         }
     }
 
@@ -270,12 +273,14 @@ impl Editor {
         let ids = self.editable_selection();
         if ids.is_empty() {
             self.status =
-                "Nichts Bearbeitbares ausgewählt (gesperrte Ebenen bleiben unverändert).".into();
+                tr("Nichts Bearbeitbares ausgewählt (gesperrte Ebenen bleiben unverändert).")
+                    .into();
             return;
         }
         if let ArrangeOp::Boolean(boolean) = op {
             if !self.machine_source_clean() {
-                self.status = "Zuerst vorgemerktes Zustands-JSON übernehmen oder neu laden.".into();
+                self.status =
+                    tr("Zuerst vorgemerktes Zustands-JSON übernehmen oder neu laden.").into();
                 return;
             }
             let mut next = self.project.clone();
@@ -286,9 +291,9 @@ impl Editor {
                     self.machine_buffer =
                         serde_json::to_string_pretty(&self.project.state_machines)
                             .unwrap_or_default();
-                    self.status = format!(
+                    self.status = trf(
                         "{} Formen zu einem Pfad kombiniert · Strg+Z macht es rückgängig.",
-                        ids.len()
+                        &[format!("{}", ids.len())],
                     );
                 }
                 Err(error) => self.status = error.to_string(),
@@ -301,7 +306,7 @@ impl Editor {
                 return;
             };
             if selection.len() != 2 {
-                self.status = "Für einen Morph genau zwei Formen wählen.".into();
+                self.status = tr("Für einen Morph genau zwei Formen wählen.").into();
                 return;
             }
             let mut next = self.project.clone();
@@ -318,9 +323,10 @@ impl Editor {
                     self.timeline_visible = true;
                     self.time = 0.;
                     self.set_selection(vec![source]);
-                    self.status =
-                        "Morph-Clip erstellt (1 s) · Leertaste spielt ab · Zielform ausgeblendet."
-                            .into();
+                    self.status = tr(
+                        "Morph-Clip erstellt (1 s) · Leertaste spielt ab · Zielform ausgeblendet.",
+                    )
+                    .into();
                 }
                 Err(error) => self.status = error.to_string(),
             }
@@ -366,15 +372,15 @@ impl Editor {
             Ok(()) => {
                 self.commit(next);
                 self.status = match op {
-                    ArrangeOp::Group => format!(
+                    ArrangeOp::Group => trf(
                         "{} Formen gruppiert · Strg+Umschalt+G löst die Gruppe.",
-                        ids.len()
+                        &[format!("{}", ids.len())],
                     ),
-                    ArrangeOp::Ungroup => "Gruppe aufgelöst.".into(),
-                    ArrangeOp::Align(_) => "Ausgerichtet.".into(),
-                    ArrangeOp::Distribute(_) => "Gleichmäßig verteilt.".into(),
-                    ArrangeOp::Flip(_) => "Gespiegelt.".into(),
-                    ArrangeOp::Stack(_) => "Reihenfolge geändert.".into(),
+                    ArrangeOp::Ungroup => tr("Gruppe aufgelöst.").into(),
+                    ArrangeOp::Align(_) => tr("Ausgerichtet.").into(),
+                    ArrangeOp::Distribute(_) => tr("Gleichmäßig verteilt.").into(),
+                    ArrangeOp::Flip(_) => tr("Gespiegelt.").into(),
+                    ArrangeOp::Stack(_) => tr("Reihenfolge geändert.").into(),
                     ArrangeOp::Boolean(_) | ArrangeOp::SetBounds(..) | ArrangeOp::Morph => {
                         unreachable!("handled above")
                     }
@@ -394,9 +400,9 @@ impl Editor {
         let mut op = None;
         let count = selection.len();
         let title = if count > 1 {
-            format!("Anordnen · {count} Formen")
+            trf("Anordnen · {count} Formen", &[format!("{count}")])
         } else {
-            "Anordnen".into()
+            tr("Anordnen").into()
         };
         // Single shapes have their own position fields; keep the panel compact.
         egui::CollapsingHeader::new(title)
@@ -426,8 +432,8 @@ impl Editor {
                         let id = ui.make_persistent_id("bounds_proportional");
                         let mut proportional = ui.data(|d| d.get_temp::<bool>(id)).unwrap_or(true);
                         if ui
-                            .checkbox(&mut proportional, "Proportional")
-                            .on_hover_text("Breite und Höhe gemeinsam ändern. Schräg gedrehte Formen lassen sich nur proportional skalieren.")
+                            .checkbox(&mut proportional, tr("Proportional"))
+                            .on_hover_text(tr("Breite und Höhe gemeinsam ändern. Schräg gedrehte Formen lassen sich nur proportional skalieren."))
                             .changed()
                         {
                             ui.data_mut(|d| d.insert_temp(id, proportional));
@@ -436,16 +442,16 @@ impl Editor {
                             op = Some(ArrangeOp::SetBounds(values, proportional));
                         }
                     }
-                    let target = if count > 1 { "an der Auswahl" } else { "an der Zeichenfläche" };
+                    let target = if count > 1 { tr("an der Auswahl") } else { tr("an der Zeichenfläche") };
                     ui.horizontal_wrapped(|ui| {
                         ui.spacing_mut().item_spacing.x = 3.;
                         for (icon, edge, hint) in [
-                            (Icon::Align(false, 0.), AlignEdge::Left, "Links ausrichten"),
-                            (Icon::Align(false, 0.5), AlignEdge::HorizontalCenter, "Horizontal zentrieren"),
-                            (Icon::Align(false, 1.), AlignEdge::Right, "Rechts ausrichten"),
-                            (Icon::Align(true, 0.), AlignEdge::Top, "Oben ausrichten"),
-                            (Icon::Align(true, 0.5), AlignEdge::VerticalCenter, "Vertikal zentrieren"),
-                            (Icon::Align(true, 1.), AlignEdge::Bottom, "Unten ausrichten"),
+                            (Icon::Align(false, 0.), AlignEdge::Left, tr("Links ausrichten")),
+                            (Icon::Align(false, 0.5), AlignEdge::HorizontalCenter, tr("Horizontal zentrieren")),
+                            (Icon::Align(false, 1.), AlignEdge::Right, tr("Rechts ausrichten")),
+                            (Icon::Align(true, 0.), AlignEdge::Top, tr("Oben ausrichten")),
+                            (Icon::Align(true, 0.5), AlignEdge::VerticalCenter, tr("Vertikal zentrieren")),
+                            (Icon::Align(true, 1.), AlignEdge::Bottom, tr("Unten ausrichten")),
                         ] {
                             if icon_button(ui, icon, true)
                                 .on_hover_text(format!("{hint} {target}"))
@@ -459,12 +465,12 @@ impl Editor {
                         ui.spacing_mut().item_spacing.x = 3.;
                         let enough = editable >= 3;
                         for (icon, axis, hint) in [
-                            (Icon::Distribute(false), Axis::Horizontal, "Horizontal gleiche Abstände"),
-                            (Icon::Distribute(true), Axis::Vertical, "Vertikal gleiche Abstände"),
+                            (Icon::Distribute(false), Axis::Horizontal, tr("Horizontal gleiche Abstände")),
+                            (Icon::Distribute(true), Axis::Vertical, tr("Vertikal gleiche Abstände")),
                         ] {
                             if icon_button(ui, icon, enough)
                                 .on_hover_text(hint)
-                                .on_disabled_hover_text(format!("{hint} · mindestens drei Formen auswählen"))
+                                .on_disabled_hover_text(trf("{hint} · mindestens drei Formen auswählen", &[hint.to_string()]))
                                 .clicked()
                             {
                                 op = Some(ArrangeOp::Distribute(axis));
@@ -472,8 +478,8 @@ impl Editor {
                         }
                         ui.add_space(6.);
                         for (icon, axis, hint) in [
-                            (Icon::Flip(false), Axis::Horizontal, "Horizontal spiegeln · Umschalt+H"),
-                            (Icon::Flip(true), Axis::Vertical, "Vertikal spiegeln · Umschalt+V"),
+                            (Icon::Flip(false), Axis::Horizontal, tr("Horizontal spiegeln · Umschalt+H")),
+                            (Icon::Flip(true), Axis::Vertical, tr("Vertikal spiegeln · Umschalt+V")),
                         ] {
                             if icon_button(ui, icon, true).on_hover_text(hint).clicked() {
                                 op = Some(ArrangeOp::Flip(axis));
@@ -481,10 +487,10 @@ impl Editor {
                         }
                         ui.add_space(6.);
                         for (icon, stack, hint) in [
-                            (Icon::Stack(true, true), Stack::Top, "Ganz nach vorne · Umschalt+Bild⬆"),
-                            (Icon::Stack(true, false), Stack::Raise, "Eine Ebene nach vorne · Bild⬆"),
-                            (Icon::Stack(false, false), Stack::Lower, "Eine Ebene nach hinten · Bild⬇"),
-                            (Icon::Stack(false, true), Stack::Bottom, "Ganz nach hinten · Umschalt+Bild⬇"),
+                            (Icon::Stack(true, true), Stack::Top, tr("Ganz nach vorne · Umschalt+Bild⬆")),
+                            (Icon::Stack(true, false), Stack::Raise, tr("Eine Ebene nach vorne · Bild⬆")),
+                            (Icon::Stack(false, false), Stack::Lower, tr("Eine Ebene nach hinten · Bild⬇")),
+                            (Icon::Stack(false, true), Stack::Bottom, tr("Ganz nach hinten · Umschalt+Bild⬇")),
                         ] {
                             if icon_button(ui, icon, true).on_hover_text(hint).clicked() {
                                 op = Some(ArrangeOp::Stack(stack));
@@ -495,14 +501,14 @@ impl Editor {
                         ui.spacing_mut().item_spacing.x = 3.;
                         let enough = editable >= 2;
                         for (icon, boolean, hint) in [
-                            (Icon::Boolean(BooleanOp::Union), BooleanOp::Union, "Vereinigen"),
-                            (Icon::Boolean(BooleanOp::Difference), BooleanOp::Difference, "Abziehen: unterste Form minus die anderen"),
-                            (Icon::Boolean(BooleanOp::Intersection), BooleanOp::Intersection, "Schnittmenge"),
-                            (Icon::Boolean(BooleanOp::Exclusion), BooleanOp::Exclusion, "Ausschluss (nur nicht überlappende Bereiche)"),
+                            (Icon::Boolean(BooleanOp::Union), BooleanOp::Union, tr("Vereinigen")),
+                            (Icon::Boolean(BooleanOp::Difference), BooleanOp::Difference, tr("Abziehen: unterste Form minus die anderen")),
+                            (Icon::Boolean(BooleanOp::Intersection), BooleanOp::Intersection, tr("Schnittmenge")),
+                            (Icon::Boolean(BooleanOp::Exclusion), BooleanOp::Exclusion, tr("Ausschluss (nur nicht überlappende Bereiche)")),
                         ] {
                             if icon_button(ui, icon, enough)
-                                .on_hover_text(format!("{hint} · ergibt einen Pfad mit dem Stil der untersten Form; Kurven werden geglättet"))
-                                .on_disabled_hover_text(format!("{hint} · mindestens zwei Formen (kein Text) auswählen"))
+                                .on_hover_text(trf("{hint} · ergibt einen Pfad mit dem Stil der untersten Form; Kurven werden geglättet", &[hint.to_string()]))
+                                .on_disabled_hover_text(trf("{hint} · mindestens zwei Formen (kein Text) auswählen", &[hint.to_string()]))
                                 .clicked()
                             {
                                 op = Some(ArrangeOp::Boolean(boolean));
@@ -514,22 +520,22 @@ impl Editor {
                             self.project.nodes.iter().any(|n| &n.id == id && n.group.is_some())
                         });
                         if ui
-                            .add_enabled(count == 2, egui::Button::new("Morph"))
-                            .on_hover_text("Die zuerst gewählte Form verwandelt sich in die zweite (neuer 1-s-Clip, Zielform wird ausgeblendet).")
-                            .on_disabled_hover_text("Genau zwei Formen wählen")
+                            .add_enabled(count == 2, egui::Button::new(tr("Morph")))
+                            .on_hover_text(tr("Die zuerst gewählte Form verwandelt sich in die zweite (neuer 1-s-Clip, Zielform wird ausgeblendet)."))
+                            .on_disabled_hover_text(tr("Genau zwei Formen wählen"))
                             .clicked()
                         {
                             op = Some(ArrangeOp::Morph);
                         }
                         if ui
-                            .add_enabled(count > 1, egui::Button::new("Gruppieren"))
-                            .on_hover_text(format!("{} · Klick wählt dann die ganze Gruppe, Strg+Klick eine einzelne Form", self.binding_label(&super::palette::Cmd::Arrange(ArrangeOp::Group))))
+                            .add_enabled(count > 1, egui::Button::new(tr("Gruppieren")))
+                            .on_hover_text(trf("{} · Klick wählt dann die ganze Gruppe, Strg+Klick eine einzelne Form", &[self.binding_label(&super::palette::Cmd::Arrange(ArrangeOp::Group)).to_string()]))
                             .clicked()
                         {
                             op = Some(ArrangeOp::Group);
                         }
                         if ui
-                            .add_enabled(grouped, egui::Button::new("Gruppe lösen"))
+                            .add_enabled(grouped, egui::Button::new(tr("Gruppe lösen")))
                             .on_hover_text(self.binding_label(&super::palette::Cmd::Arrange(ArrangeOp::Ungroup)))
                             .clicked()
                         {
@@ -538,7 +544,7 @@ impl Editor {
                     });
                 });
                 if editable < count {
-                    ui.weak(format!("{} gesperrte Form(en) bleiben unverändert.", count - editable));
+                    ui.weak(trf("{} gesperrte Form(en) bleiben unverändert.", &[format!("{}", count - editable)]));
                 }
             });
         op

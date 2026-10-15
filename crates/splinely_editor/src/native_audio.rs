@@ -9,12 +9,12 @@ impl Editor {
         self.audio_load_wanted = false;
     }
     pub(super) fn native_audio_controls(&mut self, ui: &mut egui::Ui) {
-        ui.label("Optionale native Vorschau globaler Audioeinsätze über ffplay. Bildbasiertes Timing; maßgeblich bleibt die Audiouhr im Browser-Export. Browser-Spracheinsätze hört man nur im Browser – eingebettete Sprache (unten „Als Audio einbetten“) auch hier.");
+        ui.label(tr("Optionale native Vorschau globaler Audioeinsätze über ffplay. Bildbasiertes Timing; maßgeblich bleibt die Audiouhr im Browser-Export."));
         ui.horizontal_wrapped(|ui| {
             if ui
                 .add_enabled(
                     self.audio_loading.is_none(),
-                    egui::Button::new("Native Audiovorschau ein / neu laden"),
+                    egui::Button::new(tr("Native Audiovorschau ein / neu laden")),
                 )
                 .clicked()
             {
@@ -33,27 +33,32 @@ impl Editor {
                 if let Err(error) = spawn {
                     self.audio_loading = None;
                     self.audio_load_wanted = false;
-                    self.status = format!("Native Audiovorschau nicht vorbereitet: {error}");
+                    self.status = trf(
+                        "Native Audiovorschau nicht vorbereitet: {error}",
+                        &[format!("{error}")],
+                    );
                 }
             }
-            if ui.button("Native Audiovorschau stoppen").clicked() {
+            if ui.button(tr("Native Audiovorschau stoppen")).clicked() {
                 self.disable_native_audio();
             }
-            if self.audio_enabled && ui.button("Audiogerät erneut versuchen").clicked() {
+            if self.audio_enabled && ui.button(tr("Audiogerät erneut versuchen")).clicked() {
                 self.audio_preview.retry();
             }
             if self.audio_loading.is_some() {
                 ui.spinner();
                 ui.label(if self.audio_load_wanted {
-                    "Audio wird im Hintergrund vorbereitet …"
+                    tr("Audio wird im Hintergrund vorbereitet …")
                 } else {
-                    "Gestoppt · Vorbereitung im Hintergrund wird beendet …"
+                    tr("Gestoppt · Vorbereitung im Hintergrund wird beendet …")
                 });
             }
-            ui.label(format!(
+            ui.label(trf(
                 "{} · {} Stimmen",
-                if self.audio_enabled { "aktiv" } else { "aus" },
-                self.audio_preview.active_voices()
+                &[
+                    (if self.audio_enabled { "aktiv" } else { "aus" }).to_string(),
+                    format!("{}", self.audio_preview.active_voices()),
+                ],
             ));
         });
     }
@@ -64,7 +69,7 @@ impl Editor {
             .and_then(|receiver| match receiver.try_recv() {
                 Ok(result) => Some(result),
                 Err(std::sync::mpsc::TryRecvError::Disconnected) => {
-                    Some(Err("Audiovorbereitung unerwartet beendet".into()))
+                    Some(Err(tr("Audiovorbereitung unerwartet beendet").into()))
                 }
                 Err(std::sync::mpsc::TryRecvError::Empty) => None,
             });
@@ -82,7 +87,10 @@ impl Editor {
                 }
                 Err(error) => {
                     self.audio_enabled = false;
-                    self.status = format!("Native Audiovorschau: {error}");
+                    self.status = trf(
+                        "Native Audiovorschau: {error}",
+                        std::slice::from_ref(&error),
+                    );
                 }
             }
         }
@@ -90,7 +98,10 @@ impl Editor {
             self.audio_preview.update(self.time, self.playing);
         }
         for diagnostic in self.audio_preview.take_diagnostics() {
-            self.status = format!("Native Audiovorschau: {diagnostic}");
+            self.status = trf(
+                "Native Audiovorschau: {diagnostic}",
+                std::slice::from_ref(&diagnostic),
+            );
         }
         if self.audio_loading.is_some() || self.audio_enabled {
             ctx.request_repaint_after(Duration::from_millis(25));

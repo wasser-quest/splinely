@@ -412,3 +412,38 @@ fn double_click_on_canvas_text_opens_the_inline_editor() {
         editor.selection()
     );
 }
+
+/// Every language renders the main workspaces without panics, and Latin-script
+/// translations only use glyphs that egui bundles (CJK loads a system font).
+#[test]
+fn every_language_renders_and_has_glyphs() {
+    use splinely_editor::i18n::{set_thread_language, tr, Lang};
+    for lang in Lang::ALL {
+        set_thread_language(Some(lang));
+        let ctx = egui::Context::default();
+        let mut editor = Editor::default();
+        for workspace in [Workspace::Design, Workspace::Animate, Workspace::Advanced] {
+            editor.workspace = workspace;
+            let output = frame(&mut editor, &ctx, vec![]);
+            assert!(!texts(&output).is_empty());
+        }
+        if lang != Lang::De {
+            assert_ne!(tr("Speichern"), "Speichern", "{lang:?}");
+        }
+        if !lang.needs_cjk_font() {
+            let font = egui::FontId::proportional(14.);
+            let table = std::fs::read_to_string(format!(
+                "{}/i18n/{}.json",
+                env!("CARGO_MANIFEST_DIR"),
+                lang.code()
+            ))
+            .unwrap_or_default();
+            let missing: Vec<char> = table
+                .chars()
+                .filter(|c| !c.is_ascii() && !ctx.fonts(|f| f.has_glyph(&font, *c)))
+                .collect();
+            assert!(missing.is_empty(), "{lang:?} misses glyphs {missing:?}");
+        }
+    }
+    set_thread_language(None);
+}
