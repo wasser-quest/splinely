@@ -1,12 +1,14 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="720" height="216" viewBox="0 0 720 216" role="img" aria-labelledby="title desc">
   <title id="title">Splinely — vector, motion, sound</title>
-  <desc id="desc">An original turquoise F built from bone joints, a coral motion arc and violet sound waves, next to the Splinely wordmark.</desc>
+  <desc id="desc">A turquoise S drawn as a Bézier spline with its anchor points and control handles, a coral dot gliding along the curve with a motion trail and violet sound waves, next to the Splinely wordmark.</desc>
   <defs><linearGradient id="ink" x2="1" y2="1"><stop stop-color="#55e6cb"/><stop offset="1" stop-color="#56b7ec"/></linearGradient></defs>
   <rect width="720" height="216" rx="28" fill="#111827"/>
-  <path d="M55 158V59H151M55 104H128" fill="none" stroke="url(#ink)" stroke-width="19" stroke-linecap="round" stroke-linejoin="round"/>
-  <g fill="#111827" stroke="#78edd8" stroke-width="5"><circle cx="55" cy="59" r="10"/><circle cx="55" cy="104" r="10"/><circle cx="55" cy="158" r="10"/><circle cx="151" cy="59" r="10"/><circle cx="128" cy="104" r="10"/></g>
-  <path d="M118 153Q162 164 173 116" fill="none" stroke="#fb8e7c" stroke-width="5" stroke-linecap="round"/><path d="M163 119l11-7 3 13" fill="none" stroke="#fb8e7c" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
-  <g fill="none" stroke="#b8a0ff" stroke-width="4" stroke-linecap="round"><path d="M187 80v18m8-24v30m8-20v14"/></g>
+  <path d="M60 86L152 130" stroke="#94a3b8" stroke-width="3" stroke-linecap="round"/>
+  <path d="M148 60C120 24 30 72 106 108C182 144 92 194 64 158" fill="none" stroke="url(#ink)" stroke-width="19" stroke-linecap="round"/>
+  <g fill="#94a3b8"><circle cx="60" cy="86" r="7"/><circle cx="152" cy="130" r="7"/></g>
+  <g fill="#111827" stroke="#78edd8" stroke-width="5"><rect x="140" y="52" width="16" height="16" rx="3"/><rect x="98" y="100" width="16" height="16" rx="3"/><rect x="56" y="150" width="16" height="16" rx="3"/></g>
+  <path d="M160 176Q186 166 190 138" fill="none" stroke="#fb8e7c" stroke-width="5" stroke-linecap="round" stroke-dasharray="1 10"/><circle cx="191" cy="128" r="9" fill="#fb8e7c"/>
+  <g fill="none" stroke="#b8a0ff" stroke-width="4" stroke-linecap="round"><path d="M207 82v22m9-30v38m9-26v14"/></g>
   <text x="239" y="129" fill="#f1f5f9" font-family="DejaVu Sans, sans-serif" font-weight="700" font-size="80" letter-spacing="-3">Splinely</text>
   <text x="245" y="164" fill="#a8b5cb" font-family="DejaVu Sans, sans-serif" font-size="18" letter-spacing="3">VECTOR · MOTION · SOUND</text>
 </svg>
