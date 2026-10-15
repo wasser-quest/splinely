@@ -1,0 +1,65 @@
+# Splinely
+
+> Splinely is a vector animation tool: a desktop editor plus a command-line tool
+> (`splinely-cli`) that creates `.sply` projects (strict JSON) with shapes, paths,
+> keyframe animation, bones, state machines and embedded audio, and exports them
+> as one self-contained interactive SVG. This file tells an LLM agent with shell
+> access how to install the prebuilt binaries and start using them.
+
+## Install (Linux x86_64, no compiling)
+
+Prebuilt packages are attached to every GitHub release and run on Linux with
+glibc 2.35 or newer (Ubuntu 22.04+, Debian 12+, Fedora 36+).
+
+1. Find the latest release tag:
+   `curl -fsSL https://api.github.com/repos/wasser-quest/splinely/releases/latest`
+   and read `tag_name` (for example `v0.3.0`).
+2. Download the asset and its checksum, verify, then unpack:
+
+   ```sh
+   VERSION=v0.3.0   # use the tag_name from step 1
+   NAME="splinely-${VERSION}-x86_64-linux"
+   BASE="https://github.com/wasser-quest/splinely/releases/download/${VERSION}"
+   curl -fLO "$BASE/$NAME.tar.gz" && curl -fLO "$BASE/$NAME.tar.gz.sha256"
+   sha256sum -c "$NAME.tar.gz.sha256"
+   mkdir -p ~/.local/opt && tar -xzf "$NAME.tar.gz" -C ~/.local/opt
+   export PATH="$HOME/.local/opt/$NAME/bin:$PATH"
+   splinely-cli --version
+   ```
+
+   Stop and report if the checksum does not match. Ask the user before adding
+   the PATH line to their shell profile.
+3. On another OS or architecture there is no prebuilt package: tell the user and
+   offer to build from source (`cargo build --release`, see README.md).
+
+## Package contents
+
+- `bin/splinely-cli`: the command-line tool; use this for all authoring work.
+- `bin/splinely`: desktop editor (GUI).
+- `bin/splinely-viewer`: native player window; needs GTK 3 and WebKitGTK 4.1
+  (`libgtk-3-0 libwebkit2gtk-4.1-0` on Ubuntu). Do not install system packages
+  without asking the user.
+- `bin/splinely-runtime`, `lib/libsplinely_runtime.so`, `include/splinely_runtime.h`:
+  native runtime for embedding animations in other programs.
+- `LLM.md`, `CLI.md`, `prompts/splinely-author.md`: authoring guides.
+- `examples/`: sample projects and exported SVGs.
+
+## Using it
+
+- Read `splinely-cli guide` and `LLM.md` before the first edit.
+- Typical flow: `splinely-cli new --output scene.sply`, add shapes with
+  `splinely-cli node add`, animate with `splinely-cli keyframe`, validate with
+  `splinely-cli check scene.sply`, look at `splinely-cli render scene.sply --time 1 --output preview.png`,
+  then `splinely-cli export scene.sply --output scene.svg`.
+- `splinely-cli COMMAND --help` documents every command; output is JSON.
+- Only pass `--trusted-js` to `export` when the user explicitly approves the
+  project's custom JavaScript.
+- Exported SVGs need a script-capable browser (open directly or via `<object>`,
+  not `<img>`); audio starts only after a user click.
+
+## Links
+
+- Repository: https://github.com/wasser-quest/splinely
+- Releases: https://github.com/wasser-quest/splinely/releases
+- CLI reference: https://github.com/wasser-quest/splinely/blob/main/CLI.md
+- LLM authoring guide: https://github.com/wasser-quest/splinely/blob/main/LLM.md

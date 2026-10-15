@@ -43,28 +43,8 @@ Exportierte SVGs laufen ohne Installation in jedem Browser.
 
 ## Anleitung für ein LLM
 
-Diesen Text einem LLM-Agenten mit Shell-Zugriff geben (z. B. Claude Code), damit
-er sich Splinely selbst holt und benutzt:
+Einem LLM-Agenten mit Shell-Zugriff genügt der Satz:
 
-```text
-Installiere das SVG-Animationswerkzeug Splinely aus den fertigen GitHub-Releases,
-ohne es aus dem Quellcode zu bauen:
+> Installiere mir Splinely: https://raw.githubusercontent.com/wasser-quest/splinely/main/llms.txt
 
-1. Ermittle die neueste Version:
-   curl -fsSL https://api.github.com/repos/wasser-quest/splinely/releases/latest
-   (Feld "tag_name", z. B. v0.3.0). Nutze das Asset
-   splinely-<tag>-x86_64-linux.tar.gz und die zugehörige .sha256-Datei.
-2. Lade beide herunter, prüfe mit `sha256sum -c` und entpacke nach ~/.local/opt.
-   Führe nichts aus, wenn die Prüfsumme nicht stimmt.
-3. Füge ~/.local/opt/splinely-<tag>-x86_64-linux/bin zum PATH hinzu und prüfe mit
-   `splinely-cli --version`.
-4. Lies vor der ersten Benutzung `splinely-cli guide` sowie LLM.md und
-   prompts/splinely-author.md aus dem entpackten Ordner. Arbeite danach nur mit
-   `splinely-cli` (z. B. `new`, `node add`, `keyframe`, `check`, `render`, `export`).
-5. Prüfe jedes Projekt mit `splinely-cli check`, sieh dir eine Vorschau mit
-   `splinely-cli render` an und exportiere am Ende mit `splinely-cli export`.
-   Nutze `--trusted-js` nur, wenn ich eigenen JavaScript-Code ausdrücklich freigebe.
-
-Systempakete installierst du nicht ohne Rückfrage. Nur `splinely-viewer` braucht
-GTK/WebKit; CLI und Editor brauchen keine zusätzlichen Bibliotheken.
-```
+Die [`llms.txt`](../llms.txt) enthält die Installationsschritte und erklärt dem Agenten die Bedienung.

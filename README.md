@@ -2,6 +2,14 @@
 
 Splinely ist ein Rust-Desktopeditor mit **`.sply`-Projektdateien** und eingebetteter JavaScript-Runtime für interaktive SVGs. **Aktueller Stand: funktionierender Prototyp, nicht der vollständige Funktionsumfang aus [PLAN.md](PLAN.md).**
 
+## Mit einem LLM installieren
+
+Einem KI-Agenten mit Shell-Zugriff (z. B. Claude Code) einfach sagen:
+
+> Installiere mir Splinely: https://raw.githubusercontent.com/wasser-quest/splinely/main/llms.txt
+
+Die [`llms.txt`](llms.txt) beschreibt, wie der Agent das passende fertige Paket aus den Releases lädt, die Prüfsumme kontrolliert, es nach `~/.local/opt` entpackt und danach mit `splinely-cli` arbeitet.
+
 ## Start
 
 **Ohne Kompilieren:** Fertige Linux-Pakete (`splinely-vX.Y.Z-x86_64-linux.tar.gz` mit Editor, CLI, Viewer, Runtime und `libsplinely_runtime.so`) liegen bei jedem [Release](https://github.com/wasser-quest/splinely/releases/latest). Installation und ein fertiger Text, mit dem sich ein LLM-Agent Splinely selbst holt: [docs/INSTALL-BINARIES.md](docs/INSTALL-BINARIES.md).
