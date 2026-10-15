@@ -7,17 +7,22 @@ use splinely_document::{BrowserExportOptions, Node, Project, MAX_PROJECT_FILE_BY
 use std::io::{self, Read, Write};
 use std::path::Path;
 
+mod a11y;
 mod assist;
 mod batch;
+mod blend_spaces;
 mod blending;
 mod bones;
 mod clips;
 mod discovery;
 mod evaluation;
+mod follow;
 mod guide;
+mod isolated_preview;
 mod keyframes;
 mod lint;
 mod paths;
+mod plugins;
 mod scaffold;
 mod shapes;
 mod showcase;
@@ -29,8 +34,8 @@ const RUNTIME: &str = include_str!("../../../runtime/src/splinely.js");
 #[command(
     name = "splinely-cli",
     version,
-    about = "Create, validate, edit and export Splinely .sply projects (strict JSON)",
-    after_help = "New here (human or LLM)? Run `splinely-cli guide` first: a short workflow with recipes.\nEvery edit validates before an atomic save; --output defaults to the input file.\nResults are JSON on stdout; errors are JSON on stderr with code, message and hint."
+    about = "Create, validate, edit and export Splinely .sply projects (binary by default; strict JSON also accepted)",
+    after_help = "New here (human or LLM)? Run `splinely-cli guide` first: a short workflow with recipes.\nEvery edit validates before an atomic save; --output defaults to the input file.\nProjects load from binary .sply or JSON by sniffing (also from stdin); a file ending in .sply is saved as binary, other extensions as JSON.\nResults are JSON on stdout; errors are JSON on stderr with code, message and hint."
 )]
 struct Cli {
     #[command(subcommand)]
@@ -73,8 +78,11 @@ enum Command {
     On {
         input: String,
         /// click, dblclick, pointerenter, pointerleave, pointerdown, pointerup, keydown, dragstart, drag, dragend, clip.end … or a custom emitted name.
-        #[arg(long)]
-        event: String,
+        #[arg(long, required_unless_present = "after")]
+        event: Option<String>,
+        /// Instead of an event: switch automatically after this many seconds in --from (timer).
+        #[arg(long, conflicts_with_all = ["event", "target"], value_parser = bones::number)]
+        after: Option<f64>,
         /// Node that receives the event (omit for any target).
         #[arg(long, alias = "node")]
         target: Option<String>,
@@ -96,13 +104,110 @@ enum Command {
         /// Switch to this state (created if missing; default: stay).
         #[arg(long)]
         to: Option<String>,
+        /// How the --to state looks: NODE.PROPERTY=VALUE; repeatable. Unlike
+        /// --set these fade in over --blend and fade back when the state is left.
+        #[arg(long = "state", allow_hyphen_values = true)]
+        state_set: Vec<String>,
+        /// Seconds to crossfade from the old state into the new one (0..60).
+        #[arg(long, default_value_t = 0.0, value_parser = bones::number)]
+        blend: f64,
         #[arg(long)]
         output: String,
+    },
+    /// Bind a node origin to a path; animate motionProgress with keyframe.
+    MotionPath {
+        input: String,
+        #[arg(long)]
+        target: String,
+        #[arg(long, required_unless_present = "remove", conflicts_with = "remove")]
+        path: Option<String>,
+        #[arg(long, default_value_t = 0.0, value_parser = bones::number)]
+        progress: f64,
+        #[arg(long)]
+        orient: bool,
+        #[arg(long)]
+        remove: bool,
+        #[arg(long)]
+        output: String,
+    },
+    /// Make a shape or bone follow the pointer (eyes, heads, arms). Works together
+    /// with clicks, hover and every state machine.
+    Follow {
+        input: String,
+        /// Node or bone that follows.
+        #[arg(long, alias = "node")]
+        target: String,
+        /// offset: move towards the pointer (pupils); rotate: turn towards it (head).
+        #[arg(long, default_value = "offset")]
+        mode: String,
+        /// Offset: maximum distance in SVG units (default 10); rotate: maximum degrees (default 30).
+        #[arg(long, value_parser = bones::number)]
+        max: Option<f64>,
+        /// Share of the pointer distance or angle, 0..1.
+        #[arg(long, default_value_t = 0.2, value_parser = bones::number)]
+        strength: f64,
+        /// Seconds to settle (0 = immediate, up to 10).
+        #[arg(long, default_value_t = 0.15, value_parser = bones::number)]
+        smoothing: f64,
+        /// Rotate: direction the target faces at rest, degrees (0 = right, 90 = down).
+        #[arg(long, default_value_t = 0.0, value_parser = bones::number)]
+        rest_angle: f64,
+        /// Scene point to measure from as X,Y (default: the target's center or bone root).
+        #[arg(long)]
+        origin: Option<String>,
+        /// Only follow while this state machine is in one of --states.
+        #[arg(long)]
+        machine: Option<String>,
+        /// Comma-separated states of --machine.
+        #[arg(long, value_delimiter = ',')]
+        states: Vec<String>,
+        /// Follower ID (default: follow-TARGET).
+        #[arg(long)]
+        id: Option<String>,
+        /// Remove the follower(s) of --target (or --id) instead of adding one.
+        #[arg(long)]
+        remove: bool,
+        #[arg(long)]
+        output: String,
+    },
+    /// Screen-reader data for the web player and SVG export: title/description, node labels,
+    /// roles, decorative nodes and state announcements. Without options it reports what is set.
+    A11y {
+        input: String,
+        /// Accessible title of the whole scene (the project name).
+        #[arg(long)]
+        title: Option<String>,
+        /// Description of the scene, or of --node (empty text removes it).
+        #[arg(long)]
+        description: Option<String>,
+        /// Node to label (needed for --label, --role, --hidden).
+        #[arg(long, alias = "target")]
+        node: Option<String>,
+        /// Accessible name of --node; default for interactive nodes is its name or ID.
+        #[arg(long)]
+        label: Option<String>,
+        /// button, link, img, group or heading (empty text removes it).
+        #[arg(long)]
+        role: Option<String>,
+        /// true: decorative, hidden from screen readers; false: visible again.
+        #[arg(long, value_parser = clap::value_parser!(bool))]
+        hidden: Option<bool>,
+        /// MACHINE.STATE=TEXT: text a live region announces when the state is entered; repeatable.
+        #[arg(long = "state-announce")]
+        state_announce: Vec<String>,
+        /// Where to save the result (default: the input).
+        #[arg(long)]
+        output: Option<String>,
     },
     /// Emit a format guide and complete valid examples as JSON.
     Schema,
     /// List supported document features, commands, model, examples and limitations as JSON.
     Capabilities,
+    /// Author and inspect two-parameter blend spaces (does not activate clips).
+    BlendSpace {
+        #[command(subcommand)]
+        command: blend_spaces::BlendSpaceCommand,
+    },
     /// Set an existing clip's authored blend settings; does not activate it.
     BlendClip {
         input: String,
@@ -164,17 +269,34 @@ enum Command {
         #[arg(long)]
         background: Option<String>,
     },
-    /// Convert a strict project between .sply and legacy JSON; never imports exported SVG.
+    /// Convert a strict project between binary .sply and JSON; never imports exported SVG.
+    /// The output format follows the extension (.sply = binary, else JSON) unless --format is given.
     Convert {
         input: String,
         #[arg(long)]
         output: String,
+        /// Force the output encoding: json or binary (default: by --output extension).
+        #[arg(long, value_enum)]
+        format: Option<Encoding>,
     },
-    /// Import supported SVG vectors as editable paths (rejects unsupported appearance).
+    /// Print the canonical JSON of any project file (binary .sply or JSON) on stdout.
+    Cat {
+        /// Project path, or - for stdin.
+        input: String,
+    },
+    /// Import SVG as editable paths, text and gradients with a structured import report
+    /// (rejects unsupported appearance, external resources and malformed images).
     ImportSvg {
         input: String,
         #[arg(long)]
         output: String,
+        /// Fail (nothing is written) when anything would be approximated or dropped.
+        #[arg(long)]
+        strict: bool,
+        /// Also write the import report JSON to FILE (`-` = stderr). With `--output -`
+        /// the report always goes to stderr (stdout carries the project) unless given here.
+        #[arg(long, value_name = "FILE")]
+        report: Option<String>,
     },
     /// Insert/replace a keyframe (number, colour, gradient or path) on a node or bone.
     Keyframe {
@@ -226,8 +348,18 @@ enum Command {
     },
     /// Validate a project. Use - to read JSON from stdin.
     Validate { input: String },
-    /// Summarize a validated project.
+    /// Summarize a validated project plus its file encoding (format, sizes, CRC, JSON-equivalent size).
     Inspect { input: String },
+    /// Export isolated browser preview HTML; custom JS requires consent in the page.
+    IsolatedPreview {
+        input: String,
+        #[arg(long)]
+        output: String,
+        /// Also embed a plugin's runtime part (folder or .js). It runs only after the in-page
+        /// consent, inside the sandboxed frame; the page lists id, file and sha256.
+        #[arg(long = "plugin", value_name = "PLUGIN_DIR_OR_JS")]
+        plugins: Vec<String>,
+    },
     /// Export a self-contained interactive SVG with embedded runtime.
     Export {
         input: String,
@@ -236,6 +368,13 @@ enum Command {
         /// Execute authored JavaScript in the exported browser SVG. Trusted code only.
         #[arg(long)]
         trusted_js: bool,
+        /// Embed a plugin's runtime (browser) part: a plugin folder or a .js file. Repeatable (max 8).
+        /// Executable code with the same trust gate as customJs: requires --trusted-js, never a silent drop.
+        #[arg(long = "plugin", value_name = "PLUGIN_DIR_OR_JS")]
+        plugins: Vec<String>,
+        /// How the project is embedded in the SVG: binary (default, compact base64 .sply) or json (legacy text).
+        #[arg(long, value_enum, default_value = "binary")]
+        embed: Embed,
     },
     /// Apply RFC 7396 JSON Merge Patch; validate before atomically saving.
     Apply {
@@ -269,7 +408,7 @@ enum Command {
         #[command(subcommand)]
         command: bones::BoneCommand,
     },
-    /// Generate trusted native plugin source only; never build or execute it.
+    /// Drop-in plugins: `list`/`validate`/`apply` the declarative editor part; `new` generates trusted native editor-plugin source only (never built or executed). Runtime parts are embedded only by `export --plugin ... --trusted-js`.
     Plugin {
         #[command(subcommand)]
         command: scaffold::PluginCommand,
@@ -342,12 +481,48 @@ enum Command {
     },
 }
 
+/// File encoding of a saved project.
+#[derive(Clone, Copy, Debug, PartialEq, Eq, clap::ValueEnum)]
+pub enum Encoding {
+    Json,
+    Binary,
+}
+
+impl Encoding {
+    fn name(self) -> &'static str {
+        match self {
+            Encoding::Json => "json",
+            Encoding::Binary => "binary",
+        }
+    }
+    /// `.sply` (any case) is binary; every other path is JSON text.
+    fn for_path(path: &str) -> Self {
+        let sply = Path::new(path)
+            .extension()
+            .is_some_and(|e| e.eq_ignore_ascii_case("sply"));
+        if sply {
+            Encoding::Binary
+        } else {
+            Encoding::Json
+        }
+    }
+}
+
+/// How an exported SVG embeds the project.
+#[derive(Clone, Copy, Debug, PartialEq, Eq, clap::ValueEnum)]
+pub enum Embed {
+    Json,
+    Binary,
+}
+
 #[derive(Debug)]
 struct Failure {
     code: &'static str,
     message: String,
     /// What to do next (shown as "hint" in the JSON error).
     hint: Option<String>,
+    /// Structured SVG import report of a refused import (shown as "importReport").
+    import_report: Option<Value>,
 }
 
 impl Failure {
@@ -364,11 +539,13 @@ fn failure(code: &'static str, message: impl ToString) -> Failure {
         code,
         message: message.to_string(),
         hint: None,
+        import_report: None,
     }
 }
 
-fn read_json(path: &str) -> Result<Value> {
-    let mut source = String::new();
+/// Read at most 64 MiB from a file, or from stdin for `-`.
+fn read_bytes(path: &str) -> Result<Vec<u8>> {
+    let mut bytes = Vec::new();
     let reader: Box<dyn Read> = if path == "-" {
         Box::new(io::stdin())
     } else {
@@ -378,15 +555,51 @@ fn read_json(path: &str) -> Result<Value> {
     };
     reader
         .take(MAX_PROJECT_FILE_BYTES + 1)
-        .read_to_string(&mut source)
+        .read_to_end(&mut bytes)
         .map_err(|e| failure("read_error", format!("{path}: {e}")))?;
-    if source.len() as u64 > MAX_PROJECT_FILE_BYTES {
-        return Err(failure("read_error", "JSON input exceeds 64 MiB limit"));
+    if bytes.len() as u64 > MAX_PROJECT_FILE_BYTES {
+        return Err(failure("read_error", "Input exceeds 64 MiB limit"));
     }
-    reject_oversized_integers(&source)?;
-    serde_json::from_str::<UniqueValue>(&source)
+    Ok(bytes)
+}
+
+fn utf8<'a>(bytes: &'a [u8], path: &str) -> Result<&'a str> {
+    std::str::from_utf8(bytes).map_err(|_| {
+        failure(
+            "read_error",
+            format!("{path}: stream did not contain valid UTF-8"),
+        )
+    })
+}
+
+/// Strict JSON text (patches, contexts). Binary `.sply` is not accepted here.
+fn read_json(path: &str) -> Result<Value> {
+    let bytes = read_bytes(path)?;
+    if Project::is_binary(&bytes) {
+        return Err(failure(
+            "invalid_json",
+            format!("{path}: expected JSON text but found binary .sply"),
+        )
+        .hint("Use `splinely-cli cat FILE` to print a binary project as JSON."));
+    }
+    json_value(utf8(&bytes, path)?)
+}
+
+fn json_value(source: &str) -> Result<Value> {
+    reject_oversized_integers(source)?;
+    serde_json::from_str::<UniqueValue>(source)
         .map(|v| v.0)
         .map_err(|e| failure("invalid_json", e))
+}
+
+/// Decode a project's raw value tree from binary `.sply` or JSON text.
+fn project_bytes_value(bytes: &[u8], path: &str) -> Result<Value> {
+    if Project::is_binary(bytes) {
+        splinely_document::decode_to_value(bytes)
+            .map_err(|e| failure("invalid_binary", format!("{path}: {e}")))
+    } else {
+        json_value(utf8(bytes, path)?)
+    }
 }
 
 // Preserve integer safety before Serde can round out-of-range integer tokens.
@@ -546,22 +759,13 @@ fn check_preserved(input: &Value, canonical: &Value, path: &str) -> Result<()> {
 }
 
 fn validated(value: Value) -> Result<Project> {
-    if !value.is_object() {
-        return Err(failure("invalid_project", "Project must be a JSON object"));
-    }
-    let project: Project =
-        serde_json::from_value(value.clone()).map_err(|e| failure("invalid_project", e))?;
-    let canonical =
-        serde_json::to_value(&project).map_err(|e| failure("serialization_error", e))?;
-    check_preserved(&value, &canonical, "")?;
-    project
-        .validate()
-        .map_err(|e| failure("validation_error", e))?;
-    Ok(project)
+    Project::from_value_strict(value).map_err(|e| failure(e.code, e.message))
 }
 
+/// Load a project from binary `.sply` or JSON (sniffed; `-` reads stdin).
 fn load(path: &str) -> Result<Project> {
-    validated(read_json(path)?)
+    let bytes = read_bytes(path)?;
+    validated(project_bytes_value(&bytes, path)?)
 }
 
 fn merge_patch(target: &mut Value, patch: Value) {
@@ -606,10 +810,22 @@ fn project_value(project: &Project) -> Result<Value> {
 }
 
 fn save_project(project: &Project, output: &str) -> Result<Value> {
+    save_project_as(project, output, None)
+}
+
+/// Save with the encoding implied by the extension unless `encoding` is given.
+/// `-` prints JSON on stdout (binary cannot be sent to a terminal/LLM).
+fn save_project_as(project: &Project, output: &str, encoding: Option<Encoding>) -> Result<Value> {
     project
         .validate()
         .map_err(|e| failure("validation_error", e))?;
     if output == "-" {
+        if encoding == Some(Encoding::Binary) {
+            return Err(failure(
+                "invalid_arguments",
+                "Binary output cannot be written to stdout; give --output FILE.sply",
+            ));
+        }
         let value = project_value(project)?;
         let bytes = serde_json::to_vec(&value).map_err(|e| failure("serialization_error", e))?;
         if bytes.len() as u64 >= MAX_PROJECT_FILE_BYTES {
@@ -617,10 +833,15 @@ fn save_project(project: &Project, output: &str) -> Result<Value> {
         }
         return Ok(value);
     }
-    project
-        .save_file(output)
-        .map_err(|e| failure("write_error", e))?;
-    Ok(json!({"ok": true, "output": output, "format": "splinely-project"}))
+    let encoding = encoding.unwrap_or_else(|| Encoding::for_path(output));
+    match encoding {
+        Encoding::Binary => project.save_file_binary(output),
+        Encoding::Json => project.save_file(output),
+    }
+    .map_err(|e| failure("write_error", e))?;
+    Ok(
+        json!({"ok": true, "output": output, "format": "splinely-project", "encoding": encoding.name()}),
+    )
 }
 
 fn demo() -> Result<Project> {
@@ -675,9 +896,9 @@ fn schema() -> Result<Value> {
         "bindingExample":{"boneId":"upper-arm","transform":{"x":0.0,"y":0.0,"rotation":0.0,"scaleX":1.0,"scaleY":1.0}},
         "boneTrackExample":{"nodeId":"upper-arm","property":"rotation","keyframes":[{"time":0.0,"value":{"type":"number","value":30.0},"easing":{"type":"linear"}}]},
         "boneProperties":["x","y","rotation"],
-        "keyframeCommand":{"numericProperties":["x","y","rotation","scaleX","scaleY","opacity","width","height","radius","fontSize"],"target":"Existing node or bone ID; bones support only x/y/rotation; width/height require rect, radius circle, fontSize text","time":"Finite nonnegative seconds; duration grows to max(existing duration, time, 0.001)","replacement":"Same target/property/time replaces only value, retaining easing; insertion is sorted and linear","newClip":"Name equals ID; looping and autoplay false; blendMode override, weight 1; ID must be globally unique","locking":"Explicit document edit; locked editor metadata does not prevent writing"},
+        "keyframeCommand":{"numericProperties":["motionProgress","x","y","rotation","scaleX","scaleY","opacity","width","height","radius","fontSize"],"target":"Existing node or bone ID; bones support only x/y/rotation; width/height require rect, radius circle, fontSize text","time":"Finite nonnegative seconds; duration grows to max(existing duration, time, 0.001)","replacement":"Same target/property/time replaces only value, retaining easing; insertion is sorted and linear","newClip":"Name equals ID; looping and autoplay false; blendMode override, weight 1; ID must be globally unique","locking":"Explicit document edit; locked editor metadata does not prevent writing"},
         "boneCoordinates":"Root x/y are scene coordinates. Child x/y offset from parent tip; child rotation is relative in degrees. Bound node transform is local to bone root. Bone IDs share the global ID namespace.",
-        "properties":["x","y","rotation","scaleX","scaleY","opacity","fill","stroke","width","height","radius","fontSize"],
+        "properties":["motionProgress","x","y","rotation","scaleX","scaleY","opacity","fill","stroke","width","height","radius","fontSize"],
         "easingExamples":[{"type":"linear"},{"type":"step"},{"type":"cubicBezier","x1":0.42,"y1":0.0,"x2":0.58,"y2":1.0}],
         "valueExamples":[{"type":"number","value":42.0},{"type":"color","value":{"r":1.0,"g":0.0,"b":0.0,"a":1.0}}],
         "audioAssetExample":{"id":"voice","name":"Voice","mimeType":"audio/wav","dataBase64":"UklGRiYAAABXQVZFZm10IBAAAAABAAEAQB8AAIA+AAACABAAZGF0YQIAAAAAAA=="},
@@ -694,7 +915,34 @@ fn schema() -> Result<Value> {
 fn run(cli: Cli) -> Result<Value> {
     match cli.command {
         Command::Schema => schema(),
+        Command::MotionPath {
+            input,
+            target,
+            path,
+            progress,
+            orient,
+            remove,
+            output,
+        } => {
+            let mut project = load(&input)?;
+            let node = project
+                .nodes
+                .iter_mut()
+                .find(|n| n.id == target)
+                .ok_or_else(|| failure("invalid_arguments", format!("unknown node {target}")))?;
+            node.motion_path = if remove {
+                None
+            } else {
+                Some(splinely_document::MotionPath {
+                    path: path.unwrap(),
+                    progress,
+                    orient,
+                })
+            };
+            save_project(&project, &output)
+        }
         Command::Capabilities => discovery::capabilities(),
+        Command::BlendSpace { command } => blend_spaces::run(command),
         Command::BlendClip {
             input,
             output,
@@ -770,7 +1018,7 @@ fn run(cli: Cli) -> Result<Value> {
             count,
         } => save_project(&showcase::random_figures(seed, count)?, &output),
         Command::Bone { command } => bones::run(command),
-        Command::Plugin { command } => scaffold::run(command),
+        Command::Plugin { command } => plugins::run(command),
         Command::ConvertToPath {
             input,
             node,
@@ -782,7 +1030,12 @@ fn run(cli: Cli) -> Result<Value> {
             output,
         } => vectors::convert(&input, &node, &output, true),
         Command::Layer { command } => vectors::run(command),
-        Command::Convert { input, output } => save_project(&load(&input)?, &output),
+        Command::Convert {
+            input,
+            output,
+            format,
+        } => save_project_as(&load(&input)?, &output, format),
+        Command::Cat { input } => save_project(&load(&input)?, "-"),
         Command::Example { output } => save_project(&demo()?, output.as_deref().unwrap_or("-")),
         Command::New {
             output,
@@ -831,6 +1084,29 @@ fn run(cli: Cli) -> Result<Value> {
             }
         }
         Command::Check { input, strict } => lint::run(&input, strict),
+        Command::A11y {
+            input,
+            title,
+            description,
+            node,
+            label,
+            role,
+            hidden,
+            state_announce,
+            output,
+        } => a11y::run(
+            &input,
+            output.as_deref(),
+            a11y::Options {
+                title,
+                description,
+                node,
+                label,
+                role,
+                hidden,
+                announce: state_announce,
+            },
+        ),
         Command::Batch {
             input,
             steps,
@@ -847,47 +1123,121 @@ fn run(cli: Cli) -> Result<Value> {
             machine,
             from,
             to,
+            state_set,
+            blend,
+            after,
             output,
         } => clips::on(
-            &input, &output, &event, target, play, stop, set, &machine, from, to,
+            &input,
+            &output,
+            event.as_deref().unwrap_or(splinely_document::TIMER_EVENT),
+            target,
+            play,
+            stop,
+            set,
+            &machine,
+            from,
+            to,
+            state_set,
+            blend,
+            after,
         ),
-        Command::ImportSvg { input, output } => {
-            let source = std::fs::read_to_string(&input).map_err(|e| failure("read_error", e))?;
-            let project = Project::from_svg(&source).map_err(|e| failure("unsupported_svg", e))?;
-            save_project(&project, &output)
+        Command::Follow {
+            input,
+            target,
+            mode,
+            max,
+            strength,
+            smoothing,
+            rest_angle,
+            origin,
+            machine,
+            states,
+            id,
+            remove,
+            output,
+        } => follow::run(
+            &input,
+            &output,
+            follow::Options {
+                target,
+                mode,
+                max,
+                strength,
+                smoothing,
+                rest_angle,
+                origin,
+                machine,
+                states,
+                id,
+                remove,
+            },
+        ),
+        Command::ImportSvg {
+            input,
+            output,
+            strict,
+            report: report_path,
+        } => {
+            let bytes = read_bytes(&input)?;
+            let source = utf8(&bytes, &input)?;
+            let outcome = Project::from_svg_report(source).map_err(|f| {
+                let mut e = failure("unsupported_svg", &f.error);
+                e.import_report = Some(f.report.to_json());
+                e
+            })?;
+            let import_report = outcome.report.to_json();
+            if strict && outcome.report.has_losses() {
+                let mut e = failure(
+                    "svg_import_lossy",
+                    format!(
+                        "--strict: {} approximated and {} dropped item(s); nothing was written",
+                        outcome.report.approximated, outcome.report.dropped
+                    ),
+                )
+                .hint("Run without --strict to import with the listed losses, or remove them from the SVG");
+                e.import_report = Some(import_report);
+                return Err(e);
+            }
+            let mut result = save_project(&outcome.project, &output)?;
+            match report_path.as_deref() {
+                Some("-") => eprintln!("{}", json!({"importReport": import_report})),
+                Some(path) => std::fs::write(
+                    path,
+                    serde_json::to_vec_pretty(&import_report)
+                        .map_err(|e| failure("serialization_error", e))?,
+                )
+                .map_err(|e| failure("write_error", format!("{path}: {e}")))?,
+                None if output == "-" => {
+                    eprintln!("{}", json!({"importReport": import_report}))
+                }
+                None => {}
+            }
+            if output != "-" {
+                result["report"] = import_report;
+            }
+            Ok(result)
         }
         Command::Validate { input } => {
             let project = load(&input)?;
             Ok(json!({"ok":true,"schemaVersion":project.schema_version}))
         }
-        Command::Inspect { input } => {
-            let project = load(&input)?;
-            Ok(
-                json!({"ok":true,"schemaVersion":project.schema_version,"name":project.name,
-                "width":project.width,"height":project.height,
-                "nodes":project.nodes.iter().map(|n| json!({"id":n.id,"name":n.name,"kind":n.kind,"visible":n.visible,"locked":n.locked,"originalKind":n.original_kind})).collect::<Vec<_>>(),
-                "bones":project_value(&project)?["bones"],
-                "clips":project.clips,"stateMachines":project.state_machines,
-                "variables":project.variables,"audioAssets":project.audio_assets.iter().map(|a| json!({"id":a.id,"name":a.name,"mimeType":a.mime_type,"base64Length":a.data_base64.len()})).collect::<Vec<_>>(),
-                "audioCues":project.audio_cues,
-                "hasCustomJs":!project.custom_js.is_empty(),"hasRawSvg":!project.raw_svg.is_empty()}),
-            )
-        }
+        Command::Inspect { input } => inspect(&input),
+        Command::IsolatedPreview {
+            input,
+            output,
+            plugins,
+        } => isolated_preview::export(input, output, plugins),
         Command::Export {
             input,
             output,
             trusted_js,
+            plugins,
+            embed,
         } => {
             let project = load(&input)?;
-            let svg = project
-                .to_svg_with_options(
-                    RUNTIME,
-                    BrowserExportOptions {
-                        trusted_js,
-                        audio_controls: true,
-                    },
-                )
-                .map_err(|e| failure("export_error", e))?;
+            let bundles = plugins::bundles(&plugins, trusted_js)?;
+            let svg = export_svg(&project, trusted_js, embed, &bundles)?;
             if output == "-" {
                 Ok(json!({"ok":true,"format":"svg","svg":svg}))
             } else {
@@ -927,6 +1277,84 @@ fn run(cli: Cli) -> Result<Value> {
             clip,
         } => shapes::render(&input, &output, time, width, fps, duration, clip.as_deref()),
     }
+}
+
+/// Project summary plus how the file is encoded (binary header facts, sizes, CRC).
+/// A damaged or hostile binary file fails with the typed `invalid_binary` error.
+fn inspect(input: &str) -> Result<Value> {
+    let bytes = read_bytes(input)?;
+    let project = validated(project_bytes_value(&bytes, input)?)?;
+    let json_bytes = serde_json::to_vec_pretty(&project)
+        .map_err(|e| failure("serialization_error", e))?
+        .len()
+        + 1;
+    let binary_bytes = project
+        .to_binary()
+        .map_err(|e| failure("serialization_error", e))?
+        .len();
+    let mut file = json!({
+        "format": if Project::is_binary(&bytes) { "binary" } else { "json" },
+        "bytes": bytes.len(),
+        "schemaVersion": project.schema_version,
+        "equivalent": {"jsonBytes": json_bytes, "binaryBytes": binary_bytes},
+    });
+    if Project::is_binary(&bytes) {
+        // Validated by the decoder above, so the 32-byte header is present.
+        let u16_at = |at: usize| u16::from_le_bytes([bytes[at], bytes[at + 1]]);
+        let u32_at = |at: usize| u32::from_le_bytes(bytes[at..at + 4].try_into().expect("4 bytes"));
+        let strings = u32_at(16) as usize;
+        file["formatVersion"] = json!(format!("{}.{}", u16_at(8), u16_at(10)));
+        file["stringCount"] = json!(strings);
+        file["sections"] = json!({
+            "header": 32,
+            "stringOffsets": 4 * (strings + 1),
+            "strings": u32_at(20),
+            "body": u32_at(24),
+        });
+        file["crc32c"] = json!(format!("{:08x}", u32_at(28)));
+        file["crcOk"] = json!(splinely_document::crc32c(&bytes[32..]) == u32_at(28));
+    }
+    let tracks: usize = project.clips.iter().map(|c| c.tracks.len()).sum();
+    let keyframes: usize = project
+        .clips
+        .iter()
+        .flat_map(|c| &c.tracks)
+        .map(|t| t.keyframes.len())
+        .sum();
+    Ok(
+        json!({"ok":true,"schemaVersion":project.schema_version,"name":project.name,
+        "file":file,
+        "stats":{"nodes":project.nodes.len(),"bones":project.bones.len(),"clips":project.clips.len(),
+            "tracks":tracks,"keyframes":keyframes,"stateMachines":project.state_machines.len(),
+            "audioAssets":project.audio_assets.len(),"audioCues":project.audio_cues.len(),
+            "followers":project.followers.len()},
+        "width":project.width,"height":project.height,
+        "nodes":project.nodes.iter().map(|n| json!({"id":n.id,"name":n.name,"kind":n.kind,"visible":n.visible,"locked":n.locked,"originalKind":n.original_kind,"motionPath":n.motion_path})).collect::<Vec<_>>(),
+        "bones":project_value(&project)?["bones"],
+        "clips":project.clips,"stateMachines":project.state_machines,
+        "variables":project.variables,"audioAssets":project.audio_assets.iter().map(|a| json!({"id":a.id,"name":a.name,"mimeType":a.mime_type,"base64Length":a.data_base64.len()})).collect::<Vec<_>>(),
+        "audioCues":project.audio_cues,
+        "followers":project.followers,"hasCustomJs":!project.custom_js.is_empty(),"hasRawSvg":!project.raw_svg.is_empty(),"svgSourceSync":project.source_sync().as_str()}),
+    )
+}
+
+fn export_svg(
+    project: &Project,
+    trusted_js: bool,
+    embed: Embed,
+    bundles: &[splinely_document::plugin::RuntimeBundle],
+) -> Result<String> {
+    let options = BrowserExportOptions {
+        trusted_js,
+        audio_controls: true,
+    };
+    let embed = match embed {
+        Embed::Json => splinely_document::EmbedFormat::Json,
+        Embed::Binary => splinely_document::EmbedFormat::Binary,
+    };
+    project
+        .to_svg_with_plugins(RUNTIME, options, embed, bundles)
+        .map_err(|e| failure("export_error", e))
 }
 
 fn main() {
@@ -974,6 +1402,9 @@ fn report(error: Failure) -> ! {
     let mut body = json!({"code":error.code,"message":error.message});
     if let Some(hint) = hint {
         body["hint"] = json!(hint);
+    }
+    if let Some(report) = &error.import_report {
+        body["importReport"] = report.clone();
     }
     eprintln!("{}", json!({"ok":false,"error":body}));
     std::process::exit(1);

@@ -37,7 +37,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             Err("Usage: splinely [project.sply | --export project.sply output.svg | --demo-export output.svg]".into())
         }
         None => {
-            let mut editor = app::Editor::default();
+            let mut editor = app::Editor::blank();
             editor.check_recovery();
             run_editor(editor)
         }
@@ -45,6 +45,18 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 }
 
 fn run_editor(editor: app::Editor) -> Result<(), Box<dyn std::error::Error>> {
+    #[cfg(windows)]
+    {
+        // The binary keeps the console subsystem so that --help/--export print to the
+        // terminal; the GUI does not need a console window of its own.
+        extern "system" {
+            fn FreeConsole() -> i32;
+        }
+        // SAFETY: no arguments, no pointers; failure (no console) is harmless.
+        unsafe {
+            FreeConsole();
+        }
+    }
     let options = eframe::NativeOptions {
         viewport: eframe::egui::ViewportBuilder::default().with_inner_size([1200.0, 800.0]),
         ..Default::default()

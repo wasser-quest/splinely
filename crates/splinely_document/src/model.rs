@@ -1,3 +1,4 @@
+use crate::accessibility::NodeA11y;
 use serde::{Deserialize, Serialize};
 use std::collections::BTreeMap;
 
@@ -13,18 +14,98 @@ pub struct Project {
     pub nodes: Vec<Node>,
     pub bones: Vec<Bone>,
     pub clips: Vec<Clip>,
+    /// Two numeric variables drive normalized weights of weighted clips.
+    #[serde(skip_serializing_if = "Vec::is_empty")]
+    pub blend_spaces: Vec<BlendSpace>,
     pub state_machines: Vec<StateMachine>,
     pub variables: BTreeMap<String, serde_json::Value>,
     pub audio_assets: Vec<AudioAsset>,
     pub audio_cues: Vec<AudioCue>,
     pub custom_js: String,
     pub raw_svg: String,
+    /// Optional accessible description of the whole scene (web player / SVG
+    /// `<desc>`); the accessible title is `name`. Omitted when empty.
+    #[serde(skip_serializing_if = "String::is_empty")]
+    pub description: String,
     /// Nested shape groups; nodes reference their direct group via `Node::group`.
     #[serde(skip_serializing_if = "Vec::is_empty")]
     pub groups: Vec<Group>,
     /// Editor ruler guides (not exported as visible geometry).
     #[serde(skip_serializing_if = "Vec::is_empty")]
     pub guides: Vec<GuideLine>,
+    /// Shapes or bones that follow the pointer, e.g. eyes or a turning head.
+    #[serde(skip_serializing_if = "Vec::is_empty")]
+    pub followers: Vec<Follower>,
+    /// Set by SVG import: fingerprints of the imported source text and of the
+    /// resulting visual document, used to show when the two disagree later.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub svg_import: Option<SvgImportInfo>,
+}
+
+/// Import baseline (see `Project::source_sync`). Hashes are non-cryptographic
+/// change detectors (`fnv1a64:<16 hex>`), not integrity or security proofs.
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct SvgImportInfo {
+    /// Hash of `Project::raw_svg` right after import.
+    pub source_hash: String,
+    /// Hash of the visual document (size, groups, nodes) right after import.
+    pub document_hash: String,
+}
+
+/// How a follower reacts to the pointer.
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub enum FollowMode {
+    /// Move towards the pointer (eyes, pupils): adds to x/y.
+    #[default]
+    Offset,
+    /// Turn towards the pointer (head, arm, turret): adds to rotation.
+    Rotate,
+}
+
+/// A node or bone that follows the pointer. The result is added on top of
+/// clips, states and explicit changes, so it blends with everything else.
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct Follower {
+    pub id: String,
+    /// Node or bone ID.
+    pub target: String,
+    #[serde(default)]
+    pub mode: FollowMode,
+    /// Offset: share of the pointer distance; rotate: share of the angle (0..1).
+    #[serde(default = "full_strength")]
+    pub strength: f64,
+    /// Offset: maximum distance in SVG units; rotate: maximum degrees either way.
+    pub max: f64,
+    /// Seconds to settle on a new pointer position (0 = immediate).
+    #[serde(default)]
+    pub smoothing: f64,
+    /// Rotate: the direction (degrees, 0 = right, 90 = down) the target faces at rest.
+    #[serde(default, skip_serializing_if = "is_zero")]
+    pub rest_angle: f64,
+    /// Scene point to measure from; by default the target's center or bone root.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub origin: Option<[f64; 2]>,
+    /// Only follow while this machine is in one of the listed states.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub when: Option<FollowCondition>,
+}
+
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct FollowCondition {
+    pub machine: String,
+    pub states: Vec<String>,
+}
+
+fn full_strength() -> f64 {
+    1.0
+}
+
+fn is_zero(value: &f64) -> bool {
+    *value == 0.0
 }
 
 /// A (possibly nested) group of nodes and other groups.
@@ -56,14 +137,18 @@ impl Default for Project {
             nodes: vec![],
             bones: vec![],
             clips: vec![],
+            blend_spaces: vec![],
             state_machines: vec![],
             variables: BTreeMap::new(),
             audio_assets: vec![],
             audio_cues: vec![],
             custom_js: String::new(),
             raw_svg: String::new(),
+            description: String::new(),
             groups: vec![],
             guides: vec![],
+            followers: vec![],
+            svg_import: None,
         }
     }
 }
@@ -90,12 +175,29 @@ pub struct Node {
     /// and previews; fill colour animation then has no visible effect.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub gradient: Option<Gradient>,
+    /// Move the local origin along an unbound path in scene coordinates.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub motion_path: Option<MotionPath>,
+    /// Optional screen-reader semantics for the web player and SVG export
+    /// (see `accessibility.rs`); omitted when empty.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub a11y: Option<NodeA11y>,
     #[serde(default)]
     pub transform: Transform,
     #[serde(default)]
     pub style: Style,
     pub kind: NodeKind,
 }
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct MotionPath {
+    pub path: String,
+    #[serde(default)]
+    pub progress: f64,
+    #[serde(default)]
+    pub orient: bool,
+}
+
 fn default_visible() -> bool {
     true
 }
@@ -136,6 +238,8 @@ impl Node {
             original_kind: None,
             group: None,
             gradient: None,
+            motion_path: None,
+            a11y: None,
             transform: Transform::default(),
             style: Style::default(),
             kind,
@@ -332,6 +436,22 @@ pub enum BlendMode {
     #[default]
     Override,
     Weighted,
+    /// Adds weight * (sample - immutable document rest pose).
+    Additive,
+}
+/// Inverse-distance-squared blend space. Samples drive selected clips only.
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct BlendSpace {
+    pub id: String,
+    pub parameters: [String; 2],
+    pub samples: Vec<BlendSpaceSample>,
+}
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct BlendSpaceSample {
+    pub clip_id: String,
+    pub position: [f64; 2],
 }
 fn default_clip_weight() -> f64 {
     1.0
@@ -339,6 +459,9 @@ fn default_clip_weight() -> f64 {
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Clip {
+    /// Cues scheduled on this clip's local clock by the browser runtime.
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub audio_cues: Vec<AudioCue>,
     pub id: String,
     #[serde(default)]
     pub name: String,
@@ -382,6 +505,8 @@ pub enum AnimValue {
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub enum Property {
+    /// Normalized arc-length position on the node's motion path.
+    MotionProgress,
     X,
     Y,
     Rotation,
@@ -430,6 +555,13 @@ pub struct State {
     pub on_enter: Vec<Action>,
     #[serde(default)]
     pub overrides: Vec<PropertyOverride>,
+    /// Actions run when a transition leaves this state (before its own actions).
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub on_exit: Vec<Action>,
+    /// Text announced politely to screen readers (web-player live region)
+    /// when a transition enters this state. Browser-only; omitted when unset.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub announce: Option<String>,
 }
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -442,11 +574,31 @@ pub struct PropertyOverride {
 pub struct Transition {
     pub from: String,
     pub to: String,
+    /// The triggering event; timer transitions (`after`) use the name "after".
+    #[serde(default = "timer_event")]
     pub event: Event,
     #[serde(default)]
     pub guard: Option<Guard>,
     #[serde(default)]
     pub actions: Vec<Action>,
+    /// Seconds over which the previous state's overrides fade into the new
+    /// state's (0 = switch immediately).
+    #[serde(default, skip_serializing_if = "is_zero")]
+    pub blend: f64,
+    /// Fire automatically this many seconds after entering `from` instead of
+    /// on an event (if the guard holds then).
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub after: Option<f64>,
+}
+
+/// Event name of timer transitions.
+pub const TIMER_EVENT: &str = "after";
+
+fn timer_event() -> Event {
+    Event {
+        name: TIMER_EVENT.into(),
+        target: None,
+    }
 }
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 pub struct Event {

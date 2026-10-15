@@ -54,6 +54,16 @@ movie.addEventListener('load', () => {
 
 Zugriff aus dem HTML funktioniert nur, wenn die Browser-Isolation dies erlaubt. Besonders `file://` ist browserabhängig; die bereitgestellten eigenständigen Showcases oder der Viewer vermeiden zusätzliche Dateien. Isolation/CSP nicht abschalten, um einen Fehler zu verstecken. Ein fehlendes `load`-Event benötigt in einer Produktionsoberfläche zusätzlich einen Lade-Timeout.
 
+## Leistung und Ruhezustand
+
+Die Runtime rendert nur, wenn sich etwas geändert hat: laufende Clips, Überblendungen, Follower, `set()`, Variablen, Zustandswechsel oder Seeks. Ein ruhender Film (keine laufende Zeit, keine Änderung) kostet pro `tick()` praktisch nichts und schreibt keine DOM-Attribute; auch bei laufenden Clips werden nur Attribute geschrieben, deren Wert sich seit dem letzten Schreiben geändert hat. Ergebnis, `snapshot()`, `bones()` und Diagnosen bleiben dabei identisch zur bisherigen Runtime (Golden-Test `runtime/tests/perf-golden.test.cjs`).
+
+Konsequenzen für Hosts:
+
+- Die Runtime überschreibt animierte Attribute nicht mehr in jedem Frame. Wer ein animiertes Attribut von außen am DOM ändert, sieht die Änderung bis zur nächsten echten Wertänderung bestehen; dauerhafte Eingriffe gehören in `splinely.set(id, {…})`.
+- `overrides` eines Zustands werden beim ersten Gebrauch gelesen; Zustände zur Laufzeit zu ändern wird nicht unterstützt (das Projekt ist nach dem Laden unveränderlich).
+- `splinely.sourceProject` liefert das ursprünglich übergebene bzw. einmal aus `<metadata>` gelesene Projekt-Objekt. Hosts, die dieselben Daten brauchen, sollten es wiederverwenden statt das JSON erneut zu parsen (`splinely.sourceProject || JSON.parse(…)`); nicht verändern.
+
 ## Audio und Vertrauen
 
 Audio aus einer echten Nutzeraktion freigeben: `await splinely.audio.unlock()`. Der Export bietet dafür seinen Startknopf. Kein automatisches Audio beim Laden versprechen.

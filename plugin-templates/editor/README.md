@@ -27,5 +27,8 @@ observe `SessionGeneration` if you add document-specific state.
 
 This extension is **editor-only**: preview decorations do not change project
 JSON, do not persist, and do not appear in SVG/browser exports. Project JSON or
-authored JavaScript cannot request native plugin loading. Browser extensions
-require a separately designed runtime implementation, not this native scaffold.
+authored JavaScript cannot request native plugin loading. Browser runtime plugins are a
+separate, opt-in mechanism (JavaScript file named in a drop-in `splinely-plugin.json`, exported only with
+`splinely-cli export --plugin … --trusted-js`): see [docs/plugins.md](../../docs/plugins.md) and
+`examples/plugins/hover-wiggle`. Native plugins like this one are compile-time only; dynamically loaded
+native libraries are not supported and never will be.

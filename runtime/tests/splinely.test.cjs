@@ -292,3 +292,122 @@ test('weighted clips blend compatible path data and fall back to the heaviest ot
   assert.equal(n.getAttribute('d'),'M 0 5 L 20 5');
   f.destroy();
 });
+
+test('two machines crossfade together while click, hover and a pointer follower all work at once',()=>{
+  const circle=(id,r)=>({id,kind:{type:'circle',cx:100,cy:100,radius:r},transform:{x:0,y:0,rotation:0,scaleX:1,scaleY:1},style:{opacity:1}});
+  const p={schemaVersion:1,nodes:[circle('face',50),circle('pupil',5)],clips:[],
+    stateMachines:[
+      {id:'mood',initial:'calm',states:[{id:'calm',overrides:[{nodeId:'face',property:'opacity',value:number(1)}]},{id:'happy',overrides:[{nodeId:'face',property:'opacity',value:number(0.5)}]}],
+        transitions:[{from:'calm',to:'happy',event:{name:'click',target:'face'},blend:1}]},
+      {id:'hover',initial:'out',states:[{id:'out'},{id:'in',overrides:[{nodeId:'face',property:'scaleX',value:number(2)}]}],
+        transitions:[{from:'out',to:'in',event:{name:'pointerenter',target:'face'},blend:0.5},{from:'in',to:'out',event:{name:'pointerleave',target:'face'},blend:0.5}]}],
+    followers:[{id:'look',target:'pupil',max:10,strength:0.5,smoothing:0,when:{machine:'hover',states:['in']}}]};
+  const {f,svg}=runtime(p,{},['face','pupil']);
+  const [face,pupil]=svg.children;
+  const fire=(type,target,x=216,y=200)=>{for(const fn of svg.listeners.get(type)||[])fn({type,target,clientX:x,clientY:y});};
+  fire('click',face);fire('pointerenter',face);fire('pointermove',face);
+  f.tick(0.25);
+  const opacity=Number(face.getAttribute('opacity')),scale=Number(/scale\(([\d.]+)/.exec(face.getAttribute('transform'))[1]);
+  assert.ok(opacity<1 && opacity>0.5,String(opacity));assert.ok(scale>1 && scale<2,String(scale));
+  assert.match(pupil.getAttribute('transform'),/^translate\(4 0\)/);
+  f.tick(1);
+  assert.equal(face.getAttribute('opacity'),'0.5');assert.match(face.getAttribute('transform'),/scale\(2 1\)/);
+  assert.deepEqual(f.snapshot().states,{mood:'happy',hover:'in'});
+  fire('pointerleave',face);f.tick(0.25);
+  assert.match(pupil.getAttribute('transform'),/^translate\(0 0\)/,'follower rests once its state is left');
+  assert.deepEqual(f.diagnostics,[]);f.destroy();
+});
+
+test('followers smooth towards the pointer and rotate within limits',()=>{
+  const p={schemaVersion:1,clips:[],nodes:[{id:'head',kind:{type:'rect',x:90,y:90,width:20,height:20},transform:{x:0,y:0,rotation:0,scaleX:1,scaleY:1}}],
+    followers:[{id:'turn',target:'head',mode:'rotate',max:30,smoothing:0.5}]};
+  const {f,svg}=runtime(p,{},['head']);const head=svg.children[0];
+  for(const fn of svg.listeners.get('pointermove')||[])fn({type:'pointermove',target:head,clientX:200,clientY:400});
+  f.tick(0.1);const early=Number(/rotate\(([-\d.]+)/.exec(head.getAttribute('transform'))[1]);
+  f.tick(5);const late=Number(/rotate\(([-\d.]+)/.exec(head.getAttribute('transform'))[1]);
+  assert.ok(early>0 && early<late,`${early} < ${late}`);near(late,30,1e-6);
+  assert.throws(()=>normalize({followers:[{id:'x',target:'missing',max:1}]}),/Unknown follower target/);
+  f.destroy();
+});
+
+test('timer transitions fire after their time and exit actions run before the next state',()=>{
+  const p={schemaVersion:1,clips:[],nodes:[{id:'eye',kind:{type:'circle',cx:10,cy:10,radius:5},transform:{x:0,y:0,rotation:0,scaleX:1,scaleY:1}}],
+    stateMachines:[{id:'blink',initial:'open',states:[{id:'open',onExit:[{type:'emit',event:{name:'closing'}}]},{id:'shut',overrides:[{nodeId:'eye',property:'scaleY',value:number(0.1)}]}],
+      transitions:[{from:'open',to:'shut',after:2},{from:'shut',to:'open',after:0.15}]}]};
+  const {f,svg}=runtime(p,{},['eye']);const seen=[];f.on('closing',()=>seen.push(f.machine('blink').state));
+  f.tick(1.9);assert.equal(f.machine('blink').state,'open');
+  f.tick(0.2);assert.equal(f.machine('blink').state,'shut');assert.equal(seen.length,1,'exit action ran once (its event is queued, like every emit)');
+  assert.match(svg.children[0].getAttribute('transform'),/scale\(1 0\.1\)/);
+  f.emit('after');assert.equal(f.machine('blink').state,'shut','events named after do not trigger timers');
+  f.tick(0.2);assert.equal(f.machine('blink').state,'open');
+  assert.deepEqual(f.diagnostics,[]);f.destroy();
+});
+
+test('reduced motion: no looping autoplay, instant state changes, resting followers',()=>{
+  const env={matchMedia:q=>({matches:q==='(prefers-reduced-motion: reduce)'})};
+  const p=project({clips:[{id:'a',duration:2,looping:true,autoplay:true,tracks:[{target:'n',property:'cx',keyframes:[frame(0,0),frame(2,20)]}]}],
+    stateMachines:[{id:'m',initial:'a',states:[{id:'a'},{id:'b',overrides:[{nodeId:'n',property:'opacity',value:number(0.5)}]}],transitions:[{from:'a',to:'b',event:{name:'go'},blend:2}]}]});
+  const {f,n}=runtime(p,env);
+  assert.equal(f.snapshot().reducedMotion,true);assert.equal(f.clip('a').playing,false);
+  f.emit('go');assert.equal(n.getAttribute('opacity'),'0.5','switches instantly');f.destroy();
+  const {f:g}=runtime(p,env,['n'],{reducedMotion:false});assert.equal(g.clip('a').playing,true);g.destroy();
+});
+
+test('motion corners keep incoming tangents and animated paths accept scientific notation',()=>{
+  for(const [d,rotation,expected] of [['M0 0 L1 0 L1 1',30,30],['M0 0 L1 1 L0 2',0,45]]) {
+    const p=motionScene(d);p.nodes[1].transform={rotation};
+    const {f,n}=runtime(p);const angle=Number(n.getAttribute('transform').match(/rotate\(([^)]+)\)/)[1]);
+    near(angle,expected);assert.deepEqual(f.diagnostics,[]);f.destroy();
+  }
+  const p=motionScene('M0 0 L1e2 0');p.nodes[0].transform={};
+  p.clips=[{id:'morph',duration:1,tracks:[{nodeId:'route',property:'d',keyframes:[frame(0,{type:'path',value:'M0 0 L1e2 0'}),frame(1,{type:'path',value:'M0 0 L2e2 0'})]}]}];
+  const {f,n}=runtime(p);f.clip('morph').seek(0.5);
+  near(Number(n.getAttribute('transform').slice(10).split(' ')[0]),75);f.destroy();
+  for(const d of ['M0,,0 L100 0','M,0 0 L100 0','M0 0, L100 0','M0 0 L100 0,'])assert.throws(()=>normalize(motionScene(d)));
+});
+
+function motionScene(d='M0 0 L100 0 L100 300') {
+  return {schemaVersion:1,nodes:[
+    {id:'n',kind:{type:'circle',cx:0,cy:0,radius:3},transform:{x:4},motionPath:{path:'route',progress:0.5,orient:true}},
+    {id:'route',visible:false,kind:{type:'path',d,bounds:[0,0,100,300]},transform:{}}
+  ]};
+}
+test('motion paths use scene arc length, transformed sources and tangent orientation',()=>{
+  const p=motionScene(),{f,n}=runtime(p);
+  assert.equal(n.getAttribute('transform'),'translate(104 100) rotate(90) scale(1 1)');
+  f.set('n',{motionProgress:0});assert.equal(n.getAttribute('transform'),'translate(4 0) rotate(0) scale(1 1)');
+  f.set('n',{motionProgress:1});assert.equal(n.getAttribute('transform'),'translate(104 300) rotate(90) scale(1 1)');
+  assert.throws(()=>f.set('n',{motionProgress:1.1}),/weight/i);
+  assert.throws(()=>f.set('route',{motionProgress:0.5}),/binding/);f.destroy();
+  p.nodes[1].transform={x:10,y:20,rotation:90,scaleX:2,scaleY:2};
+  const r=runtime(p);const nums=r.n.getAttribute('transform').match(/[-+]?\d*\.?\d+(?:e[-+]?\d+)?/g).map(Number);
+  near(nums[0],-186);near(nums[1],220);near(nums[2],180);r.f.destroy();
+});
+test('motion path curves, relative commands, close and disconnected subpaths match Rust samples',()=>{
+  for(const [d,x,y] of [['m0 0 q50 100 100 0',50,50],['M0 0 C0 100 100 100 100 0',50,75],['M0 0 L0 0 L10 0 M100 0 L130 0',110,0],['M0 0 L10 0 Z',10,0]]) {
+    const p=motionScene(d);p.nodes[0].transform={};p.nodes[0].motionPath.orient=false;
+    const {f,n}=runtime(p);const xy=n.getAttribute('transform').slice(10).split(')')[0].split(' ').map(Number);
+    near(xy[0],x);near(xy[1],y);assert.deepEqual(f.diagnostics,[]);f.destroy();
+  }
+});
+test('motion progress weighted clips and state crossfades match native runtime',()=>{
+  const p=motionScene('M0 0 L100 0');p.nodes[0].transform={};p.nodes[0].motionPath.progress=0;
+  p.clips=[{id:'travel',duration:1,autoplay:true,blendMode:'weighted',weight:0.5,tracks:[{nodeId:'n',property:'motionProgress',keyframes:[frame(0,number(1))]}]}];
+  p.stateMachines=[{id:'mood',initial:'idle',states:[{id:'idle'},{id:'active',overrides:[{nodeId:'n',property:'motionProgress',value:number(0.4)}]}],transitions:[{from:'idle',to:'active',event:{name:'go'},blend:1}]}];
+  const {f,n}=runtime(p),x=()=>Number(n.getAttribute('transform').slice(10).split(' ')[0]);
+  near(x(),50);f.emit('go');f.tick(0.5);near(x(),60);f.tick(0.5);near(x(),70);
+  f.set('n',{motionProgress:0.9});near(x(),90);assert.deepEqual(f.diagnostics,[]);f.destroy();
+});
+test('motion progress participates in clips, states, explicit changes and validation',()=>{
+  const p=motionScene('M0 0 L100 0');p.nodes[0].transform={};p.nodes[0].motionPath.orient=false;
+  p.clips=[{id:'travel',duration:1,tracks:[{nodeId:'n',property:'motionProgress',keyframes:[frame(0,number(0)),frame(1,number(1))]}]}];
+  p.stateMachines=[{id:'m',initial:'idle',states:[{id:'idle',overrides:[{nodeId:'n',property:'motionProgress',value:number(0.2)}]}]}];
+  const {f,n}=runtime(p);assert.match(n.getAttribute('transform'),/^translate\(20 /);
+  f.clip('travel').seek(0.25);assert.match(n.getAttribute('transform'),/^translate\(25 /);
+  f.set('n',{motionProgress:0.8});assert.match(n.getAttribute('transform'),/^translate\(80 /);
+  f.set('route',{x:10});assert.match(n.getAttribute('transform'),/^translate\(90 /);assert.deepEqual(f.diagnostics,[]);f.destroy();
+  for(const progress of [-0.1,1.1,NaN]){const q=motionScene();q.nodes[0].motionPath.progress=progress;assert.throws(()=>normalize(q));}
+  for(const path of ['n','missing']){const q=motionScene();q.nodes[0].motionPath.path=path;assert.throws(()=>normalize(q));}
+  for(const d of ['M0 0','M0 0 L0 0','M0 0 H100'])assert.throws(()=>normalize(motionScene(d)));
+  const q=motionScene();q.nodes[1].motionPath={path:'n'};assert.throws(()=>normalize(q));
+});

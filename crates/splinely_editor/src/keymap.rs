@@ -269,7 +269,7 @@ impl Editor {
 
     /// Run every bound command whose key was pressed this frame.
     pub(super) fn dispatch_keys(&mut self, ctx: &egui::Context) {
-        if ctx.wants_keyboard_input() || self.editing_keymap() {
+        if self.typing(ctx) || self.editing_keymap() {
             return;
         }
         let presses: Vec<(egui::Key, egui::Modifiers)> = ctx.input(|i| {

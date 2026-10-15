@@ -32,10 +32,21 @@ fn err(dir: &Path, args: &[&str]) -> Value {
     serde_json::from_slice(&out.stderr).unwrap()
 }
 
-fn read(path: &Path) -> Value {
-    serde_json::from_slice(&std::fs::read(path).unwrap()).unwrap()
+/// Raw JSON value tree of a project file, binary `.sply` or JSON text.
+fn project_value(bytes: &[u8]) -> Value {
+    if splinely_document::Project::is_binary(bytes) {
+        splinely_document::decode_to_value(bytes).unwrap()
+    } else {
+        serde_json::from_slice(bytes).unwrap()
+    }
 }
 
+fn read(path: &Path) -> Value {
+    project_value(&std::fs::read(path).unwrap())
+}
+
+// Runs the guide's shell recipes through bash with a symlinked CLI: Unix only.
+#[cfg(unix)]
 #[test]
 fn guide_recipes_run_verbatim_and_pass_check() {
     let dir = tempfile::tempdir().unwrap();

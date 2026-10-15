@@ -76,21 +76,42 @@ pub(crate) fn solve_bones(bones: &[Bone]) -> Result<Vec<BonePose>, DocumentError
     Ok(poses)
 }
 
+/// Resolve one node's bone attachment: the node's transform after the pose.
+fn attached(
+    node: &Node,
+    by_id: &HashMap<&str, &BonePose>,
+) -> Result<Option<Transform>, DocumentError> {
+    let Some(id) = &node.bone_id else {
+        return Ok(None);
+    };
+    let pose = by_id
+        .get(id.as_str())
+        .ok_or_else(|| DocumentError(format!("node {}: missing bone {id}", node.id)))?;
+    let mut t = node.transform;
+    let (x, y) = rotate(pose.rotation, t.x, t.y);
+    t.x = pose.x + x;
+    t.y = pose.y + y;
+    t.rotation += pose.rotation;
+    checked(&[t.x, t.y, t.rotation, t.scale_x, t.scale_y])?;
+    Ok(Some(t))
+}
+
 /// Apply exactly once to local nodes, never to previously evaluated nodes.
 pub(crate) fn attach_nodes(nodes: &mut [Node], poses: &[BonePose]) -> Result<(), DocumentError> {
     let by_id: HashMap<_, _> = poses.iter().map(|p| (p.id.as_str(), p)).collect();
     for node in nodes {
-        if let Some(id) = &node.bone_id {
-            let pose = by_id
-                .get(id.as_str())
-                .ok_or_else(|| DocumentError(format!("node {}: missing bone {id}", node.id)))?;
-            let t = &mut node.transform;
-            let (x, y) = rotate(pose.rotation, t.x, t.y);
-            t.x = pose.x + x;
-            t.y = pose.y + y;
-            t.rotation += pose.rotation;
-            checked(&[t.x, t.y, t.rotation, t.scale_x, t.scale_y])?;
+        if let Some(transform) = attached(node, &by_id)? {
+            node.transform = transform;
         }
+    }
+    Ok(())
+}
+
+/// `attach_nodes` for validation: same errors, without cloning the nodes.
+pub(crate) fn check_attachments(nodes: &[Node], poses: &[BonePose]) -> Result<(), DocumentError> {
+    let by_id: HashMap<_, _> = poses.iter().map(|p| (p.id.as_str(), p)).collect();
+    for node in nodes {
+        attached(node, &by_id)?;
     }
     Ok(())
 }

@@ -51,16 +51,13 @@ pub(super) struct NewProjectDraft {
 }
 
 pub(super) fn config_dir() -> Option<PathBuf> {
-    std::env::var_os("XDG_CONFIG_HOME")
-        .map(PathBuf::from)
-        .or_else(|| std::env::var_os("HOME").map(|h| Path::new(&h).join(".config")))
+    // XDG on Linux, %APPDATA% on Windows, ~/Library/Application Support on macOS.
+    splinely_document::platform_dirs::base_dir(splinely_document::platform_dirs::Kind::Config)
         .map(|d| d.join("splinely"))
 }
 
 fn data_dir() -> Option<PathBuf> {
-    std::env::var_os("XDG_DATA_HOME")
-        .map(PathBuf::from)
-        .or_else(|| std::env::var_os("HOME").map(|h| Path::new(&h).join(".local/share")))
+    splinely_document::platform_dirs::base_dir(splinely_document::platform_dirs::Kind::Data)
         .map(|d| d.join("splinely"))
 }
 
@@ -93,6 +90,25 @@ pub(super) fn autosave_path(project_path: &str) -> Option<String> {
     } else {
         Some(format!("{project_path}.autosave"))
     }
+}
+
+/// True for `.sply` (any case): saved as compact binary. Other extensions
+/// (`.splinely.json`, `.json`, …) keep readable canonical JSON text. Loading
+/// sniffs the content (`Project::load_file`), so both always open.
+pub(super) fn is_binary_path(path: &str) -> bool {
+    Path::new(path)
+        .extension()
+        .is_some_and(|e| e.eq_ignore_ascii_case("sply"))
+}
+
+/// Validate and atomically write a project in the encoding its extension implies.
+pub(super) fn save_project_file(project: &Project, path: &str) -> Result<(), String> {
+    if is_binary_path(path) {
+        project.save_file_binary(path)
+    } else {
+        project.save_file(path)
+    }
+    .map_err(|e| e.to_string())
 }
 
 fn with_extension(mut path: PathBuf, extension: &str) -> PathBuf {
@@ -325,12 +341,18 @@ impl Editor {
     pub(super) fn import_svg(&mut self, path: &str) {
         self.finish_edit();
         self.finish_drag();
-        let result = fs::read_to_string(path)
-            .map_err(|e| e.to_string())
-            .and_then(|s| Project::from_svg(&s).map_err(|e| e.to_string()));
-        match result {
-            Ok(project) => {
-                self.commit(project);
+        let source = match fs::read_to_string(path) {
+            Ok(source) => source,
+            Err(error) => {
+                self.status = trf("SVG-Import fehlgeschlagen: {error}", &[error.to_string()]);
+                return;
+            }
+        };
+        match Project::from_svg_report(&source) {
+            Ok(outcome) => {
+                let summary = super::svg_import_ui::summary(&outcome.report);
+                let losses = outcome.report.has_losses();
+                self.commit(outcome.project);
                 self.sync_buffers();
                 self.dirty = true;
                 self.path = String::new();
@@ -338,12 +360,18 @@ impl Editor {
                     "„{}“ als bearbeitbare Pfade importiert · rückgängig möglich.",
                     &[file_label(path).to_string()],
                 );
+                if losses {
+                    self.status.push_str(" · ");
+                    self.status.push_str(&summary);
+                }
+                self.show_import_report(path, outcome.report, false);
             }
-            Err(error) => {
+            Err(failure) => {
                 self.status = trf(
                     "SVG-Import fehlgeschlagen: {error}",
-                    std::slice::from_ref(&error),
-                )
+                    &[failure.error.to_string()],
+                );
+                self.show_import_report(path, failure.report, true);
             }
         }
     }
@@ -778,5 +806,80 @@ mod tests {
             PathBuf::from("/x/scene.json")
         );
         assert_eq!(autosave_path("a.sply").as_deref(), Some("a.sply.autosave"));
+    }
+
+    fn scratch(name: &str) -> PathBuf {
+        let thread = std::thread::current()
+            .name()
+            .unwrap_or("t")
+            .replace("::", "-");
+        let dir = std::env::temp_dir().join(format!(
+            "splinely-editor-files-{}-{thread}",
+            std::process::id()
+        ));
+        fs::create_dir_all(&dir).unwrap();
+        dir.join(name)
+    }
+
+    #[test]
+    fn sply_saves_binary_and_other_extensions_keep_json() {
+        let project = Project {
+            name: "Größe".into(),
+            ..Project::default()
+        };
+        let binary = scratch("a.sply");
+        let upper = scratch("b.SPLY");
+        let json = scratch("c.splinely.json");
+        let plain = scratch("d.json");
+        for path in [&binary, &upper, &json, &plain] {
+            save_project_file(&project, path.to_str().unwrap()).unwrap();
+        }
+        for (path, is_binary) in [
+            (&binary, true),
+            (&upper, true),
+            (&json, false),
+            (&plain, false),
+        ] {
+            let bytes = fs::read(path).unwrap();
+            assert_eq!(Project::is_binary(&bytes), is_binary, "{path:?}");
+            assert_eq!(is_binary_path(path.to_str().unwrap()), is_binary);
+            // Both encodings reload through the sniffing loader into the same project.
+            assert_eq!(Project::load_file(path).unwrap(), project);
+        }
+        assert!(fs::read(&json).unwrap().starts_with(b"{"));
+        // Re-saving a legacy JSON-text `.sply` migrates it to binary.
+        let legacy = scratch("legacy.sply");
+        fs::write(&legacy, project.to_json().unwrap()).unwrap();
+        assert!(!Project::is_binary(&fs::read(&legacy).unwrap()));
+        let loaded = Project::load_file(&legacy).unwrap();
+        save_project_file(&loaded, legacy.to_str().unwrap()).unwrap();
+        assert!(Project::is_binary(&fs::read(&legacy).unwrap()));
+        assert_eq!(Project::load_file(&legacy).unwrap(), project);
+        // A failed save leaves the previous file untouched.
+        let invalid = Project {
+            width: -1.0,
+            ..Project::default()
+        };
+        let before = fs::read(&binary).unwrap();
+        assert!(save_project_file(&invalid, binary.to_str().unwrap()).is_err());
+        assert_eq!(fs::read(&binary).unwrap(), before);
+        let _ = fs::remove_dir_all(binary.parent().unwrap());
+    }
+
+    #[test]
+    fn editor_opens_binary_and_json_projects() {
+        let project = Project {
+            name: "Offen".into(),
+            ..Project::default()
+        };
+        let binary = scratch("open.sply");
+        let json = scratch("open.splinely.json");
+        save_project_file(&project, binary.to_str().unwrap()).unwrap();
+        save_project_file(&project, json.to_str().unwrap()).unwrap();
+        for path in [&binary, &json] {
+            let editor = Editor::open_project_file(path.to_str().unwrap()).unwrap();
+            assert_eq!(editor.project.name, "Offen");
+        }
+        let _ = fs::remove_dir_all(binary.parent().unwrap());
     }
 }

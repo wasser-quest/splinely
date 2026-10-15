@@ -13,8 +13,8 @@ from urllib.parse import quote
 
 from firefox_harness import Firefox
 
-# Observe the actual exported instance; never drive its clock, emit transitions,
-# or call Start from JS.
+# Observe the actual exported instance; never click, drive its clock, emit
+# transitions or call Start from JS: the showcases must start by themselves.
 DOCUMENT = """
 const object=document.querySelector(arguments[0]);
 if(!object || !object.contentDocument) return null;
@@ -22,7 +22,7 @@ const doc=object.contentDocument, root=doc.documentElement, f=root.splinely;
 if(!f) return null;
 """
 INSTALL = DOCUMENT + """
-const w=doc.defaultView, p=JSON.parse(doc.querySelector('#splinely-project').textContent);
+const w=doc.defaultView, p=f.sourceProject;
 if(!w.__showcaseSmoke) {
  const t=w.__showcaseSmoke={states:[],errors:[],clicks:[],installedAt:performance.now()};
  w.addEventListener('error',e=>t.errors.push({type:'error',message:e.message,source:e.filename,line:e.lineno}));
@@ -35,7 +35,7 @@ return {mounted:true,
  project:p,control:!!doc.querySelector('[data-splinely-host-control]')};
 """
 SNAPSHOT = DOCUMENT + """
-const p=JSON.parse(doc.querySelector('#splinely-project').textContent), t=doc.defaultView.__showcaseSmoke;
+const p=f.sourceProject, t=doc.defaultView.__showcaseSmoke;
 return {time:f.timeline.time,playing:f.timeline.playing,
  machines:(p.stateMachines||p.machines||[]).map(m=>({id:m.id,state:f.machine(m.id).state})),
  attributes:p.nodes.map(n=>{const el=doc.getElementById(n.id);return {id:n.id,attrs:el?Object.fromEntries([...el.attributes].map(a=>[a.name,a.value])):null};}),
@@ -58,26 +58,6 @@ def wait_for(browser, script, selector, timeout):
     raise RuntimeError("HTML object SVG mount timed out")
 
 
-def click_start(browser, selector, button_selector):
-    """Trusted viewport actions; frame ElementClick can silently miss SVG controls."""
-    browser.command("WebDriver:SwitchToFrame", {"id": None})
-    browser.js("document.querySelector(arguments[0]).scrollIntoView({block:arguments[1]});", [selector, 'end' if button_selector == '#start-control' else 'start'])
-    point = browser.js(DOCUMENT + """
-const button=doc.querySelector(arguments[1]);
-if(!button)throw Error('SVG Start control missing');
-const b=button.getBoundingClientRect(), o=object.getBoundingClientRect();
-return {x:Math.round(o.left+object.clientLeft+(b.left+b.width/2)*object.clientWidth/doc.defaultView.innerWidth),
- y:Math.round(o.top+object.clientTop+(b.top+b.height/2)*object.clientHeight/doc.defaultView.innerHeight)};
-""", [selector, button_selector])
-    try:
-        browser.command("WebDriver:PerformActions", {"actions": [{"type": "pointer", "id": "mouse", "parameters": {"pointerType": "mouse"}, "actions": [
-            {"type": "pointerMove", "duration": 0, "origin": "viewport", **point},
-            {"type": "pointerDown", "button": 0}, {"type": "pointerUp", "button": 0}]}]})
-    finally:
-        browser.command("WebDriver:ReleaseActions")
-    return {"method": "viewport pointer actions", "point": point}
-
-
 def run_case(browser, url, kind, args, result):
     browser.command("WebDriver:Navigate", {"url": url})
     result["initial"] = wait_for(browser, INSTALL, args.object_selector, args.mount_timeout)
@@ -89,7 +69,8 @@ def run_case(browser, url, kind, args, result):
     result["before"] = browser.js(SNAPSHOT, [args.object_selector])
     for machine in result["before"]["machines"]:
         seen[machine["id"]].add(machine["state"])
-    result["click"] = click_start(browser, args.object_selector, "#start-control")
+    # No Play button exists and nothing is pressed: only wall-clock observation follows.
+    result["hostButtons"] = browser.js("return document.querySelectorAll('button,[role=button]').length;")
     samples = result["samples"] = []
     deadline = time.monotonic() + args.duration
     changed = False
@@ -120,8 +101,10 @@ def run_case(browser, url, kind, args, result):
     result["attributeChanges"] = changed
     checks = result["checks"] = {
         "mountedInHtmlObject": initial["mounted"],
-        "trustedStartClick": any(c["trusted"] for c in last["telemetry"]["clicks"]),
-        "started": last["playing"] and last["time"] > result["before"]["time"] and not last["control"],
+        "noHostButtons": result["hostButtons"] == 0 and not any(
+            n["id"].endswith("-control") for n in project["nodes"]),
+        "noInputWasSent": not last["telemetry"]["clicks"],
+        "startedWithoutInput": last["playing"] and last["time"] > result["before"]["time"] and not last["control"],
         "domAttributesChanged": changed,
         # Runtime emits this advisory before the reviewed export host runs customJs.
         # Retain it in the JSON; fail every other diagnostic, including host errors.

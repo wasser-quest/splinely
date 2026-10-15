@@ -314,7 +314,7 @@ impl Editor {
         if self.selected_key.is_some() {
             let delete = ui
                 .input(|i| i.key_pressed(egui::Key::Delete) || i.key_pressed(egui::Key::Backspace));
-            if delete && !ui.ctx().wants_keyboard_input() {
+            if delete && !self.typing(ui.ctx()) {
                 if let Some(key) = self.selected_key.take() {
                     self.delete_key(key);
                 }
@@ -353,6 +353,20 @@ impl Editor {
                     }
                 });
                 ui.separator();
+                if ui.button(tr("Schlüsselbild kopieren")).clicked() {
+                    self.copy_key(key);
+                    ui.close_menu();
+                }
+                if ui
+                    .add_enabled(
+                        self.key_clipboard.is_some(),
+                        egui::Button::new(tr("Am Abspielkopf einfügen")),
+                    )
+                    .clicked()
+                {
+                    self.paste_key();
+                    ui.close_menu();
+                }
                 if ui.button(tr("Schlüsselbild löschen")).clicked() {
                     self.selected_key = None;
                     self.delete_key(key);
@@ -443,6 +457,77 @@ impl Editor {
             tr("Schlüsselbild eingefügt · Wert im Inspektor ändern und erneut merken.").into();
     }
 
+    /// Copy a keyframe (value and easing) for pasting at another time or track.
+    pub(super) fn copy_key(&mut self, key: KeyRef) {
+        let Some(track) = self
+            .project
+            .clips
+            .get(self.active_clip)
+            .and_then(|c| c.tracks.get(key.track))
+        else {
+            return;
+        };
+        let Some(keyframe) = track.keyframes.get(key.key) else {
+            return;
+        };
+        self.key_clipboard = Some((track.node_id.clone(), track.property, keyframe.clone()));
+        self.paste_key_next = true;
+        self.status =
+            tr("Schlüsselbild kopiert · Abspielkopf setzen und Strg+V fügt es ein.").into();
+    }
+
+    /// Paste the copied keyframe at the playhead: into the selected key's track
+    /// when the value fits, otherwise into the track it was copied from (created
+    /// in the active clip if needed). A key at the same time is replaced.
+    pub(super) fn paste_key(&mut self) {
+        let Some((node, property, keyframe)) = self.key_clipboard.clone() else {
+            return;
+        };
+        let mut next = self.project.clone();
+        let Some(clip) = next.clips.get_mut(self.active_clip) else {
+            self.status = tr("Zuerst in der Zeitleiste einen Clip anlegen.").into();
+            return;
+        };
+        let time = self.time.clamp(0., clip.duration);
+        let selected = self.selected_key.map(|k| k.track).filter(|&t| {
+            clip.tracks.get(t).is_some_and(|track| {
+                track
+                    .keyframes
+                    .first()
+                    .is_some_and(|k| k.value.compatible(&keyframe.value))
+            })
+        });
+        let index = selected
+            .or_else(|| {
+                clip.tracks
+                    .iter()
+                    .position(|t| t.node_id == node && t.property == property)
+            })
+            .unwrap_or_else(|| {
+                clip.tracks.push(Track {
+                    node_id: node.clone(),
+                    property,
+                    keyframes: vec![],
+                });
+                clip.tracks.len() - 1
+            });
+        let track = &mut clip.tracks[index];
+        track.keyframes.retain(|k| (k.time - time).abs() >= 1e-6);
+        let at = track.keyframes.partition_point(|k| k.time < time);
+        track.keyframes.insert(at, Keyframe { time, ..keyframe });
+        if let Err(error) = next.validate() {
+            self.status = error.to_string();
+            return;
+        }
+        self.commit(next);
+        self.selected_key = Some(KeyRef {
+            track: index,
+            key: at,
+        });
+        self.preview_animation = true;
+        self.status = tr("Schlüsselbild eingefügt · Strg+Z macht es rückgängig.").into();
+    }
+
     pub(super) fn delete_key(&mut self, key: KeyRef) {
         let mut next = self.project.clone();
         let Some(clip) = next.clips.get_mut(self.active_clip) else {
@@ -516,6 +601,30 @@ mod tests {
             .iter()
             .all(|k| k.easing == Easing::Step));
         editor.project.validate().unwrap();
+    }
+
+    #[test]
+    fn keyframes_copy_to_the_playhead_and_replace_same_time_keys() {
+        let mut editor = Editor::default();
+        let before = editor.project.clips[0].tracks[0].keyframes.len();
+        editor.copy_key(KeyRef { track: 0, key: 0 });
+        editor.time = 0.75;
+        editor.paste_key();
+        let keys = &editor.project.clips[0].tracks[0].keyframes;
+        assert_eq!(keys.len(), before + 1);
+        let pasted = keys.iter().find(|k| (k.time - 0.75).abs() < 1e-9).unwrap();
+        assert_eq!(
+            pasted.value,
+            editor.project.clips[0].tracks[0].keyframes[0].value
+        );
+        editor.paste_key();
+        assert_eq!(
+            editor.project.clips[0].tracks[0].keyframes.len(),
+            before + 1
+        );
+        // Pasting the same key again changes nothing, so one undo restores it.
+        assert!(editor.history.undo(&mut editor.project));
+        assert_eq!(editor.project.clips[0].tracks[0].keyframes.len(), before);
     }
 
     #[test]

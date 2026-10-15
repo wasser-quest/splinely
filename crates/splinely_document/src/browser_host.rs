@@ -1,5 +1,5 @@
 //! Explicit browser host capabilities, kept separate from safe document data.
-use crate::{DocumentError, Project};
+use crate::{DocumentError, EmbedFormat, Project};
 
 #[derive(Clone, Copy, Debug, Default)]
 pub struct BrowserExportOptions {
@@ -10,10 +10,19 @@ pub struct BrowserExportOptions {
 }
 
 impl Project {
+    /// Interactive export; the project is embedded as binary `.sply` (see `to_svg_with_options_embed`).
     pub fn to_svg_with_options(
         &self,
         runtime: &str,
         options: BrowserExportOptions,
+    ) -> Result<String, DocumentError> {
+        self.to_svg_with_options_embed(runtime, options, EmbedFormat::Binary)
+    }
+    pub fn to_svg_with_options_embed(
+        &self,
+        runtime: &str,
+        options: BrowserExportOptions,
+        embed: EmbedFormat,
     ) -> Result<String, DocumentError> {
         let mut script = runtime.to_owned();
         script.push_str(&format!(
@@ -24,7 +33,7 @@ impl Project {
 const svg=document.currentScript && document.currentScript.ownerSVGElement;
 if(!svg || !svg.splinely)return;
 const splinely=svg.splinely;
-const data=JSON.parse(svg.querySelector('[id="splinely-project"]').textContent);
+const data=splinely.sourceProject||SplinelyRuntime.readProject(svg);
 const report=error=>{if(splinely.destroyed)return;const e=new Error('Splinely host: '+String(error));if(splinely.reportError)splinely.reportError(e);else{splinely.diagnostics.push(e);if(splinely.diagnostics.length>100)splinely.diagnostics.shift();splinely.emit('error',{error:e});}console.error('Splinely host:',error);};
 if(controls && (data.audioAssets || []).length) {
   const resume=(data.clips || []).filter(c=>splinely.clip(c.id).playing).map(c=>c.id);
@@ -63,6 +72,6 @@ if(data.customJs) {
             );
         }
         script.push_str("\n})();\n");
-        self.to_svg(&script)
+        self.to_svg_embed(&script, embed)
     }
 }

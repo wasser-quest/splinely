@@ -16,6 +16,7 @@ fn fixture() -> Project {
         length: 10.0,
     });
     p.clips = vec![Clip {
+        audio_cues: vec![],
         id: "walk".into(),
         name: String::new(),
         duration: 1.0,
@@ -131,6 +132,8 @@ fn ordered_initial_entries_transitions_shared_guards_and_overrides() {
                     id: "a".into(),
                     on_enter: vec![Action::Emit { event: ev("go") }],
                     overrides: vec![],
+                    on_exit: vec![],
+                    announce: None,
                 },
                 State {
                     id: "b".into(),
@@ -138,6 +141,8 @@ fn ordered_initial_entries_transitions_shared_guards_and_overrides() {
                         asset_id: "entered".into(),
                     }],
                     overrides: vec![],
+                    on_exit: vec![],
+                    announce: None,
                 },
             ],
             transitions: vec![Transition {
@@ -154,6 +159,8 @@ fn ordered_initial_entries_transitions_shared_guards_and_overrides() {
                         asset_id: "transition".into(),
                     },
                 ],
+                blend: 0.0,
+                after: None,
             }],
         },
         StateMachine {
@@ -166,6 +173,8 @@ fn ordered_initial_entries_transitions_shared_guards_and_overrides() {
                         asset_id: "initial".into(),
                     }],
                     overrides: vec![],
+                    on_exit: vec![],
+                    announce: None,
                 },
                 State {
                     id: "b".into(),
@@ -175,6 +184,8 @@ fn ordered_initial_entries_transitions_shared_guards_and_overrides() {
                         property: Property::Y,
                         value: AnimValue::Number(7.0),
                     }],
+                    on_exit: vec![],
+                    announce: None,
                 },
             ],
             transitions: vec![Transition {
@@ -186,6 +197,8 @@ fn ordered_initial_entries_transitions_shared_guards_and_overrides() {
                     equals: json!(true),
                 }),
                 actions: vec![],
+                blend: 0.0,
+                after: None,
             }],
         },
     ];
@@ -233,6 +246,8 @@ fn segmented_callbacks_start_clips_and_fades_mid_tick() {
             id: "idle".into(),
             on_enter: vec![],
             overrides: vec![],
+            on_exit: vec![],
+            announce: None,
         }],
         transitions: vec![Transition {
             from: "idle".into(),
@@ -249,6 +264,8 @@ fn segmented_callbacks_start_clips_and_fades_mid_tick() {
                     duration: 1.0,
                 },
             ],
+            blend: 0.0,
+            after: None,
         }],
     });
     let mut r = Runtime::new(p).unwrap();
@@ -375,6 +392,8 @@ fn invalid_requests_and_cycles_roll_back() {
             id: "a".into(),
             on_enter: vec![],
             overrides: vec![],
+            on_exit: vec![],
+            announce: None,
         }],
         transitions: vec![Transition {
             from: "a".into(),
@@ -382,6 +401,8 @@ fn invalid_requests_and_cycles_roll_back() {
             event: ev("cycle"),
             guard: None,
             actions: vec![Action::Emit { event: ev("cycle") }],
+            blend: 0.0,
+            after: None,
         }],
     });
     let mut r = Runtime::new(p).unwrap();
@@ -450,6 +471,8 @@ fn override_clips_reject_fades_and_initial_cycles_are_bounded() {
             id: "a".into(),
             on_enter: vec![Action::Emit { event: ev("cycle") }],
             overrides: vec![],
+            on_exit: vec![],
+            announce: None,
         }],
         transitions: vec![Transition {
             from: "a".into(),
@@ -457,7 +480,103 @@ fn override_clips_reject_fades_and_initial_cycles_are_bounded() {
             event: ev("cycle"),
             guard: None,
             actions: vec![],
+            blend: 0.0,
+            after: None,
         }],
     });
     assert_eq!(Runtime::new(p).unwrap_err().0, "event drain limit exceeded");
+}
+
+/// Two machines crossfade on the same shape while a pointer follower adds on top.
+#[test]
+fn two_machines_blend_and_followers_track_the_pointer_together() {
+    let project = Project::from_json(
+        &json!({
+            "nodes": [
+                {"id": "face", "kind": {"type": "circle", "cx": 100, "cy": 100, "radius": 50}},
+                {"id": "pupil", "kind": {"type": "circle", "cx": 100, "cy": 100, "radius": 5}}
+            ],
+            "stateMachines": [
+                {"id": "mood", "initial": "calm", "states": [
+                    {"id": "calm", "overrides": [{"nodeId": "face", "property": "opacity", "value": {"type": "number", "value": 1}}]},
+                    {"id": "happy", "overrides": [{"nodeId": "face", "property": "opacity", "value": {"type": "number", "value": 0.5}}]}
+                ], "transitions": [{"from": "calm", "to": "happy", "event": {"name": "click", "target": "face"}, "blend": 1}]},
+                {"id": "hover", "initial": "out", "states": [
+                    {"id": "out"},
+                    {"id": "in", "overrides": [{"nodeId": "face", "property": "scaleX", "value": {"type": "number", "value": 2}}]}
+                ], "transitions": [{"from": "out", "to": "in", "event": {"name": "pointerenter", "target": "face"}, "blend": 0.5}]}
+            ],
+            "followers": [{"id": "look", "target": "pupil", "max": 10, "strength": 0.5, "smoothing": 0,
+                "when": {"machine": "hover", "states": ["in"]}}]
+        })
+        .to_string(),
+    )
+    .unwrap();
+    let mut r = Runtime::new(project).unwrap();
+    let face = |f: &Frame| f.nodes.iter().find(|n| n.id == "face").unwrap().clone();
+    let pupil = |f: &Frame| f.nodes.iter().find(|n| n.id == "pupil").unwrap().transform;
+    let click = Event {
+        name: "click".into(),
+        target: Some("face".into()),
+    };
+    let enter = Event {
+        name: "pointerenter".into(),
+        target: Some("face".into()),
+    };
+    r.execute(Request::Event { event: click }).unwrap();
+    r.execute(Request::Event { event: enter }).unwrap();
+    r.execute(Request::Pointer { x: 108.0, y: 100.0 }).unwrap();
+    let half = r.tick(0.25).unwrap().frame;
+    // Both machines are mid-crossfade at the same time.
+    let opacity = face(&half).style.opacity;
+    assert!(opacity < 1.0 && opacity > 0.5, "{opacity}");
+    let scale = face(&half).transform.scale_x;
+    assert!(scale > 1.0 && scale < 2.0, "{scale}");
+    assert_eq!(pupil(&half).x, 4.0);
+    let done = r.tick(1.0).unwrap().frame;
+    assert_eq!(face(&done).style.opacity, 0.5);
+    assert_eq!(face(&done).transform.scale_x, 2.0);
+    let left = r.execute(Request::PointerLeave).unwrap().frame;
+    assert_eq!(pupil(&left).x, 0.0);
+}
+
+/// Timer transitions fire on time and exit actions run before the next state.
+#[test]
+fn timers_fire_on_time_and_exit_actions_run_first() {
+    let project = Project::from_json(
+        &json!({
+            "nodes": [{"id": "eye", "kind": {"type": "circle", "cx": 10, "cy": 10, "radius": 5}}],
+            "variables": {"blinks": 0},
+            "stateMachines": [{"id": "blink", "initial": "open", "states": [
+                {"id": "open", "onExit": [{"type": "emit", "event": {"name": "closing"}}]},
+                {"id": "shut", "overrides": [{"nodeId": "eye", "property": "scaleY", "value": {"type": "number", "value": 0.1}}]}
+            ], "transitions": [
+                {"from": "open", "to": "shut", "after": 2},
+                {"from": "shut", "to": "open", "after": 0.15}
+            ]}]
+        })
+        .to_string(),
+    )
+    .unwrap();
+    let mut r = Runtime::new(project).unwrap();
+    assert_eq!(r.tick(1.9).unwrap().frame.states["blink"], "open");
+    let out = r.tick(0.2).unwrap();
+    assert_eq!(out.frame.states["blink"], "shut");
+    assert!(out
+        .host_actions
+        .iter()
+        .any(|a| matches!(a, HostAction::Event { event } if event.name == "closing")));
+    let eye = |f: &Frame| f.nodes[0].transform.scale_y;
+    assert_eq!(eye(&out.frame), 0.1);
+    // 0.1 s already passed in "shut" within the same tick; 0.05 s more reopens.
+    assert_eq!(r.tick(0.05).unwrap().frame.states["blink"], "open");
+    // A timer cycle repeats.
+    assert_eq!(r.tick(2.0).unwrap().frame.states["blink"], "shut");
+    // Timer transitions ignore events with the reserved name.
+    assert!(Project::from_json(
+        &json!({"stateMachines": [{"id": "m", "initial": "a", "states": [{"id": "a"}],
+        "transitions": [{"from": "a", "to": "a", "event": {"name": "after"}}]}]})
+        .to_string()
+    )
+    .is_err());
 }

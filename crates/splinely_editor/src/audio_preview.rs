@@ -9,7 +9,7 @@
 //! `set_project` does bounded base64 decoding and disk I/O: run preparation off
 //! the GUI thread for large documents, then move the controller to the UI.
 //!
-//! Limits: only Project.audio_cues, not clip-local cues, or action sounds.
+//! Global and clip-local cues are supported; action sounds are not.
 //! Scheduling is frame-driven, not sample accurate. ffplay startup adds latency;
 //! very short cues can be missed. Unknown source lengths are bounded by a five
 //! minute preview window. Source duration/codec/device failures are reported by
@@ -48,6 +48,7 @@ static NEXT_DIRECTORY: AtomicU64 = AtomicU64::new(0);
 #[derive(Clone)]
 struct PreparedCue {
     path: PathBuf,
+    scope: Option<String>,
     format: &'static str,
     time: f64,
     offset: f64,
@@ -114,6 +115,7 @@ fn new_cache() -> Result<Cache, String> {
                 .as_nanos(),
             NEXT_DIRECTORY.fetch_add(1, Ordering::Relaxed)
         ));
+        #[cfg_attr(not(unix), allow(unused_mut))]
         let mut builder = fs::DirBuilder::new();
         #[cfg(unix)]
         {
@@ -125,7 +127,7 @@ fn new_cache() -> Result<Cache, String> {
                 return Ok(Cache {
                     directory,
                     cues: Vec::new(),
-                })
+                });
             }
             Err(e) if e.kind() == std::io::ErrorKind::AlreadyExists => continue,
             Err(e) => return Err(format!("cannot create audio preview cache: {e}")),
@@ -135,7 +137,13 @@ fn new_cache() -> Result<Cache, String> {
 }
 
 fn prepare(project: &Project) -> Result<Cache, String> {
-    if project.audio_assets.len() > MAX_ASSETS || project.audio_cues.len() > MAX_CUES {
+    let cue_count = project
+        .clips
+        .iter()
+        .try_fold(project.audio_cues.len(), |n, c| {
+            n.checked_add(c.audio_cues.len())
+        });
+    if project.audio_assets.len() > MAX_ASSETS || cue_count.is_none_or(|n| n > MAX_CUES) {
         return Err("audio preview asset/cue count limit exceeded".into());
     }
     let mut cache = new_cache()?;
@@ -162,8 +170,17 @@ fn prepare(project: &Project) -> Result<Cache, String> {
         assets.push((&asset.id, path, format));
     }
     let mut ids = HashSet::new();
-    for cue in &project.audio_cues {
-        if !valid_cue(cue) || !ids.insert(&cue.id) {
+    let cues = project
+        .audio_cues
+        .iter()
+        .map(|cue| (None, f64::INFINITY, cue))
+        .chain(project.clips.iter().flat_map(|clip| {
+            clip.audio_cues
+                .iter()
+                .map(move |cue| (Some(clip.id.clone()), clip.duration, cue))
+        }));
+    for (scope, end, cue) in cues {
+        if !valid_cue(cue) || !ids.insert(&cue.id) || end <= cue.time || end.is_nan() {
             return Err("invalid or duplicate audio preview cue".into());
         }
         let (_, path, format) = assets
@@ -172,13 +189,15 @@ fn prepare(project: &Project) -> Result<Cache, String> {
             .ok_or("audio cue references missing asset")?;
         cache.cues.push(PreparedCue {
             path: path.clone(),
+            scope,
             format,
             time: cue.time,
             offset: cue.offset,
             length: cue
                 .duration
                 .unwrap_or(MAX_PREVIEW_SECONDS)
-                .min(MAX_PREVIEW_SECONDS),
+                .min(MAX_PREVIEW_SECONDS)
+                .min(end - cue.time),
             volume: cue.volume,
         });
     }
@@ -338,6 +357,12 @@ impl Ffplay {
             .stdin(Stdio::null())
             .stdout(Stdio::null())
             .stderr(Stdio::piped());
+        #[cfg(windows)]
+        {
+            use std::os::windows::process::CommandExt;
+            // The editor has no console: do not flash one for the console-subsystem ffplay.
+            command.creation_flags(0x0800_0000); // CREATE_NO_WINDOW
+        }
         command
     }
 }
@@ -356,6 +381,7 @@ impl Player for Ffplay {
     }
 }
 struct Voice {
+    cue_index: usize,
     process: Box<dyn Process>,
     deadline: Instant,
     timeline_end: f64,
@@ -366,7 +392,7 @@ impl Drop for Voice {
     }
 }
 
-/// A best-effort global timeline preview. All errors are returned or queued,
+/// A best-effort global and clip-local timeline preview. All errors are returned or queued,
 /// never panicked. A failed spawn disables playback until set_project/retry.
 /// Stderr is continuously drained with only 4 KiB retained per voice. Worker
 /// threads supervise native processes even if GUI updates are suspended.
@@ -375,10 +401,12 @@ pub struct AudioPreview {
     player: Box<dyn Player>,
     voices: Vec<Voice>,
     started: HashSet<usize>,
+    clocks: std::collections::BTreeMap<Option<String>, (f64, bool)>,
     diagnostics: Vec<String>,
     playing: bool,
     position: f64,
     unavailable: bool,
+    editor_tick: Option<Instant>,
 }
 impl Default for AudioPreview {
     fn default() -> Self {
@@ -392,10 +420,12 @@ impl AudioPreview {
             player: Box::new(Ffplay),
             voices: Vec::new(),
             started: HashSet::new(),
+            clocks: Default::default(),
             diagnostics: Vec::new(),
             playing: false,
             position: 0.0,
             unavailable: false,
+            editor_tick: None,
         }
     }
 
@@ -413,6 +443,8 @@ impl AudioPreview {
     pub fn stop(&mut self) {
         self.voices.clear();
         self.started.clear();
+        self.clocks.clear();
+        self.editor_tick = None;
         self.playing = false;
         self.position = 0.0;
     }
@@ -445,23 +477,122 @@ impl AudioPreview {
     }
 
     pub fn update(&mut self, position: f64, playing: bool) {
+        self.update_clips(position, playing, &[]);
+    }
+
+    /// Synchronize against the editor's last transport tick (not wall time at
+    /// this call). This detects forward seeks and complete loops even when the
+    /// resulting local phase is equal to or greater than the previous phase.
+    pub fn update_editor(
+        &mut self,
+        tick: Instant,
+        position: f64,
+        playing: bool,
+        clips: &[(String, f64, bool, f64, bool)],
+    ) {
+        if let Some(previous) = self.editor_tick {
+            let dt = tick.saturating_duration_since(previous).as_secs_f64();
+            let mut reset = HashSet::new();
+            for (scope, (old, was_playing)) in &self.clocks {
+                let (next, duration, looping) = match scope {
+                    None => (position, f64::INFINITY, false),
+                    Some(id) => match clips.iter().find(|(key, ..)| key == id) {
+                        Some((_, time, _, duration, looping)) => (*time, *duration, *looping),
+                        None => {
+                            reset.insert(scope.clone());
+                            continue;
+                        }
+                    },
+                };
+                let advanced = old + if *was_playing { dt } else { 0.0 };
+                let expected = if looping {
+                    advanced % duration
+                } else {
+                    advanced.min(duration)
+                };
+                if (next - expected).abs() > 1e-7 || (looping && advanced >= duration) {
+                    reset.insert(scope.clone());
+                }
+            }
+            let indices: HashSet<usize> = self
+                .cache
+                .as_ref()
+                .map(|cache| {
+                    cache
+                        .cues
+                        .iter()
+                        .enumerate()
+                        .filter_map(|(i, cue)| reset.contains(&cue.scope).then_some(i))
+                        .collect()
+                })
+                .unwrap_or_default();
+            self.voices
+                .retain(|voice| !indices.contains(&voice.cue_index));
+            self.started.retain(|i| !indices.contains(i));
+        }
+        self.editor_tick = Some(tick);
+        let clocks = clips
+            .iter()
+            .map(|(id, time, playing, ..)| (id.clone(), *time, *playing))
+            .collect::<Vec<_>>();
+        self.update_clips(position, playing, &clocks);
+    }
+
+    /// Clip clocks come from the same editor preview context as the visual pose.
+    /// Weights deliberately do not affect audio. Missing/paused clocks stop
+    /// their voices; resume/backward wraps reconstruct only overlapping cues.
+    pub fn update_clips(&mut self, position: f64, playing: bool, clips: &[(String, f64, bool)]) {
         if !position.is_finite() || position < 0.0 {
             self.stop();
             self.report("invalid audio transport position");
             return;
         }
-        if !playing || !self.playing || position < self.position {
-            self.voices.clear();
-            self.started.clear();
+        let mut clocks = std::collections::BTreeMap::new();
+        clocks.insert(None, (position, playing));
+        for (id, time, playing) in clips {
+            if !time.is_finite() || *time < 0.0 {
+                self.stop();
+                self.report("invalid clip audio transport position");
+                return;
+            }
+            clocks.insert(Some(id.clone()), (*time, *playing));
         }
+        let reset: HashSet<usize> = self
+            .cache
+            .as_ref()
+            .map(|cache| {
+                cache
+                    .cues
+                    .iter()
+                    .enumerate()
+                    .filter_map(|(i, cue)| {
+                        let next = clocks.get(&cue.scope);
+                        let old = self.clocks.get(&cue.scope);
+                        (next.is_none_or(|(_, playing)| !playing)
+                            || old.is_none_or(|(_, playing)| !playing)
+                            || matches!((next, old), (Some((n, _)), Some((o, _))) if n < o))
+                        .then_some(i)
+                    })
+                    .collect()
+            })
+            .unwrap_or_default();
+        self.voices
+            .retain(|voice| !reset.contains(&voice.cue_index));
+        self.started.retain(|i| !reset.contains(i));
+        self.clocks = clocks;
         self.position = position;
         self.playing = playing;
         let now = Instant::now();
         let mut index = 0;
         while index < self.voices.len() {
             let status = self.voices[index].process.poll();
-            let expired = now >= self.voices[index].deadline
-                || position - self.voices[index].timeline_end >= 0.0;
+            let cue = &self.cache.as_ref().unwrap().cues[self.voices[index].cue_index];
+            let local = self
+                .clocks
+                .get(&cue.scope)
+                .map_or(f64::INFINITY, |(t, _)| *t);
+            let expired =
+                now >= self.voices[index].deadline || local >= self.voices[index].timeline_end;
             if expired || !matches!(status, Ok(None)) {
                 self.voices.swap_remove(index);
                 match status {
@@ -473,12 +604,15 @@ impl AudioPreview {
                 index += 1;
             }
         }
-        if !playing || self.unavailable {
+        if self.unavailable {
             return;
         }
         let count = self.cache.as_ref().map_or(0, |c| c.cues.len());
         for index in 0..count {
             let cue = &self.cache.as_ref().unwrap().cues[index];
+            let Some(&(position, true)) = self.clocks.get(&cue.scope) else {
+                continue;
+            };
             if position < cue.time || !self.started.insert(index) {
                 continue;
             }
@@ -493,6 +627,7 @@ impl AudioPreview {
             let length = cue.length - elapsed;
             match self.player.start(cue, cue.offset + elapsed, length) {
                 Ok(process) => self.voices.push(Voice {
+                    cue_index: index,
                     process,
                     // Include startup allowance, but never run indefinitely.
                     deadline: now + Duration::from_secs_f64(length + 2.0),
@@ -575,6 +710,94 @@ mod tests {
         preview.player = Box::new(FakePlayer(calls.clone()));
         preview.set_project(&project()).unwrap();
         (preview, calls)
+    }
+
+    #[test]
+    fn clip_clocks_loop_pause_resume_scope_switch_and_end_truncation() {
+        let (mut a, calls) = controller();
+        let mut p = project();
+        let cue = p.audio_cues.remove(0);
+        p.clips.push(
+            serde_json::from_value(serde_json::json!({
+                "id":"clip", "duration":4, "looping":true, "audioCues":[cue]
+            }))
+            .unwrap(),
+        );
+        a.set_project(&p).unwrap();
+        let clock = |time, playing| vec![("clip".to_string(), time, playing)];
+        a.update_clips(10., false, &clock(2., true));
+        assert_eq!(calls.lock().unwrap().starts, [(1., 2.)]);
+        a.update_clips(11., false, &clock(3., false));
+        assert_eq!(a.active_voices(), 0);
+        a.update_clips(11., false, &clock(3., true));
+        assert_eq!(calls.lock().unwrap().starts[1], (2., 1.));
+        a.update_clips(12., false, &clock(0., true));
+        assert_eq!(a.active_voices(), 0);
+        a.update_clips(14., false, &clock(2., true));
+        assert_eq!(calls.lock().unwrap().starts.len(), 3);
+        a.update_clips(15., false, &[]);
+        assert_eq!(a.active_voices(), 0);
+        a.update_clips(16., false, &clock(4., true));
+        assert_eq!(calls.lock().unwrap().starts.len(), 3);
+    }
+
+    #[test]
+    fn editor_tick_detects_forward_seek_and_skipped_complete_loop_per_scope() {
+        let (mut a, calls) = controller();
+        let mut p = project();
+        let mut cue = p.audio_cues[0].clone();
+        cue.id = "local".into();
+        cue.time = 0.;
+        p.clips.push(
+            serde_json::from_value(serde_json::json!({
+                "id":"clip", "duration":2, "looping":true, "audioCues":[cue]
+            }))
+            .unwrap(),
+        );
+        a.set_project(&p).unwrap();
+        let tick = Instant::now();
+        let clock = |time| vec![("clip".to_string(), time, true, 2., true)];
+        a.update_editor(tick, 2., true, &clock(0.5));
+        a.update_editor(tick + Duration::from_millis(100), 2.1, true, &clock(1.));
+        // Forward local seek, but the unrelated global voice keeps playing.
+        assert_eq!(
+            calls.lock().unwrap().starts,
+            [(1., 4.), (1.5, 1.5), (2., 1.)]
+        );
+        assert_eq!(calls.lock().unwrap().stops, 1);
+        a.update_editor(tick + Duration::from_millis(2200), 4.2, true, &clock(1.1));
+        // A whole loop elapsed even though local phase increased.
+        assert_eq!(calls.lock().unwrap().starts[3], (2.1, 0.8999999999999999));
+        assert_eq!(calls.lock().unwrap().stops, 2);
+        assert_eq!(a.active_voices(), 2);
+    }
+
+    #[test]
+    fn clip_and_global_voices_are_independent_and_limits_include_all_scopes() {
+        let (mut a, calls) = controller();
+        let mut p = project();
+        let mut cue = p.audio_cues[0].clone();
+        cue.id = "local".into();
+        p.clips.push(
+            serde_json::from_value(serde_json::json!({
+                "id":"clip", "duration":8, "audioCues":[cue]
+            }))
+            .unwrap(),
+        );
+        a.set_project(&p).unwrap();
+        a.update_clips(2., true, &[("clip".into(), 3., true)]);
+        assert_eq!(calls.lock().unwrap().starts, [(1., 4.), (2., 3.)]);
+        a.update_clips(3., true, &[("clip".into(), 3., false)]);
+        assert_eq!(a.active_voices(), 1);
+        p.clips[0].audio_cues = (0..MAX_CUES)
+            .map(|i| {
+                let mut cue = p.clips[0].audio_cues[0].clone();
+                cue.id = format!("local-{i}");
+                cue
+            })
+            .collect();
+        assert!(a.set_project(&p).is_err());
+        assert!(a.cache.is_none());
     }
 
     #[test]

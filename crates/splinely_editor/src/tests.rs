@@ -177,6 +177,8 @@ fn event_recursion_is_bounded() {
                 target: None,
             },
         }],
+        blend: 0.0,
+        after: None,
     }];
     e.send_event("loop".into(), None);
     assert!(e.status.contains("32 Ereignissen"));
@@ -226,14 +228,7 @@ fn atomic_project_save_and_interactive_export_preserve_source_and_assets() {
     assert_eq!(loaded.audio_assets, p.audio_assets);
     export_file(path.to_str().unwrap(), svg.to_str().unwrap()).unwrap();
     let source = fs::read_to_string(&svg).unwrap();
-    let xml = roxmltree::Document::parse(&source).unwrap();
-    let data = xml
-        .descendants()
-        .find(|n| n.attribute("id") == Some("splinely-project"))
-        .unwrap()
-        .text()
-        .unwrap();
-    let exported = Project::from_json(data).unwrap();
+    let exported = Project::from_svg_metadata(&source).unwrap();
     assert_eq!(exported.audio_cues, p.audio_cues);
     assert!(source.contains("data-splinely-node"));
     assert!(source.contains("<script"));
@@ -458,6 +453,8 @@ fn native_completion_actions_are_segmented_and_parallel_machines_keep_scrolling(
                 weight: 0.,
                 duration: 1.,
             }],
+            blend: 0.0,
+            after: None,
         };
         for id in ["scroll_machine", "jump_machine"] {
             e.project.state_machines.push(StateMachine {
@@ -468,11 +465,15 @@ fn native_completion_actions_are_segmented_and_parallel_machines_keep_scrolling(
                         id: "idle".into(),
                         on_enter: vec![],
                         overrides: vec![],
+                        on_exit: vec![],
+                        announce: None,
                     },
                     State {
                         id: "done".into(),
                         on_enter: vec![],
                         overrides: vec![],
+                        on_exit: vec![],
+                        announce: None,
                     },
                 ],
                 transitions: if id == "jump_machine" {
@@ -527,11 +528,15 @@ fn manual_completion_dispatches_timeline_before_remaining_fade() {
                 id: "idle".into(),
                 on_enter: vec![],
                 overrides: vec![],
+                on_exit: vec![],
+                announce: None,
             },
             State {
                 id: "done".into(),
                 on_enter: vec![],
                 overrides: vec![],
+                on_exit: vec![],
+                announce: None,
             },
         ],
         transitions: vec![Transition {
@@ -547,6 +552,8 @@ fn manual_completion_dispatches_timeline_before_remaining_fade() {
                 weight: 0.,
                 duration: 1.,
             }],
+            blend: 0.0,
+            after: None,
         }],
     });
     e.project.validate().unwrap();

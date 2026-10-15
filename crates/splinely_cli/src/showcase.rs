@@ -33,32 +33,8 @@ fn scene(title: &str, subtitle: &str) -> Result<Value> {
         text("title", 54., 112., title, 34., [237, 246, 255]),
         text("subtitle", 54., 144., subtitle, 15., [156, 181, 203]),
     ];
-    for (id, x, words) in [
-        ("start-control", 54., "Play / resume"),
-        ("pause-control", 222., "Pause"),
-    ] {
-        let mut button = painted(Node::rect(id, x, 567., 152., 40.), [32, 60, 84]);
-        if let NodeKind::Rect { rx, .. } = &mut button.kind {
-            *rx = 12.;
-        }
-        nodes.push(button);
-        nodes.push(text(
-            &format!("{id}-label"),
-            x + 16.,
-            593.,
-            words,
-            15.,
-            [222, 240, 249],
-        ));
-    }
-    nodes.push(text(
-        "status",
-        402.,
-        593.,
-        "Ready · use Play",
-        14.,
-        [156, 181, 203],
-    ));
+    // No Play/Pause controls: every scene starts by itself on load.
+    nodes.push(text("status", 54., 593., "Starting…", 14., [156, 181, 203]));
     project_value(&Project {
         name: title.into(),
         width: 960.,
@@ -85,9 +61,12 @@ fn track(id: &str, property: &str, keys: &[(f64, f64)]) -> Value {
 }
 
 // No timers, random state selection or private runtime fields.
+// The scenes run on load without any button: the water drop clip autoplays and the
+// shape conversation machine starts in its first figure. `showcase.pause` /
+// `showcase.start` remain as optional scripting hooks for host pages.
 const CONTROLS: &str = r#"
 const svg = document.currentScript.ownerSVGElement;
-const data = JSON.parse(svg.querySelector('[id="splinely-project"]').textContent);
+const data = splinely.sourceProject; // decoded once by the runtime (binary or JSON metadata)
 const machine = data.stateMachines.length ? splinely.machine('gallery') : null;
 const status = svg.querySelector('[id="status"]');
 let paused = [], pauseRequested = false;
@@ -97,10 +76,7 @@ function describe() {
 }
 function start() {
   pauseRequested = false;
-  const host = svg.querySelector('[data-splinely-host-control]');
-  if (host) host.remove(); // These generated scenes contain no audio assets to unlock.
-  if (machine && machine.state === 'idle') machine.send('START');
-  else for (const id of paused) splinely.clip(id).play();
+  for (const id of paused) splinely.clip(id).play();
   paused = []; splinely.timeline.play(); describe();
 }
 function pause() {
@@ -110,24 +86,6 @@ function pause() {
     splinely.timeline.pause();
   }
   describe();
-}
-for (const [id, fn] of [['start-control', start], ['pause-control', pause]]) {
-  const el = svg.querySelector('[id="' + id + '"]');
-  el.setAttribute('role', 'button'); el.setAttribute('tabindex', '0');
-  el.setAttribute('aria-label', id === 'start-control' ? 'Play or resume animation' : 'Pause animation');
-  el.style.cursor = 'pointer';
-  const label = svg.querySelector('[id="' + id + '-label"]');
-  label.style.pointerEvents = 'none';
-  splinely.on(id, 'click', fn);
-  const key = event => { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); fn(); } };
-  el.addEventListener('keydown', key);
-  splinely.onDestroy(() => el.removeEventListener('keydown', key));
-}
-const host = svg.querySelector('[data-splinely-host-control]');
-if (host) {
-  const key = event => { if (event.key === 'Enter' || event.key === ' ') start(); };
-  host.addEventListener('click', start); host.addEventListener('keydown', key);
-  splinely.onDestroy(() => { host.removeEventListener('click', start); host.removeEventListener('keydown', key); });
 }
 splinely.on('showcase.start', start);
 splinely.on('showcase.pause', pause);
@@ -321,9 +279,9 @@ pub fn random_figures(seed: u64, count: usize) -> Result<Project> {
         "I am a soft square. Let's build something.",
         "I am a bright polygon. Every corner has a story.",
     ];
-    let mut states = vec![json!({"id":"idle","onEnter":[],"overrides":[]})];
-    let mut transitions =
-        vec![json!({"from":"idle","to":"figure-0","event":{"name":"START"},"actions":[]})];
+    // The machine starts in figure-0, so the conversation runs on load without any input.
+    let mut states = Vec::new();
+    let mut transitions = Vec::new();
     let mut clips = Vec::new();
     for i in 0..count {
         let id = format!("shape-{i}");
@@ -395,7 +353,7 @@ pub fn random_figures(seed: u64, count: usize) -> Result<Project> {
     }
     value["clips"] = json!(clips);
     value["stateMachines"] =
-        json!([{"id":"gallery","initial":"idle","states":states,"transitions":transitions}]);
+        json!([{"id":"gallery","initial":"figure-0","states":states,"transitions":transitions}]);
     value["variables"] = json!({"seed":seed.to_string(),"figureCount":count});
     value["customJs"] = json!(CONTROLS);
     validated(value)

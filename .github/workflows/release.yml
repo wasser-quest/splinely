@@ -41,3 +41,104 @@ jobs:
         run: |
           gh release view "$TAG" >/dev/null 2>&1 || gh release create "$TAG" --title "Splinely $TAG" --generate-notes
           gh release upload "$TAG" "$ARCHIVE" "$ARCHIVE.sha256" --clobber
+
+  # --- Windows and macOS packages (PLAN.md item 4) ---------------------------------------------
+  # Configured from Linux; these jobs have NOT run on GitHub and the packages have not been
+  # started on real Windows/macOS hardware. The Linux job above is unchanged.
+
+  windows-x86_64:
+    runs-on: windows-latest
+    env:
+      TAG: ${{ inputs.tag || github.ref_name }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Build and package
+        shell: pwsh
+        run: |
+          $archive = ./scripts/package-release.ps1 | Select-Object -Last 1
+          "ARCHIVE=$archive" >> $env:GITHUB_ENV
+      - name: Smoke-test the packaged CLI (unpacked from the zip)
+        shell: pwsh
+        run: |
+          $work = Join-Path $env:RUNNER_TEMP 'smoke'
+          Remove-Item -Recurse -Force -ErrorAction SilentlyContinue $work
+          Expand-Archive -Path $env:ARCHIVE -DestinationPath $work
+          $bin = (Get-ChildItem $work -Directory | Select-Object -First 1).FullName + '\bin'
+          function Run { & $args[0] $args[1..($args.Length - 1)]; if ($LASTEXITCODE -ne 0) { throw "failed: $args" } }
+          Run "$bin\splinely-cli.exe" --version
+          Run "$bin\splinely.exe" --version
+          Run "$bin\splinely-cli.exe" new --demo --output "$work\demo.sply"
+          Run "$bin\splinely-cli.exe" export "$work\demo.sply" --output "$work\demo.svg"
+          Run "$bin\splinely-cli.exe" convert "$work\demo.sply" --output "$work\demo.json"
+          Run "$bin\splinely-cli.exe" convert "$work\demo.json" --output "$work\back.sply"
+          if (-not (Test-Path "$work\demo.svg")) { throw 'no svg exported' }
+          if (-not (Test-Path "$work\back.sply")) { throw 'no sply converted back' }
+      - name: Upload to the GitHub release
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release view "$TAG" >/dev/null 2>&1 || gh release create "$TAG" --title "Splinely $TAG" --generate-notes
+          gh release upload "$TAG" "$ARCHIVE" "$ARCHIVE.sha256" --clobber
+
+  macos-aarch64:
+    runs-on: macos-14
+    env:
+      TAG: ${{ inputs.tag || github.ref_name }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Build and package
+        run: echo "ARCHIVE=$(bash scripts/package-release.sh)" >> "$GITHUB_ENV"
+      - name: Smoke-test the packaged CLI
+        run: |
+          work=$(mktemp -d)
+          (cd "$(dirname "$ARCHIVE")" && shasum -a 256 -c "$(basename "$ARCHIVE").sha256")
+          tar -xzf "$ARCHIVE" -C "$work"
+          cli=$(echo "$work"/splinely-*/bin/splinely-cli)
+          "$cli" --version
+          "$cli" new --demo --output "$work/demo.sply"
+          "$cli" export "$work/demo.sply" --output "$work/demo.svg"
+          "$cli" convert "$work/demo.sply" --output "$work/demo.json"
+          "$cli" convert "$work/demo.json" --output "$work/back.sply"
+          codesign --verify --verbose "$cli"
+          test -s "$work/demo.svg" && test -s "$work/back.sply"
+      - name: Upload to the GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release view "$TAG" >/dev/null 2>&1 || gh release create "$TAG" --title "Splinely $TAG" --generate-notes
+          gh release upload "$TAG" "$ARCHIVE" "$ARCHIVE.sha256" --clobber
+
+  # Intel Mac. The task asked for macos-13; GitHub announced its retirement (late 2025) and
+  # offers macos-15-intel as the remaining Intel image. UNVERIFIED label: confirm it exists
+  # for this repository before relying on this job.
+  macos-x86_64:
+    runs-on: macos-15-intel
+    env:
+      TAG: ${{ inputs.tag || github.ref_name }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Build and package
+        run: echo "ARCHIVE=$(bash scripts/package-release.sh)" >> "$GITHUB_ENV"
+      - name: Smoke-test the packaged CLI
+        run: |
+          work=$(mktemp -d)
+          (cd "$(dirname "$ARCHIVE")" && shasum -a 256 -c "$(basename "$ARCHIVE").sha256")
+          tar -xzf "$ARCHIVE" -C "$work"
+          cli=$(echo "$work"/splinely-*/bin/splinely-cli)
+          "$cli" --version
+          "$cli" new --demo --output "$work/demo.sply"
+          "$cli" export "$work/demo.sply" --output "$work/demo.svg"
+          "$cli" convert "$work/demo.sply" --output "$work/demo.json"
+          "$cli" convert "$work/demo.json" --output "$work/back.sply"
+          codesign --verify --verbose "$cli"
+          test -s "$work/demo.svg" && test -s "$work/back.sply"
+      - name: Upload to the GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release view "$TAG" >/dev/null 2>&1 || gh release create "$TAG" --title "Splinely $TAG" --generate-notes
+          gh release upload "$TAG" "$ARCHIVE" "$ARCHIVE.sha256" --clobber

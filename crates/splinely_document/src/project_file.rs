@@ -1,4 +1,4 @@
-//! Single-file authored projects: strict UTF-8 JSON, conventionally named `.sply`.
+//! Single-file authored projects: binary `.sply` or strict UTF-8 JSON.
 use crate::{DocumentError, Project};
 use std::fs::{self, File, OpenOptions};
 use std::io::{self, Read, Write};
@@ -9,21 +9,22 @@ use std::sync::atomic::{AtomicU64, Ordering};
 pub const MAX_PROJECT_FILE_BYTES: u64 = 64 * 1024 * 1024;
 
 impl Project {
-    /// Load a bounded UTF-8 project with the same strict rules as `from_json`.
-    /// Extensions are conventions, not parser switches; legacy JSON is accepted.
+    /// Load a bounded project with the same strict rules as `from_json`.
+    /// Binary `.sply` (detected by magic) and legacy UTF-8 JSON are both
+    /// accepted; extensions are conventions, not parser switches.
     pub fn load_file(path: impl AsRef<Path>) -> Result<Self, DocumentError> {
         let path = path.as_ref();
         let load = || -> Result<Self, DocumentError> {
-            let mut source = String::new();
+            let mut source = Vec::new();
             File::open(path)
                 .map_err(io_error)?
                 .take(MAX_PROJECT_FILE_BYTES + 1)
-                .read_to_string(&mut source)
+                .read_to_end(&mut source)
                 .map_err(io_error)?;
             if source.len() as u64 > MAX_PROJECT_FILE_BYTES {
                 return Err(DocumentError("Project file exceeds 64 MiB limit".into()));
             }
-            Self::from_json(&source)
+            Self::from_bytes(&source)
         };
         load().map_err(|e| DocumentError(format!("{}: {e}", path.display())))
     }
@@ -34,24 +35,40 @@ impl Project {
     /// directory-entry power-loss durability guarantee is provided.
     pub fn save_file(&self, path: impl AsRef<Path>) -> Result<(), DocumentError> {
         self.validate()?;
-        let path = path.as_ref();
-        let save = || -> Result<(), DocumentError> {
-            let parent = path
-                .parent()
-                .filter(|p| !p.as_os_str().is_empty())
-                .unwrap_or(Path::new("."));
-            let (mut temporary, file) = Temporary::create(parent).map_err(io_error)?;
-            let mut writer = BoundedWriter { file, written: 0 };
-            serde_json::to_writer_pretty(&mut writer, self)?;
-            writer.write_all(b"\n").map_err(io_error)?;
-            writer.file.sync_all().map_err(io_error)?;
-            drop(writer); // Close before rename, including on Windows.
-            fs::rename(temporary.0.as_ref().expect("temporary path"), path).map_err(io_error)?;
-            temporary.0 = None;
-            Ok(())
-        };
-        save().map_err(|e| DocumentError(format!("{}: {e}", path.display())))
+        save_atomic(path.as_ref(), |writer| {
+            serde_json::to_writer_pretty(&mut *writer, self)?;
+            writer.write_all(b"\n").map_err(io_error)
+        })
     }
+
+    /// Like `save_file`, but writes the binary `.sply` encoding.
+    pub fn save_file_binary(&self, path: impl AsRef<Path>) -> Result<(), DocumentError> {
+        let bytes = self.to_binary()?;
+        save_atomic(path.as_ref(), |writer| {
+            writer.write_all(&bytes).map_err(io_error)
+        })
+    }
+}
+
+fn save_atomic(
+    path: &Path,
+    write: impl FnOnce(&mut BoundedWriter) -> Result<(), DocumentError>,
+) -> Result<(), DocumentError> {
+    let save = || -> Result<(), DocumentError> {
+        let parent = path
+            .parent()
+            .filter(|p| !p.as_os_str().is_empty())
+            .unwrap_or(Path::new("."));
+        let (mut temporary, file) = Temporary::create(parent).map_err(io_error)?;
+        let mut writer = BoundedWriter { file, written: 0 };
+        write(&mut writer)?;
+        writer.file.sync_all().map_err(io_error)?;
+        drop(writer); // Close before rename, including on Windows.
+        fs::rename(temporary.0.as_ref().expect("temporary path"), path).map_err(io_error)?;
+        temporary.0 = None;
+        Ok(())
+    };
+    save().map_err(|e| DocumentError(format!("{}: {e}", path.display())))
 }
 
 fn io_error(error: io::Error) -> DocumentError {

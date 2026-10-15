@@ -204,11 +204,15 @@ pub(super) fn machine_candidate(
                 id: draft.idle.clone(),
                 on_enter: entry_actions(&draft.idle_clip),
                 overrides: vec![],
+                on_exit: vec![],
+                announce: None,
             },
             State {
                 id: draft.active.clone(),
                 on_enter: entry_actions(&draft.active_clip),
                 overrides: vec![],
+                on_exit: vec![],
+                announce: None,
             },
         ],
         transitions: vec![Transition {
@@ -221,6 +225,8 @@ pub(super) fn machine_candidate(
             // No guard means unconditional event matching, not an invented variable condition.
             guard: None,
             actions: vec![],
+            blend: 0.0,
+            after: None,
         }],
     });
     validated(next)
@@ -233,6 +239,7 @@ mod tests {
         let mut p = Project::default();
         p.nodes.push(Node::circle("ball", 0., 0., 10.));
         p.clips.push(Clip {
+            audio_cues: vec![],
             id: "move".into(),
             name: "Move".into(),
             duration: 2.,

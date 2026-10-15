@@ -33,7 +33,11 @@ impl Editor {
             let Some(old) = self.project.nodes.iter().find(|n| n.id == node.id) else {
                 continue;
             };
-            for p in RECORDED.iter().copied().chain([Property::Gradient]) {
+            for p in RECORDED
+                .iter()
+                .copied()
+                .chain([Property::Gradient, Property::MotionProgress])
+            {
                 if let (Some(a), Some(b)) = (old.property_value(p), node.property_value(p)) {
                     if a != b {
                         changes.push((node.id.clone(), p, a, b));
@@ -48,6 +52,7 @@ impl Editor {
         if next.clips.get(self.active_clip).is_none() {
             let id = next.unused_id("animation");
             next.clips.push(Clip {
+                audio_cues: vec![],
                 id,
                 name: tr("Animation").into(),
                 duration: self.time.max(2.),
@@ -210,6 +215,44 @@ mod tests {
         editor.preview_animation = true;
         editor.time = 1.;
         assert_eq!(editor.evaluated()[0].transform.x, 100.);
+    }
+
+    #[test]
+    fn motion_progress_autokey_preserves_binding_and_base() {
+        let mut e = editor();
+        let target = e.project.nodes[0].id.clone();
+        e.project.nodes[0].motion_path = Some(MotionPath {
+            path: "route".into(),
+            progress: 0.,
+            orient: true,
+        });
+        e.project.nodes.push(Node::new(
+            "route",
+            NodeKind::Path {
+                d: "M0 0 L100 0".into(),
+                bounds: [0., 0., 100., 0.],
+                evenodd: false,
+            },
+        ));
+        e.time = 1.;
+        e.auto_key = true;
+        let mut next = e.project.clone();
+        next.nodes[0].motion_path.as_mut().unwrap().progress = 1.;
+        e.commit(next);
+        assert_eq!(
+            e.project.nodes[0].motion_path.as_ref().unwrap().progress,
+            0.
+        );
+        let track = e.project.clips[0]
+            .tracks
+            .iter()
+            .find(|t| t.property == Property::MotionProgress)
+            .unwrap();
+        assert_eq!(track.node_id, target);
+        assert_eq!(track.keyframes.len(), 2);
+        assert!((e.evaluated()[0].transform.x - 100.).abs() < 1e-8);
+        assert!(e.history.undo(&mut e.project));
+        assert!(e.project.clips.is_empty());
     }
 
     #[test]

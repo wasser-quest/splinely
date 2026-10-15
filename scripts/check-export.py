@@ -9,15 +9,17 @@ import sys
 import wave
 import xml.etree.ElementTree as ET
 
+from sply_py import load_project_file, project_from_metadata  # binary .sply or JSON; metadata sply-base64 or JSON
+
 project_path, svg_path = map(Path, sys.argv[1:])
-project = json.loads(project_path.read_text(encoding='utf-8'))
+project = load_project_file(project_path)
 root = ET.parse(svg_path).getroot()
 ns = '{http://www.w3.org/2000/svg}'
 assert root.tag == ns + 'svg'
 assert root.attrib['data-splinely-version'] == '1'
 metadata = root.find(f"{ns}metadata[@id='splinely-project']")
 assert metadata is not None
-assert json.loads(metadata.text) == project, 'Project metadata changed'
+assert project_from_metadata(metadata) == project, 'Project metadata changed'
 scripts = root.findall(ns + 'script')
 assert scripts and any('createRuntime' in (s.text or '') for s in scripts)
 for element in root.iter():

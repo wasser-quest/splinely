@@ -1,0 +1,17 @@
+<svg width="400" height="200" viewBox="0 0 400 200" fill="none" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<rect id="Card" x="10" y="10" width="380" height="180" rx="12" fill="url(#paint0_linear_1_2)"/>
+<circle id="Glow" cx="300" cy="100" r="60" fill="url(#paint1_radial_1_3)"/>
+<text id="Title" fill="white" xml:space="preserve" style="white-space: pre" font-family="Inter" font-size="24" font-weight="bold" letter-spacing="0em"><tspan x="30" y="50.5">Gradient card</tspan></text>
+<text id="Centered" fill="#FFFFFF" font-family="Inter" font-size="16" text-anchor="middle"><tspan x="200" y="150">Centered label</tspan></text>
+<defs>
+<linearGradient id="paint0_linear_1_2" x1="10" y1="10" x2="390" y2="190" gradientUnits="userSpaceOnUse">
+<stop stop-color="#7F5AF0"/>
+<stop offset="0.5" stop-color="#2CB67D"/>
+<stop offset="1" stop-color="#FF8906" stop-opacity="0.8"/>
+</linearGradient>
+<radialGradient id="paint1_radial_1_3" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(300 100) rotate(90) scale(60)">
+<stop stop-color="white"/>
+<stop offset="1" stop-color="white" stop-opacity="0"/>
+</radialGradient>
+</defs>
+</svg>

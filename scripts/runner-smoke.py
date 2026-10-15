@@ -9,6 +9,7 @@ import re
 import time
 import xml.etree.ElementTree as ET
 from firefox_harness import Firefox
+from sply_py import load_project_file, project_from_metadata
 
 ROOT=Path(__file__).resolve().parents[1]
 os.environ.setdefault('TMPDIR',str(ROOT/'.work-tmp'))
@@ -44,6 +45,11 @@ def wait_for(browser,predicate,seconds=3):
         if predicate(last): return last
         time.sleep(.015)
     raise AssertionError(('Expected wall-time state not observed',last))
+
+
+def emit(browser,action):
+    """Scripting hook of the trusted controller (the page has no buttons any more)."""
+    browser.js("document.querySelector('#scene').splinely.emit('runner.'+arguments[0]);",[action])
 
 
 def click(browser,id):
@@ -109,8 +115,8 @@ def cactus_pose(s,project):
 
 def main():
     tree=ET.parse(SVG)
-    project=json.loads(tree.find("{http://www.w3.org/2000/svg}metadata[@id='splinely-project']").text)
-    canonical=json.loads((ROOT/'examples/cactus-runner.splinely.json').read_text())
+    project=project_from_metadata(tree.find("{http://www.w3.org/2000/svg}metadata[@id='splinely-project']"))
+    canonical=load_project_file(ROOT/'examples/cactus-runner.splinely.json')
     assert len(project['bones'])==10 and not project['audioAssets']
     for index in [3,4]:
         assert project['clips'][index]['blendMode']=='weighted'
@@ -127,12 +133,13 @@ def main():
         browser.command('WebDriver:Navigate',{'url':(ROOT/'examples/cactus-runner.html').as_uri()})
         deadline=time.monotonic()+15
         while time.monotonic()<deadline:
-            if browser.js("return !document.querySelector('#pause').disabled;"): break
+            if browser.js("return !!document.querySelector('#scene')?.splinely;"): break
             time.sleep(.1)
-        assert browser.js("return !document.querySelector('#pause').disabled;"),'Offline runtime not ready'
-        click(browser,'restart')
+        assert browser.js("return !!document.querySelector('#scene')?.splinely;"),'Offline runtime not ready'
+        # Nothing is pressed: the page has no buttons and the world already runs.
+        assert not browser.js("return document.querySelectorAll('button').length;"),'Host page still has buttons'
         initial=sample(browser)
-        assert initial['walk']==1 and initial['jump']==0 and initial['state']=='ground'
+        assert initial['walk']==1 and initial['jump']==0 and initial['state']=='ground' and initial['scene']=='running'
         time.sleep(.35)
         walking=sample(browser)
         assert walking['scroll']>initial['scroll']+.2 and walking['cacti']!=initial['cacti']
@@ -145,11 +152,11 @@ def main():
         fk(overlap)
         weighted_pose(overlap,project)
         # Pause in the actual crossfade, not only after the ramps have finished.
-        click(browser,'pause')
+        emit(browser,'pause')
         paused_blend=sample(browser)
         time.sleep(.3)
         assert sample(browser)==paused_blend,'Paused blend continued changing'
-        click(browser,'play')
+        emit(browser,'play')
         apex=wait_for(browser,lambda s:.40<s['jumpTime']<.65)
         fk(apex)
         weighted_pose(apex,project)
@@ -167,17 +174,17 @@ def main():
         delta=settled['scroll']-walking['scroll']
         for before,after in zip(cactus_xs(walking),cactus_xs(settled)):
             assert abs((after-before)+120*delta)<3, (before,after,delta)
-        click(browser,'pause')
+        emit(browser,'pause')
         held=sample(browser)
         time.sleep(.3)
         assert sample(browser)==held and held['scene']=='paused','Pause did not hold scene/rig'
-        click(browser,'play')
+        emit(browser,'play')
         time.sleep(.2)
         assert sample(browser)['scroll']>held['scroll']+.1
         # Host keyboard path uses the same trusted event/state/blend controller.
         browser.js("document.dispatchEvent(new KeyboardEvent('keydown',{code:'Space',bubbles:true}));")
         wait_for(browser,lambda s:s['state']=='jumping')
-        click(browser,'restart')
+        emit(browser,'restart')
         restarted=sample(browser)
         assert restarted['scroll']<.35 and restarted['state']=='ground' and restarted['walk']==1 and restarted['jump']==0,restarted
         fk(restarted)
@@ -202,9 +209,9 @@ def main():
         assert wrapped['scene']=='running' and len(respawned)==8,(wrapped,respawned)
         clean_diagnostics(wrapped)
         # A full deterministic restart recreates positions at the same sample time.
-        click(browser,'pause')
-        click(browser,'restart')
-        click(browser,'pause')
+        emit(browser,'pause')
+        emit(browser,'restart')
+        emit(browser,'pause')
         fresh=sample(browser)
         for expected,actual in zip(cactus_xs(initial),cactus_xs(fresh)):
             assert abs((actual-expected)+120*(fresh['scroll']-initial['scroll']))<3
@@ -228,7 +235,7 @@ def main():
             returnBlend=back,settled=settled,loop=wrapped,standaloneOverlap=standalone_overlap,
             standaloneSettled=standalone_settled),'samples':SAMPLES},indent=2)+'\n')
     print('Telemetry: '+str(EVIDENCE))
-    print('PASS: compiled SVG schema/actions; offline Firefox wall-time walk/jump fade overlap + return, scrolling/cacti, FK, pause/resume/restart, 24s seeded loop and standalone. Screenshot: '+str(shot))
+    print('PASS: compiled SVG schema/actions; offline Firefox wall-time walk/jump fade overlap + return, scrolling/cacti, FK, jump on real scene click/Space with no button pressed, pause/resume/restart scripting hooks, 24s seeded loop and standalone. Screenshot: '+str(shot))
 
 
 if __name__=='__main__':

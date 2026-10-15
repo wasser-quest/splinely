@@ -130,3 +130,76 @@ fn check_needs_no_display_and_reports_errors() {
         .status
         .success());
 }
+
+fn example(name: &str) -> std::path::PathBuf {
+    std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
+        .join("../../examples")
+        .join(name)
+}
+
+fn headless(input: &std::path::Path, extra: &[&str]) -> std::process::Output {
+    cli()
+        .env_remove("DISPLAY")
+        .env_remove("WAYLAND_DISPLAY")
+        .arg(input)
+        .arg("--check")
+        .args(extra)
+        .output()
+        .unwrap()
+}
+
+#[test]
+fn help_documents_the_runtime_option() {
+    let help = String::from_utf8(cli().arg("--help").output().unwrap().stdout).unwrap();
+    assert!(
+        help.contains("--runtime <RUNTIME>") && help.contains("[default: js]"),
+        "{help}"
+    );
+    assert!(help.contains("customJs is NOT executed"), "{help}");
+}
+
+#[test]
+fn runtime_defaults_to_js_and_rust_is_checked_headlessly() {
+    let demo = example("demo.splinely.json");
+    let default = headless(&demo, &[]);
+    assert!(default.status.success());
+    assert!(String::from_utf8_lossy(&default.stdout).contains("runtime: js"));
+    let explicit = headless(&demo, &["--runtime", "js"]);
+    assert_eq!(default.stdout, explicit.stdout);
+
+    let rust = headless(&demo, &["--runtime", "rust"]);
+    let (out, err) = (
+        String::from_utf8_lossy(&rust.stdout),
+        String::from_utf8_lossy(&rust.stderr),
+    );
+    assert!(rust.status.success(), "{err}");
+    assert!(
+        out.contains("runtime: rust, 3 nodes evaluated by splinely_runtime"),
+        "{out}"
+    );
+    assert!(
+        err.contains("customJs") && err.contains("NOT executed"),
+        "{err}"
+    );
+    assert!(err.contains("Audio is not supported"), "{err}");
+
+    let stick = headless(&example("stickfight.splinely.json"), &["--runtime", "rust"]);
+    assert!(stick.status.success());
+    assert!(String::from_utf8_lossy(&stick.stderr).is_empty());
+}
+
+#[test]
+fn rust_runtime_rejects_svg_trusted_js_and_unknown_values() {
+    let svg = headless(&example("demo.svg"), &["--runtime", "rust"]);
+    assert!(!svg.status.success());
+    assert!(String::from_utf8_lossy(&svg.stderr).contains("needs a Splinely project"));
+    let trusted = headless(
+        &example("demo.splinely.json"),
+        &["--runtime", "rust", "--trusted-js"],
+    );
+    assert!(!trusted.status.success());
+    assert!(String::from_utf8_lossy(&trusted.stderr).contains("cannot be combined"));
+    let bad = headless(&example("demo.splinely.json"), &["--runtime", "wasm"]);
+    assert!(!bad.status.success());
+    assert!(String::from_utf8_lossy(&bad.stderr).contains("invalid value 'wasm'"));
+}

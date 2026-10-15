@@ -285,3 +285,96 @@ fn all_invalid_patch_forms_leave_existing_output_untouched() {
     assert_eq!(reset["name"], "Untitled");
     assert_eq!(std::fs::read_dir(directory.path()).unwrap().count(), 1);
 }
+
+#[test]
+fn blended_states_and_followers_work_from_the_cli() {
+    let dir = tempfile::tempdir().unwrap();
+    let f = dir.path().join("face.sply");
+    let f = f.to_str().unwrap();
+    let run = |args: &[&str]| {
+        let out = std::process::Command::new(env!("CARGO_BIN_EXE_splinely-cli"))
+            .args(args)
+            .output()
+            .unwrap();
+        (
+            out.status.success(),
+            String::from_utf8_lossy(&out.stdout).to_string(),
+            String::from_utf8_lossy(&out.stderr).to_string(),
+        )
+    };
+    assert!(run(&["new", "--output", f]).0);
+    assert!(
+        run(&[
+            "node", "add", f, "--kind", "circle", "--id", "face", "--x", "100", "--y", "100",
+            "--radius", "40"
+        ])
+        .0
+    );
+    assert!(
+        run(&[
+            "node",
+            "add",
+            f,
+            "--kind",
+            "path",
+            "--id",
+            "mouth",
+            "--d",
+            "M 0 0 L 10 0",
+            "--fill",
+            "none"
+        ])
+        .0
+    );
+    let (ok, _, err) = run(&[
+        "on",
+        f,
+        "--event",
+        "click",
+        "--target",
+        "face",
+        "--machine",
+        "mood",
+        "--to",
+        "happy",
+        "--state",
+        "face.fill=gold",
+        "--blend",
+        "0.4",
+    ]);
+    assert!(ok, "{err}");
+    assert!(
+        run(&[
+            "follow",
+            f,
+            "--target",
+            "face",
+            "--mode",
+            "rotate",
+            "--max",
+            "20",
+            "--machine",
+            "mood",
+            "--states",
+            "happy"
+        ])
+        .0
+    );
+    let (_, inspect, _) = run(&["inspect", f]);
+    let v: serde_json::Value = serde_json::from_str(&inspect).unwrap();
+    assert_eq!(v["followers"][0]["mode"], "rotate");
+    let transition = &v["stateMachines"][0]["transitions"][0];
+    assert_eq!(transition["blend"], 0.4);
+    assert_eq!(
+        v["stateMachines"][0]["states"][1]["overrides"][0]["property"],
+        "fill"
+    );
+    // Errors stay helpful.
+    let (ok, _, err) = run(&["on", f, "--event", "click", "--state", "face.fill=red"]);
+    assert!(!ok && err.contains("--state needs --to"));
+    let (ok, _, err) = run(&["follow", f, "--target", "face", "--machine", "mood"]);
+    assert!(!ok && err.contains("--machine and --states go together"));
+    assert!(run(&["follow", f, "--target", "face", "--remove"]).0);
+    let (_, inspect, _) = run(&["inspect", f]);
+    assert!(!inspect.contains("\"followers\":[{"));
+}

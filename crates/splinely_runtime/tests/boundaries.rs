@@ -8,6 +8,7 @@ fn event(name: &str, target: Option<&str>) -> Event {
 }
 fn clip(id: &str, duration: f64, looping: bool) -> Clip {
     Clip {
+        audio_cues: vec![],
         id: id.into(),
         name: String::new(),
         duration,
@@ -45,6 +46,8 @@ fn simultaneous_boundaries_are_queued_before_nested_emits() {
             id: "s".into(),
             on_enter: vec![],
             overrides: vec![],
+            on_exit: vec![],
+            announce: None,
         }],
         transitions: vec![Transition {
             from: "s".into(),
@@ -54,6 +57,8 @@ fn simultaneous_boundaries_are_queued_before_nested_emits() {
             actions: vec![Action::Emit {
                 event: event("nested", None),
             }],
+            blend: 0.0,
+            after: None,
         }],
     });
     let out = Runtime::new(p).unwrap().tick(1.0).unwrap();

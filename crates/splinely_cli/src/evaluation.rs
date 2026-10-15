@@ -11,6 +11,7 @@ struct Context {
     states: BTreeMap<String, String>,
     clips: Option<Vec<Playback>>,
     clip_weights: BTreeMap<String, f64>,
+    variables: BTreeMap<String, Value>,
     overrides: Vec<PropertyOverride>,
 }
 
@@ -68,7 +69,9 @@ pub fn run(input: &str, time: f64, context: Option<&str>) -> Result<Value> {
                     .collect()
             }),
             clip_weights: parsed.clip_weights,
+            variables: parsed.variables,
             overrides: parsed.overrides,
+            ..Default::default()
         }
     } else {
         EvaluationContext::default()

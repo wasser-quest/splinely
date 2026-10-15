@@ -87,7 +87,7 @@ impl BlendPreview {
         let clip = project.clips.iter().find(|c| c.id == id).ok_or_else(|| {
             splinely_editor::i18n::trf("Unbekannter Vorschau-Clip: {id}", &[id.to_string()])
         })?;
-        if clip.blend_mode != BlendMode::Weighted {
+        if clip.blend_mode == BlendMode::Override {
             return Err(splinely_editor::i18n::trf(
                 "Mischvorschau braucht einen gewichteten Clip: {id}",
                 &[id.to_string()],

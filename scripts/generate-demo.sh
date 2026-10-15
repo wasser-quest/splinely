@@ -34,8 +34,17 @@ keys[2]['time'] = 3.0
 project['nodes'][2]['kind']['text'] = 'Kreis klicken: Bewegung + Ton bei 1,5 s'
 transition = project['stateMachines'][0]['transitions'][0]
 transition['actions'].append({'type': 'playClip', 'clipId': 'travel'})
+# Screen-reader semantics for the web player (opt-in): scene description,
+# focusable labelled ball (Tab, Enter/Space), decorative background, live status.
+project['nodes'][0]['a11y'] = {'hidden': True}
+project['nodes'][1]['a11y'] = {'label': 'Ball: Klick startet Bewegung und Ton',
+                               'description': 'Der Kreis bewegt sich nach rechts; bei 1,5 Sekunden erklingt ein Ton.'}
+for state in project['stateMachines'][0]['states']:
+    if state['id'] == 'clicked':
+        state['announce'] = 'Der Ball bewegt sich.'
 patch = {
     'name': 'Splinely: Klick, Keyframes und eingebetteter Ton',
+    'description': 'Ein Kreis auf farbigem Grund. Per Klick, Enter oder Leertaste bewegt er sich nach rechts und spielt einen kurzen Ton.',
     'nodes': project['nodes'], 'clips': [clip],
     'stateMachines': project['stateMachines'],
     'audioAssets': [{'id': 'tone', 'name': 'Silbenartiger Ton (keine Worte)',
@@ -61,5 +70,5 @@ with open(sys.argv[2], 'w', encoding='utf-8') as out:
 PY
 cargo run --quiet -p splinely-cli -- apply "$work/base.splinely.json" --patch "$work/patch.json" --output "$output/demo.splinely.json"
 cargo run --quiet -p splinely-cli -- validate "$output/demo.splinely.json"
-# Explicit opt-in for the short, reviewable gesture handler above.
-cargo run --quiet -p splinely-cli -- export "$output/demo.splinely.json" --trusted-js --output "$output/demo.svg"
+# Explicit opt-in for the short, reviewable gesture handler above. JSON metadata keeps the sample readable and matches the browser tests.
+cargo run --quiet -p splinely-cli -- export "$output/demo.splinely.json" --trusted-js --embed json --output "$output/demo.svg"

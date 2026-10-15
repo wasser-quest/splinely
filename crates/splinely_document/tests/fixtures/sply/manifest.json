@@ -1,0 +1,350 @@
+{
+  "format": "sply-binary",
+  "malformed": [
+    {
+      "error": "bad magic",
+      "file": "malformed/empty-input.sply",
+      "rule": "wrong magic"
+    },
+    {
+      "error": "bad magic",
+      "file": "malformed/bad-magic.sply",
+      "rule": "wrong magic"
+    },
+    {
+      "error": "truncated header",
+      "file": "malformed/short-header.sply",
+      "rule": "truncated header"
+    },
+    {
+      "error": "unsupported major version",
+      "file": "malformed/major-2.sply",
+      "rule": "wrong major"
+    },
+    {
+      "error": "unsupported major version",
+      "file": "malformed/major-0.sply",
+      "rule": "wrong major"
+    },
+    {
+      "error": "unsupported minor version",
+      "file": "malformed/minor-1.sply",
+      "rule": "minor higher than supported"
+    },
+    {
+      "error": "unsupported flags",
+      "file": "malformed/flags-set.sply",
+      "rule": "flag bit set"
+    },
+    {
+      "error": "unsupported flags",
+      "file": "malformed/flags-high-bit.sply",
+      "rule": "flag bit set"
+    },
+    {
+      "error": "size mismatch",
+      "file": "malformed/trailing-byte.sply",
+      "rule": "size mismatch (trailing bytes)"
+    },
+    {
+      "error": "size mismatch",
+      "file": "malformed/truncated-file.sply",
+      "rule": "size mismatch (truncated)"
+    },
+    {
+      "error": "size mismatch",
+      "file": "malformed/huge-string-count.sply",
+      "rule": "string_count larger than file (no allocation)"
+    },
+    {
+      "error": "size mismatch",
+      "file": "malformed/huge-body-len.sply",
+      "rule": "body_len larger than file"
+    },
+    {
+      "error": "crc mismatch",
+      "file": "malformed/crc-flipped.sply",
+      "rule": "crc mismatch"
+    },
+    {
+      "error": "crc mismatch",
+      "file": "malformed/body-bit-flip.sply",
+      "rule": "crc mismatch"
+    },
+    {
+      "error": "invalid string offsets",
+      "file": "malformed/offset0-nonzero.sply",
+      "rule": "offsets[0] != 0"
+    },
+    {
+      "error": "invalid string offsets",
+      "file": "malformed/offset-last-mismatch.sply",
+      "rule": "offsets[N] != strings_len"
+    },
+    {
+      "error": "invalid string offsets",
+      "file": "malformed/offsets-decreasing.sply",
+      "rule": "offsets non-monotonic / out of range"
+    },
+    {
+      "error": "invalid utf-8",
+      "file": "malformed/utf8-invalid.sply",
+      "rule": "invalid UTF-8 in string table"
+    },
+    {
+      "error": "invalid utf-8",
+      "file": "malformed/utf8-truncated-seq.sply",
+      "rule": "invalid UTF-8 (cut multibyte)"
+    },
+    {
+      "error": "invalid utf-8",
+      "file": "malformed/utf8-surrogate.sply",
+      "rule": "invalid UTF-8 (encoded surrogate)"
+    },
+    {
+      "error": "duplicate string",
+      "file": "malformed/duplicate-string.sply",
+      "rule": "duplicate string table entries"
+    },
+    {
+      "error": "duplicate string",
+      "file": "malformed/duplicate-empty-string.sply",
+      "rule": "duplicate string table entries"
+    },
+    {
+      "error": "duplicate object key",
+      "file": "malformed/duplicate-key.sply",
+      "rule": "duplicate object key"
+    },
+    {
+      "error": "unknown tag",
+      "file": "malformed/unknown-tag-11.sply",
+      "rule": "unknown tag"
+    },
+    {
+      "error": "unknown tag",
+      "file": "malformed/unknown-tag-255.sply",
+      "rule": "unknown tag"
+    },
+    {
+      "error": "non-minimal varint",
+      "file": "malformed/nonminimal-varint.sply",
+      "rule": "non-minimal varint"
+    },
+    {
+      "error": "non-minimal varint",
+      "file": "malformed/nonminimal-varint-long.sply",
+      "rule": "non-minimal varint"
+    },
+    {
+      "error": "varint overflow",
+      "file": "malformed/varint-overflow-10th-byte.sply",
+      "rule": "varint overflow"
+    },
+    {
+      "error": "varint overflow",
+      "file": "malformed/varint-too-long.sply",
+      "rule": "varint longer than 10 bytes"
+    },
+    {
+      "error": "unexpected end of body",
+      "file": "malformed/varint-truncated.sply",
+      "rule": "varint cut by end of body"
+    },
+    {
+      "error": "negative integer out of range",
+      "file": "malformed/negint-out-of-range.sply",
+      "rule": "negative integer below -2^63"
+    },
+    {
+      "error": "non-finite float",
+      "file": "malformed/float-nan.sply",
+      "rule": "non-finite float (NaN)"
+    },
+    {
+      "error": "non-finite float",
+      "file": "malformed/float-inf.sply",
+      "rule": "non-finite float (+inf)"
+    },
+    {
+      "error": "non-finite float",
+      "file": "malformed/float-neg-inf-in-array.sply",
+      "rule": "non-finite float inside tag 9"
+    },
+    {
+      "error": "unexpected end of body",
+      "file": "malformed/float-truncated.sply",
+      "rule": "tag 5 cut short"
+    },
+    {
+      "error": "nesting too deep",
+      "file": "malformed/depth-129.sply",
+      "rule": "nesting deeper than 128"
+    },
+    {
+      "error": "nesting too deep",
+      "file": "malformed/depth-1000.sply",
+      "rule": "nesting deeper than 128"
+    },
+    {
+      "error": "nesting too deep",
+      "file": "malformed/depth-129-object.sply",
+      "rule": "nesting deeper than 128 through objects"
+    },
+    {
+      "error": "nesting too deep",
+      "file": "malformed/floats-depth-129.sply",
+      "rule": "tag 9 float array nested deeper than 128"
+    },
+    {
+      "error": "count exceeds remaining bytes",
+      "file": "malformed/claims-exceed-body.sply",
+      "rule": "sum of container claims exceeds the body length"
+    },
+    {
+      "error": "negative integer out of range",
+      "file": "malformed/negint-max-varint.sply",
+      "rule": "negative integer with varint 2^64-1 (below -2^63)"
+    },
+    {
+      "error": "count exceeds remaining bytes",
+      "file": "malformed/array-count-too-big.sply",
+      "rule": "array count > remaining bytes"
+    },
+    {
+      "error": "count exceeds remaining bytes",
+      "file": "malformed/array-count-huge.sply",
+      "rule": "array count of 2^63 elements"
+    },
+    {
+      "error": "count exceeds remaining bytes",
+      "file": "malformed/object-count-too-big.sply",
+      "rule": "object count*2 > remaining"
+    },
+    {
+      "error": "count exceeds remaining bytes",
+      "file": "malformed/floats-count-too-big.sply",
+      "rule": "tag 9 count*8 > remaining"
+    },
+    {
+      "error": "count exceeds remaining bytes",
+      "file": "malformed/floats-count-overflow.sply",
+      "rule": "tag 9 count*8 overflows u64"
+    },
+    {
+      "error": "unexpected end of body",
+      "file": "malformed/blob-length-too-big.sply",
+      "rule": "tag 10 length > remaining"
+    },
+    {
+      "error": "unexpected end of body",
+      "file": "malformed/blob-length-huge.sply",
+      "rule": "tag 10 length 2^63"
+    },
+    {
+      "error": "trailing bytes in body",
+      "file": "malformed/trailing-body-bytes.sply",
+      "rule": "bytes left after the root value"
+    },
+    {
+      "error": "unexpected end of body",
+      "file": "malformed/empty-body.sply",
+      "rule": "no root value"
+    },
+    {
+      "error": "invalid string index",
+      "file": "malformed/string-index-out-of-range.sply",
+      "rule": "string index >= string_count"
+    },
+    {
+      "error": "invalid string index",
+      "file": "malformed/string-index-no-table.sply",
+      "rule": "string index with empty table"
+    },
+    {
+      "error": "invalid string index",
+      "file": "malformed/string-index-huge.sply",
+      "rule": "string index 2^63"
+    },
+    {
+      "error": "invalid string index",
+      "file": "malformed/key-index-out-of-range.sply",
+      "rule": "object key index >= string_count"
+    },
+    {
+      "error": "string expansion limit exceeded",
+      "file": "malformed/string-amplification.sply",
+      "rule": "reference amplification of one large string"
+    }
+  ],
+  "notes": "valid[].expectedText is the exact JSON text of the decoded tree (1 vs 1.0 distinguishes int/float kinds; lossy=true means it holds numbers a JS Number cannot represent). malformed[].error is a substring of the Rust decoder error (prefix 'sply: '); the JS and Python decoders must reject every malformed file with a 'sply: ' error (wording may differ; all three decoders enforce the same limits, including string expansion, container claims and tag-9 depth).",
+  "valid": [
+    {
+      "description": "null/true/false/array root",
+      "expectedText": "[null,false,true]",
+      "file": "valid/scalars.sply",
+      "lossy": false
+    },
+    {
+      "description": "root is an empty object",
+      "expectedText": "{}",
+      "file": "valid/empty-object.sply",
+      "lossy": false
+    },
+    {
+      "description": "integers keep kind; 1 vs 1.0 vs -0.0; u64 max and i64 min",
+      "expectedText": "{\"big\":1e+300,\"exp\":1.5e-7,\"i64max\":9223372036854775807,\"i64min\":-9223372036854775808,\"neg\":-1,\"negzero\":-0.0,\"one\":1,\"onef\":1.0,\"u64max\":18446744073709551615,\"zero\":0}",
+      "file": "valid/int-float-kinds.sply",
+      "lossy": true
+    },
+    {
+      "description": "unicode strings, empty string/key, repeated strings share one table entry",
+      "expectedText": "{\"\":\"\",\"a\":\"héllo ✓ 😀\",\"b\":\"héllo ✓ 😀\",\"k\":[\"héllo ✓ 😀\",\"\"]}",
+      "file": "valid/strings-dedupe.sply",
+      "lossy": false
+    },
+    {
+      "description": "arrays of >=2 floats use tag 9; mixed/single/empty arrays use tag 7",
+      "expectedText": "{\"empty\":[],\"ints\":[1,2,3],\"mixed\":[1.0,2],\"nested\":[[0.0,-0.0],[1.25,2.5]],\"one\":[1.5],\"points\":[0.5,1.0,-2.5e+300,5e-324]}",
+      "file": "valid/float-arrays.sply",
+      "lossy": false
+    },
+    {
+      "description": "dataBase64 canonical padded base64 uses tag 10; same text elsewhere stays a string",
+      "expectedText": "{\"assets\":[{\"dataBase64\":\"AAECAwQ=\",\"id\":\"a\"},{\"dataBase64\":\"not base64!\",\"id\":\"b\"},{\"dataBase64\":\"\",\"id\":\"c\"},{\"dataBase64\":\"Zm9v\",\"id\":\"d\"},{\"dataBase64\":\"Zg==\",\"id\":\"e\"}],\"other\":\"AAECAwQ=\"}",
+      "file": "valid/audio-blob.sply",
+      "lossy": false
+    },
+    {
+      "description": "128 nested arrays (the maximum depth)",
+      "expectedText": "[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]",
+      "file": "valid/nesting-128.sply",
+      "lossy": false
+    },
+    {
+      "description": "3000 nulls in one array: the densest legal body (1 byte per item) must stay within the claim budget",
+      "expectedText": "[null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null]",
+      "file": "valid/dense-nulls.sply",
+      "lossy": false
+    },
+    {
+      "description": "tag 9 float array nested at the maximum depth 128",
+      "expectedText": "[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[1.0,-2.5]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]",
+      "file": "valid/floats-depth-128.sply",
+      "lossy": false
+    },
+    {
+      "description": "Project::default() encoded by the Rust encoder",
+      "expectedText": "{\"audioAssets\":[],\"audioCues\":[],\"bones\":[],\"clips\":[],\"customJs\":\"\",\"height\":600.0,\"name\":\"Untitled\",\"nodes\":[],\"rawSvg\":\"\",\"schemaVersion\":1,\"stateMachines\":[],\"variables\":{},\"width\":800.0}",
+      "file": "valid/minimal-project.sply",
+      "lossy": false
+    },
+    {
+      "description": "tag 7 float arrays, tag 9 single/empty, tag 10 on any key and empty; unused table string",
+      "expectedText": "{\"blob\":\"Zm9v\",\"empty\":[],\"emptyblob\":\"\",\"packed\":[1.0,-2.5],\"plain\":[1.0,-2.5],\"single\":[1.0]}",
+      "file": "valid/noncanonical-accepted.sply",
+      "lossy": false
+    }
+  ],
+  "version": "1.0"
+}

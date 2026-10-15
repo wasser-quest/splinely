@@ -9,6 +9,7 @@ fn vectors_roundtrip_and_animate() {
     assert!(matches!(project.nodes[0].kind, NodeKind::Path { .. }));
     assert_eq!(project.nodes[0].style.fill, Color::rgb(255, 0, 0));
     project.clips.push(Clip {
+        audio_cues: vec![],
         id: "move".into(),
         name: "Move".into(),
         duration: 1.,
@@ -45,7 +46,7 @@ fn reject_unsupported_without_partial_success() {
     for body in [
         r#"<rect width="10" height="10"/><image href="https://example.test/x"/>"#,
         r#"<script>alert(1)</script>"#,
-        r#"<text>unsupported rich text</text>"#,
+        r##"<text><textPath href="#p">on a path</textPath></text>"##,
         r#"<g opacity=".5"><rect width="10" height="10"/><rect width="10" height="10"/></g>"#,
         r#"<path fill="url(#gradient)" d="M0 0L10 0L10 10Z"/>"#,
         r#"<path onclick="evil()" d="M0 0L10 0Z"/>"#,

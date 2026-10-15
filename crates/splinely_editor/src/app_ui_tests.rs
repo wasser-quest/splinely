@@ -447,3 +447,97 @@ fn every_language_renders_and_has_glyphs() {
     }
     set_thread_language(None);
 }
+
+#[test]
+fn the_editor_starts_with_an_empty_canvas() {
+    let editor = Editor::blank();
+    assert!(editor.project.nodes.is_empty());
+    assert!(editor.project.clips.is_empty() && editor.project.state_machines.is_empty());
+    assert!(!editor.dirty);
+}
+
+#[test]
+fn preview_hover_crossfades_states_and_followers_track_the_pointer() {
+    let mut editor = Editor::blank();
+    let mut p = editor.project.clone();
+    p.nodes.push(Node::circle("face", 100., 100., 40.));
+    p.nodes.push(Node::circle("pupil", 100., 100., 5.));
+    p.state_machines.push(StateMachine {
+        id: "hover".into(),
+        initial: "out".into(),
+        states: vec![
+            State {
+                id: "out".into(),
+                on_enter: vec![],
+                overrides: vec![],
+                on_exit: vec![],
+                announce: None,
+            },
+            State {
+                id: "in".into(),
+                on_enter: vec![],
+                overrides: vec![PropertyOverride {
+                    node_id: "face".into(),
+                    property: Property::Opacity,
+                    value: AnimValue::Number(0.2),
+                }],
+                on_exit: vec![],
+                announce: None,
+            },
+        ],
+        transitions: vec![Transition {
+            from: "out".into(),
+            to: "in".into(),
+            event: Event {
+                name: "pointerenter".into(),
+                target: Some("face".into()),
+            },
+            guard: None,
+            actions: vec![],
+            blend: 1.0,
+            after: None,
+        }],
+    });
+    p.followers.push(Follower {
+        id: "look".into(),
+        target: "pupil".into(),
+        mode: FollowMode::Offset,
+        strength: 0.5,
+        max: 10.,
+        smoothing: 0.,
+        rest_angle: 0.,
+        origin: None,
+        when: None,
+    });
+    editor.commit(p);
+    editor.preview_mode = true;
+    let scene = editor.evaluate_scene(&editor.preview_context());
+    // The pupil is on top: hover the face away from it.
+    editor.preview_pointer_moved(&scene, Some(Vec2::new(70., 100.)));
+    assert_eq!(editor.machines[0].current_state, "in");
+    assert_eq!(editor.follow["look"], [-10., 0.]);
+    editor.advance_preview_blends(0.5);
+    let nodes = editor
+        .project
+        .evaluate_with_context(0., &editor.preview_context())
+        .unwrap();
+    let face = nodes.iter().find(|n| n.id == "face").unwrap();
+    assert!(
+        face.style.opacity < 1. && face.style.opacity > 0.2,
+        "{}",
+        face.style.opacity
+    );
+    let pupil = nodes.iter().find(|n| n.id == "pupil").unwrap();
+    assert_eq!(pupil.transform.x, -10.);
+    editor.advance_preview_blends(1.);
+    let nodes = editor
+        .project
+        .evaluate_with_context(0., &editor.preview_context())
+        .unwrap();
+    assert_eq!(
+        nodes.iter().find(|n| n.id == "face").unwrap().style.opacity,
+        0.2
+    );
+    editor.preview_pointer_moved(&scene, None);
+    assert_eq!(editor.follow["look"], [0., 0.]);
+}

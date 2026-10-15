@@ -34,35 +34,36 @@ function mount(p, clock=null) {
   return {f,svg};
 }
 
-test('seeded gallery automatically visits each state, wraps and pauses via API',()=>{
+test('seeded gallery starts on load, visits each state, wraps and pauses via API',()=>{
   for(const count of [3,6,12]) {
     const p=project('random-figures','--seed','0','--count',String(count));
     const {f,svg}=mount(p);
-    assert.equal(f.machine('gallery').state,'idle');
-    const seen=[];f.on('state.change',e=>seen.push(e.to));
-    f.emit('showcase.start');
+    // No button or start event: the machine begins in figure-0 and the timeline already runs.
+    assert.equal(f.machine('gallery').state,'figure-0');
+    assert.equal(f.timeline.playing,true);
     assert.equal(svg.querySelector('[id="phrase-0"]').getAttribute('opacity'),'1');
-    // Repeated START cannot select an unchecked state or skip the running one.
+    assert.ok(!p.nodes.some(n=>/control/.test(n.id)));
+    const seen=[];f.on('state.change',e=>seen.push(e.to));
+    // The optional start hook never skips or restarts the running state.
     f.emit('showcase.start');assert.equal(f.machine('gallery').state,'figure-0');
     f.tick(1.2);const before=f.clip('motion-0').time;
     f.emit('showcase.pause');f.tick(10);assert.equal(f.clip('motion-0').time,before);
     f.emit('showcase.pause'); // Idempotent pause retains the resume list.
     f.emit('showcase.start');
     f.tick(4.8 * count);
-    assert.deepEqual(seen,Array.from({length:count+1},(_,i)=>`figure-${i%count}`));
+    assert.deepEqual(seen,Array.from({length:count},(_,i)=>`figure-${(i+1)%count}`));
     assert.equal(f.machine('gallery').state,'figure-0');
     for(let i=1;i<count;i++)assert.equal(svg.querySelector(`[id="phrase-${i}"]`).getAttribute('opacity'),'0');
     const unexpected=f.diagnostics.filter(d=>!d.message.includes('customJs is preserved'));
     assert.deepEqual(unexpected,[]);
     f.destroy();
-    assert.equal(svg.querySelector('[id="start-control"]').listeners.get('keydown').size,0);
   }
 });
 
 test('wall-clock pause at a completion boundary holds the next state atomically',()=>{
   const clock={now:0}, p=project('random-figures','--count','3');
   const {f}=mount(p,clock);
-  f.emit('showcase.start');clock.now=4810;
+  clock.now=4810;
   f.emit('showcase.pause');
   assert.equal(f.machine('gallery').state,'figure-1');
   assert.equal(f.timeline.playing,false);
@@ -74,14 +75,15 @@ test('wall-clock pause at a completion boundary holds the next state atomically'
 
 test('automatic transitions advance without any speech API',()=>{
   const {f}=mount(project('random-figures','--count','3'));
-  f.emit('showcase.start');f.tick(4.9);
+  f.tick(4.9);
   assert.equal(f.machine('gallery').state,'figure-1');assert.equal(f.speech,undefined);
   assert.ok(!f.diagnostics.some(d=>/speech/i.test(d.message)));
   f.destroy();
 });
 
-test('water drop deforms at impact, loops and resumes without reset',()=>{
+test('water drop plays on load, deforms at impact, loops and resumes without reset',()=>{
   const {f,svg}=mount(project('water-drop'));
+  assert.equal(f.timeline.playing,true);
   const drop=svg.querySelector('[id="drop"]');const first=drop.getAttribute('transform');
   f.tick(1.02);assert.notEqual(drop.getAttribute('transform'),first);
   f.emit('showcase.pause');const before=drop.getAttribute('transform');f.tick(10);

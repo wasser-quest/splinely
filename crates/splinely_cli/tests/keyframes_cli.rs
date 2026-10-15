@@ -223,6 +223,6 @@ fn help_and_schema_describe_numeric_editing() {
             .as_array()
             .unwrap()
             .len(),
-        10
+        11
     );
 }

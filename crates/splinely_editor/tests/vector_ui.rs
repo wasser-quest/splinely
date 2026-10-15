@@ -21,6 +21,7 @@ fn scene() -> Project {
 
 fn animate_rect(project: &mut Project, property: Property) {
     project.clips.push(Clip {
+        audio_cues: vec![],
         blend_mode: Default::default(),
         weight: 1.0,
         id: "rect-copy-1".into(),
@@ -102,6 +103,8 @@ fn deletion_rejects_event_targets() {
             id: "idle".into(),
             on_enter: vec![],
             overrides: vec![],
+            on_exit: vec![],
+            announce: None,
         }],
         transitions: vec![Transition {
             from: "idle".into(),
@@ -112,6 +115,8 @@ fn deletion_rejects_event_targets() {
             },
             guard: None,
             actions: vec![],
+            blend: 0.0,
+            after: None,
         }],
     });
     let before = project.clone();

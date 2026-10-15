@@ -68,6 +68,8 @@ Schema. All canonical document fields are writable as JSON or with `apply`.
 | Embedded audio assets/cues/playAudio | JSON/`apply` |
 | customJs/rawSvg | Preserved JSON; rawSvg inert; JS runs only with explicit trusted export |
 | Trusted native plugin source | `plugin new`; source-only, editor-only, not a project field |
+| Drop-in plugin tools (declarative behaviors) | `plugin validate|apply|list`; project data only, runs on every runtime |
+| Plugin runtime hooks (browser) | `export --plugin DIR --trusted-js`; user approval required, not a sandbox (docs/plugins.md) |
 | Seeded/deterministic starter scenes | `random-figures`, `water-drop`, `rig-demo`, `new --demo` |
 | Validation, inspection, independent clocks/weights, SVG | `validate`, `inspect`, `evaluate --context`, `export` |
 | Visual self-check | `render --time S --output shot.png` (static PNG), `render --output anim.gif` (animated GIF); no scripts |

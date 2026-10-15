@@ -247,6 +247,12 @@ impl FreehandTool {
                 && !project.state_machines.iter().any(|n| n.id == id)
                 && !project.audio_assets.iter().any(|n| n.id == id)
                 && !project.audio_cues.iter().any(|n| n.id == id)
+                && !project
+                    .clips
+                    .iter()
+                    .flat_map(|c| &c.audio_cues)
+                    .any(|n| n.id == id)
+                && !project.followers.iter().any(|n| n.id == id)
             {
                 break id;
             }
@@ -679,6 +685,40 @@ mod tests {
         .is_err());
         assert!(map.document(egui::pos2(f32::INFINITY, 0.0)).is_err());
     }
+    #[test]
+    fn generated_id_skips_clip_audio_cues() {
+        let mut project = Project::default();
+        project.audio_assets.push(splinely_document::AudioAsset {
+            id: "sound".into(),
+            name: String::new(),
+            mime_type: "audio/wav".into(),
+            data_base64: "AQID".into(),
+        });
+        project.clips.push(
+            serde_json::from_value(serde_json::json!({
+                "id":"clip", "duration":1, "audioCues":[{
+                    "id":"freehand_1", "assetId":"sound", "time":0, "offset":0, "volume":1
+                }]
+            }))
+            .unwrap(),
+        );
+        let mut tool = FreehandTool::default();
+        tool.events(
+            &[button(10., true), Event::PointerMoved(egui::pos2(20., 10.))],
+            rect(),
+            true,
+            viewport(),
+            &project,
+        )
+        .unwrap();
+        let (next, id) = tool
+            .events(&[button(30., false)], rect(), true, viewport(), &project)
+            .unwrap()
+            .unwrap();
+        assert_eq!(id, "freehand_2");
+        next.validate().unwrap();
+    }
+
     #[test]
     fn pointer_atomic_release_outside_start_and_cancel() {
         let project = Project::default();

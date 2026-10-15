@@ -20,6 +20,7 @@ fn key(time: f64, value: f64) -> Keyframe {
 }
 fn clip() -> Clip {
     Clip {
+        audio_cues: vec![],
         id: "move".into(),
         name: "Move".into(),
         duration: 2.0,
@@ -47,6 +48,8 @@ fn machine() -> StateMachine {
                     property: Property::X,
                     value: AnimValue::Number(7.0),
                 }],
+                on_exit: vec![],
+                announce: None,
             },
             State {
                 id: "open".into(),
@@ -55,6 +58,8 @@ fn machine() -> StateMachine {
                     value: json!(true),
                 }],
                 overrides: vec![],
+                on_exit: vec![],
+                announce: None,
             },
         ],
         transitions: vec![Transition {
@@ -71,6 +76,8 @@ fn machine() -> StateMachine {
             actions: vec![Action::PlayClip {
                 clip_id: "move".into(),
             }],
+            blend: 0.0,
+            after: None,
         }],
     }
 }
@@ -494,11 +501,7 @@ fn svg_is_well_formed_and_preserves_script_and_json() {
     let exported = p.to_svg(runtime).unwrap();
     let doc = roxmltree::Document::parse(&exported).unwrap();
     assert_eq!(doc.root_element().tag_name().name(), "svg");
-    let metadata = doc
-        .descendants()
-        .find(|n| n.has_tag_name("metadata") && n.attribute("id") == Some("splinely-project"))
-        .unwrap();
-    let decoded: Project = serde_json::from_str(metadata.text().unwrap()).unwrap();
+    let decoded = Project::from_svg_metadata(&exported).unwrap();
     assert_eq!(decoded, p);
     let script = doc
         .descendants()

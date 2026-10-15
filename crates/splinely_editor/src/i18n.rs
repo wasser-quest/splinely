@@ -124,6 +124,16 @@ fn table(lang: Lang) -> Option<&'static Table> {
     }))
 }
 
+/// Translation of `source` in `lang` (None for German, or when the table lacks it).
+pub fn translation(lang: Lang, source: &str) -> Option<&'static str> {
+    table(lang)?.get(source).copied()
+}
+
+/// All German source strings a language table translates.
+pub fn table_keys(lang: Lang) -> std::collections::BTreeSet<&'static str> {
+    table(lang).map_or_else(Default::default, |t| t.keys().copied().collect())
+}
+
 /// Translate a fixed UI string.
 pub fn tr(source: &str) -> &str {
     table(language())

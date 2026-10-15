@@ -9,7 +9,7 @@ impl Editor {
         self.audio_load_wanted = false;
     }
     pub(super) fn native_audio_controls(&mut self, ui: &mut egui::Ui) {
-        ui.label(tr("Optionale native Vorschau globaler Audioeinsätze über ffplay. Bildbasiertes Timing; maßgeblich bleibt die Audiouhr im Browser-Export."));
+        ui.label(tr("Optionale native Vorschau globaler und clip-lokaler Audioeinsätze über ffplay. Bildbasiertes Timing; maßgeblich bleibt die Audiouhr im Browser-Export."));
         ui.horizontal_wrapped(|ui| {
             if ui
                 .add_enabled(
@@ -83,7 +83,7 @@ impl Editor {
                 Ok(preview) => {
                     self.audio_preview = preview;
                     self.audio_enabled = true;
-                    self.audio_preview.seek(self.time, self.playing);
+                    // Clocks are supplied below, including clip-local scopes.
                 }
                 Err(error) => {
                     self.audio_enabled = false;
@@ -95,7 +95,31 @@ impl Editor {
             }
         }
         if self.audio_enabled {
-            self.audio_preview.update(self.time, self.playing);
+            let clips = self
+                .preview_context()
+                .clips
+                .unwrap_or_default()
+                .into_iter()
+                .filter_map(|clock| {
+                    let model = self.project.clips.iter().find(|c| c.id == clock.clip_id)?;
+                    let playing = if self.blend_preview.enabled {
+                        self.blend_preview
+                            .layers
+                            .get(&clock.clip_id)
+                            .is_some_and(|l| l.active && l.playing)
+                    } else {
+                        self.playing
+                    };
+                    let time = if model.looping {
+                        clock.time % model.duration
+                    } else {
+                        clock.time.min(model.duration)
+                    };
+                    Some((clock.clip_id, time, playing, model.duration, model.looping))
+                })
+                .collect::<Vec<_>>();
+            self.audio_preview
+                .update_editor(self.last_tick, self.time, self.playing, &clips);
         }
         for diagnostic in self.audio_preview.take_diagnostics() {
             self.status = trf(

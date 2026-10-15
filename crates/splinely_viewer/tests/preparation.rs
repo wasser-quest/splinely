@@ -95,14 +95,12 @@ fn frm_is_self_contained_and_matches_splinely_json() {
     assert!(prepared.custom_js_disabled);
     let svg = svg_in(&prepared.html);
     let doc = roxmltree::Document::parse(&svg).unwrap();
-    let embedded = doc
+    assert!(doc
         .descendants()
-        .find(|node| node.attribute("id") == Some("splinely-project"))
-        .unwrap()
-        .text()
-        .unwrap();
+        .any(|node| node.attribute("id") == Some("splinely-project")
+            && node.attribute("data-encoding") == Some("sply-base64")));
     assert_eq!(
-        splinely_document::Project::from_json(embedded).unwrap(),
+        splinely_document::Project::from_svg_metadata(&svg).unwrap(),
         project
     );
     assert!(svg.contains("const controls=true;"));
@@ -133,7 +131,13 @@ fn sply_custom_js_requires_explicit_trust() {
         assert!(!prepared.is_svg_input);
         assert_eq!(prepared.custom_js_disabled, !trusted_js);
         let svg = svg_in(&prepared.html);
-        assert!(svg.contains("window.FRM_MARKER=123;"));
+        // The default embedding is binary; the code travels inside it, never as active script.
+        assert_eq!(
+            splinely_document::Project::from_svg_metadata(&svg)
+                .unwrap()
+                .custom_js,
+            "window.FRM_MARKER=123;"
+        );
         assert_eq!(svg.contains("new Function('splinely'"), trusted_js);
         assert!(!svg.contains("speech"));
     }
@@ -208,4 +212,69 @@ fn empty_and_prefixed_svg_work() {
     let prefixed =
         wrap_svg(r#"<s:svg xmlns:s="http://www.w3.org/2000/svg"><s:rect/></s:svg>"#).unwrap();
     roxmltree::Document::parse(&svg_in(&prefixed)).unwrap();
+}
+
+fn binary_input(project: &splinely_document::Project, extension: &str) -> Input {
+    let input = Input::new("", extension);
+    std::fs::write(&input.0, project.to_binary().unwrap()).unwrap();
+    input
+}
+
+#[test]
+fn binary_sply_opens_by_magic_whatever_the_extension() {
+    let project = splinely_document::Project {
+        name: "Binär ü".into(),
+        custom_js: "window.BIN_MARKER=1;".into(),
+        ..Default::default()
+    };
+    for extension in ["sply", "SPLY", "bin"] {
+        let input = binary_input(&project, extension);
+        for trusted_js in [false, true] {
+            let prepared = prepare(
+                &input.0,
+                ViewerOptions {
+                    trusted_js,
+                    ..Default::default()
+                },
+            )
+            .unwrap();
+            assert!(!prepared.is_svg_input, "{extension}");
+            assert_eq!(prepared.title, "Binär ü");
+            assert_eq!(prepared.custom_js_disabled, !trusted_js);
+            let svg = svg_in(&prepared.html);
+            assert_eq!(svg.contains("new Function('splinely'"), trusted_js);
+            assert_eq!(
+                splinely_document::Project::from_svg_metadata(&svg).unwrap(),
+                project
+            );
+        }
+    }
+    // Binary and JSON inputs of the same project produce the same playback page.
+    let binary = binary_input(&project, "sply");
+    let json = Input::new(&project.to_json().unwrap(), "json");
+    assert_eq!(
+        prepare(&binary.0, ViewerOptions::default()).unwrap().html,
+        prepare(&json.0, ViewerOptions::default()).unwrap().html
+    );
+}
+
+#[test]
+fn hostile_binary_sply_is_rejected_with_a_typed_error() {
+    let project = splinely_document::Project::default();
+    let good = project.to_binary().unwrap();
+    let mut corrupt = good.clone();
+    *corrupt.last_mut().unwrap() ^= 0xff; // CRC mismatch
+    let mut trailing = good.clone();
+    trailing.push(0);
+    for (label, bytes) in [
+        ("crc", corrupt),
+        ("trailing", trailing),
+        ("truncated", good[..good.len() - 3].to_vec()),
+        ("header only", good[..10].to_vec()),
+    ] {
+        let input = Input::new("", "sply");
+        std::fs::write(&input.0, bytes).unwrap();
+        let error = prepare(&input.0, ViewerOptions::default()).err().unwrap();
+        assert!(error.to_string().contains("sply"), "{label}: {error}");
+    }
 }

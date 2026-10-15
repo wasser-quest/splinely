@@ -89,3 +89,19 @@ firefox --headless --no-remote \
 ```
 
 Verified green **PASS** in direct-file Firefox 151.0.1: XML-safe JSON containing `</script> & ]]>`, script auto-mount, core transform sampling, bone hierarchy/attachment/numeric rotation, loop crossings, silent seek, DOM click → machine entry, nested duplicate-ID scoping, alias lifecycle and destroy. This smoke is visual/manual, not a Node assertion of browser output. Script-disabled display says STATIC FALLBACK. Browser matrix beyond Firefox, real codecs/unlock, sound hardware, and CSP-restricted hosts remain manual acceptance work.
+
+## Binary `.sply` decoder (`src/sply_decode.js`)
+
+Dependency-free, ES2018-safe, BigInt-free decoder for the binary project encoding specified in [`../docs/sply-binary-format.md`](../docs/sply-binary-format.md). It works as a browser `<script>` (defines `SplyDecode`) and in Node (`require('./src/sply_decode.js')`); `splinely.js` is not modified and the file can be concatenated in front of it later.
+
+```js
+const { decodeSply, decodeSplyBase64, isSply, crc32c } = require('./src/sply_decode.js');
+isSply(bytes);            // true when bytes start with the 8-byte magic (Uint8Array | ArrayBuffer)
+const tree = decodeSply(bytes);            // plain JSON-equivalent tree; feed it to normalize()/readProject-style code
+const tree2 = decodeSplyBase64(b64text);   // standard base64 of a whole .sply file (SVG data-encoding="sply-base64"); whitespace allowed
+```
+
+* Every failure throws `Error` whose message starts with `sply:` (bad magic/major/minor/flags, size or CRC32C mismatch, bad string offsets, invalid UTF-8, duplicate strings/keys, unknown tag, non-minimal/overflowing varint, non-finite float, depth > 128, counts larger than the remaining bytes, trailing body bytes, invalid string index, input > 64 MiB). Decoding is linear in file size and never allocates before validating counts.
+* Float arrays (tag 9) become plain JS arrays; blob tag 10 becomes the padded standard base64 string; `-0.0` is preserved. JS cannot distinguish `1` from `1.0`.
+* Integers: |v| ≤ 2^53−1 are exact. Larger tag 3/4 values (up to 2^64−1 / −2^63) are returned only if exactly representable as a double (e.g. 2^60); otherwise `sply: integer exceeds safe range` is thrown instead of rounding silently.
+* Tests: `node --test runtime/tests/sply-decode.test.cjs` (test-only encoder, hostile-input cases, fuzz; additionally runs `crates/splinely_document/tests/fixtures/sply/manifest.json` when present, skipped otherwise).

@@ -1,8 +1,9 @@
 # Declarative drop-in plugins (no recompilation)
 
-These plugins are JSON data, not executable extensions. Once the host integrates
-`extensions.rs` as described below, valid plugins are discovered and automatically
-activated at editor startup. Install or edit a manifest and **restart the editor**;
+These plugins are JSON data, not executable extensions. Overview of all plugin kinds,
+the trust model and a full walkthrough: [`plugins.md`](plugins.md). Valid plugins are
+discovered and automatically activated at editor startup (the editor sidebar section
+“Extensions” lists them and keeps load errors visible). Install or edit a manifest and **restart the editor**;
 there is no enable step, code compilation, or live reload.
 
 ## Installation
@@ -11,7 +12,7 @@ The first nonempty environment setting wins:
 
 1. `SPLINELY_PLUGIN_DIR` (the plugin root itself)
 2. `$XDG_CONFIG_HOME/splinely/plugins`
-3. `$HOME/.config/splinely/plugins`
+3. Linux: `$HOME/.config/splinely/plugins`; Windows: `%APPDATA%\splinely\plugins`; macOS: `~/Library/Application Support/splinely/plugins` (Windows/macOS ungetestet)
 
 Paths are used literally (no shell expansion). Each immediate child directory must
 contain `splinely-plugin.json`, for example:
@@ -29,8 +30,8 @@ other valid plugins still activate. No recursive directory discovery occurs.
 
 ## Manifest
 
-Only `id`, `title`, `tools`, and `palette` are accepted at the top level. `id` and
-`title` are required. At least one tool or palette entry is required. All object
+Only `id`, `title`, `tools`, `palette`, and `runtime` are accepted at the top level. `id` and
+`title` are required. At least one tool, palette entry or `runtime` part is required. All object
 levels reject unknown fields, including fields in shapes, styles, and actions.
 The implementation uses `serde_json::Value` and explicit allowlists equivalent to
 `deny_unknown_fields`, because the editor has no direct `serde` dependency.
@@ -75,7 +76,7 @@ A shape template:
 
 ### Tools and shapes
 
-Each tool requires `id`, `title`, and `action`. Only two action types exist:
+Each tool requires `id`, `title`, and `action`. Only three action types exist:
 
 - `{"type":"addShape","shape":{...},"style":{...}}`: append one node.
   `style` is optional; omitted properties use document defaults. The title becomes
@@ -84,6 +85,11 @@ Each tool requires `id`, `title`, and `action`. Only two action types exist:
   both nodes and bones; existing nodes are never replaced.
 - `{"type":"setStyle","style":{...}}`: patch the selected, unlocked node.
   Missing or locked selections are errors (the UI disables these buttons).
+- `{"type":"addBehavior","behavior":{...}}`: merge one declarative clip + state machine (+ optional
+  variables and accessibility label) bound to the selected, unlocked node, e.g. “wiggle on hover”.
+  Pure project data, so it runs on the Rust and the JavaScript runtime. Fields, limits and exactly
+  what is merged: [`plugins.md`](plugins.md#writing-the-editor-part-kind-1-addbehavior). The whole
+  candidate passes `Project::validate()`; ids are collision free; at most 256 clips/machines.
 
 Shapes use document geometry names:
 
@@ -112,10 +118,20 @@ preserve geometry, transforms, bone bindings, names, visibility and locks.
 See `examples/plugins/colors/splinely-plugin.json` for a complete color palette and
 `examples/plugins/basic-shapes/splinely-plugin.json` for all three template shapes.
 
+### Optional runtime part
+
+`"runtime": {"apiVersion": 1, "entry": "runtime.js", "description": "…"}` names **one JavaScript file in the
+same folder** for the browser runtime. The editor and `Project::validate()` never execute it. Discovery only
+reads it (UTF-8, ≤ 256 KiB, best-effort lint, SHA-256) and shows entry/hash in the sidebar. It is embedded into an
+exported SVG only by `splinely-cli export --plugin DIR --trusted-js` (explicit trust, like `customJs`; **not a
+sandbox**). Hook API, trust model and the `hover-wiggle` example: [`plugins.md`](plugins.md).
+Command line: `splinely-cli plugin list|validate|apply` (see `CLI.md`).
+
 ## Safety and bounds
 
-- No scripts, shell commands, Python, JavaScript, WebAssembly, native libraries,
-  dynamic imports, or executable plugin hooks. Unknown action types are errors.
+- The *editor part* contains no scripts, shell commands, Python, JavaScript, WebAssembly, native
+  libraries, dynamic imports, or executable hooks. Unknown action types are errors. The only executable
+  thing a folder can carry is the opt-in `runtime.entry` file above, which the editor never runs.
 - No image fields, file references, URLs, or network fetches. Colors cannot use
   `url(...)`; shapes cannot embed external images. Other files in a plugin folder
   are never opened. This feature does not sanitize preexisting project content.
@@ -145,25 +161,24 @@ sandbox and is not used by drop-in discovery.
 
 ## Host integration contract
 
-This change supplies a standalone module; startup/sidebar integration belongs to
-`main.rs` and is intentionally not performed here. In the host module:
+The GUI-free core lives in `splinely_document::plugin` (shared by the editor and the CLI, so
+`plugin apply` takes exactly the same candidate path as the editor button).
+`crates/splinely_editor/src/extensions.rs` is a thin egui wrapper around it:
 
 ```rust,ignore
-mod extensions;
-// Store once in editor state, initialized during startup:
-let extensions = extensions::ExtensionRegistry::load_default();
+let mut extensions = splinely_editor::extensions::ExtensionRegistry::load_default();
 // In the right sidebar:
 match extensions.ui(ui, &project, selected_node_id.as_deref()) {
-    Ok(Some(candidate)) => { /* commit via existing history/dirty/projection path */ }
+    Ok(Some(candidate)) => { /* commit via existing history/dirty/projection path (undoable) */ }
     Ok(None) => {}
     Err(message) => { /* display in the editor's visible error/status area */ }
 }
 ```
 
-`ui(&self, &mut egui::Ui, &Project, Option<&str>) -> Result<Option<Project>, String>`
-returns at most one candidate per frame and never mutates project or history.
-The host should suppress commits during playback or other non-editable modes,
-using its usual edit gate, and propagate errors visibly. `plugins()` exposes
-metadata and `candidate(plugin_id, tool_id, project, selected)` provides the same
-validated actions without egui. `load_directory(path)` supports custom hosts and
-isolated filesystem tests. Do not reload every frame.
+`ui` returns at most one candidate per frame and never mutates project or history. The host suppresses
+commits during playback or other non-editable modes. Errors stay visible in the section (persistent
+`last_error`, diagnostics of broken plugins, a `⚠ N` count in the header). Without egui:
+`splinely_document::plugin::ExtensionRegistry::{load_directory, load_plugin, plugins, candidate}`
+(`candidate(plugin_id, tool_id, project, selected) -> Result<Project, CandidateError>`) and
+`splinely_document::plugin::load_runtime_bundle` + `Project::to_svg_with_plugins` for the export.
+Do not reload every frame.

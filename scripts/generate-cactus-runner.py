@@ -6,9 +6,11 @@ import math
 import os
 from pathlib import Path
 import random
+import re
 import subprocess
 import tempfile
 import xml.etree.ElementTree as ET
+from sply_py import project_from_metadata
 
 ROOT = Path(__file__).resolve().parents[1]
 os.environ.setdefault('TMPDIR', str(ROOT / '.work-tmp'))
@@ -87,16 +89,16 @@ HTML = '''<!doctype html>
 <html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Dune / Stride — cactus runner</title>
 <style>
-*{box-sizing:border-box}body{margin:0;background:#13292b;color:#f8eed6;font:16px system-ui}main{max-width:1100px;margin:5vh auto;padding:24px}.eyebrow{font-size:12px;color:#e8b979;letter-spacing:.28em;text-transform:uppercase}h1{font-size:clamp(36px,7vw,74px);letter-spacing:-.06em;margin:12px 0}h1 span{color:#e8b979}p{color:#b7c8bc;line-height:1.6}.frame{border-radius:22px;overflow:hidden;border:1px solid #46605a;box-shadow:0 25px 75px #0004}#scene{display:block;width:100%;height:auto;aspect-ratio:16/9;background:#eedbb4}.controls{display:flex;gap:10px;flex-wrap:wrap;padding:18px;background:#203b3b}button{font:inherit;color:#f8eed6;background:#2d504d;border:1px solid #668279;border-radius:9px;padding:10px 17px;cursor:pointer}button:disabled{opacity:.4}button:focus-visible{outline:3px solid #e8b979}#jump{background:#e8b979;color:#13292b}output{margin-left:auto;font:12px ui-monospace,monospace;align-self:center}footer{font-size:13px;margin-top:22px;color:#b7c8bc}a{color:#e8b979}
+*{box-sizing:border-box}body{margin:0;background:#13292b;color:#f8eed6;font:16px system-ui}main{max-width:1100px;margin:5vh auto;padding:24px}.eyebrow{font-size:12px;color:#e8b979;letter-spacing:.28em;text-transform:uppercase}h1{font-size:clamp(36px,7vw,74px);letter-spacing:-.06em;margin:12px 0}h1 span{color:#e8b979}p{color:#b7c8bc;line-height:1.6}.frame{border-radius:22px;overflow:hidden;border:1px solid #46605a;box-shadow:0 25px 75px #0004}#scene{display:block;width:100%;height:auto;aspect-ratio:16/9;background:#eedbb4}.controls{display:flex;gap:10px;flex-wrap:wrap;padding:18px;background:#203b3b}output{margin-left:auto;font:12px ui-monospace,monospace;align-self:center}footer{font-size:13px;margin-top:22px;color:#b7c8bc}a{color:#e8b979}
 </style><main><div class="eyebrow">Splinely / motion field notes 009</div><h1>Dune <span>/ Stride</span></h1>
-<p>A copper-scarfed wanderer, a quiet desert, an endless trail.<br>Click the scene or press Space to jump. The world never waits for your feet.</p>
+<p>A copper-scarfed wanderer, a quiet desert, an endless trail.<br>Click the scene or press Space to jump. The world starts running by itself and never waits for your feet.</p>
 <section class="frame">__EMBEDDED_SVG__
-<div class="controls"><button id="play" disabled>Play</button><button id="pause" disabled>Pause</button><button id="restart" disabled>Restart</button><button id="jump" disabled>Jump / Space</button><output id="status">Loading trusted runtime…</output></div></section>
+<div class="controls"><output id="status">Loading trusted runtime…</output></div></section>
 <footer>Weighted bone poses, independent scene layers, seeded cactus loop. No collision penalty: this is a motion study, not a survival game.<br><a href="cactus-runner.splinely.json">Editable project</a> · <a href="cactus-runner.svg">Offline SVG</a> · <a href="../docs/cactus-runner.md">Technical notes</a><br>Reviewed custom JavaScript requires an explicit trusted export. No external assets, libraries, audio or network.</footer></main>
 <script>
 const scene=document.querySelector('#scene');let f;
 function ready(){if(f)return;f=scene?.splinely;if(!f)return;
-for(const id of ['play','pause','restart','jump']){const b=document.getElementById(id);b.disabled=false;b.onclick=()=>f.emit('runner.'+id)}
+// The runner scrolls and walks on load (autoplay clips); the scene itself handles clicks. No buttons.
 scene.setAttribute('tabindex','0');
 document.addEventListener('keydown',e=>{if(e.code==='Space'){e.preventDefault();if(!e.repeat)f.emit('runner.jump')}});
 function status(){document.querySelector('#status').textContent=f.machine('scene').state+' / '+f.machine('runner').state+' / walk '+f.clip('walk').weight.toFixed(2)+' + jump '+f.clip('jump').weight.toFixed(2);requestAnimationFrame(status)}status();}
@@ -212,6 +214,10 @@ def main():
     args=p.parse_args()
     args.output.mkdir(parents=True,exist_ok=True)
     project=build()
+    # Opt-in screen-reader data: describe the scene, hide purely decorative scenery.
+    project['description']='A teal stickfigure walks across a desert trail between cacti. Click or press Space to make it jump.'
+    for n in project['nodes']:
+        if re.fullmatch(r'sky|sun|sun-ring|sand|shadow|(ridge|dune|trail|cactus)-\d+',n['id']): n['a11y']={'hidden':True}
     filename=args.output/'cactus-runner.splinely.json'
     filename.write_text(json.dumps(project,ensure_ascii=False,indent=2)+'\n')
     if args.author_only:
@@ -243,10 +249,10 @@ def main():
     svg=args.output/'cactus-runner.svg'
     cli('export',filename,'--output',svg,'--trusted-js')
     tree=ET.parse(svg)
-    exported=json.loads(tree.find("{http://www.w3.org/2000/svg}metadata[@id='splinely-project']").text)
+    exported=project_from_metadata(tree.find("{http://www.w3.org/2000/svg}metadata[@id='splinely-project']"))
     assert exported['clips'][3]['blendMode']=='weighted' and exported['clips'][4]['weight']==0, 'Old CLI dropped weighted schema; rebuild before export'
     assert exported['stateMachines'][1]['states'][1]['onEnter'][1]['type']=='blendClip'
-    embedded=svg.read_text().replace('<svg ', '<svg id="scene" role="img" aria-label="Walking stickfigure; click to jump" ', 1)
+    embedded=svg.read_text().replace('<svg ', '<svg id="scene" ', 1)
     (args.output/'cactus-runner.html').write_text(HTML.replace('__EMBEDDED_SVG__',embedded))
     # Independent static FK sanity from the compiled core's evaluator.
     evaluated=cli('evaluate',filename,'--time',0)

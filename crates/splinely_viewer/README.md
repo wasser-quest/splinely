@@ -17,17 +17,20 @@ sudo dnf install gtk3-devel webkit2gtk4.1-devel
 cargo build -p splinely_viewer
 cargo run -p splinely_viewer -- examples/demo.svg
 cargo run -p splinely_viewer -- examples/demo.splinely.json
-# A single authored file, with the same JSON contents as .splinely.json:
+# A single authored file (compact binary by default; same model as .splinely.json):
 splinely-viewer authored.sply
 # Only after reviewing project customJs:
 cargo run -p splinely_viewer -- examples/demo.splinely.json --trusted-js
+# Same project animated by the Rust runtime (splinely_runtime) started by the viewer:
+cargo run -p splinely_viewer -- examples/stickfight.splinely.json --runtime rust
 ```
 
 Binary name: `splinely-viewer`. Positional input is required except for `--help` /
 `--version`. `.sply` and `.json` inputs (including `.splinely.json`) are detected
-automatically, case-insensitively; `--project` forces JSON for another extension.
-A `.sply` is a strict canonical `splinely_document::Project` JSON document, identical
-in contents to `.splinely.json`, **not a ZIP archive**. Geometry, states, animations,
+automatically, case-insensitively, and binary `.sply` is recognised by its magic bytes
+whatever the extension; `--project` forces JSON for another extension.
+A `.sply` is a binary (or legacy JSON-text) encoding of the canonical
+`splinely_document::Project`, identical in contents to `.splinely.json`, **not a ZIP archive**; damaged binary files are rejected with a typed error. Geometry, states, animations,
 audio assets and code are embedded in that one file. The viewer generates SVG
 in memory and opens it through the same genuine WebView as SVG input; no sidecar
 SVG, extraction step or external asset files are needed.
@@ -49,6 +52,57 @@ cargo run -p splinely_viewer --no-default-features -- examples/demo.svg --check
 is atomically replaced using a temporary file in its destination directory. It
 cannot alias the input, including through hard links or symlinks; replacement
 does not truncate other hard links to an existing output file.
+
+## Runtime: `--runtime js|rust`
+
+`--runtime js` is the default and behaves exactly as before: the JavaScript runtime
+(`runtime/src/splinely.js`) runs inside the WebView.
+
+`--runtime rust` makes the viewer start the Rust runtime in its own process:
+
+* `splinely_runtime::Runtime` is built from the loaded `Project` (`.sply` or JSON) and
+  advanced with a fixed 1/60 s step from the native event loop (at most 5 catch-up
+  steps; a longer stall drops the backlog instead of fast-forwarding).
+* The WebView shows `Project::to_static_svg(0.0)` inline (no `data:` iframe, no JS
+  runtime, no project metadata, no `eval`). After each tick the changed nodes of the
+  evaluated `Frame` are sent as one small JSON message to a dependency-free page script
+  (`src/frame_applier.js`) that writes the same attributes the JS runtime writes
+  (`transform`, `opacity`, `fill`/`fill-opacity`, `stroke`/`stroke-opacity`/`stroke-width`,
+  gradient stops and vector, `width`/`height`/`r`/`font-size`/`d`), by node id. One frame
+  is in flight at a time (the page acknowledges it), so a slow WebView never queues frames.
+* Pointer, wheel, key, focus and drag events are batched once per animation frame by
+  `src/rust_host.js` and posted to the host over `window.ipc` as `{"t":"input", ...}`;
+  the host forwards them as `Request::Pointer`/`PointerLeave`/`Event` (name + target node)
+  to the Rust runtime. Drag/pointer-capture behaviour of the JS runtime is emulated.
+* The IPC channel is the only new capability of the page. Messages are limited to
+  16 KiB, strictly parsed (`deny_unknown_fields`), at most 64 events each, event names
+  come from a fixed allow-list, targets must be node/group ids of the project (≤256
+  bytes), pointer coordinates must be finite and within ±1e6. Anything else is dropped
+  and logged on stderr. The CSP stays no-network (`connect-src/frame-src/img-src 'none'`)
+  and is narrower than in js mode (no `unsafe-eval`, no iframe).
+
+**Not reproduced in rust mode** (the viewer says so on stderr and in a visible banner
+at the top of the window whenever it applies):
+
+* `customJs` is never executed (`--trusted-js` is rejected with `--runtime rust`).
+  Behaviour that only scripts provide (custom events/emit, `splinely.on` handlers,
+  DOM tweaks, variable-driven code) is missing.
+* Audio: no assets, `playAudio`, timeline/clip audio cues and no "Start audio" control;
+  the requests are ignored (one note each). Callback host actions are ignored too.
+* `prefers-reduced-motion` is not honoured (the JS runtime can freeze animation).
+* Accessibility semantics of the web player (`role`, `tabindex`, `aria-*`, keyboard
+  activation, focus ring, live region) are not applied; the page shows the plain static SVG.
+* DOM event `detail` (coordinates, key, buttons, modifiers) is not forwarded, only the
+  event name and target node; pointer position goes through the pointer request only.
+* SVG input has no project to evaluate and is rejected; use `--runtime js`.
+* Only the properties the JS runtime animates are applied; the SVG itself is the static
+  export, so invisible nodes are absent exactly as in the JS export.
+* Windows/macOS are untested (only Linux/WebKitGTK was run).
+
+If the Rust runtime cannot load a project, the viewer prints
+`--runtime rust is unavailable for this project (<reason>); falling back to the JS
+runtime.` and starts the JS runtime instead; it never shows silently wrong output.
+`--check` reports `runtime: rust, N nodes evaluated by splinely_runtime` or `runtime: js`.
 
 ## Playback and trust
 
@@ -106,9 +160,13 @@ pub fn launch(path: &std::path::Path, options: ViewerOptions) -> ViewerResult<()
 pub fn launch_prepared(prepared: PreparedViewer) -> ViewerResult<()>;
 ```
 
-`ViewerOptions { project: bool, trusted_js: bool }` defaults all
-flags to false. `PreparedViewer` exposes `html: String`, `title: String`,
-`is_svg_input: bool`, and `custom_js_disabled: bool`. Preparation is GUI-free.
+`ViewerOptions { project: bool, trusted_js: bool, runtime: RuntimeMode }` defaults
+to false/false/`RuntimeMode::Js` (`RuntimeMode::{Js, Rust}`). `PreparedViewer` exposes
+`html: String`, `title: String`, `is_svg_input: bool`, `custom_js_disabled: bool`,
+`runtime: RuntimeMode` (the runtime actually used; `Js` after a fallback),
+`diagnostics: Vec<String>` and `rust_session: Option<RustSession>` (rust mode only;
+`launch_prepared` takes it and drives it). `RustSession` (`splinely_viewer::rust_mode`)
+is usable without a GUI: `tick()`, `handle_ipc(&str)`, `frame_message()`. Preparation is GUI-free.
 Launch must run on the main thread and owns a native event loop until the window
 closes or renderer failure is reported. Without `webview`, launch returns an
 explicit unavailable-feature error. For an editor already owning its event loop,
@@ -140,7 +198,16 @@ cargo build -p splinely_viewer
 python3 crates/splinely_viewer/tests/native_smoke.py
 python3 crates/splinely_viewer/tests/native_smoke.py --svg
 python3 crates/splinely_viewer/tests/native_smoke.py --crash
+# Opt-in X11 smoke for --runtime rust (click moves/recolours the circle via the Rust runtime):
+python3 crates/splinely_viewer/tests/native_smoke_rust.py
 ```
+
+`tests/rust_runtime.rs` (no GUI; needs `node` for the parity part, skipped without it) drives
+`RustSession` like the event loop and replays each scenario through `src/frame_applier.js` on a
+fake DOM (`tests/frame_applier.test.cjs`) next to the JS runtime on the same static SVG, comparing
+every attribute (numbers within 1e-9) at several times for stickfight, desert-stickfight, rig,
+brown-owl (gradients, click), cactus-runner, water-drop, demo (click via IPC) and a follower
+scenario with pointer input. `tests/cli.rs` covers `--runtime` in `--check`.
 
 Set `TMPDIR` to a filesystem with sufficient space for builds/test tempfiles
 when necessary. Smoke tests run the actual binary, use real pointer events,

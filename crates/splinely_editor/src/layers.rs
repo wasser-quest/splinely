@@ -1,6 +1,7 @@
 //! Layer controls independent of the application and its undo/history policy.
 use eframe::egui;
 use splinely_document::Project;
+use splinely_editor::accessible::Named;
 use splinely_editor::i18n::{tr, trf};
 
 #[derive(Clone, Debug)]
@@ -106,6 +107,12 @@ pub(crate) fn apply_layer_command(
                     || next.state_machines.iter().any(|n| n.id == id)
                     || next.audio_assets.iter().any(|n| n.id == id)
                     || next.audio_cues.iter().any(|n| n.id == id)
+                    || next
+                        .clips
+                        .iter()
+                        .flat_map(|c| &c.audio_cues)
+                        .any(|n| n.id == id)
+                    || next.followers.iter().any(|n| n.id == id)
             };
             let mut suffix = 1_u64;
             let new_id = loop {
@@ -253,6 +260,7 @@ pub(crate) fn layers_ui_multi(
                                         .min_size(egui::vec2(22., 0.)),
                                 )
                                 .on_hover_text(tr("Ganze Gruppe ein-/ausblenden"))
+                                .named(tr("Ganze Gruppe ein-/ausblenden"))
                                 .clicked()
                             {
                                 command = Some(LayerCommand::GroupFlags {
@@ -276,6 +284,7 @@ pub(crate) fn layers_ui_multi(
                                         .min_size(egui::vec2(22., 0.)),
                                 )
                                 .on_hover_text(tr("Ganze Gruppe sperren/entsperren"))
+                                .named(tr("Ganze Gruppe sperren/entsperren"))
                                 .clicked()
                             {
                                 command = Some(LayerCommand::GroupFlags {
@@ -289,6 +298,11 @@ pub(crate) fn layers_ui_multi(
                                     egui::Button::new(if *folded { "›" } else { "⏷" }).frame(false),
                                 )
                                 .on_hover_text(if *folded {
+                                    tr("Aufklappen")
+                                } else {
+                                    tr("Zuklappen")
+                                })
+                                .named(if *folded {
                                     tr("Aufklappen")
                                 } else {
                                     tr("Zuklappen")
@@ -417,6 +431,11 @@ pub(crate) fn layers_ui_multi(
                                 } else {
                                     tr("Einblenden")
                                 })
+                                .named(if node.visible {
+                                    tr("Ausblenden")
+                                } else {
+                                    tr("Einblenden")
+                                })
                                 .clicked()
                             {
                                 command = Some(LayerCommand::Visibility {
@@ -440,6 +459,11 @@ pub(crate) fn layers_ui_multi(
                                     tr("Entsperren")
                                 } else {
                                     tr("Sperren (vor versehentlichem Bearbeiten schützen)")
+                                })
+                                .named(if node.locked {
+                                    tr("Entsperren")
+                                } else {
+                                    tr("Sperren")
                                 })
                                 .clicked()
                             {
@@ -536,6 +560,7 @@ pub(crate) fn layers_ui_multi(
                 if ui
                     .add_enabled(!locked && index + 1 < project.nodes.len(), egui::Button::new("⬆"))
                     .on_hover_text(tr("Eine Ebene nach vorne"))
+                    .named(tr("Eine Ebene nach vorne"))
                     .clicked()
                 {
                     command = Some(LayerCommand::Raise(id.clone()));
@@ -543,6 +568,7 @@ pub(crate) fn layers_ui_multi(
                 if ui
                     .add_enabled(!locked && index > 0, egui::Button::new("⬇"))
                     .on_hover_text(tr("Eine Ebene nach hinten"))
+                    .named(tr("Eine Ebene nach hinten"))
                     .clicked()
                 {
                     command = Some(LayerCommand::Lower(id.clone()));
@@ -557,6 +583,7 @@ pub(crate) fn layers_ui_multi(
                 if ui
                     .add_enabled(!locked, egui::Button::new("🗑"))
                     .on_hover_text(tr("Ebene löschen · Entf. Ebenen mit Animations- oder Zustandsbezügen über „Form löschen“ entfernen."))
+                    .named(tr("Ebene löschen"))
                     .clicked()
                 {
                     command = Some(LayerCommand::Delete(id.clone()));
@@ -646,6 +673,35 @@ fn layer_rows<'a>(project: &'a Project, needle: &str, collapsed: &[String]) -> V
 mod tree_tests {
     use super::*;
     use splinely_document::Node;
+
+    #[test]
+    fn duplicate_id_skips_clip_audio_cues() {
+        let mut project = Project::default();
+        project.nodes.push(Node::rect("shape", 0., 0., 1., 1.));
+        project.audio_assets.push(splinely_document::AudioAsset {
+            id: "sound".into(),
+            name: String::new(),
+            mime_type: "audio/wav".into(),
+            data_base64: "AQID".into(),
+        });
+        project.clips.push(
+            serde_json::from_value(serde_json::json!({
+                "id":"clip", "duration":1, "audioCues":[{
+                    "id":"shape-copy-1", "assetId":"sound", "time":0, "offset":0, "volume":1
+                }]
+            }))
+            .unwrap(),
+        );
+        let mut selection = None;
+        apply_layer_command(
+            &mut project,
+            &mut selection,
+            LayerCommand::Duplicate("shape".into()),
+        )
+        .unwrap();
+        assert_eq!(selection.as_deref(), Some("shape-copy-2"));
+        project.validate().unwrap();
+    }
 
     #[test]
     fn rows_nest_groups_and_hide_collapsed_members() {

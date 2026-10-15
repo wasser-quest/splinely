@@ -34,8 +34,23 @@ fn showcases_are_canonical_and_deterministic() {
         project.validate().unwrap();
         assert_eq!(serde_json::to_value(&project).unwrap(), value);
         assert!(project.custom_js.contains("splinely.on('state.change'"));
-        assert!(project.custom_js.contains("splinely.onDestroy"));
-        assert!(project.raw_svg.is_empty());
+        // Scenes run on load: no Play/Pause controls in the SVG and no START gate.
+        assert!(project.nodes.iter().all(|n| !n.id.contains("control")));
+        assert!(!project.custom_js.contains("start-control"));
+        // Self-starting: an autoplay clip, or an initial state that plays a clip on enter.
+        let machine = project.state_machines.first();
+        assert!(
+            project.clips.iter().any(|c| c.autoplay)
+                || machine.is_some_and(|m| m
+                    .states
+                    .iter()
+                    .find(|s| s.id == m.initial)
+                    .is_some_and(|s| !s.on_enter.is_empty()))
+        );
+        for machine in &project.state_machines {
+            assert_ne!(machine.initial, "idle");
+            assert!(machine.transitions.iter().all(|t| t.event.name != "START"));
+        }
     }
     assert_ne!(
         cli(&["random-figures", "--seed", "42", "--output", "-"])["nodes"],

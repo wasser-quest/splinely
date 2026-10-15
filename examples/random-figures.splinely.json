@@ -1,3082 +1,2961 @@
 {
-  "audioAssets": [],
-  "audioCues": [],
-  "bones": [],
-  "clips": [
-    {
-      "autoplay": false,
-      "duration": 4.8,
-      "id": "motion-0",
-      "looping": false,
-      "name": "",
-      "tracks": [
-        {
-          "keyframes": [
-            {
-              "easing": {
-                "type": "cubicBezier",
-                "x1": 0.42,
-                "x2": 0.58,
-                "y1": 0.0,
-                "y2": 1.0
-              },
-              "time": 0.0,
-              "value": {
-                "type": "number",
-                "value": 0.65
-              }
-            },
-            {
-              "easing": {
-                "type": "cubicBezier",
-                "x1": 0.42,
-                "x2": 0.58,
-                "y1": 0.0,
-                "y2": 1.0
-              },
-              "time": 0.65,
-              "value": {
-                "type": "number",
-                "value": 1.08
-              }
-            },
-            {
-              "easing": {
-                "type": "cubicBezier",
-                "x1": 0.42,
-                "x2": 0.58,
-                "y1": 0.0,
-                "y2": 1.0
-              },
-              "time": 1.0,
-              "value": {
-                "type": "number",
-                "value": 1.0
-              }
-            },
-            {
-              "easing": {
-                "type": "cubicBezier",
-                "x1": 0.42,
-                "x2": 0.58,
-                "y1": 0.0,
-                "y2": 1.0
-              },
-              "time": 3.8,
-              "value": {
-                "type": "number",
-                "value": 1.0
-              }
-            },
-            {
-              "easing": {
-                "type": "cubicBezier",
-                "x1": 0.42,
-                "x2": 0.58,
-                "y1": 0.0,
-                "y2": 1.0
-              },
-              "time": 4.8,
-              "value": {
-                "type": "number",
-                "value": 0.65
-              }
-            }
-          ],
-          "nodeId": "shape-0",
-          "property": "scaleX"
-        },
-        {
-          "keyframes": [
-            {
-              "easing": {
-                "type": "cubicBezier",
-                "x1": 0.42,
-                "x2": 0.58,
-                "y1": 0.0,
-                "y2": 1.0
-              },
-              "time": 0.0,
-              "value": {
-                "type": "number",
-                "value": 0.65
-              }
-            },
-            {
-              "easing": {
-                "type": "cubicBezier",
-                "x1": 0.42,
-                "x2": 0.58,
-                "y1": 0.0,
-                "y2": 1.0
-              },
-              "time": 0.65,
-              "value": {
-                "type": "number",
-                "value": 1.08
-              }
-            },
-            {
-              "easing": {
-                "type": "cubicBezier",
-                "x1": 0.42,
-                "x2": 0.58,
-                "y1": 0.0,
-                "y2": 1.0
-              },
-              "time": 1.0,
-              "value": {
-                "type": "number",
-                "value": 1.0
-              }
-            },
-            {
-              "easing": {
-                "type": "cubicBezier",
-                "x1": 0.42,
-                "x2": 0.58,
-                "y1": 0.0,
-                "y2": 1.0
-              },
-              "time": 3.8,
-              "value": {
-                "type": "number",
-                "value": 1.0
-              }
-            },
-            {
-              "easing": {
-                "type": "cubicBezier",
-                "x1": 0.42,
-                "x2": 0.58,
-                "y1": 0.0,
-                "y2": 1.0
-              },
-              "time": 4.8,
-              "value": {
-                "type": "number",
-                "value": 0.65
-              }
-            }
-          ],
-          "nodeId": "shape-0",
-          "property": "scaleY"
-        },
-        {
-          "keyframes": [
-            {
-              "easing": {
-                "type": "cubicBezier",
-                "x1": 0.42,
-                "x2": 0.58,
-                "y1": 0.0,
-                "y2": 1.0
-              },
-              "time": 0.0,
-              "value": {
-                "type": "number",
-                "value": 350.0
-              }
-            },
-            {
-              "easing": {
-                "type": "cubicBezier",
-                "x1": 0.42,
-                "x2": 0.58,
-                "y1": 0.0,
-                "y2": 1.0
-              },
-              "time": 1.0,
-              "value": {
-                "type": "number",
-                "value": 320.0
-              }
-            },
-            {
-              "easing": {
-                "type": "cubicBezier",
-                "x1": 0.42,
-                "x2": 0.58,
-                "y1": 0.0,
-                "y2": 1.0
-              },
-              "time": 2.4,
-              "value": {
-                "type": "number",
-                "value": 305.0
-              }
-            },
-            {
-              "easing": {
-                "type": "cubicBezier",
-                "x1": 0.42,
-                "x2": 0.58,
-                "y1": 0.0,
-                "y2": 1.0
-              },
-              "time": 3.8,
-              "value": {
-                "type": "number",
-                "value": 320.0
-              }
-            },
-            {
-              "easing": {
-                "type": "cubicBezier",
-                "x1": 0.42,
-                "x2": 0.58,
-                "y1": 0.0,
-                "y2": 1.0
-              },
-              "time": 4.8,
-              "value": {
-                "type": "number",
-                "value": 350.0
-              }
-            }
-          ],
-          "nodeId": "shape-0",
-          "property": "y"
-        },
-        {
-          "keyframes": [
-            {
-              "easing": {
-                "type": "cubicBezier",
-                "x1": 0.42,
-                "x2": 0.58,
-                "y1": 0.0,
-                "y2": 1.0
-              },
-              "time": 0.0,
-              "value": {
-                "type": "number",
-                "value": -20.256766376590235
-              }
-            },
-            {
-              "easing": {
-                "type": "cubicBezier",
-                "x1": 0.42,
-                "x2": 0.58,
-                "y1": 0.0,
-                "y2": 1.0
-              },
-              "time": 1.0,
-              "value": {
-                "type": "number",
-                "value": 0.0
-              }
-            },
-            {
-              "easing": {
-                "type": "cubicBezier",
-                "x1": 0.42,
-                "x2": 0.58,
-                "y1": 0.0,
-                "y2": 1.0
-              },
-              "time": 2.4,
-              "value": {
-                "type": "number",
-                "value": 20.256766376590235
-              }
-            },
-            {
-              "easing": {
-                "type": "cubicBezier",
-                "x1": 0.42,
-                "x2": 0.58,
-                "y1": 0.0,
-                "y2": 1.0
-              },
-              "time": 3.8,
-              "value": {
-                "type": "number",
-                "value": 0.0
-              }
-            },
-            {
-              "easing": {
-                "type": "cubicBezier",
-                "x1": 0.42,
-                "x2": 0.58,
-                "y1": 0.0,
-                "y2": 1.0
-              },
-              "time": 4.8,
-              "value": {
-                "type": "number",
-                "value": -20.256766376590235
-              }
-            }
-          ],
-          "nodeId": "shape-0",
-          "property": "rotation"
-        },
-        {
-          "keyframes": [
-            {
-              "easing": {
-                "type": "cubicBezier",
-                "x1": 0.42,
-                "x2": 0.58,
-                "y1": 0.0,
-                "y2": 1.0
-              },
-              "time": 0.0,
-              "value": {
-                "type": "number",
-                "value": 0.0
-              }
-            },
-            {
-              "easing": {
-                "type": "cubicBezier",
-                "x1": 0.42,
-                "x2": 0.58,
-                "y1": 0.0,
-                "y2": 1.0
-              },
-              "time": 0.55,
-              "value": {
-                "type": "number",
-                "value": 1.0
-              }
-            },
-            {
-              "easing": {
-                "type": "cubicBezier",
-                "x1": 0.42,
-                "x2": 0.58,
-                "y1": 0.0,
-                "y2": 1.0
-              },
-              "time": 4.1,
-              "value": {
-                "type": "number",
-                "value": 1.0
-              }
-            },
-            {
-              "easing": {
-                "type": "cubicBezier",
-                "x1": 0.42,
-                "x2": 0.58,
-                "y1": 0.0,
-                "y2": 1.0
-              },
-              "time": 4.8,
-              "value": {
-                "type": "number",
-                "value": 0.0
-              }
-            }
-          ],
-          "nodeId": "shape-0",
-          "property": "opacity"
-        }
-      ]
-    },
-    {
-      "autoplay": false,
-      "duration": 4.8,
-      "id": "motion-1",
-      "looping": false,
-      "name": "",
-      "tracks": [
-        {
-          "keyframes": [
-            {
-              "easing": {
-                "type": "cubicBezier",
-                "x1": 0.42,
-                "x2": 0.58,
-                "y1": 0.0,
-                "y2": 1.0
-              },
-              "time": 0.0,
-              "value": {
-                "type": "number",
-                "value": 0.65
-              }
-            },
-            {
-              "easing": {
-                "type": "cubicBezier",
-                "x1": 0.42,
-                "x2": 0.58,
-                "y1": 0.0,
-                "y2": 1.0
-              },
-              "time": 0.65,
-              "value": {
-                "type": "number",
-                "value": 1.08
-              }
-            },
-            {
-              "easing": {
-                "type": "cubicBezier",
-                "x1": 0.42,
-                "x2": 0.58,
-                "y1": 0.0,
-                "y2": 1.0
-              },
-              "time": 1.0,
-              "value": {
-                "type": "number",
-                "value": 1.0
-              }
-            },
-            {
-              "easing": {
-                "type": "cubicBezier",
-                "x1": 0.42,
-                "x2": 0.58,
-                "y1": 0.0,
-                "y2": 1.0
-              },
-              "time": 3.8,
-              "value": {
-                "type": "number",
-                "value": 1.0
-              }
-            },
-            {
-              "easing": {
-                "type": "cubicBezier",
-                "x1": 0.42,
-                "x2": 0.58,
-                "y1": 0.0,
-                "y2": 1.0
-              },
-              "time": 4.8,
-              "value": {
-                "type": "number",
-                "value": 0.65
-              }
-            }
-          ],
-          "nodeId": "shape-1",
-          "property": "scaleX"
-        },
-        {
-          "keyframes": [
-            {
-              "easing": {
-                "type": "cubicBezier",
-                "x1": 0.42,
-                "x2": 0.58,
-                "y1": 0.0,
-                "y2": 1.0
-              },
-              "time": 0.0,
-              "value": {
-                "type": "number",
-                "value": 0.65
-              }
-            },
-            {
-              "easing": {
-                "type": "cubicBezier",
-                "x1": 0.42,
-                "x2": 0.58,
-                "y1": 0.0,
-                "y2": 1.0
-              },
-              "time": 0.65,
-              "value": {
-                "type": "number",
-                "value": 1.08
-              }
-            },
-            {
-              "easing": {
-                "type": "cubicBezier",
-                "x1": 0.42,
-                "x2": 0.58,
-                "y1": 0.0,
-                "y2": 1.0
-              },
-              "time": 1.0,
-              "value": {
-                "type": "number",
-                "value": 1.0
-              }
-            },
-            {
-              "easing": {
-                "type": "cubicBezier",
-                "x1": 0.42,
-                "x2": 0.58,
-                "y1": 0.0,
-                "y2": 1.0
-              },
-              "time": 3.8,
-              "value": {
-                "type": "number",
-                "value": 1.0
-              }
-            },
-            {
-              "easing": {
-                "type": "cubicBezier",
-                "x1": 0.42,
-                "x2": 0.58,
-                "y1": 0.0,
-                "y2": 1.0
-              },
-              "time": 4.8,
-              "value": {
-                "type": "number",
-                "value": 0.65
-              }
-            }
-          ],
-          "nodeId": "shape-1",
-          "property": "scaleY"
-        },
-        {
-          "keyframes": [
-            {
-              "easing": {
-                "type": "cubicBezier",
-                "x1": 0.42,
-                "x2": 0.58,
-                "y1": 0.0,
-                "y2": 1.0
-              },
-              "time": 0.0,
-              "value": {
-                "type": "number",
-                "value": 350.0
-              }
-            },
-            {
-              "easing": {
-                "type": "cubicBezier",
-                "x1": 0.42,
-                "x2": 0.58,
-                "y1": 0.0,
-                "y2": 1.0
-              },
-              "time": 1.0,
-              "value": {
-                "type": "number",
-                "value": 320.0
-              }
-            },
-            {
-              "easing": {
-                "type": "cubicBezier",
-                "x1": 0.42,
-                "x2": 0.58,
-                "y1": 0.0,
-                "y2": 1.0
-              },
-              "time": 2.4,
-              "value": {
-                "type": "number",
-                "value": 305.0
-              }
-            },
-            {
-              "easing": {
-                "type": "cubicBezier",
-                "x1": 0.42,
-                "x2": 0.58,
-                "y1": 0.0,
-                "y2": 1.0
-              },
-              "time": 3.8,
-              "value": {
-                "type": "number",
-                "value": 320.0
-              }
-            },
-            {
-              "easing": {
-                "type": "cubicBezier",
-                "x1": 0.42,
-                "x2": 0.58,
-                "y1": 0.0,
-                "y2": 1.0
-              },
-              "time": 4.8,
-              "value": {
-                "type": "number",
-                "value": 350.0
-              }
-            }
-          ],
-          "nodeId": "shape-1",
-          "property": "y"
-        },
-        {
-          "keyframes": [
-            {
-              "easing": {
-                "type": "cubicBezier",
-                "x1": 0.42,
-                "x2": 0.58,
-                "y1": 0.0,
-                "y2": 1.0
-              },
-              "time": 0.0,
-              "value": {
-                "type": "number",
-                "value": -12.524578213998767
-              }
-            },
-            {
-              "easing": {
-                "type": "cubicBezier",
-                "x1": 0.42,
-                "x2": 0.58,
-                "y1": 0.0,
-                "y2": 1.0
-              },
-              "time": 1.0,
-              "value": {
-                "type": "number",
-                "value": 0.0
-              }
-            },
-            {
-              "easing": {
-                "type": "cubicBezier",
-                "x1": 0.42,
-                "x2": 0.58,
-                "y1": 0.0,
-                "y2": 1.0
-              },
-              "time": 2.4,
-              "value": {
-                "type": "number",
-                "value": 12.524578213998767
-              }
-            },
-            {
-              "easing": {
-                "type": "cubicBezier",
-                "x1": 0.42,
-                "x2": 0.58,
-                "y1": 0.0,
-                "y2": 1.0
-              },
-              "time": 3.8,
-              "value": {
-                "type": "number",
-                "value": 0.0
-              }
-            },
-            {
-              "easing": {
-                "type": "cubicBezier",
-                "x1": 0.42,
-                "x2": 0.58,
-                "y1": 0.0,
-                "y2": 1.0
-              },
-              "time": 4.8,
-              "value": {
-                "type": "number",
-                "value": -12.524578213998767
-              }
-            }
-          ],
-          "nodeId": "shape-1",
-          "property": "rotation"
-        },
-        {
-          "keyframes": [
-            {
-              "easing": {
-                "type": "cubicBezier",
-                "x1": 0.42,
-                "x2": 0.58,
-                "y1": 0.0,
-                "y2": 1.0
-              },
-              "time": 0.0,
-              "value": {
-                "type": "number",
-                "value": 0.0
-              }
-            },
-            {
-              "easing": {
-                "type": "cubicBezier",
-                "x1": 0.42,
-                "x2": 0.58,
-                "y1": 0.0,
-                "y2": 1.0
-              },
-              "time": 0.55,
-              "value": {
-                "type": "number",
-                "value": 1.0
-              }
-            },
-            {
-              "easing": {
-                "type": "cubicBezier",
-                "x1": 0.42,
-                "x2": 0.58,
-                "y1": 0.0,
-                "y2": 1.0
-              },
-              "time": 4.1,
-              "value": {
-                "type": "number",
-                "value": 1.0
-              }
-            },
-            {
-              "easing": {
-                "type": "cubicBezier",
-                "x1": 0.42,
-                "x2": 0.58,
-                "y1": 0.0,
-                "y2": 1.0
-              },
-              "time": 4.8,
-              "value": {
-                "type": "number",
-                "value": 0.0
-              }
-            }
-          ],
-          "nodeId": "shape-1",
-          "property": "opacity"
-        }
-      ]
-    },
-    {
-      "autoplay": false,
-      "duration": 4.8,
-      "id": "motion-2",
-      "looping": false,
-      "name": "",
-      "tracks": [
-        {
-          "keyframes": [
-            {
-              "easing": {
-                "type": "cubicBezier",
-                "x1": 0.42,
-                "x2": 0.58,
-                "y1": 0.0,
-                "y2": 1.0
-              },
-              "time": 0.0,
-              "value": {
-                "type": "number",
-                "value": 0.65
-              }
-            },
-            {
-              "easing": {
-                "type": "cubicBezier",
-                "x1": 0.42,
-                "x2": 0.58,
-                "y1": 0.0,
-                "y2": 1.0
-              },
-              "time": 0.65,
-              "value": {
-                "type": "number",
-                "value": 1.08
-              }
-            },
-            {
-              "easing": {
-                "type": "cubicBezier",
-                "x1": 0.42,
-                "x2": 0.58,
-                "y1": 0.0,
-                "y2": 1.0
-              },
-              "time": 1.0,
-              "value": {
-                "type": "number",
-                "value": 1.0
-              }
-            },
-            {
-              "easing": {
-                "type": "cubicBezier",
-                "x1": 0.42,
-                "x2": 0.58,
-                "y1": 0.0,
-                "y2": 1.0
-              },
-              "time": 3.8,
-              "value": {
-                "type": "number",
-                "value": 1.0
-              }
-            },
-            {
-              "easing": {
-                "type": "cubicBezier",
-                "x1": 0.42,
-                "x2": 0.58,
-                "y1": 0.0,
-                "y2": 1.0
-              },
-              "time": 4.8,
-              "value": {
-                "type": "number",
-                "value": 0.65
-              }
-            }
-          ],
-          "nodeId": "shape-2",
-          "property": "scaleX"
-        },
-        {
-          "keyframes": [
-            {
-              "easing": {
-                "type": "cubicBezier",
-                "x1": 0.42,
-                "x2": 0.58,
-                "y1": 0.0,
-                "y2": 1.0
-              },
-              "time": 0.0,
-              "value": {
-                "type": "number",
-                "value": 0.65
-              }
-            },
-            {
-              "easing": {
-                "type": "cubicBezier",
-                "x1": 0.42,
-                "x2": 0.58,
-                "y1": 0.0,
-                "y2": 1.0
-              },
-              "time": 0.65,
-              "value": {
-                "type": "number",
-                "value": 1.08
-              }
-            },
-            {
-              "easing": {
-                "type": "cubicBezier",
-                "x1": 0.42,
-                "x2": 0.58,
-                "y1": 0.0,
-                "y2": 1.0
-              },
-              "time": 1.0,
-              "value": {
-                "type": "number",
-                "value": 1.0
-              }
-            },
-            {
-              "easing": {
-                "type": "cubicBezier",
-                "x1": 0.42,
-                "x2": 0.58,
-                "y1": 0.0,
-                "y2": 1.0
-              },
-              "time": 3.8,
-              "value": {
-                "type": "number",
-                "value": 1.0
-              }
-            },
-            {
-              "easing": {
-                "type": "cubicBezier",
-                "x1": 0.42,
-                "x2": 0.58,
-                "y1": 0.0,
-                "y2": 1.0
-              },
-              "time": 4.8,
-              "value": {
-                "type": "number",
-                "value": 0.65
-              }
-            }
-          ],
-          "nodeId": "shape-2",
-          "property": "scaleY"
-        },
-        {
-          "keyframes": [
-            {
-              "easing": {
-                "type": "cubicBezier",
-                "x1": 0.42,
-                "x2": 0.58,
-                "y1": 0.0,
-                "y2": 1.0
-              },
-              "time": 0.0,
-              "value": {
-                "type": "number",
-                "value": 350.0
-              }
-            },
-            {
-              "easing": {
-                "type": "cubicBezier",
-                "x1": 0.42,
-                "x2": 0.58,
-                "y1": 0.0,
-                "y2": 1.0
-              },
-              "time": 1.0,
-              "value": {
-                "type": "number",
-                "value": 320.0
-              }
-            },
-            {
-              "easing": {
-                "type": "cubicBezier",
-                "x1": 0.42,
-                "x2": 0.58,
-                "y1": 0.0,
-                "y2": 1.0
-              },
-              "time": 2.4,
-              "value": {
-                "type": "number",
-                "value": 305.0
-              }
-            },
-            {
-              "easing": {
-                "type": "cubicBezier",
-                "x1": 0.42,
-                "x2": 0.58,
-                "y1": 0.0,
-                "y2": 1.0
-              },
-              "time": 3.8,
-              "value": {
-                "type": "number",
-                "value": 320.0
-              }
-            },
-            {
-              "easing": {
-                "type": "cubicBezier",
-                "x1": 0.42,
-                "x2": 0.58,
-                "y1": 0.0,
-                "y2": 1.0
-              },
-              "time": 4.8,
-              "value": {
-                "type": "number",
-                "value": 350.0
-              }
-            }
-          ],
-          "nodeId": "shape-2",
-          "property": "y"
-        },
-        {
-          "keyframes": [
-            {
-              "easing": {
-                "type": "cubicBezier",
-                "x1": 0.42,
-                "x2": 0.58,
-                "y1": 0.0,
-                "y2": 1.0
-              },
-              "time": 0.0,
-              "value": {
-                "type": "number",
-                "value": -21.479216916111127
-              }
-            },
-            {
-              "easing": {
-                "type": "cubicBezier",
-                "x1": 0.42,
-                "x2": 0.58,
-                "y1": 0.0,
-                "y2": 1.0
-              },
-              "time": 1.0,
-              "value": {
-                "type": "number",
-                "value": 0.0
-              }
-            },
-            {
-              "easing": {
-                "type": "cubicBezier",
-                "x1": 0.42,
-                "x2": 0.58,
-                "y1": 0.0,
-                "y2": 1.0
-              },
-              "time": 2.4,
-              "value": {
-                "type": "number",
-                "value": 21.479216916111127
-              }
-            },
-            {
-              "easing": {
-                "type": "cubicBezier",
-                "x1": 0.42,
-                "x2": 0.58,
-                "y1": 0.0,
-                "y2": 1.0
-              },
-              "time": 3.8,
-              "value": {
-                "type": "number",
-                "value": 0.0
-              }
-            },
-            {
-              "easing": {
-                "type": "cubicBezier",
-                "x1": 0.42,
-                "x2": 0.58,
-                "y1": 0.0,
-                "y2": 1.0
-              },
-              "time": 4.8,
-              "value": {
-                "type": "number",
-                "value": -21.479216916111127
-              }
-            }
-          ],
-          "nodeId": "shape-2",
-          "property": "rotation"
-        },
-        {
-          "keyframes": [
-            {
-              "easing": {
-                "type": "cubicBezier",
-                "x1": 0.42,
-                "x2": 0.58,
-                "y1": 0.0,
-                "y2": 1.0
-              },
-              "time": 0.0,
-              "value": {
-                "type": "number",
-                "value": 0.0
-              }
-            },
-            {
-              "easing": {
-                "type": "cubicBezier",
-                "x1": 0.42,
-                "x2": 0.58,
-                "y1": 0.0,
-                "y2": 1.0
-              },
-              "time": 0.55,
-              "value": {
-                "type": "number",
-                "value": 1.0
-              }
-            },
-            {
-              "easing": {
-                "type": "cubicBezier",
-                "x1": 0.42,
-                "x2": 0.58,
-                "y1": 0.0,
-                "y2": 1.0
-              },
-              "time": 4.1,
-              "value": {
-                "type": "number",
-                "value": 1.0
-              }
-            },
-            {
-              "easing": {
-                "type": "cubicBezier",
-                "x1": 0.42,
-                "x2": 0.58,
-                "y1": 0.0,
-                "y2": 1.0
-              },
-              "time": 4.8,
-              "value": {
-                "type": "number",
-                "value": 0.0
-              }
-            }
-          ],
-          "nodeId": "shape-2",
-          "property": "opacity"
-        }
-      ]
-    },
-    {
-      "autoplay": false,
-      "duration": 4.8,
-      "id": "motion-3",
-      "looping": false,
-      "name": "",
-      "tracks": [
-        {
-          "keyframes": [
-            {
-              "easing": {
-                "type": "cubicBezier",
-                "x1": 0.42,
-                "x2": 0.58,
-                "y1": 0.0,
-                "y2": 1.0
-              },
-              "time": 0.0,
-              "value": {
-                "type": "number",
-                "value": 0.65
-              }
-            },
-            {
-              "easing": {
-                "type": "cubicBezier",
-                "x1": 0.42,
-                "x2": 0.58,
-                "y1": 0.0,
-                "y2": 1.0
-              },
-              "time": 0.65,
-              "value": {
-                "type": "number",
-                "value": 1.08
-              }
-            },
-            {
-              "easing": {
-                "type": "cubicBezier",
-                "x1": 0.42,
-                "x2": 0.58,
-                "y1": 0.0,
-                "y2": 1.0
-              },
-              "time": 1.0,
-              "value": {
-                "type": "number",
-                "value": 1.0
-              }
-            },
-            {
-              "easing": {
-                "type": "cubicBezier",
-                "x1": 0.42,
-                "x2": 0.58,
-                "y1": 0.0,
-                "y2": 1.0
-              },
-              "time": 3.8,
-              "value": {
-                "type": "number",
-                "value": 1.0
-              }
-            },
-            {
-              "easing": {
-                "type": "cubicBezier",
-                "x1": 0.42,
-                "x2": 0.58,
-                "y1": 0.0,
-                "y2": 1.0
-              },
-              "time": 4.8,
-              "value": {
-                "type": "number",
-                "value": 0.65
-              }
-            }
-          ],
-          "nodeId": "shape-3",
-          "property": "scaleX"
-        },
-        {
-          "keyframes": [
-            {
-              "easing": {
-                "type": "cubicBezier",
-                "x1": 0.42,
-                "x2": 0.58,
-                "y1": 0.0,
-                "y2": 1.0
-              },
-              "time": 0.0,
-              "value": {
-                "type": "number",
-                "value": 0.65
-              }
-            },
-            {
-              "easing": {
-                "type": "cubicBezier",
-                "x1": 0.42,
-                "x2": 0.58,
-                "y1": 0.0,
-                "y2": 1.0
-              },
-              "time": 0.65,
-              "value": {
-                "type": "number",
-                "value": 1.08
-              }
-            },
-            {
-              "easing": {
-                "type": "cubicBezier",
-                "x1": 0.42,
-                "x2": 0.58,
-                "y1": 0.0,
-                "y2": 1.0
-              },
-              "time": 1.0,
-              "value": {
-                "type": "number",
-                "value": 1.0
-              }
-            },
-            {
-              "easing": {
-                "type": "cubicBezier",
-                "x1": 0.42,
-                "x2": 0.58,
-                "y1": 0.0,
-                "y2": 1.0
-              },
-              "time": 3.8,
-              "value": {
-                "type": "number",
-                "value": 1.0
-              }
-            },
-            {
-              "easing": {
-                "type": "cubicBezier",
-                "x1": 0.42,
-                "x2": 0.58,
-                "y1": 0.0,
-                "y2": 1.0
-              },
-              "time": 4.8,
-              "value": {
-                "type": "number",
-                "value": 0.65
-              }
-            }
-          ],
-          "nodeId": "shape-3",
-          "property": "scaleY"
-        },
-        {
-          "keyframes": [
-            {
-              "easing": {
-                "type": "cubicBezier",
-                "x1": 0.42,
-                "x2": 0.58,
-                "y1": 0.0,
-                "y2": 1.0
-              },
-              "time": 0.0,
-              "value": {
-                "type": "number",
-                "value": 350.0
-              }
-            },
-            {
-              "easing": {
-                "type": "cubicBezier",
-                "x1": 0.42,
-                "x2": 0.58,
-                "y1": 0.0,
-                "y2": 1.0
-              },
-              "time": 1.0,
-              "value": {
-                "type": "number",
-                "value": 320.0
-              }
-            },
-            {
-              "easing": {
-                "type": "cubicBezier",
-                "x1": 0.42,
-                "x2": 0.58,
-                "y1": 0.0,
-                "y2": 1.0
-              },
-              "time": 2.4,
-              "value": {
-                "type": "number",
-                "value": 305.0
-              }
-            },
-            {
-              "easing": {
-                "type": "cubicBezier",
-                "x1": 0.42,
-                "x2": 0.58,
-                "y1": 0.0,
-                "y2": 1.0
-              },
-              "time": 3.8,
-              "value": {
-                "type": "number",
-                "value": 320.0
-              }
-            },
-            {
-              "easing": {
-                "type": "cubicBezier",
-                "x1": 0.42,
-                "x2": 0.58,
-                "y1": 0.0,
-                "y2": 1.0
-              },
-              "time": 4.8,
-              "value": {
-                "type": "number",
-                "value": 350.0
-              }
-            }
-          ],
-          "nodeId": "shape-3",
-          "property": "y"
-        },
-        {
-          "keyframes": [
-            {
-              "easing": {
-                "type": "cubicBezier",
-                "x1": 0.42,
-                "x2": 0.58,
-                "y1": 0.0,
-                "y2": 1.0
-              },
-              "time": 0.0,
-              "value": {
-                "type": "number",
-                "value": -22.57798406603462
-              }
-            },
-            {
-              "easing": {
-                "type": "cubicBezier",
-                "x1": 0.42,
-                "x2": 0.58,
-                "y1": 0.0,
-                "y2": 1.0
-              },
-              "time": 1.0,
-              "value": {
-                "type": "number",
-                "value": 0.0
-              }
-            },
-            {
-              "easing": {
-                "type": "cubicBezier",
-                "x1": 0.42,
-                "x2": 0.58,
-                "y1": 0.0,
-                "y2": 1.0
-              },
-              "time": 2.4,
-              "value": {
-                "type": "number",
-                "value": 22.57798406603462
-              }
-            },
-            {
-              "easing": {
-                "type": "cubicBezier",
-                "x1": 0.42,
-                "x2": 0.58,
-                "y1": 0.0,
-                "y2": 1.0
-              },
-              "time": 3.8,
-              "value": {
-                "type": "number",
-                "value": 0.0
-              }
-            },
-            {
-              "easing": {
-                "type": "cubicBezier",
-                "x1": 0.42,
-                "x2": 0.58,
-                "y1": 0.0,
-                "y2": 1.0
-              },
-              "time": 4.8,
-              "value": {
-                "type": "number",
-                "value": -22.57798406603462
-              }
-            }
-          ],
-          "nodeId": "shape-3",
-          "property": "rotation"
-        },
-        {
-          "keyframes": [
-            {
-              "easing": {
-                "type": "cubicBezier",
-                "x1": 0.42,
-                "x2": 0.58,
-                "y1": 0.0,
-                "y2": 1.0
-              },
-              "time": 0.0,
-              "value": {
-                "type": "number",
-                "value": 0.0
-              }
-            },
-            {
-              "easing": {
-                "type": "cubicBezier",
-                "x1": 0.42,
-                "x2": 0.58,
-                "y1": 0.0,
-                "y2": 1.0
-              },
-              "time": 0.55,
-              "value": {
-                "type": "number",
-                "value": 1.0
-              }
-            },
-            {
-              "easing": {
-                "type": "cubicBezier",
-                "x1": 0.42,
-                "x2": 0.58,
-                "y1": 0.0,
-                "y2": 1.0
-              },
-              "time": 4.1,
-              "value": {
-                "type": "number",
-                "value": 1.0
-              }
-            },
-            {
-              "easing": {
-                "type": "cubicBezier",
-                "x1": 0.42,
-                "x2": 0.58,
-                "y1": 0.0,
-                "y2": 1.0
-              },
-              "time": 4.8,
-              "value": {
-                "type": "number",
-                "value": 0.0
-              }
-            }
-          ],
-          "nodeId": "shape-3",
-          "property": "opacity"
-        }
-      ]
-    },
-    {
-      "autoplay": false,
-      "duration": 4.8,
-      "id": "motion-4",
-      "looping": false,
-      "name": "",
-      "tracks": [
-        {
-          "keyframes": [
-            {
-              "easing": {
-                "type": "cubicBezier",
-                "x1": 0.42,
-                "x2": 0.58,
-                "y1": 0.0,
-                "y2": 1.0
-              },
-              "time": 0.0,
-              "value": {
-                "type": "number",
-                "value": 0.65
-              }
-            },
-            {
-              "easing": {
-                "type": "cubicBezier",
-                "x1": 0.42,
-                "x2": 0.58,
-                "y1": 0.0,
-                "y2": 1.0
-              },
-              "time": 0.65,
-              "value": {
-                "type": "number",
-                "value": 1.08
-              }
-            },
-            {
-              "easing": {
-                "type": "cubicBezier",
-                "x1": 0.42,
-                "x2": 0.58,
-                "y1": 0.0,
-                "y2": 1.0
-              },
-              "time": 1.0,
-              "value": {
-                "type": "number",
-                "value": 1.0
-              }
-            },
-            {
-              "easing": {
-                "type": "cubicBezier",
-                "x1": 0.42,
-                "x2": 0.58,
-                "y1": 0.0,
-                "y2": 1.0
-              },
-              "time": 3.8,
-              "value": {
-                "type": "number",
-                "value": 1.0
-              }
-            },
-            {
-              "easing": {
-                "type": "cubicBezier",
-                "x1": 0.42,
-                "x2": 0.58,
-                "y1": 0.0,
-                "y2": 1.0
-              },
-              "time": 4.8,
-              "value": {
-                "type": "number",
-                "value": 0.65
-              }
-            }
-          ],
-          "nodeId": "shape-4",
-          "property": "scaleX"
-        },
-        {
-          "keyframes": [
-            {
-              "easing": {
-                "type": "cubicBezier",
-                "x1": 0.42,
-                "x2": 0.58,
-                "y1": 0.0,
-                "y2": 1.0
-              },
-              "time": 0.0,
-              "value": {
-                "type": "number",
-                "value": 0.65
-              }
-            },
-            {
-              "easing": {
-                "type": "cubicBezier",
-                "x1": 0.42,
-                "x2": 0.58,
-                "y1": 0.0,
-                "y2": 1.0
-              },
-              "time": 0.65,
-              "value": {
-                "type": "number",
-                "value": 1.08
-              }
-            },
-            {
-              "easing": {
-                "type": "cubicBezier",
-                "x1": 0.42,
-                "x2": 0.58,
-                "y1": 0.0,
-                "y2": 1.0
-              },
-              "time": 1.0,
-              "value": {
-                "type": "number",
-                "value": 1.0
-              }
-            },
-            {
-              "easing": {
-                "type": "cubicBezier",
-                "x1": 0.42,
-                "x2": 0.58,
-                "y1": 0.0,
-                "y2": 1.0
-              },
-              "time": 3.8,
-              "value": {
-                "type": "number",
-                "value": 1.0
-              }
-            },
-            {
-              "easing": {
-                "type": "cubicBezier",
-                "x1": 0.42,
-                "x2": 0.58,
-                "y1": 0.0,
-                "y2": 1.0
-              },
-              "time": 4.8,
-              "value": {
-                "type": "number",
-                "value": 0.65
-              }
-            }
-          ],
-          "nodeId": "shape-4",
-          "property": "scaleY"
-        },
-        {
-          "keyframes": [
-            {
-              "easing": {
-                "type": "cubicBezier",
-                "x1": 0.42,
-                "x2": 0.58,
-                "y1": 0.0,
-                "y2": 1.0
-              },
-              "time": 0.0,
-              "value": {
-                "type": "number",
-                "value": 350.0
-              }
-            },
-            {
-              "easing": {
-                "type": "cubicBezier",
-                "x1": 0.42,
-                "x2": 0.58,
-                "y1": 0.0,
-                "y2": 1.0
-              },
-              "time": 1.0,
-              "value": {
-                "type": "number",
-                "value": 320.0
-              }
-            },
-            {
-              "easing": {
-                "type": "cubicBezier",
-                "x1": 0.42,
-                "x2": 0.58,
-                "y1": 0.0,
-                "y2": 1.0
-              },
-              "time": 2.4,
-              "value": {
-                "type": "number",
-                "value": 305.0
-              }
-            },
-            {
-              "easing": {
-                "type": "cubicBezier",
-                "x1": 0.42,
-                "x2": 0.58,
-                "y1": 0.0,
-                "y2": 1.0
-              },
-              "time": 3.8,
-              "value": {
-                "type": "number",
-                "value": 320.0
-              }
-            },
-            {
-              "easing": {
-                "type": "cubicBezier",
-                "x1": 0.42,
-                "x2": 0.58,
-                "y1": 0.0,
-                "y2": 1.0
-              },
-              "time": 4.8,
-              "value": {
-                "type": "number",
-                "value": 350.0
-              }
-            }
-          ],
-          "nodeId": "shape-4",
-          "property": "y"
-        },
-        {
-          "keyframes": [
-            {
-              "easing": {
-                "type": "cubicBezier",
-                "x1": 0.42,
-                "x2": 0.58,
-                "y1": 0.0,
-                "y2": 1.0
-              },
-              "time": 0.0,
-              "value": {
-                "type": "number",
-                "value": -19.81745006988522
-              }
-            },
-            {
-              "easing": {
-                "type": "cubicBezier",
-                "x1": 0.42,
-                "x2": 0.58,
-                "y1": 0.0,
-                "y2": 1.0
-              },
-              "time": 1.0,
-              "value": {
-                "type": "number",
-                "value": 0.0
-              }
-            },
-            {
-              "easing": {
-                "type": "cubicBezier",
-                "x1": 0.42,
-                "x2": 0.58,
-                "y1": 0.0,
-                "y2": 1.0
-              },
-              "time": 2.4,
-              "value": {
-                "type": "number",
-                "value": 19.81745006988522
-              }
-            },
-            {
-              "easing": {
-                "type": "cubicBezier",
-                "x1": 0.42,
-                "x2": 0.58,
-                "y1": 0.0,
-                "y2": 1.0
-              },
-              "time": 3.8,
-              "value": {
-                "type": "number",
-                "value": 0.0
-              }
-            },
-            {
-              "easing": {
-                "type": "cubicBezier",
-                "x1": 0.42,
-                "x2": 0.58,
-                "y1": 0.0,
-                "y2": 1.0
-              },
-              "time": 4.8,
-              "value": {
-                "type": "number",
-                "value": -19.81745006988522
-              }
-            }
-          ],
-          "nodeId": "shape-4",
-          "property": "rotation"
-        },
-        {
-          "keyframes": [
-            {
-              "easing": {
-                "type": "cubicBezier",
-                "x1": 0.42,
-                "x2": 0.58,
-                "y1": 0.0,
-                "y2": 1.0
-              },
-              "time": 0.0,
-              "value": {
-                "type": "number",
-                "value": 0.0
-              }
-            },
-            {
-              "easing": {
-                "type": "cubicBezier",
-                "x1": 0.42,
-                "x2": 0.58,
-                "y1": 0.0,
-                "y2": 1.0
-              },
-              "time": 0.55,
-              "value": {
-                "type": "number",
-                "value": 1.0
-              }
-            },
-            {
-              "easing": {
-                "type": "cubicBezier",
-                "x1": 0.42,
-                "x2": 0.58,
-                "y1": 0.0,
-                "y2": 1.0
-              },
-              "time": 4.1,
-              "value": {
-                "type": "number",
-                "value": 1.0
-              }
-            },
-            {
-              "easing": {
-                "type": "cubicBezier",
-                "x1": 0.42,
-                "x2": 0.58,
-                "y1": 0.0,
-                "y2": 1.0
-              },
-              "time": 4.8,
-              "value": {
-                "type": "number",
-                "value": 0.0
-              }
-            }
-          ],
-          "nodeId": "shape-4",
-          "property": "opacity"
-        }
-      ]
-    },
-    {
-      "autoplay": false,
-      "duration": 4.8,
-      "id": "motion-5",
-      "looping": false,
-      "name": "",
-      "tracks": [
-        {
-          "keyframes": [
-            {
-              "easing": {
-                "type": "cubicBezier",
-                "x1": 0.42,
-                "x2": 0.58,
-                "y1": 0.0,
-                "y2": 1.0
-              },
-              "time": 0.0,
-              "value": {
-                "type": "number",
-                "value": 0.65
-              }
-            },
-            {
-              "easing": {
-                "type": "cubicBezier",
-                "x1": 0.42,
-                "x2": 0.58,
-                "y1": 0.0,
-                "y2": 1.0
-              },
-              "time": 0.65,
-              "value": {
-                "type": "number",
-                "value": 1.08
-              }
-            },
-            {
-              "easing": {
-                "type": "cubicBezier",
-                "x1": 0.42,
-                "x2": 0.58,
-                "y1": 0.0,
-                "y2": 1.0
-              },
-              "time": 1.0,
-              "value": {
-                "type": "number",
-                "value": 1.0
-              }
-            },
-            {
-              "easing": {
-                "type": "cubicBezier",
-                "x1": 0.42,
-                "x2": 0.58,
-                "y1": 0.0,
-                "y2": 1.0
-              },
-              "time": 3.8,
-              "value": {
-                "type": "number",
-                "value": 1.0
-              }
-            },
-            {
-              "easing": {
-                "type": "cubicBezier",
-                "x1": 0.42,
-                "x2": 0.58,
-                "y1": 0.0,
-                "y2": 1.0
-              },
-              "time": 4.8,
-              "value": {
-                "type": "number",
-                "value": 0.65
-              }
-            }
-          ],
-          "nodeId": "shape-5",
-          "property": "scaleX"
-        },
-        {
-          "keyframes": [
-            {
-              "easing": {
-                "type": "cubicBezier",
-                "x1": 0.42,
-                "x2": 0.58,
-                "y1": 0.0,
-                "y2": 1.0
-              },
-              "time": 0.0,
-              "value": {
-                "type": "number",
-                "value": 0.65
-              }
-            },
-            {
-              "easing": {
-                "type": "cubicBezier",
-                "x1": 0.42,
-                "x2": 0.58,
-                "y1": 0.0,
-                "y2": 1.0
-              },
-              "time": 0.65,
-              "value": {
-                "type": "number",
-                "value": 1.08
-              }
-            },
-            {
-              "easing": {
-                "type": "cubicBezier",
-                "x1": 0.42,
-                "x2": 0.58,
-                "y1": 0.0,
-                "y2": 1.0
-              },
-              "time": 1.0,
-              "value": {
-                "type": "number",
-                "value": 1.0
-              }
-            },
-            {
-              "easing": {
-                "type": "cubicBezier",
-                "x1": 0.42,
-                "x2": 0.58,
-                "y1": 0.0,
-                "y2": 1.0
-              },
-              "time": 3.8,
-              "value": {
-                "type": "number",
-                "value": 1.0
-              }
-            },
-            {
-              "easing": {
-                "type": "cubicBezier",
-                "x1": 0.42,
-                "x2": 0.58,
-                "y1": 0.0,
-                "y2": 1.0
-              },
-              "time": 4.8,
-              "value": {
-                "type": "number",
-                "value": 0.65
-              }
-            }
-          ],
-          "nodeId": "shape-5",
-          "property": "scaleY"
-        },
-        {
-          "keyframes": [
-            {
-              "easing": {
-                "type": "cubicBezier",
-                "x1": 0.42,
-                "x2": 0.58,
-                "y1": 0.0,
-                "y2": 1.0
-              },
-              "time": 0.0,
-              "value": {
-                "type": "number",
-                "value": 350.0
-              }
-            },
-            {
-              "easing": {
-                "type": "cubicBezier",
-                "x1": 0.42,
-                "x2": 0.58,
-                "y1": 0.0,
-                "y2": 1.0
-              },
-              "time": 1.0,
-              "value": {
-                "type": "number",
-                "value": 320.0
-              }
-            },
-            {
-              "easing": {
-                "type": "cubicBezier",
-                "x1": 0.42,
-                "x2": 0.58,
-                "y1": 0.0,
-                "y2": 1.0
-              },
-              "time": 2.4,
-              "value": {
-                "type": "number",
-                "value": 305.0
-              }
-            },
-            {
-              "easing": {
-                "type": "cubicBezier",
-                "x1": 0.42,
-                "x2": 0.58,
-                "y1": 0.0,
-                "y2": 1.0
-              },
-              "time": 3.8,
-              "value": {
-                "type": "number",
-                "value": 320.0
-              }
-            },
-            {
-              "easing": {
-                "type": "cubicBezier",
-                "x1": 0.42,
-                "x2": 0.58,
-                "y1": 0.0,
-                "y2": 1.0
-              },
-              "time": 4.8,
-              "value": {
-                "type": "number",
-                "value": 350.0
-              }
-            }
-          ],
-          "nodeId": "shape-5",
-          "property": "y"
-        },
-        {
-          "keyframes": [
-            {
-              "easing": {
-                "type": "cubicBezier",
-                "x1": 0.42,
-                "x2": 0.58,
-                "y1": 0.0,
-                "y2": 1.0
-              },
-              "time": 0.0,
-              "value": {
-                "type": "number",
-                "value": -26.149680215577337
-              }
-            },
-            {
-              "easing": {
-                "type": "cubicBezier",
-                "x1": 0.42,
-                "x2": 0.58,
-                "y1": 0.0,
-                "y2": 1.0
-              },
-              "time": 1.0,
-              "value": {
-                "type": "number",
-                "value": 0.0
-              }
-            },
-            {
-              "easing": {
-                "type": "cubicBezier",
-                "x1": 0.42,
-                "x2": 0.58,
-                "y1": 0.0,
-                "y2": 1.0
-              },
-              "time": 2.4,
-              "value": {
-                "type": "number",
-                "value": 26.149680215577337
-              }
-            },
-            {
-              "easing": {
-                "type": "cubicBezier",
-                "x1": 0.42,
-                "x2": 0.58,
-                "y1": 0.0,
-                "y2": 1.0
-              },
-              "time": 3.8,
-              "value": {
-                "type": "number",
-                "value": 0.0
-              }
-            },
-            {
-              "easing": {
-                "type": "cubicBezier",
-                "x1": 0.42,
-                "x2": 0.58,
-                "y1": 0.0,
-                "y2": 1.0
-              },
-              "time": 4.8,
-              "value": {
-                "type": "number",
-                "value": -26.149680215577337
-              }
-            }
-          ],
-          "nodeId": "shape-5",
-          "property": "rotation"
-        },
-        {
-          "keyframes": [
-            {
-              "easing": {
-                "type": "cubicBezier",
-                "x1": 0.42,
-                "x2": 0.58,
-                "y1": 0.0,
-                "y2": 1.0
-              },
-              "time": 0.0,
-              "value": {
-                "type": "number",
-                "value": 0.0
-              }
-            },
-            {
-              "easing": {
-                "type": "cubicBezier",
-                "x1": 0.42,
-                "x2": 0.58,
-                "y1": 0.0,
-                "y2": 1.0
-              },
-              "time": 0.55,
-              "value": {
-                "type": "number",
-                "value": 1.0
-              }
-            },
-            {
-              "easing": {
-                "type": "cubicBezier",
-                "x1": 0.42,
-                "x2": 0.58,
-                "y1": 0.0,
-                "y2": 1.0
-              },
-              "time": 4.1,
-              "value": {
-                "type": "number",
-                "value": 1.0
-              }
-            },
-            {
-              "easing": {
-                "type": "cubicBezier",
-                "x1": 0.42,
-                "x2": 0.58,
-                "y1": 0.0,
-                "y2": 1.0
-              },
-              "time": 4.8,
-              "value": {
-                "type": "number",
-                "value": 0.0
-              }
-            }
-          ],
-          "nodeId": "shape-5",
-          "property": "opacity"
-        }
-      ]
-    }
-  ],
-  "customJs": "\nconst svg = document.currentScript.ownerSVGElement;\nconst data = JSON.parse(svg.querySelector('[id=\"splinely-project\"]').textContent);\nconst machine = data.stateMachines.length ? splinely.machine('gallery') : null;\nconst status = svg.querySelector('[id=\"status\"]');\nlet paused = [], pauseRequested = false;\nfunction describe() {\n  status.textContent = (machine ? 'State: ' + machine.state : 'Water drop') +\n    ' · ' + (splinely.timeline.playing ? 'playing' : 'paused');\n}\nfunction start() {\n  pauseRequested = false;\n  const host = svg.querySelector('[data-splinely-host-control]');\n  if (host) host.remove(); // These generated scenes contain no audio assets to unlock.\n  if (machine && machine.state === 'idle') machine.send('START');\n  else for (const id of paused) splinely.clip(id).play();\n  paused = []; splinely.timeline.play(); describe();\n}\nfunction pause() {\n  pauseRequested = true;\n  if (splinely.timeline.playing) {\n    paused = data.clips.filter(c => splinely.clip(c.id).playing).map(c => c.id);\n    splinely.timeline.pause();\n  }\n  describe();\n}\nfor (const [id, fn] of [['start-control', start], ['pause-control', pause]]) {\n  const el = svg.querySelector('[id=\"' + id + '\"]');\n  el.setAttribute('role', 'button'); el.setAttribute('tabindex', '0');\n  el.setAttribute('aria-label', id === 'start-control' ? 'Play or resume animation' : 'Pause animation');\n  el.style.cursor = 'pointer';\n  const label = svg.querySelector('[id=\"' + id + '-label\"]');\n  label.style.pointerEvents = 'none';\n  splinely.on(id, 'click', fn);\n  const key = event => { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); fn(); } };\n  el.addEventListener('keydown', key);\n  splinely.onDestroy(() => el.removeEventListener('keydown', key));\n}\nconst host = svg.querySelector('[data-splinely-host-control]');\nif (host) {\n  const key = event => { if (event.key === 'Enter' || event.key === ' ') start(); };\n  host.addEventListener('click', start); host.addEventListener('keydown', key);\n  splinely.onDestroy(() => { host.removeEventListener('click', start); host.removeEventListener('keydown', key); });\n}\nsplinely.on('showcase.start', start);\nsplinely.on('showcase.pause', pause);\nsplinely.on('state.change', () => {\n  // Pausing synchronizes the wall clock. A queued clip.end may enter the next\n  // state after the Pause handler returns; hold that new clip, not the old one.\n  if (pauseRequested) {\n    paused = data.clips.filter(c => splinely.clip(c.id).playing).map(c => c.id);\n    splinely.timeline.pause();\n  }\n  describe();\n});\nsplinely.on('error', () => { status.textContent = 'Runtime error · inspect diagnostics'; });\ndescribe();\n",
-  "height": 640.0,
+  "schemaVersion": 1,
   "name": "The shape conversation",
+  "width": 960.0,
+  "height": 640.0,
   "nodes": [
     {
-      "boneId": null,
       "id": "background",
-      "kind": {
-        "height": 640.0,
-        "rx": 0.0,
-        "type": "rect",
-        "width": 960.0,
-        "x": 0.0,
-        "y": 0.0
-      },
-      "locked": false,
       "name": "",
+      "boneId": null,
+      "visible": true,
+      "locked": false,
       "originalKind": null,
+      "a11y": {
+        "hidden": true
+      },
+      "transform": {
+        "x": 0.0,
+        "y": 0.0,
+        "rotation": 0.0,
+        "scaleX": 1.0,
+        "scaleY": 1.0
+      },
       "style": {
         "fill": {
-          "a": 1.0,
-          "b": 0.16862745098039217,
+          "r": 0.047058823529411764,
           "g": 0.09019607843137255,
-          "r": 0.047058823529411764
+          "b": 0.16862745098039217,
+          "a": 1.0
         },
-        "opacity": 1.0,
         "stroke": null,
-        "strokeWidth": 1.0
+        "strokeWidth": 1.0,
+        "opacity": 1.0
       },
-      "transform": {
-        "rotation": 0.0,
-        "scaleX": 1.0,
-        "scaleY": 1.0,
+      "kind": {
+        "type": "rect",
         "x": 0.0,
-        "y": 0.0
-      },
-      "visible": true
+        "y": 0.0,
+        "width": 960.0,
+        "height": 640.0,
+        "rx": 0.0
+      }
     },
     {
-      "boneId": null,
       "id": "ambient",
-      "kind": {
-        "cx": 840.0,
-        "cy": 180.0,
-        "radius": 270.0,
-        "type": "circle"
-      },
-      "locked": false,
       "name": "",
+      "boneId": null,
+      "visible": true,
+      "locked": false,
       "originalKind": null,
+      "a11y": {
+        "hidden": true
+      },
+      "transform": {
+        "x": 0.0,
+        "y": 0.0,
+        "rotation": 0.0,
+        "scaleX": 1.0,
+        "scaleY": 1.0
+      },
       "style": {
         "fill": {
-          "a": 1.0,
-          "b": 0.2235294117647059,
+          "r": 0.06274509803921569,
           "g": 0.13333333333333333,
-          "r": 0.06274509803921569
+          "b": 0.2235294117647059,
+          "a": 1.0
         },
-        "opacity": 1.0,
         "stroke": null,
-        "strokeWidth": 1.0
+        "strokeWidth": 1.0,
+        "opacity": 1.0
       },
-      "transform": {
-        "rotation": 0.0,
-        "scaleX": 1.0,
-        "scaleY": 1.0,
-        "x": 0.0,
-        "y": 0.0
-      },
-      "visible": true
-    },
-    {
-      "boneId": null,
-      "id": "ambient-inner",
       "kind": {
+        "type": "circle",
         "cx": 840.0,
         "cy": 180.0,
-        "radius": 210.0,
-        "type": "circle"
-      },
-      "locked": false,
+        "radius": 270.0
+      }
+    },
+    {
+      "id": "ambient-inner",
       "name": "",
+      "boneId": null,
+      "visible": true,
+      "locked": false,
       "originalKind": null,
+      "a11y": {
+        "hidden": true
+      },
+      "transform": {
+        "x": 0.0,
+        "y": 0.0,
+        "rotation": 0.0,
+        "scaleX": 1.0,
+        "scaleY": 1.0
+      },
       "style": {
         "fill": {
-          "a": 1.0,
-          "b": 0.2549019607843137,
+          "r": 0.07450980392156863,
           "g": 0.1568627450980392,
-          "r": 0.07450980392156863
+          "b": 0.2549019607843137,
+          "a": 1.0
         },
-        "opacity": 1.0,
         "stroke": null,
-        "strokeWidth": 1.0
+        "strokeWidth": 1.0,
+        "opacity": 1.0
       },
-      "transform": {
-        "rotation": 0.0,
-        "scaleX": 1.0,
-        "scaleY": 1.0,
-        "x": 0.0,
-        "y": 0.0
-      },
-      "visible": true
+      "kind": {
+        "type": "circle",
+        "cx": 840.0,
+        "cy": 180.0,
+        "radius": 210.0
+      }
     },
     {
-      "boneId": null,
       "id": "eyebrow",
-      "kind": {
-        "fontSize": 14.0,
-        "text": "SPLINELY / MOTION STUDIES",
-        "type": "text",
-        "x": 54.0,
-        "y": 66.0
-      },
-      "locked": false,
       "name": "",
+      "boneId": null,
+      "visible": true,
+      "locked": false,
       "originalKind": null,
+      "transform": {
+        "x": 0.0,
+        "y": 0.0,
+        "rotation": 0.0,
+        "scaleX": 1.0,
+        "scaleY": 1.0
+      },
       "style": {
         "fill": {
-          "a": 1.0,
-          "b": 0.8627450980392157,
+          "r": 0.4117647058823529,
           "g": 0.7686274509803922,
-          "r": 0.4117647058823529
+          "b": 0.8627450980392157,
+          "a": 1.0
         },
-        "opacity": 1.0,
         "stroke": null,
-        "strokeWidth": 1.0
+        "strokeWidth": 1.0,
+        "opacity": 1.0
       },
-      "transform": {
-        "rotation": 0.0,
-        "scaleX": 1.0,
-        "scaleY": 1.0,
-        "x": 0.0,
-        "y": 0.0
-      },
-      "visible": true
+      "kind": {
+        "type": "text",
+        "x": 54.0,
+        "y": 66.0,
+        "text": "SPLINELY / MOTION STUDIES",
+        "fontSize": 14.0
+      }
     },
     {
-      "boneId": null,
       "id": "title",
-      "kind": {
-        "fontSize": 34.0,
-        "text": "The shape conversation",
-        "type": "text",
-        "x": 54.0,
-        "y": 112.0
-      },
-      "locked": false,
       "name": "",
+      "boneId": null,
+      "visible": true,
+      "locked": false,
       "originalKind": null,
+      "transform": {
+        "x": 0.0,
+        "y": 0.0,
+        "rotation": 0.0,
+        "scaleX": 1.0,
+        "scaleY": 1.0
+      },
       "style": {
         "fill": {
-          "a": 1.0,
-          "b": 1.0,
+          "r": 0.9294117647058824,
           "g": 0.9647058823529412,
-          "r": 0.9294117647058824
-        },
-        "opacity": 1.0,
-        "stroke": null,
-        "strokeWidth": 1.0
-      },
-      "transform": {
-        "rotation": 0.0,
-        "scaleX": 1.0,
-        "scaleY": 1.0,
-        "x": 0.0,
-        "y": 0.0
-      },
-      "visible": true
-    },
-    {
-      "boneId": null,
-      "id": "subtitle",
-      "kind": {
-        "fontSize": 15.0,
-        "text": "Seeded geometry. Every state gets its turn; narration is optional.",
-        "type": "text",
-        "x": 54.0,
-        "y": 144.0
-      },
-      "locked": false,
-      "name": "",
-      "originalKind": null,
-      "style": {
-        "fill": {
-          "a": 1.0,
-          "b": 0.796078431372549,
-          "g": 0.7098039215686275,
-          "r": 0.611764705882353
-        },
-        "opacity": 1.0,
-        "stroke": null,
-        "strokeWidth": 1.0
-      },
-      "transform": {
-        "rotation": 0.0,
-        "scaleX": 1.0,
-        "scaleY": 1.0,
-        "x": 0.0,
-        "y": 0.0
-      },
-      "visible": true
-    },
-    {
-      "boneId": null,
-      "id": "start-control",
-      "kind": {
-        "height": 40.0,
-        "rx": 12.0,
-        "type": "rect",
-        "width": 152.0,
-        "x": 54.0,
-        "y": 567.0
-      },
-      "locked": false,
-      "name": "",
-      "originalKind": null,
-      "style": {
-        "fill": {
-          "a": 1.0,
-          "b": 0.32941176470588235,
-          "g": 0.23529411764705882,
-          "r": 0.12549019607843137
-        },
-        "opacity": 1.0,
-        "stroke": null,
-        "strokeWidth": 1.0
-      },
-      "transform": {
-        "rotation": 0.0,
-        "scaleX": 1.0,
-        "scaleY": 1.0,
-        "x": 0.0,
-        "y": 0.0
-      },
-      "visible": true
-    },
-    {
-      "boneId": null,
-      "id": "start-control-label",
-      "kind": {
-        "fontSize": 15.0,
-        "text": "Play / resume",
-        "type": "text",
-        "x": 70.0,
-        "y": 593.0
-      },
-      "locked": false,
-      "name": "",
-      "originalKind": null,
-      "style": {
-        "fill": {
-          "a": 1.0,
-          "b": 0.9764705882352941,
-          "g": 0.9411764705882353,
-          "r": 0.8705882352941177
-        },
-        "opacity": 1.0,
-        "stroke": null,
-        "strokeWidth": 1.0
-      },
-      "transform": {
-        "rotation": 0.0,
-        "scaleX": 1.0,
-        "scaleY": 1.0,
-        "x": 0.0,
-        "y": 0.0
-      },
-      "visible": true
-    },
-    {
-      "boneId": null,
-      "id": "pause-control",
-      "kind": {
-        "height": 40.0,
-        "rx": 12.0,
-        "type": "rect",
-        "width": 152.0,
-        "x": 222.0,
-        "y": 567.0
-      },
-      "locked": false,
-      "name": "",
-      "originalKind": null,
-      "style": {
-        "fill": {
-          "a": 1.0,
-          "b": 0.32941176470588235,
-          "g": 0.23529411764705882,
-          "r": 0.12549019607843137
-        },
-        "opacity": 1.0,
-        "stroke": null,
-        "strokeWidth": 1.0
-      },
-      "transform": {
-        "rotation": 0.0,
-        "scaleX": 1.0,
-        "scaleY": 1.0,
-        "x": 0.0,
-        "y": 0.0
-      },
-      "visible": true
-    },
-    {
-      "boneId": null,
-      "id": "pause-control-label",
-      "kind": {
-        "fontSize": 15.0,
-        "text": "Pause",
-        "type": "text",
-        "x": 238.0,
-        "y": 593.0
-      },
-      "locked": false,
-      "name": "",
-      "originalKind": null,
-      "style": {
-        "fill": {
-          "a": 1.0,
-          "b": 0.9764705882352941,
-          "g": 0.9411764705882353,
-          "r": 0.8705882352941177
-        },
-        "opacity": 1.0,
-        "stroke": null,
-        "strokeWidth": 1.0
-      },
-      "transform": {
-        "rotation": 0.0,
-        "scaleX": 1.0,
-        "scaleY": 1.0,
-        "x": 0.0,
-        "y": 0.0
-      },
-      "visible": true
-    },
-    {
-      "boneId": null,
-      "id": "status",
-      "kind": {
-        "fontSize": 14.0,
-        "text": "Ready · use Play",
-        "type": "text",
-        "x": 402.0,
-        "y": 593.0
-      },
-      "locked": false,
-      "name": "",
-      "originalKind": null,
-      "style": {
-        "fill": {
-          "a": 1.0,
-          "b": 0.796078431372549,
-          "g": 0.7098039215686275,
-          "r": 0.611764705882353
-        },
-        "opacity": 1.0,
-        "stroke": null,
-        "strokeWidth": 1.0
-      },
-      "transform": {
-        "rotation": 0.0,
-        "scaleX": 1.0,
-        "scaleY": 1.0,
-        "x": 0.0,
-        "y": 0.0
-      },
-      "visible": true
-    },
-    {
-      "boneId": null,
-      "id": "stage",
-      "kind": {
-        "cx": 0.0,
-        "cy": 0.0,
-        "radius": 170.0,
-        "type": "circle"
-      },
-      "locked": false,
-      "name": "",
-      "originalKind": null,
-      "style": {
-        "fill": {
-          "a": 1.0,
-          "b": 0.25882352941176473,
-          "g": 0.16862745098039217,
-          "r": 0.09019607843137255
-        },
-        "opacity": 1.0,
-        "stroke": null,
-        "strokeWidth": 1.0
-      },
-      "transform": {
-        "rotation": 0.0,
-        "scaleX": 1.0,
-        "scaleY": 0.87,
-        "x": 480.0,
-        "y": 328.0
-      },
-      "visible": true
-    },
-    {
-      "boneId": null,
-      "id": "shape-0",
-      "kind": {
-        "height": 163.52780573686508,
-        "rx": 26.0,
-        "type": "rect",
-        "width": 163.52780573686508,
-        "x": -81.76390286843254,
-        "y": -81.76390286843254
-      },
-      "locked": false,
-      "name": "",
-      "originalKind": null,
-      "style": {
-        "fill": {
-          "a": 1.0,
-          "b": 0.8549019607843137,
-          "g": 0.8784313725490196,
-          "r": 0.4
-        },
-        "opacity": 0.0,
-        "stroke": null,
-        "strokeWidth": 1.0
-      },
-      "transform": {
-        "rotation": 0.0,
-        "scaleX": 1.0,
-        "scaleY": 1.0,
-        "x": 480.0,
-        "y": 320.0
-      },
-      "visible": true
-    },
-    {
-      "boneId": null,
-      "id": "phrase-0",
-      "kind": {
-        "fontSize": 20.0,
-        "text": "I am a soft square. Let's build something.",
-        "type": "text",
-        "x": 180.0,
-        "y": 506.0
-      },
-      "locked": false,
-      "name": "",
-      "originalKind": null,
-      "style": {
-        "fill": {
-          "a": 1.0,
-          "b": 0.9725490196078431,
-          "g": 0.9294117647058824,
-          "r": 0.8705882352941177
-        },
-        "opacity": 0.0,
-        "stroke": null,
-        "strokeWidth": 1.0
-      },
-      "transform": {
-        "rotation": 0.0,
-        "scaleX": 1.0,
-        "scaleY": 1.0,
-        "x": 0.0,
-        "y": 0.0
-      },
-      "visible": true
-    },
-    {
-      "boneId": null,
-      "id": "shape-1",
-      "kind": {
-        "height": 190.80886843452694,
-        "rx": 26.0,
-        "type": "rect",
-        "width": 190.80886843452694,
-        "x": -95.40443421726347,
-        "y": -95.40443421726347
-      },
-      "locked": false,
-      "name": "",
-      "originalKind": null,
-      "style": {
-        "fill": {
-          "a": 1.0,
-          "b": 0.4196078431372549,
-          "g": 0.7215686274509804,
-          "r": 1.0
-        },
-        "opacity": 0.0,
-        "stroke": null,
-        "strokeWidth": 1.0
-      },
-      "transform": {
-        "rotation": 0.0,
-        "scaleX": 1.0,
-        "scaleY": 1.0,
-        "x": 480.0,
-        "y": 320.0
-      },
-      "visible": true
-    },
-    {
-      "boneId": null,
-      "id": "phrase-1",
-      "kind": {
-        "fontSize": 20.0,
-        "text": "I am a soft square. Let's build something.",
-        "type": "text",
-        "x": 180.0,
-        "y": 506.0
-      },
-      "locked": false,
-      "name": "",
-      "originalKind": null,
-      "style": {
-        "fill": {
-          "a": 1.0,
-          "b": 0.9725490196078431,
-          "g": 0.9294117647058824,
-          "r": 0.8705882352941177
-        },
-        "opacity": 0.0,
-        "stroke": null,
-        "strokeWidth": 1.0
-      },
-      "transform": {
-        "rotation": 0.0,
-        "scaleX": 1.0,
-        "scaleY": 1.0,
-        "x": 0.0,
-        "y": 0.0
-      },
-      "visible": true
-    },
-    {
-      "boneId": null,
-      "id": "shape-2",
-      "kind": {
-        "cx": 0.0,
-        "cy": 0.0,
-        "radius": 79.57365127372836,
-        "type": "circle"
-      },
-      "locked": false,
-      "name": "",
-      "originalKind": null,
-      "style": {
-        "fill": {
-          "a": 1.0,
           "b": 1.0,
-          "g": 0.6,
-          "r": 0.6745098039215687
+          "a": 1.0
         },
-        "opacity": 0.0,
         "stroke": null,
-        "strokeWidth": 1.0
+        "strokeWidth": 1.0,
+        "opacity": 1.0
       },
-      "transform": {
-        "rotation": 0.0,
-        "scaleX": 1.0,
-        "scaleY": 1.0,
-        "x": 480.0,
-        "y": 320.0
-      },
-      "visible": true
+      "kind": {
+        "type": "text",
+        "x": 54.0,
+        "y": 112.0,
+        "text": "The shape conversation",
+        "fontSize": 34.0
+      }
     },
     {
-      "boneId": null,
-      "id": "phrase-2",
-      "kind": {
-        "fontSize": 20.0,
-        "text": "Hello! I am a curious circle.",
-        "type": "text",
-        "x": 180.0,
-        "y": 506.0
-      },
-      "locked": false,
+      "id": "subtitle",
       "name": "",
+      "boneId": null,
+      "visible": true,
+      "locked": false,
       "originalKind": null,
+      "transform": {
+        "x": 0.0,
+        "y": 0.0,
+        "rotation": 0.0,
+        "scaleX": 1.0,
+        "scaleY": 1.0
+      },
       "style": {
         "fill": {
-          "a": 1.0,
-          "b": 0.9725490196078431,
-          "g": 0.9294117647058824,
-          "r": 0.8705882352941177
+          "r": 0.611764705882353,
+          "g": 0.7098039215686275,
+          "b": 0.796078431372549,
+          "a": 1.0
         },
-        "opacity": 0.0,
         "stroke": null,
-        "strokeWidth": 1.0
+        "strokeWidth": 1.0,
+        "opacity": 1.0
       },
-      "transform": {
-        "rotation": 0.0,
-        "scaleX": 1.0,
-        "scaleY": 1.0,
-        "x": 0.0,
-        "y": 0.0
-      },
-      "visible": true
+      "kind": {
+        "type": "text",
+        "x": 54.0,
+        "y": 144.0,
+        "text": "Seeded geometry. Every state gets its turn; narration is optional.",
+        "fontSize": 15.0
+      }
     },
     {
+      "id": "status",
+      "name": "",
       "boneId": null,
-      "id": "shape-3",
+      "visible": true,
+      "locked": false,
+      "originalKind": null,
+      "transform": {
+        "x": 0.0,
+        "y": 0.0,
+        "rotation": 0.0,
+        "scaleX": 1.0,
+        "scaleY": 1.0
+      },
+      "style": {
+        "fill": {
+          "r": 0.611764705882353,
+          "g": 0.7098039215686275,
+          "b": 0.796078431372549,
+          "a": 1.0
+        },
+        "stroke": null,
+        "strokeWidth": 1.0,
+        "opacity": 1.0
+      },
       "kind": {
+        "type": "text",
+        "x": 54.0,
+        "y": 593.0,
+        "text": "Starting…",
+        "fontSize": 14.0
+      }
+    },
+    {
+      "id": "stage",
+      "name": "",
+      "boneId": null,
+      "visible": true,
+      "locked": false,
+      "originalKind": null,
+      "transform": {
+        "x": 480.0,
+        "y": 328.0,
+        "rotation": 0.0,
+        "scaleX": 1.0,
+        "scaleY": 0.87
+      },
+      "style": {
+        "fill": {
+          "r": 0.09019607843137255,
+          "g": 0.16862745098039217,
+          "b": 0.25882352941176473,
+          "a": 1.0
+        },
+        "stroke": null,
+        "strokeWidth": 1.0,
+        "opacity": 1.0
+      },
+      "kind": {
+        "type": "circle",
         "cx": 0.0,
         "cy": 0.0,
-        "radius": 85.70256304932172,
-        "type": "circle"
-      },
-      "locked": false,
-      "name": "",
-      "originalKind": null,
-      "style": {
-        "fill": {
-          "a": 1.0,
-          "b": 0.6431372549019608,
-          "g": 0.5294117647058824,
-          "r": 1.0
-        },
-        "opacity": 0.0,
-        "stroke": null,
-        "strokeWidth": 1.0
-      },
-      "transform": {
-        "rotation": 0.0,
-        "scaleX": 1.0,
-        "scaleY": 1.0,
-        "x": 480.0,
-        "y": 320.0
-      },
-      "visible": true
+        "radius": 170.0
+      }
     },
     {
+      "id": "shape-0",
+      "name": "",
       "boneId": null,
-      "id": "phrase-3",
+      "visible": true,
+      "locked": false,
+      "originalKind": null,
+      "transform": {
+        "x": 480.0,
+        "y": 320.0,
+        "rotation": 0.0,
+        "scaleX": 1.0,
+        "scaleY": 1.0
+      },
+      "style": {
+        "fill": {
+          "r": 0.4,
+          "g": 0.8784313725490196,
+          "b": 0.8549019607843137,
+          "a": 1.0
+        },
+        "stroke": null,
+        "strokeWidth": 1.0,
+        "opacity": 0.0
+      },
       "kind": {
-        "fontSize": 20.0,
-        "text": "Hello! I am a curious circle.",
+        "type": "rect",
+        "x": -81.76390286843254,
+        "y": -81.76390286843254,
+        "width": 163.52780573686508,
+        "height": 163.52780573686508,
+        "rx": 26.0
+      }
+    },
+    {
+      "id": "phrase-0",
+      "name": "",
+      "boneId": null,
+      "visible": true,
+      "locked": false,
+      "originalKind": null,
+      "transform": {
+        "x": 0.0,
+        "y": 0.0,
+        "rotation": 0.0,
+        "scaleX": 1.0,
+        "scaleY": 1.0
+      },
+      "style": {
+        "fill": {
+          "r": 0.8705882352941177,
+          "g": 0.9294117647058824,
+          "b": 0.9725490196078431,
+          "a": 1.0
+        },
+        "stroke": null,
+        "strokeWidth": 1.0,
+        "opacity": 0.0
+      },
+      "kind": {
         "type": "text",
         "x": 180.0,
-        "y": 506.0
-      },
-      "locked": false,
-      "name": "",
-      "originalKind": null,
-      "style": {
-        "fill": {
-          "a": 1.0,
-          "b": 0.9725490196078431,
-          "g": 0.9294117647058824,
-          "r": 0.8705882352941177
-        },
-        "opacity": 0.0,
-        "stroke": null,
-        "strokeWidth": 1.0
-      },
-      "transform": {
-        "rotation": 0.0,
-        "scaleX": 1.0,
-        "scaleY": 1.0,
-        "x": 0.0,
-        "y": 0.0
-      },
-      "visible": true
+        "y": 506.0,
+        "text": "I am a soft square. Let's build something.",
+        "fontSize": 20.0
+      }
     },
     {
+      "id": "shape-1",
+      "name": "",
       "boneId": null,
-      "id": "shape-4",
+      "visible": true,
+      "locked": false,
+      "originalKind": null,
+      "transform": {
+        "x": 480.0,
+        "y": 320.0,
+        "rotation": 0.0,
+        "scaleX": 1.0,
+        "scaleY": 1.0
+      },
+      "style": {
+        "fill": {
+          "r": 1.0,
+          "g": 0.7215686274509804,
+          "b": 0.4196078431372549,
+          "a": 1.0
+        },
+        "stroke": null,
+        "strokeWidth": 1.0,
+        "opacity": 0.0
+      },
       "kind": {
+        "type": "rect",
+        "x": -95.40443421726347,
+        "y": -95.40443421726347,
+        "width": 190.80886843452694,
+        "height": 190.80886843452694,
+        "rx": 26.0
+      }
+    },
+    {
+      "id": "phrase-1",
+      "name": "",
+      "boneId": null,
+      "visible": true,
+      "locked": false,
+      "originalKind": null,
+      "transform": {
+        "x": 0.0,
+        "y": 0.0,
+        "rotation": 0.0,
+        "scaleX": 1.0,
+        "scaleY": 1.0
+      },
+      "style": {
+        "fill": {
+          "r": 0.8705882352941177,
+          "g": 0.9294117647058824,
+          "b": 0.9725490196078431,
+          "a": 1.0
+        },
+        "stroke": null,
+        "strokeWidth": 1.0,
+        "opacity": 0.0
+      },
+      "kind": {
+        "type": "text",
+        "x": 180.0,
+        "y": 506.0,
+        "text": "I am a soft square. Let's build something.",
+        "fontSize": 20.0
+      }
+    },
+    {
+      "id": "shape-2",
+      "name": "",
+      "boneId": null,
+      "visible": true,
+      "locked": false,
+      "originalKind": null,
+      "transform": {
+        "x": 480.0,
+        "y": 320.0,
+        "rotation": 0.0,
+        "scaleX": 1.0,
+        "scaleY": 1.0
+      },
+      "style": {
+        "fill": {
+          "r": 0.6745098039215687,
+          "g": 0.6,
+          "b": 1.0,
+          "a": 1.0
+        },
+        "stroke": null,
+        "strokeWidth": 1.0,
+        "opacity": 0.0
+      },
+      "kind": {
+        "type": "circle",
+        "cx": 0.0,
+        "cy": 0.0,
+        "radius": 79.57365127372836
+      }
+    },
+    {
+      "id": "phrase-2",
+      "name": "",
+      "boneId": null,
+      "visible": true,
+      "locked": false,
+      "originalKind": null,
+      "transform": {
+        "x": 0.0,
+        "y": 0.0,
+        "rotation": 0.0,
+        "scaleX": 1.0,
+        "scaleY": 1.0
+      },
+      "style": {
+        "fill": {
+          "r": 0.8705882352941177,
+          "g": 0.9294117647058824,
+          "b": 0.9725490196078431,
+          "a": 1.0
+        },
+        "stroke": null,
+        "strokeWidth": 1.0,
+        "opacity": 0.0
+      },
+      "kind": {
+        "type": "text",
+        "x": 180.0,
+        "y": 506.0,
+        "text": "Hello! I am a curious circle.",
+        "fontSize": 20.0
+      }
+    },
+    {
+      "id": "shape-3",
+      "name": "",
+      "boneId": null,
+      "visible": true,
+      "locked": false,
+      "originalKind": null,
+      "transform": {
+        "x": 480.0,
+        "y": 320.0,
+        "rotation": 0.0,
+        "scaleX": 1.0,
+        "scaleY": 1.0
+      },
+      "style": {
+        "fill": {
+          "r": 1.0,
+          "g": 0.5294117647058824,
+          "b": 0.6431372549019608,
+          "a": 1.0
+        },
+        "stroke": null,
+        "strokeWidth": 1.0,
+        "opacity": 0.0
+      },
+      "kind": {
+        "type": "circle",
+        "cx": 0.0,
+        "cy": 0.0,
+        "radius": 85.70256304932172
+      }
+    },
+    {
+      "id": "phrase-3",
+      "name": "",
+      "boneId": null,
+      "visible": true,
+      "locked": false,
+      "originalKind": null,
+      "transform": {
+        "x": 0.0,
+        "y": 0.0,
+        "rotation": 0.0,
+        "scaleX": 1.0,
+        "scaleY": 1.0
+      },
+      "style": {
+        "fill": {
+          "r": 0.8705882352941177,
+          "g": 0.9294117647058824,
+          "b": 0.9725490196078431,
+          "a": 1.0
+        },
+        "stroke": null,
+        "strokeWidth": 1.0,
+        "opacity": 0.0
+      },
+      "kind": {
+        "type": "text",
+        "x": 180.0,
+        "y": 506.0,
+        "text": "Hello! I am a curious circle.",
+        "fontSize": 20.0
+      }
+    },
+    {
+      "id": "shape-4",
+      "name": "",
+      "boneId": null,
+      "visible": true,
+      "locked": false,
+      "originalKind": null,
+      "transform": {
+        "x": 480.0,
+        "y": 320.0,
+        "rotation": 0.0,
+        "scaleX": 1.0,
+        "scaleY": 1.0
+      },
+      "style": {
+        "fill": {
+          "r": 0.5647058823529412,
+          "g": 0.8117647058823529,
+          "b": 1.0,
+          "a": 1.0
+        },
+        "stroke": null,
+        "strokeWidth": 1.0,
+        "opacity": 0.0
+      },
+      "kind": {
+        "type": "path",
+        "d": "M 0.0000 -84.7955 L 73.4351 -42.3978 L 73.4351 42.3978 L 0.0000 84.7955 L -73.4351 42.3978 L -73.4351 -42.3978 Z",
         "bounds": [
           -73.43509674072266,
           -84.79550170898438,
           146.8701934814453,
           169.59100341796875
         ],
-        "d": "M 0.0000 -84.7955 L 73.4351 -42.3978 L 73.4351 42.3978 L 0.0000 84.7955 L -73.4351 42.3978 L -73.4351 -42.3978 Z",
-        "evenodd": false,
-        "type": "path"
-      },
-      "locked": false,
-      "name": "",
-      "originalKind": null,
-      "style": {
-        "fill": {
-          "a": 1.0,
-          "b": 1.0,
-          "g": 0.8117647058823529,
-          "r": 0.5647058823529412
-        },
-        "opacity": 0.0,
-        "stroke": null,
-        "strokeWidth": 1.0
-      },
-      "transform": {
-        "rotation": 0.0,
-        "scaleX": 1.0,
-        "scaleY": 1.0,
-        "x": 480.0,
-        "y": 320.0
-      },
-      "visible": true
+        "evenodd": false
+      }
     },
     {
-      "boneId": null,
       "id": "phrase-4",
+      "name": "",
+      "boneId": null,
+      "visible": true,
+      "locked": false,
+      "originalKind": null,
+      "transform": {
+        "x": 0.0,
+        "y": 0.0,
+        "rotation": 0.0,
+        "scaleX": 1.0,
+        "scaleY": 1.0
+      },
+      "style": {
+        "fill": {
+          "r": 0.8705882352941177,
+          "g": 0.9294117647058824,
+          "b": 0.9725490196078431,
+          "a": 1.0
+        },
+        "stroke": null,
+        "strokeWidth": 1.0,
+        "opacity": 0.0
+      },
       "kind": {
-        "fontSize": 20.0,
-        "text": "I am a bright polygon. Every corner has a story.",
         "type": "text",
         "x": 180.0,
-        "y": 506.0
-      },
-      "locked": false,
-      "name": "",
-      "originalKind": null,
-      "style": {
-        "fill": {
-          "a": 1.0,
-          "b": 0.9725490196078431,
-          "g": 0.9294117647058824,
-          "r": 0.8705882352941177
-        },
-        "opacity": 0.0,
-        "stroke": null,
-        "strokeWidth": 1.0
-      },
-      "transform": {
-        "rotation": 0.0,
-        "scaleX": 1.0,
-        "scaleY": 1.0,
-        "x": 0.0,
-        "y": 0.0
-      },
-      "visible": true
+        "y": 506.0,
+        "text": "I am a bright polygon. Every corner has a story.",
+        "fontSize": 20.0
+      }
     },
     {
-      "boneId": null,
       "id": "shape-5",
+      "name": "",
+      "boneId": null,
+      "visible": true,
+      "locked": false,
+      "originalKind": null,
+      "transform": {
+        "x": 480.0,
+        "y": 320.0,
+        "rotation": 0.0,
+        "scaleX": 1.0,
+        "scaleY": 1.0
+      },
+      "style": {
+        "fill": {
+          "r": 0.8117647058823529,
+          "g": 0.9098039215686274,
+          "b": 0.5764705882352941,
+          "a": 1.0
+        },
+        "stroke": null,
+        "strokeWidth": 1.0,
+        "opacity": 0.0
+      },
       "kind": {
+        "type": "path",
+        "d": "M 0.0000 -77.0158 L 73.2464 -23.7992 L 45.2688 62.3071 L -45.2688 62.3071 L -73.2464 -23.7992 Z",
         "bounds": [
           -73.24639892578125,
           -77.01580047607422,
           146.4927978515625,
           139.32290649414062
         ],
-        "d": "M 0.0000 -77.0158 L 73.2464 -23.7992 L 45.2688 62.3071 L -45.2688 62.3071 L -73.2464 -23.7992 Z",
-        "evenodd": false,
-        "type": "path"
-      },
-      "locked": false,
-      "name": "",
-      "originalKind": null,
-      "style": {
-        "fill": {
-          "a": 1.0,
-          "b": 0.5764705882352941,
-          "g": 0.9098039215686274,
-          "r": 0.8117647058823529
-        },
-        "opacity": 0.0,
-        "stroke": null,
-        "strokeWidth": 1.0
-      },
-      "transform": {
-        "rotation": 0.0,
-        "scaleX": 1.0,
-        "scaleY": 1.0,
-        "x": 480.0,
-        "y": 320.0
-      },
-      "visible": true
+        "evenodd": false
+      }
     },
     {
-      "boneId": null,
       "id": "phrase-5",
-      "kind": {
-        "fontSize": 20.0,
-        "text": "I am a bright polygon. Every corner has a story.",
-        "type": "text",
-        "x": 180.0,
-        "y": 506.0
-      },
-      "locked": false,
       "name": "",
+      "boneId": null,
+      "visible": true,
+      "locked": false,
       "originalKind": null,
-      "style": {
-        "fill": {
-          "a": 1.0,
-          "b": 0.9725490196078431,
-          "g": 0.9294117647058824,
-          "r": 0.8705882352941177
-        },
-        "opacity": 0.0,
-        "stroke": null,
-        "strokeWidth": 1.0
-      },
       "transform": {
+        "x": 0.0,
+        "y": 0.0,
         "rotation": 0.0,
         "scaleX": 1.0,
-        "scaleY": 1.0,
-        "x": 0.0,
-        "y": 0.0
+        "scaleY": 1.0
       },
-      "visible": true
+      "style": {
+        "fill": {
+          "r": 0.8705882352941177,
+          "g": 0.9294117647058824,
+          "b": 0.9725490196078431,
+          "a": 1.0
+        },
+        "stroke": null,
+        "strokeWidth": 1.0,
+        "opacity": 0.0
+      },
+      "kind": {
+        "type": "text",
+        "x": 180.0,
+        "y": 506.0,
+        "text": "I am a bright polygon. Every corner has a story.",
+        "fontSize": 20.0
+      }
     }
   ],
-  "rawSvg": "",
-  "schemaVersion": 1,
+  "bones": [],
+  "clips": [
+    {
+      "id": "motion-0",
+      "name": "",
+      "duration": 4.8,
+      "looping": false,
+      "autoplay": false,
+      "blendMode": "override",
+      "weight": 1.0,
+      "tracks": [
+        {
+          "nodeId": "shape-0",
+          "property": "scaleX",
+          "keyframes": [
+            {
+              "time": 0.0,
+              "value": {
+                "type": "number",
+                "value": 0.65
+              },
+              "easing": {
+                "type": "cubicBezier",
+                "x1": 0.42,
+                "y1": 0.0,
+                "x2": 0.58,
+                "y2": 1.0
+              }
+            },
+            {
+              "time": 0.65,
+              "value": {
+                "type": "number",
+                "value": 1.08
+              },
+              "easing": {
+                "type": "cubicBezier",
+                "x1": 0.42,
+                "y1": 0.0,
+                "x2": 0.58,
+                "y2": 1.0
+              }
+            },
+            {
+              "time": 1.0,
+              "value": {
+                "type": "number",
+                "value": 1.0
+              },
+              "easing": {
+                "type": "cubicBezier",
+                "x1": 0.42,
+                "y1": 0.0,
+                "x2": 0.58,
+                "y2": 1.0
+              }
+            },
+            {
+              "time": 3.8,
+              "value": {
+                "type": "number",
+                "value": 1.0
+              },
+              "easing": {
+                "type": "cubicBezier",
+                "x1": 0.42,
+                "y1": 0.0,
+                "x2": 0.58,
+                "y2": 1.0
+              }
+            },
+            {
+              "time": 4.8,
+              "value": {
+                "type": "number",
+                "value": 0.65
+              },
+              "easing": {
+                "type": "cubicBezier",
+                "x1": 0.42,
+                "y1": 0.0,
+                "x2": 0.58,
+                "y2": 1.0
+              }
+            }
+          ]
+        },
+        {
+          "nodeId": "shape-0",
+          "property": "scaleY",
+          "keyframes": [
+            {
+              "time": 0.0,
+              "value": {
+                "type": "number",
+                "value": 0.65
+              },
+              "easing": {
+                "type": "cubicBezier",
+                "x1": 0.42,
+                "y1": 0.0,
+                "x2": 0.58,
+                "y2": 1.0
+              }
+            },
+            {
+              "time": 0.65,
+              "value": {
+                "type": "number",
+                "value": 1.08
+              },
+              "easing": {
+                "type": "cubicBezier",
+                "x1": 0.42,
+                "y1": 0.0,
+                "x2": 0.58,
+                "y2": 1.0
+              }
+            },
+            {
+              "time": 1.0,
+              "value": {
+                "type": "number",
+                "value": 1.0
+              },
+              "easing": {
+                "type": "cubicBezier",
+                "x1": 0.42,
+                "y1": 0.0,
+                "x2": 0.58,
+                "y2": 1.0
+              }
+            },
+            {
+              "time": 3.8,
+              "value": {
+                "type": "number",
+                "value": 1.0
+              },
+              "easing": {
+                "type": "cubicBezier",
+                "x1": 0.42,
+                "y1": 0.0,
+                "x2": 0.58,
+                "y2": 1.0
+              }
+            },
+            {
+              "time": 4.8,
+              "value": {
+                "type": "number",
+                "value": 0.65
+              },
+              "easing": {
+                "type": "cubicBezier",
+                "x1": 0.42,
+                "y1": 0.0,
+                "x2": 0.58,
+                "y2": 1.0
+              }
+            }
+          ]
+        },
+        {
+          "nodeId": "shape-0",
+          "property": "y",
+          "keyframes": [
+            {
+              "time": 0.0,
+              "value": {
+                "type": "number",
+                "value": 350.0
+              },
+              "easing": {
+                "type": "cubicBezier",
+                "x1": 0.42,
+                "y1": 0.0,
+                "x2": 0.58,
+                "y2": 1.0
+              }
+            },
+            {
+              "time": 1.0,
+              "value": {
+                "type": "number",
+                "value": 320.0
+              },
+              "easing": {
+                "type": "cubicBezier",
+                "x1": 0.42,
+                "y1": 0.0,
+                "x2": 0.58,
+                "y2": 1.0
+              }
+            },
+            {
+              "time": 2.4,
+              "value": {
+                "type": "number",
+                "value": 305.0
+              },
+              "easing": {
+                "type": "cubicBezier",
+                "x1": 0.42,
+                "y1": 0.0,
+                "x2": 0.58,
+                "y2": 1.0
+              }
+            },
+            {
+              "time": 3.8,
+              "value": {
+                "type": "number",
+                "value": 320.0
+              },
+              "easing": {
+                "type": "cubicBezier",
+                "x1": 0.42,
+                "y1": 0.0,
+                "x2": 0.58,
+                "y2": 1.0
+              }
+            },
+            {
+              "time": 4.8,
+              "value": {
+                "type": "number",
+                "value": 350.0
+              },
+              "easing": {
+                "type": "cubicBezier",
+                "x1": 0.42,
+                "y1": 0.0,
+                "x2": 0.58,
+                "y2": 1.0
+              }
+            }
+          ]
+        },
+        {
+          "nodeId": "shape-0",
+          "property": "rotation",
+          "keyframes": [
+            {
+              "time": 0.0,
+              "value": {
+                "type": "number",
+                "value": -20.256766376590235
+              },
+              "easing": {
+                "type": "cubicBezier",
+                "x1": 0.42,
+                "y1": 0.0,
+                "x2": 0.58,
+                "y2": 1.0
+              }
+            },
+            {
+              "time": 1.0,
+              "value": {
+                "type": "number",
+                "value": 0.0
+              },
+              "easing": {
+                "type": "cubicBezier",
+                "x1": 0.42,
+                "y1": 0.0,
+                "x2": 0.58,
+                "y2": 1.0
+              }
+            },
+            {
+              "time": 2.4,
+              "value": {
+                "type": "number",
+                "value": 20.256766376590235
+              },
+              "easing": {
+                "type": "cubicBezier",
+                "x1": 0.42,
+                "y1": 0.0,
+                "x2": 0.58,
+                "y2": 1.0
+              }
+            },
+            {
+              "time": 3.8,
+              "value": {
+                "type": "number",
+                "value": 0.0
+              },
+              "easing": {
+                "type": "cubicBezier",
+                "x1": 0.42,
+                "y1": 0.0,
+                "x2": 0.58,
+                "y2": 1.0
+              }
+            },
+            {
+              "time": 4.8,
+              "value": {
+                "type": "number",
+                "value": -20.256766376590235
+              },
+              "easing": {
+                "type": "cubicBezier",
+                "x1": 0.42,
+                "y1": 0.0,
+                "x2": 0.58,
+                "y2": 1.0
+              }
+            }
+          ]
+        },
+        {
+          "nodeId": "shape-0",
+          "property": "opacity",
+          "keyframes": [
+            {
+              "time": 0.0,
+              "value": {
+                "type": "number",
+                "value": 0.0
+              },
+              "easing": {
+                "type": "cubicBezier",
+                "x1": 0.42,
+                "y1": 0.0,
+                "x2": 0.58,
+                "y2": 1.0
+              }
+            },
+            {
+              "time": 0.55,
+              "value": {
+                "type": "number",
+                "value": 1.0
+              },
+              "easing": {
+                "type": "cubicBezier",
+                "x1": 0.42,
+                "y1": 0.0,
+                "x2": 0.58,
+                "y2": 1.0
+              }
+            },
+            {
+              "time": 4.1,
+              "value": {
+                "type": "number",
+                "value": 1.0
+              },
+              "easing": {
+                "type": "cubicBezier",
+                "x1": 0.42,
+                "y1": 0.0,
+                "x2": 0.58,
+                "y2": 1.0
+              }
+            },
+            {
+              "time": 4.8,
+              "value": {
+                "type": "number",
+                "value": 0.0
+              },
+              "easing": {
+                "type": "cubicBezier",
+                "x1": 0.42,
+                "y1": 0.0,
+                "x2": 0.58,
+                "y2": 1.0
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "motion-1",
+      "name": "",
+      "duration": 4.8,
+      "looping": false,
+      "autoplay": false,
+      "blendMode": "override",
+      "weight": 1.0,
+      "tracks": [
+        {
+          "nodeId": "shape-1",
+          "property": "scaleX",
+          "keyframes": [
+            {
+              "time": 0.0,
+              "value": {
+                "type": "number",
+                "value": 0.65
+              },
+              "easing": {
+                "type": "cubicBezier",
+                "x1": 0.42,
+                "y1": 0.0,
+                "x2": 0.58,
+                "y2": 1.0
+              }
+            },
+            {
+              "time": 0.65,
+              "value": {
+                "type": "number",
+                "value": 1.08
+              },
+              "easing": {
+                "type": "cubicBezier",
+                "x1": 0.42,
+                "y1": 0.0,
+                "x2": 0.58,
+                "y2": 1.0
+              }
+            },
+            {
+              "time": 1.0,
+              "value": {
+                "type": "number",
+                "value": 1.0
+              },
+              "easing": {
+                "type": "cubicBezier",
+                "x1": 0.42,
+                "y1": 0.0,
+                "x2": 0.58,
+                "y2": 1.0
+              }
+            },
+            {
+              "time": 3.8,
+              "value": {
+                "type": "number",
+                "value": 1.0
+              },
+              "easing": {
+                "type": "cubicBezier",
+                "x1": 0.42,
+                "y1": 0.0,
+                "x2": 0.58,
+                "y2": 1.0
+              }
+            },
+            {
+              "time": 4.8,
+              "value": {
+                "type": "number",
+                "value": 0.65
+              },
+              "easing": {
+                "type": "cubicBezier",
+                "x1": 0.42,
+                "y1": 0.0,
+                "x2": 0.58,
+                "y2": 1.0
+              }
+            }
+          ]
+        },
+        {
+          "nodeId": "shape-1",
+          "property": "scaleY",
+          "keyframes": [
+            {
+              "time": 0.0,
+              "value": {
+                "type": "number",
+                "value": 0.65
+              },
+              "easing": {
+                "type": "cubicBezier",
+                "x1": 0.42,
+                "y1": 0.0,
+                "x2": 0.58,
+                "y2": 1.0
+              }
+            },
+            {
+              "time": 0.65,
+              "value": {
+                "type": "number",
+                "value": 1.08
+              },
+              "easing": {
+                "type": "cubicBezier",
+                "x1": 0.42,
+                "y1": 0.0,
+                "x2": 0.58,
+                "y2": 1.0
+              }
+            },
+            {
+              "time": 1.0,
+              "value": {
+                "type": "number",
+                "value": 1.0
+              },
+              "easing": {
+                "type": "cubicBezier",
+                "x1": 0.42,
+                "y1": 0.0,
+                "x2": 0.58,
+                "y2": 1.0
+              }
+            },
+            {
+              "time": 3.8,
+              "value": {
+                "type": "number",
+                "value": 1.0
+              },
+              "easing": {
+                "type": "cubicBezier",
+                "x1": 0.42,
+                "y1": 0.0,
+                "x2": 0.58,
+                "y2": 1.0
+              }
+            },
+            {
+              "time": 4.8,
+              "value": {
+                "type": "number",
+                "value": 0.65
+              },
+              "easing": {
+                "type": "cubicBezier",
+                "x1": 0.42,
+                "y1": 0.0,
+                "x2": 0.58,
+                "y2": 1.0
+              }
+            }
+          ]
+        },
+        {
+          "nodeId": "shape-1",
+          "property": "y",
+          "keyframes": [
+            {
+              "time": 0.0,
+              "value": {
+                "type": "number",
+                "value": 350.0
+              },
+              "easing": {
+                "type": "cubicBezier",
+                "x1": 0.42,
+                "y1": 0.0,
+                "x2": 0.58,
+                "y2": 1.0
+              }
+            },
+            {
+              "time": 1.0,
+              "value": {
+                "type": "number",
+                "value": 320.0
+              },
+              "easing": {
+                "type": "cubicBezier",
+                "x1": 0.42,
+                "y1": 0.0,
+                "x2": 0.58,
+                "y2": 1.0
+              }
+            },
+            {
+              "time": 2.4,
+              "value": {
+                "type": "number",
+                "value": 305.0
+              },
+              "easing": {
+                "type": "cubicBezier",
+                "x1": 0.42,
+                "y1": 0.0,
+                "x2": 0.58,
+                "y2": 1.0
+              }
+            },
+            {
+              "time": 3.8,
+              "value": {
+                "type": "number",
+                "value": 320.0
+              },
+              "easing": {
+                "type": "cubicBezier",
+                "x1": 0.42,
+                "y1": 0.0,
+                "x2": 0.58,
+                "y2": 1.0
+              }
+            },
+            {
+              "time": 4.8,
+              "value": {
+                "type": "number",
+                "value": 350.0
+              },
+              "easing": {
+                "type": "cubicBezier",
+                "x1": 0.42,
+                "y1": 0.0,
+                "x2": 0.58,
+                "y2": 1.0
+              }
+            }
+          ]
+        },
+        {
+          "nodeId": "shape-1",
+          "property": "rotation",
+          "keyframes": [
+            {
+              "time": 0.0,
+              "value": {
+                "type": "number",
+                "value": -12.524578213998767
+              },
+              "easing": {
+                "type": "cubicBezier",
+                "x1": 0.42,
+                "y1": 0.0,
+                "x2": 0.58,
+                "y2": 1.0
+              }
+            },
+            {
+              "time": 1.0,
+              "value": {
+                "type": "number",
+                "value": 0.0
+              },
+              "easing": {
+                "type": "cubicBezier",
+                "x1": 0.42,
+                "y1": 0.0,
+                "x2": 0.58,
+                "y2": 1.0
+              }
+            },
+            {
+              "time": 2.4,
+              "value": {
+                "type": "number",
+                "value": 12.524578213998767
+              },
+              "easing": {
+                "type": "cubicBezier",
+                "x1": 0.42,
+                "y1": 0.0,
+                "x2": 0.58,
+                "y2": 1.0
+              }
+            },
+            {
+              "time": 3.8,
+              "value": {
+                "type": "number",
+                "value": 0.0
+              },
+              "easing": {
+                "type": "cubicBezier",
+                "x1": 0.42,
+                "y1": 0.0,
+                "x2": 0.58,
+                "y2": 1.0
+              }
+            },
+            {
+              "time": 4.8,
+              "value": {
+                "type": "number",
+                "value": -12.524578213998767
+              },
+              "easing": {
+                "type": "cubicBezier",
+                "x1": 0.42,
+                "y1": 0.0,
+                "x2": 0.58,
+                "y2": 1.0
+              }
+            }
+          ]
+        },
+        {
+          "nodeId": "shape-1",
+          "property": "opacity",
+          "keyframes": [
+            {
+              "time": 0.0,
+              "value": {
+                "type": "number",
+                "value": 0.0
+              },
+              "easing": {
+                "type": "cubicBezier",
+                "x1": 0.42,
+                "y1": 0.0,
+                "x2": 0.58,
+                "y2": 1.0
+              }
+            },
+            {
+              "time": 0.55,
+              "value": {
+                "type": "number",
+                "value": 1.0
+              },
+              "easing": {
+                "type": "cubicBezier",
+                "x1": 0.42,
+                "y1": 0.0,
+                "x2": 0.58,
+                "y2": 1.0
+              }
+            },
+            {
+              "time": 4.1,
+              "value": {
+                "type": "number",
+                "value": 1.0
+              },
+              "easing": {
+                "type": "cubicBezier",
+                "x1": 0.42,
+                "y1": 0.0,
+                "x2": 0.58,
+                "y2": 1.0
+              }
+            },
+            {
+              "time": 4.8,
+              "value": {
+                "type": "number",
+                "value": 0.0
+              },
+              "easing": {
+                "type": "cubicBezier",
+                "x1": 0.42,
+                "y1": 0.0,
+                "x2": 0.58,
+                "y2": 1.0
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "motion-2",
+      "name": "",
+      "duration": 4.8,
+      "looping": false,
+      "autoplay": false,
+      "blendMode": "override",
+      "weight": 1.0,
+      "tracks": [
+        {
+          "nodeId": "shape-2",
+          "property": "scaleX",
+          "keyframes": [
+            {
+              "time": 0.0,
+              "value": {
+                "type": "number",
+                "value": 0.65
+              },
+              "easing": {
+                "type": "cubicBezier",
+                "x1": 0.42,
+                "y1": 0.0,
+                "x2": 0.58,
+                "y2": 1.0
+              }
+            },
+            {
+              "time": 0.65,
+              "value": {
+                "type": "number",
+                "value": 1.08
+              },
+              "easing": {
+                "type": "cubicBezier",
+                "x1": 0.42,
+                "y1": 0.0,
+                "x2": 0.58,
+                "y2": 1.0
+              }
+            },
+            {
+              "time": 1.0,
+              "value": {
+                "type": "number",
+                "value": 1.0
+              },
+              "easing": {
+                "type": "cubicBezier",
+                "x1": 0.42,
+                "y1": 0.0,
+                "x2": 0.58,
+                "y2": 1.0
+              }
+            },
+            {
+              "time": 3.8,
+              "value": {
+                "type": "number",
+                "value": 1.0
+              },
+              "easing": {
+                "type": "cubicBezier",
+                "x1": 0.42,
+                "y1": 0.0,
+                "x2": 0.58,
+                "y2": 1.0
+              }
+            },
+            {
+              "time": 4.8,
+              "value": {
+                "type": "number",
+                "value": 0.65
+              },
+              "easing": {
+                "type": "cubicBezier",
+                "x1": 0.42,
+                "y1": 0.0,
+                "x2": 0.58,
+                "y2": 1.0
+              }
+            }
+          ]
+        },
+        {
+          "nodeId": "shape-2",
+          "property": "scaleY",
+          "keyframes": [
+            {
+              "time": 0.0,
+              "value": {
+                "type": "number",
+                "value": 0.65
+              },
+              "easing": {
+                "type": "cubicBezier",
+                "x1": 0.42,
+                "y1": 0.0,
+                "x2": 0.58,
+                "y2": 1.0
+              }
+            },
+            {
+              "time": 0.65,
+              "value": {
+                "type": "number",
+                "value": 1.08
+              },
+              "easing": {
+                "type": "cubicBezier",
+                "x1": 0.42,
+                "y1": 0.0,
+                "x2": 0.58,
+                "y2": 1.0
+              }
+            },
+            {
+              "time": 1.0,
+              "value": {
+                "type": "number",
+                "value": 1.0
+              },
+              "easing": {
+                "type": "cubicBezier",
+                "x1": 0.42,
+                "y1": 0.0,
+                "x2": 0.58,
+                "y2": 1.0
+              }
+            },
+            {
+              "time": 3.8,
+              "value": {
+                "type": "number",
+                "value": 1.0
+              },
+              "easing": {
+                "type": "cubicBezier",
+                "x1": 0.42,
+                "y1": 0.0,
+                "x2": 0.58,
+                "y2": 1.0
+              }
+            },
+            {
+              "time": 4.8,
+              "value": {
+                "type": "number",
+                "value": 0.65
+              },
+              "easing": {
+                "type": "cubicBezier",
+                "x1": 0.42,
+                "y1": 0.0,
+                "x2": 0.58,
+                "y2": 1.0
+              }
+            }
+          ]
+        },
+        {
+          "nodeId": "shape-2",
+          "property": "y",
+          "keyframes": [
+            {
+              "time": 0.0,
+              "value": {
+                "type": "number",
+                "value": 350.0
+              },
+              "easing": {
+                "type": "cubicBezier",
+                "x1": 0.42,
+                "y1": 0.0,
+                "x2": 0.58,
+                "y2": 1.0
+              }
+            },
+            {
+              "time": 1.0,
+              "value": {
+                "type": "number",
+                "value": 320.0
+              },
+              "easing": {
+                "type": "cubicBezier",
+                "x1": 0.42,
+                "y1": 0.0,
+                "x2": 0.58,
+                "y2": 1.0
+              }
+            },
+            {
+              "time": 2.4,
+              "value": {
+                "type": "number",
+                "value": 305.0
+              },
+              "easing": {
+                "type": "cubicBezier",
+                "x1": 0.42,
+                "y1": 0.0,
+                "x2": 0.58,
+                "y2": 1.0
+              }
+            },
+            {
+              "time": 3.8,
+              "value": {
+                "type": "number",
+                "value": 320.0
+              },
+              "easing": {
+                "type": "cubicBezier",
+                "x1": 0.42,
+                "y1": 0.0,
+                "x2": 0.58,
+                "y2": 1.0
+              }
+            },
+            {
+              "time": 4.8,
+              "value": {
+                "type": "number",
+                "value": 350.0
+              },
+              "easing": {
+                "type": "cubicBezier",
+                "x1": 0.42,
+                "y1": 0.0,
+                "x2": 0.58,
+                "y2": 1.0
+              }
+            }
+          ]
+        },
+        {
+          "nodeId": "shape-2",
+          "property": "rotation",
+          "keyframes": [
+            {
+              "time": 0.0,
+              "value": {
+                "type": "number",
+                "value": -21.479216916111127
+              },
+              "easing": {
+                "type": "cubicBezier",
+                "x1": 0.42,
+                "y1": 0.0,
+                "x2": 0.58,
+                "y2": 1.0
+              }
+            },
+            {
+              "time": 1.0,
+              "value": {
+                "type": "number",
+                "value": 0.0
+              },
+              "easing": {
+                "type": "cubicBezier",
+                "x1": 0.42,
+                "y1": 0.0,
+                "x2": 0.58,
+                "y2": 1.0
+              }
+            },
+            {
+              "time": 2.4,
+              "value": {
+                "type": "number",
+                "value": 21.479216916111127
+              },
+              "easing": {
+                "type": "cubicBezier",
+                "x1": 0.42,
+                "y1": 0.0,
+                "x2": 0.58,
+                "y2": 1.0
+              }
+            },
+            {
+              "time": 3.8,
+              "value": {
+                "type": "number",
+                "value": 0.0
+              },
+              "easing": {
+                "type": "cubicBezier",
+                "x1": 0.42,
+                "y1": 0.0,
+                "x2": 0.58,
+                "y2": 1.0
+              }
+            },
+            {
+              "time": 4.8,
+              "value": {
+                "type": "number",
+                "value": -21.479216916111127
+              },
+              "easing": {
+                "type": "cubicBezier",
+                "x1": 0.42,
+                "y1": 0.0,
+                "x2": 0.58,
+                "y2": 1.0
+              }
+            }
+          ]
+        },
+        {
+          "nodeId": "shape-2",
+          "property": "opacity",
+          "keyframes": [
+            {
+              "time": 0.0,
+              "value": {
+                "type": "number",
+                "value": 0.0
+              },
+              "easing": {
+                "type": "cubicBezier",
+                "x1": 0.42,
+                "y1": 0.0,
+                "x2": 0.58,
+                "y2": 1.0
+              }
+            },
+            {
+              "time": 0.55,
+              "value": {
+                "type": "number",
+                "value": 1.0
+              },
+              "easing": {
+                "type": "cubicBezier",
+                "x1": 0.42,
+                "y1": 0.0,
+                "x2": 0.58,
+                "y2": 1.0
+              }
+            },
+            {
+              "time": 4.1,
+              "value": {
+                "type": "number",
+                "value": 1.0
+              },
+              "easing": {
+                "type": "cubicBezier",
+                "x1": 0.42,
+                "y1": 0.0,
+                "x2": 0.58,
+                "y2": 1.0
+              }
+            },
+            {
+              "time": 4.8,
+              "value": {
+                "type": "number",
+                "value": 0.0
+              },
+              "easing": {
+                "type": "cubicBezier",
+                "x1": 0.42,
+                "y1": 0.0,
+                "x2": 0.58,
+                "y2": 1.0
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "motion-3",
+      "name": "",
+      "duration": 4.8,
+      "looping": false,
+      "autoplay": false,
+      "blendMode": "override",
+      "weight": 1.0,
+      "tracks": [
+        {
+          "nodeId": "shape-3",
+          "property": "scaleX",
+          "keyframes": [
+            {
+              "time": 0.0,
+              "value": {
+                "type": "number",
+                "value": 0.65
+              },
+              "easing": {
+                "type": "cubicBezier",
+                "x1": 0.42,
+                "y1": 0.0,
+                "x2": 0.58,
+                "y2": 1.0
+              }
+            },
+            {
+              "time": 0.65,
+              "value": {
+                "type": "number",
+                "value": 1.08
+              },
+              "easing": {
+                "type": "cubicBezier",
+                "x1": 0.42,
+                "y1": 0.0,
+                "x2": 0.58,
+                "y2": 1.0
+              }
+            },
+            {
+              "time": 1.0,
+              "value": {
+                "type": "number",
+                "value": 1.0
+              },
+              "easing": {
+                "type": "cubicBezier",
+                "x1": 0.42,
+                "y1": 0.0,
+                "x2": 0.58,
+                "y2": 1.0
+              }
+            },
+            {
+              "time": 3.8,
+              "value": {
+                "type": "number",
+                "value": 1.0
+              },
+              "easing": {
+                "type": "cubicBezier",
+                "x1": 0.42,
+                "y1": 0.0,
+                "x2": 0.58,
+                "y2": 1.0
+              }
+            },
+            {
+              "time": 4.8,
+              "value": {
+                "type": "number",
+                "value": 0.65
+              },
+              "easing": {
+                "type": "cubicBezier",
+                "x1": 0.42,
+                "y1": 0.0,
+                "x2": 0.58,
+                "y2": 1.0
+              }
+            }
+          ]
+        },
+        {
+          "nodeId": "shape-3",
+          "property": "scaleY",
+          "keyframes": [
+            {
+              "time": 0.0,
+              "value": {
+                "type": "number",
+                "value": 0.65
+              },
+              "easing": {
+                "type": "cubicBezier",
+                "x1": 0.42,
+                "y1": 0.0,
+                "x2": 0.58,
+                "y2": 1.0
+              }
+            },
+            {
+              "time": 0.65,
+              "value": {
+                "type": "number",
+                "value": 1.08
+              },
+              "easing": {
+                "type": "cubicBezier",
+                "x1": 0.42,
+                "y1": 0.0,
+                "x2": 0.58,
+                "y2": 1.0
+              }
+            },
+            {
+              "time": 1.0,
+              "value": {
+                "type": "number",
+                "value": 1.0
+              },
+              "easing": {
+                "type": "cubicBezier",
+                "x1": 0.42,
+                "y1": 0.0,
+                "x2": 0.58,
+                "y2": 1.0
+              }
+            },
+            {
+              "time": 3.8,
+              "value": {
+                "type": "number",
+                "value": 1.0
+              },
+              "easing": {
+                "type": "cubicBezier",
+                "x1": 0.42,
+                "y1": 0.0,
+                "x2": 0.58,
+                "y2": 1.0
+              }
+            },
+            {
+              "time": 4.8,
+              "value": {
+                "type": "number",
+                "value": 0.65
+              },
+              "easing": {
+                "type": "cubicBezier",
+                "x1": 0.42,
+                "y1": 0.0,
+                "x2": 0.58,
+                "y2": 1.0
+              }
+            }
+          ]
+        },
+        {
+          "nodeId": "shape-3",
+          "property": "y",
+          "keyframes": [
+            {
+              "time": 0.0,
+              "value": {
+                "type": "number",
+                "value": 350.0
+              },
+              "easing": {
+                "type": "cubicBezier",
+                "x1": 0.42,
+                "y1": 0.0,
+                "x2": 0.58,
+                "y2": 1.0
+              }
+            },
+            {
+              "time": 1.0,
+              "value": {
+                "type": "number",
+                "value": 320.0
+              },
+              "easing": {
+                "type": "cubicBezier",
+                "x1": 0.42,
+                "y1": 0.0,
+                "x2": 0.58,
+                "y2": 1.0
+              }
+            },
+            {
+              "time": 2.4,
+              "value": {
+                "type": "number",
+                "value": 305.0
+              },
+              "easing": {
+                "type": "cubicBezier",
+                "x1": 0.42,
+                "y1": 0.0,
+                "x2": 0.58,
+                "y2": 1.0
+              }
+            },
+            {
+              "time": 3.8,
+              "value": {
+                "type": "number",
+                "value": 320.0
+              },
+              "easing": {
+                "type": "cubicBezier",
+                "x1": 0.42,
+                "y1": 0.0,
+                "x2": 0.58,
+                "y2": 1.0
+              }
+            },
+            {
+              "time": 4.8,
+              "value": {
+                "type": "number",
+                "value": 350.0
+              },
+              "easing": {
+                "type": "cubicBezier",
+                "x1": 0.42,
+                "y1": 0.0,
+                "x2": 0.58,
+                "y2": 1.0
+              }
+            }
+          ]
+        },
+        {
+          "nodeId": "shape-3",
+          "property": "rotation",
+          "keyframes": [
+            {
+              "time": 0.0,
+              "value": {
+                "type": "number",
+                "value": -22.57798406603462
+              },
+              "easing": {
+                "type": "cubicBezier",
+                "x1": 0.42,
+                "y1": 0.0,
+                "x2": 0.58,
+                "y2": 1.0
+              }
+            },
+            {
+              "time": 1.0,
+              "value": {
+                "type": "number",
+                "value": 0.0
+              },
+              "easing": {
+                "type": "cubicBezier",
+                "x1": 0.42,
+                "y1": 0.0,
+                "x2": 0.58,
+                "y2": 1.0
+              }
+            },
+            {
+              "time": 2.4,
+              "value": {
+                "type": "number",
+                "value": 22.57798406603462
+              },
+              "easing": {
+                "type": "cubicBezier",
+                "x1": 0.42,
+                "y1": 0.0,
+                "x2": 0.58,
+                "y2": 1.0
+              }
+            },
+            {
+              "time": 3.8,
+              "value": {
+                "type": "number",
+                "value": 0.0
+              },
+              "easing": {
+                "type": "cubicBezier",
+                "x1": 0.42,
+                "y1": 0.0,
+                "x2": 0.58,
+                "y2": 1.0
+              }
+            },
+            {
+              "time": 4.8,
+              "value": {
+                "type": "number",
+                "value": -22.57798406603462
+              },
+              "easing": {
+                "type": "cubicBezier",
+                "x1": 0.42,
+                "y1": 0.0,
+                "x2": 0.58,
+                "y2": 1.0
+              }
+            }
+          ]
+        },
+        {
+          "nodeId": "shape-3",
+          "property": "opacity",
+          "keyframes": [
+            {
+              "time": 0.0,
+              "value": {
+                "type": "number",
+                "value": 0.0
+              },
+              "easing": {
+                "type": "cubicBezier",
+                "x1": 0.42,
+                "y1": 0.0,
+                "x2": 0.58,
+                "y2": 1.0
+              }
+            },
+            {
+              "time": 0.55,
+              "value": {
+                "type": "number",
+                "value": 1.0
+              },
+              "easing": {
+                "type": "cubicBezier",
+                "x1": 0.42,
+                "y1": 0.0,
+                "x2": 0.58,
+                "y2": 1.0
+              }
+            },
+            {
+              "time": 4.1,
+              "value": {
+                "type": "number",
+                "value": 1.0
+              },
+              "easing": {
+                "type": "cubicBezier",
+                "x1": 0.42,
+                "y1": 0.0,
+                "x2": 0.58,
+                "y2": 1.0
+              }
+            },
+            {
+              "time": 4.8,
+              "value": {
+                "type": "number",
+                "value": 0.0
+              },
+              "easing": {
+                "type": "cubicBezier",
+                "x1": 0.42,
+                "y1": 0.0,
+                "x2": 0.58,
+                "y2": 1.0
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "motion-4",
+      "name": "",
+      "duration": 4.8,
+      "looping": false,
+      "autoplay": false,
+      "blendMode": "override",
+      "weight": 1.0,
+      "tracks": [
+        {
+          "nodeId": "shape-4",
+          "property": "scaleX",
+          "keyframes": [
+            {
+              "time": 0.0,
+              "value": {
+                "type": "number",
+                "value": 0.65
+              },
+              "easing": {
+                "type": "cubicBezier",
+                "x1": 0.42,
+                "y1": 0.0,
+                "x2": 0.58,
+                "y2": 1.0
+              }
+            },
+            {
+              "time": 0.65,
+              "value": {
+                "type": "number",
+                "value": 1.08
+              },
+              "easing": {
+                "type": "cubicBezier",
+                "x1": 0.42,
+                "y1": 0.0,
+                "x2": 0.58,
+                "y2": 1.0
+              }
+            },
+            {
+              "time": 1.0,
+              "value": {
+                "type": "number",
+                "value": 1.0
+              },
+              "easing": {
+                "type": "cubicBezier",
+                "x1": 0.42,
+                "y1": 0.0,
+                "x2": 0.58,
+                "y2": 1.0
+              }
+            },
+            {
+              "time": 3.8,
+              "value": {
+                "type": "number",
+                "value": 1.0
+              },
+              "easing": {
+                "type": "cubicBezier",
+                "x1": 0.42,
+                "y1": 0.0,
+                "x2": 0.58,
+                "y2": 1.0
+              }
+            },
+            {
+              "time": 4.8,
+              "value": {
+                "type": "number",
+                "value": 0.65
+              },
+              "easing": {
+                "type": "cubicBezier",
+                "x1": 0.42,
+                "y1": 0.0,
+                "x2": 0.58,
+                "y2": 1.0
+              }
+            }
+          ]
+        },
+        {
+          "nodeId": "shape-4",
+          "property": "scaleY",
+          "keyframes": [
+            {
+              "time": 0.0,
+              "value": {
+                "type": "number",
+                "value": 0.65
+              },
+              "easing": {
+                "type": "cubicBezier",
+                "x1": 0.42,
+                "y1": 0.0,
+                "x2": 0.58,
+                "y2": 1.0
+              }
+            },
+            {
+              "time": 0.65,
+              "value": {
+                "type": "number",
+                "value": 1.08
+              },
+              "easing": {
+                "type": "cubicBezier",
+                "x1": 0.42,
+                "y1": 0.0,
+                "x2": 0.58,
+                "y2": 1.0
+              }
+            },
+            {
+              "time": 1.0,
+              "value": {
+                "type": "number",
+                "value": 1.0
+              },
+              "easing": {
+                "type": "cubicBezier",
+                "x1": 0.42,
+                "y1": 0.0,
+                "x2": 0.58,
+                "y2": 1.0
+              }
+            },
+            {
+              "time": 3.8,
+              "value": {
+                "type": "number",
+                "value": 1.0
+              },
+              "easing": {
+                "type": "cubicBezier",
+                "x1": 0.42,
+                "y1": 0.0,
+                "x2": 0.58,
+                "y2": 1.0
+              }
+            },
+            {
+              "time": 4.8,
+              "value": {
+                "type": "number",
+                "value": 0.65
+              },
+              "easing": {
+                "type": "cubicBezier",
+                "x1": 0.42,
+                "y1": 0.0,
+                "x2": 0.58,
+                "y2": 1.0
+              }
+            }
+          ]
+        },
+        {
+          "nodeId": "shape-4",
+          "property": "y",
+          "keyframes": [
+            {
+              "time": 0.0,
+              "value": {
+                "type": "number",
+                "value": 350.0
+              },
+              "easing": {
+                "type": "cubicBezier",
+                "x1": 0.42,
+                "y1": 0.0,
+                "x2": 0.58,
+                "y2": 1.0
+              }
+            },
+            {
+              "time": 1.0,
+              "value": {
+                "type": "number",
+                "value": 320.0
+              },
+              "easing": {
+                "type": "cubicBezier",
+                "x1": 0.42,
+                "y1": 0.0,
+                "x2": 0.58,
+                "y2": 1.0
+              }
+            },
+            {
+              "time": 2.4,
+              "value": {
+                "type": "number",
+                "value": 305.0
+              },
+              "easing": {
+                "type": "cubicBezier",
+                "x1": 0.42,
+                "y1": 0.0,
+                "x2": 0.58,
+                "y2": 1.0
+              }
+            },
+            {
+              "time": 3.8,
+              "value": {
+                "type": "number",
+                "value": 320.0
+              },
+              "easing": {
+                "type": "cubicBezier",
+                "x1": 0.42,
+                "y1": 0.0,
+                "x2": 0.58,
+                "y2": 1.0
+              }
+            },
+            {
+              "time": 4.8,
+              "value": {
+                "type": "number",
+                "value": 350.0
+              },
+              "easing": {
+                "type": "cubicBezier",
+                "x1": 0.42,
+                "y1": 0.0,
+                "x2": 0.58,
+                "y2": 1.0
+              }
+            }
+          ]
+        },
+        {
+          "nodeId": "shape-4",
+          "property": "rotation",
+          "keyframes": [
+            {
+              "time": 0.0,
+              "value": {
+                "type": "number",
+                "value": -19.81745006988522
+              },
+              "easing": {
+                "type": "cubicBezier",
+                "x1": 0.42,
+                "y1": 0.0,
+                "x2": 0.58,
+                "y2": 1.0
+              }
+            },
+            {
+              "time": 1.0,
+              "value": {
+                "type": "number",
+                "value": 0.0
+              },
+              "easing": {
+                "type": "cubicBezier",
+                "x1": 0.42,
+                "y1": 0.0,
+                "x2": 0.58,
+                "y2": 1.0
+              }
+            },
+            {
+              "time": 2.4,
+              "value": {
+                "type": "number",
+                "value": 19.81745006988522
+              },
+              "easing": {
+                "type": "cubicBezier",
+                "x1": 0.42,
+                "y1": 0.0,
+                "x2": 0.58,
+                "y2": 1.0
+              }
+            },
+            {
+              "time": 3.8,
+              "value": {
+                "type": "number",
+                "value": 0.0
+              },
+              "easing": {
+                "type": "cubicBezier",
+                "x1": 0.42,
+                "y1": 0.0,
+                "x2": 0.58,
+                "y2": 1.0
+              }
+            },
+            {
+              "time": 4.8,
+              "value": {
+                "type": "number",
+                "value": -19.81745006988522
+              },
+              "easing": {
+                "type": "cubicBezier",
+                "x1": 0.42,
+                "y1": 0.0,
+                "x2": 0.58,
+                "y2": 1.0
+              }
+            }
+          ]
+        },
+        {
+          "nodeId": "shape-4",
+          "property": "opacity",
+          "keyframes": [
+            {
+              "time": 0.0,
+              "value": {
+                "type": "number",
+                "value": 0.0
+              },
+              "easing": {
+                "type": "cubicBezier",
+                "x1": 0.42,
+                "y1": 0.0,
+                "x2": 0.58,
+                "y2": 1.0
+              }
+            },
+            {
+              "time": 0.55,
+              "value": {
+                "type": "number",
+                "value": 1.0
+              },
+              "easing": {
+                "type": "cubicBezier",
+                "x1": 0.42,
+                "y1": 0.0,
+                "x2": 0.58,
+                "y2": 1.0
+              }
+            },
+            {
+              "time": 4.1,
+              "value": {
+                "type": "number",
+                "value": 1.0
+              },
+              "easing": {
+                "type": "cubicBezier",
+                "x1": 0.42,
+                "y1": 0.0,
+                "x2": 0.58,
+                "y2": 1.0
+              }
+            },
+            {
+              "time": 4.8,
+              "value": {
+                "type": "number",
+                "value": 0.0
+              },
+              "easing": {
+                "type": "cubicBezier",
+                "x1": 0.42,
+                "y1": 0.0,
+                "x2": 0.58,
+                "y2": 1.0
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "motion-5",
+      "name": "",
+      "duration": 4.8,
+      "looping": false,
+      "autoplay": false,
+      "blendMode": "override",
+      "weight": 1.0,
+      "tracks": [
+        {
+          "nodeId": "shape-5",
+          "property": "scaleX",
+          "keyframes": [
+            {
+              "time": 0.0,
+              "value": {
+                "type": "number",
+                "value": 0.65
+              },
+              "easing": {
+                "type": "cubicBezier",
+                "x1": 0.42,
+                "y1": 0.0,
+                "x2": 0.58,
+                "y2": 1.0
+              }
+            },
+            {
+              "time": 0.65,
+              "value": {
+                "type": "number",
+                "value": 1.08
+              },
+              "easing": {
+                "type": "cubicBezier",
+                "x1": 0.42,
+                "y1": 0.0,
+                "x2": 0.58,
+                "y2": 1.0
+              }
+            },
+            {
+              "time": 1.0,
+              "value": {
+                "type": "number",
+                "value": 1.0
+              },
+              "easing": {
+                "type": "cubicBezier",
+                "x1": 0.42,
+                "y1": 0.0,
+                "x2": 0.58,
+                "y2": 1.0
+              }
+            },
+            {
+              "time": 3.8,
+              "value": {
+                "type": "number",
+                "value": 1.0
+              },
+              "easing": {
+                "type": "cubicBezier",
+                "x1": 0.42,
+                "y1": 0.0,
+                "x2": 0.58,
+                "y2": 1.0
+              }
+            },
+            {
+              "time": 4.8,
+              "value": {
+                "type": "number",
+                "value": 0.65
+              },
+              "easing": {
+                "type": "cubicBezier",
+                "x1": 0.42,
+                "y1": 0.0,
+                "x2": 0.58,
+                "y2": 1.0
+              }
+            }
+          ]
+        },
+        {
+          "nodeId": "shape-5",
+          "property": "scaleY",
+          "keyframes": [
+            {
+              "time": 0.0,
+              "value": {
+                "type": "number",
+                "value": 0.65
+              },
+              "easing": {
+                "type": "cubicBezier",
+                "x1": 0.42,
+                "y1": 0.0,
+                "x2": 0.58,
+                "y2": 1.0
+              }
+            },
+            {
+              "time": 0.65,
+              "value": {
+                "type": "number",
+                "value": 1.08
+              },
+              "easing": {
+                "type": "cubicBezier",
+                "x1": 0.42,
+                "y1": 0.0,
+                "x2": 0.58,
+                "y2": 1.0
+              }
+            },
+            {
+              "time": 1.0,
+              "value": {
+                "type": "number",
+                "value": 1.0
+              },
+              "easing": {
+                "type": "cubicBezier",
+                "x1": 0.42,
+                "y1": 0.0,
+                "x2": 0.58,
+                "y2": 1.0
+              }
+            },
+            {
+              "time": 3.8,
+              "value": {
+                "type": "number",
+                "value": 1.0
+              },
+              "easing": {
+                "type": "cubicBezier",
+                "x1": 0.42,
+                "y1": 0.0,
+                "x2": 0.58,
+                "y2": 1.0
+              }
+            },
+            {
+              "time": 4.8,
+              "value": {
+                "type": "number",
+                "value": 0.65
+              },
+              "easing": {
+                "type": "cubicBezier",
+                "x1": 0.42,
+                "y1": 0.0,
+                "x2": 0.58,
+                "y2": 1.0
+              }
+            }
+          ]
+        },
+        {
+          "nodeId": "shape-5",
+          "property": "y",
+          "keyframes": [
+            {
+              "time": 0.0,
+              "value": {
+                "type": "number",
+                "value": 350.0
+              },
+              "easing": {
+                "type": "cubicBezier",
+                "x1": 0.42,
+                "y1": 0.0,
+                "x2": 0.58,
+                "y2": 1.0
+              }
+            },
+            {
+              "time": 1.0,
+              "value": {
+                "type": "number",
+                "value": 320.0
+              },
+              "easing": {
+                "type": "cubicBezier",
+                "x1": 0.42,
+                "y1": 0.0,
+                "x2": 0.58,
+                "y2": 1.0
+              }
+            },
+            {
+              "time": 2.4,
+              "value": {
+                "type": "number",
+                "value": 305.0
+              },
+              "easing": {
+                "type": "cubicBezier",
+                "x1": 0.42,
+                "y1": 0.0,
+                "x2": 0.58,
+                "y2": 1.0
+              }
+            },
+            {
+              "time": 3.8,
+              "value": {
+                "type": "number",
+                "value": 320.0
+              },
+              "easing": {
+                "type": "cubicBezier",
+                "x1": 0.42,
+                "y1": 0.0,
+                "x2": 0.58,
+                "y2": 1.0
+              }
+            },
+            {
+              "time": 4.8,
+              "value": {
+                "type": "number",
+                "value": 350.0
+              },
+              "easing": {
+                "type": "cubicBezier",
+                "x1": 0.42,
+                "y1": 0.0,
+                "x2": 0.58,
+                "y2": 1.0
+              }
+            }
+          ]
+        },
+        {
+          "nodeId": "shape-5",
+          "property": "rotation",
+          "keyframes": [
+            {
+              "time": 0.0,
+              "value": {
+                "type": "number",
+                "value": -26.149680215577337
+              },
+              "easing": {
+                "type": "cubicBezier",
+                "x1": 0.42,
+                "y1": 0.0,
+                "x2": 0.58,
+                "y2": 1.0
+              }
+            },
+            {
+              "time": 1.0,
+              "value": {
+                "type": "number",
+                "value": 0.0
+              },
+              "easing": {
+                "type": "cubicBezier",
+                "x1": 0.42,
+                "y1": 0.0,
+                "x2": 0.58,
+                "y2": 1.0
+              }
+            },
+            {
+              "time": 2.4,
+              "value": {
+                "type": "number",
+                "value": 26.149680215577337
+              },
+              "easing": {
+                "type": "cubicBezier",
+                "x1": 0.42,
+                "y1": 0.0,
+                "x2": 0.58,
+                "y2": 1.0
+              }
+            },
+            {
+              "time": 3.8,
+              "value": {
+                "type": "number",
+                "value": 0.0
+              },
+              "easing": {
+                "type": "cubicBezier",
+                "x1": 0.42,
+                "y1": 0.0,
+                "x2": 0.58,
+                "y2": 1.0
+              }
+            },
+            {
+              "time": 4.8,
+              "value": {
+                "type": "number",
+                "value": -26.149680215577337
+              },
+              "easing": {
+                "type": "cubicBezier",
+                "x1": 0.42,
+                "y1": 0.0,
+                "x2": 0.58,
+                "y2": 1.0
+              }
+            }
+          ]
+        },
+        {
+          "nodeId": "shape-5",
+          "property": "opacity",
+          "keyframes": [
+            {
+              "time": 0.0,
+              "value": {
+                "type": "number",
+                "value": 0.0
+              },
+              "easing": {
+                "type": "cubicBezier",
+                "x1": 0.42,
+                "y1": 0.0,
+                "x2": 0.58,
+                "y2": 1.0
+              }
+            },
+            {
+              "time": 0.55,
+              "value": {
+                "type": "number",
+                "value": 1.0
+              },
+              "easing": {
+                "type": "cubicBezier",
+                "x1": 0.42,
+                "y1": 0.0,
+                "x2": 0.58,
+                "y2": 1.0
+              }
+            },
+            {
+              "time": 4.1,
+              "value": {
+                "type": "number",
+                "value": 1.0
+              },
+              "easing": {
+                "type": "cubicBezier",
+                "x1": 0.42,
+                "y1": 0.0,
+                "x2": 0.58,
+                "y2": 1.0
+              }
+            },
+            {
+              "time": 4.8,
+              "value": {
+                "type": "number",
+                "value": 0.0
+              },
+              "easing": {
+                "type": "cubicBezier",
+                "x1": 0.42,
+                "y1": 0.0,
+                "x2": 0.58,
+                "y2": 1.0
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ],
   "stateMachines": [
     {
       "id": "gallery",
-      "initial": "idle",
+      "initial": "figure-0",
       "states": [
-        {
-          "id": "idle",
-          "onEnter": [],
-          "overrides": []
-        },
         {
           "id": "figure-0",
           "onEnter": [
             {
-              "clipId": "motion-0",
-              "type": "playClip"
+              "type": "playClip",
+              "clipId": "motion-0"
             }
           ],
           "overrides": [
@@ -3096,14 +2975,15 @@
                 "value": 1.0
               }
             }
-          ]
+          ],
+          "announce": "I am a soft square. Let's build something."
         },
         {
           "id": "figure-1",
           "onEnter": [
             {
-              "clipId": "motion-1",
-              "type": "playClip"
+              "type": "playClip",
+              "clipId": "motion-1"
             }
           ],
           "overrides": [
@@ -3123,14 +3003,15 @@
                 "value": 1.0
               }
             }
-          ]
+          ],
+          "announce": "I am a soft square. Let's build something."
         },
         {
           "id": "figure-2",
           "onEnter": [
             {
-              "clipId": "motion-2",
-              "type": "playClip"
+              "type": "playClip",
+              "clipId": "motion-2"
             }
           ],
           "overrides": [
@@ -3150,14 +3031,15 @@
                 "value": 1.0
               }
             }
-          ]
+          ],
+          "announce": "Hello! I am a curious circle."
         },
         {
           "id": "figure-3",
           "onEnter": [
             {
-              "clipId": "motion-3",
-              "type": "playClip"
+              "type": "playClip",
+              "clipId": "motion-3"
             }
           ],
           "overrides": [
@@ -3177,14 +3059,15 @@
                 "value": 1.0
               }
             }
-          ]
+          ],
+          "announce": "Hello! I am a curious circle."
         },
         {
           "id": "figure-4",
           "onEnter": [
             {
-              "clipId": "motion-4",
-              "type": "playClip"
+              "type": "playClip",
+              "clipId": "motion-4"
             }
           ],
           "overrides": [
@@ -3204,14 +3087,15 @@
                 "value": 1.0
               }
             }
-          ]
+          ],
+          "announce": "I am a bright polygon. Every corner has a story."
         },
         {
           "id": "figure-5",
           "onEnter": [
             {
-              "clipId": "motion-5",
-              "type": "playClip"
+              "type": "playClip",
+              "clipId": "motion-5"
             }
           ],
           "overrides": [
@@ -3231,109 +3115,100 @@
                 "value": 1.0
               }
             }
-          ]
+          ],
+          "announce": "I am a bright polygon. Every corner has a story."
         }
       ],
       "transitions": [
         {
-          "actions": [],
-          "event": {
-            "name": "START",
-            "target": null
-          },
-          "from": "idle",
-          "guard": null,
-          "to": "figure-0"
-        },
-        {
-          "actions": [
-            {
-              "clipId": "motion-0",
-              "type": "stopClip"
-            }
-          ],
-          "event": {
-            "name": "clip.end",
-            "target": null
-          },
           "from": "figure-0",
-          "guard": null,
-          "to": "figure-1"
-        },
-        {
-          "actions": [
-            {
-              "clipId": "motion-1",
-              "type": "stopClip"
-            }
-          ],
+          "to": "figure-1",
           "event": {
             "name": "clip.end",
             "target": null
           },
+          "guard": null,
+          "actions": [
+            {
+              "type": "stopClip",
+              "clipId": "motion-0"
+            }
+          ]
+        },
+        {
           "from": "figure-1",
-          "guard": null,
-          "to": "figure-2"
-        },
-        {
-          "actions": [
-            {
-              "clipId": "motion-2",
-              "type": "stopClip"
-            }
-          ],
+          "to": "figure-2",
           "event": {
             "name": "clip.end",
             "target": null
           },
+          "guard": null,
+          "actions": [
+            {
+              "type": "stopClip",
+              "clipId": "motion-1"
+            }
+          ]
+        },
+        {
           "from": "figure-2",
-          "guard": null,
-          "to": "figure-3"
-        },
-        {
-          "actions": [
-            {
-              "clipId": "motion-3",
-              "type": "stopClip"
-            }
-          ],
+          "to": "figure-3",
           "event": {
             "name": "clip.end",
             "target": null
           },
+          "guard": null,
+          "actions": [
+            {
+              "type": "stopClip",
+              "clipId": "motion-2"
+            }
+          ]
+        },
+        {
           "from": "figure-3",
-          "guard": null,
-          "to": "figure-4"
-        },
-        {
-          "actions": [
-            {
-              "clipId": "motion-4",
-              "type": "stopClip"
-            }
-          ],
+          "to": "figure-4",
           "event": {
             "name": "clip.end",
             "target": null
           },
+          "guard": null,
+          "actions": [
+            {
+              "type": "stopClip",
+              "clipId": "motion-3"
+            }
+          ]
+        },
+        {
           "from": "figure-4",
-          "guard": null,
-          "to": "figure-5"
-        },
-        {
-          "actions": [
-            {
-              "clipId": "motion-5",
-              "type": "stopClip"
-            }
-          ],
+          "to": "figure-5",
           "event": {
             "name": "clip.end",
             "target": null
           },
-          "from": "figure-5",
           "guard": null,
-          "to": "figure-0"
+          "actions": [
+            {
+              "type": "stopClip",
+              "clipId": "motion-4"
+            }
+          ]
+        },
+        {
+          "from": "figure-5",
+          "to": "figure-0",
+          "event": {
+            "name": "clip.end",
+            "target": null
+          },
+          "guard": null,
+          "actions": [
+            {
+              "type": "stopClip",
+              "clipId": "motion-5"
+            }
+          ]
         }
       ]
     }
@@ -3342,5 +3217,9 @@
     "figureCount": 6,
     "seed": "42"
   },
-  "width": 960.0
+  "audioAssets": [],
+  "audioCues": [],
+  "customJs": "\nconst svg = document.currentScript.ownerSVGElement;\nconst data = splinely.sourceProject; // decoded once by the runtime (binary or JSON metadata)\nconst machine = data.stateMachines.length ? splinely.machine('gallery') : null;\nconst status = svg.querySelector('[id=\"status\"]');\nlet paused = [], pauseRequested = false;\nfunction describe() {\n  status.textContent = (machine ? 'State: ' + machine.state : 'Water drop') +\n    ' · ' + (splinely.timeline.playing ? 'playing' : 'paused');\n}\nfunction start() {\n  pauseRequested = false;\n  for (const id of paused) splinely.clip(id).play();\n  paused = []; splinely.timeline.play(); describe();\n}\nfunction pause() {\n  pauseRequested = true;\n  if (splinely.timeline.playing) {\n    paused = data.clips.filter(c => splinely.clip(c.id).playing).map(c => c.id);\n    splinely.timeline.pause();\n  }\n  describe();\n}\nsplinely.on('showcase.start', start);\nsplinely.on('showcase.pause', pause);\nsplinely.on('state.change', () => {\n  // Pausing synchronizes the wall clock. A queued clip.end may enter the next\n  // state after the Pause handler returns; hold that new clip, not the old one.\n  if (pauseRequested) {\n    paused = data.clips.filter(c => splinely.clip(c.id).playing).map(c => c.id);\n    splinely.timeline.pause();\n  }\n  describe();\n});\nsplinely.on('error', () => { status.textContent = 'Runtime error · inspect diagnostics'; });\ndescribe();\n",
+  "rawSvg": "",
+  "description": "Seeded, warm-colored geometric characters take turns on stage. It starts by itself: the machine visits every figure in order and repeats without random state jumps."
 }

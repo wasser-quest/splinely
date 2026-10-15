@@ -1,5 +1,5 @@
 use crate::*;
-use std::collections::HashSet;
+use std::collections::{HashMap, HashSet};
 
 type Result = std::result::Result<(), DocumentError>;
 fn require(ok: bool, message: impl Into<String>) -> Result {
@@ -62,6 +62,25 @@ fn same_type(a: &serde_json::Value, b: &serde_json::Value) -> bool {
         || (a.is_string() && b.is_string())
 }
 
+/// ID lookups for one `validate` pass. IDs are unique across the checked
+/// collections (`unique` runs first), so first-match scans and map lookups agree.
+struct Index<'a> {
+    nodes: HashMap<&'a str, &'a Node>,
+    bones: HashSet<&'a str>,
+    clips: HashMap<&'a str, &'a Clip>,
+    audio_assets: HashSet<&'a str>,
+}
+impl<'a> Index<'a> {
+    fn new(project: &'a Project) -> Self {
+        Self {
+            nodes: project.nodes.iter().map(|n| (n.id.as_str(), n)).collect(),
+            bones: project.bones.iter().map(|b| b.id.as_str()).collect(),
+            clips: project.clips.iter().map(|c| (c.id.as_str(), c)).collect(),
+            audio_assets: project.audio_assets.iter().map(|a| a.id.as_str()).collect(),
+        }
+    }
+}
+
 impl Project {
     pub fn validate(&self) -> Result {
         require(
@@ -83,12 +102,23 @@ impl Project {
                 .map(|n| n.id.as_str())
                 .chain(self.bones.iter().map(|n| n.id.as_str()))
                 .chain(self.clips.iter().map(|n| n.id.as_str()))
+                .chain(self.blend_spaces.iter().map(|n| n.id.as_str()))
                 .chain(self.state_machines.iter().map(|n| n.id.as_str()))
                 .chain(self.audio_assets.iter().map(|n| n.id.as_str()))
                 .chain(self.audio_cues.iter().map(|n| n.id.as_str()))
-                .chain(self.groups.iter().map(|g| g.id.as_str())),
+                .chain(
+                    self.clips
+                        .iter()
+                        .flat_map(|c| &c.audio_cues)
+                        .map(|n| n.id.as_str()),
+                )
+                .chain(self.groups.iter().map(|g| g.id.as_str()))
+                .chain(self.followers.iter().map(|f| f.id.as_str())),
             "project",
         )?;
+        let index = Index::new(self);
+        let groups: HashMap<&str, &Group> =
+            self.groups.iter().map(|g| (g.id.as_str(), g)).collect();
         for g in &self.groups {
             require(
                 g.name.len() <= 200,
@@ -104,26 +134,20 @@ impl Project {
                 match &current.parent_id {
                     None => break,
                     Some(parent) => {
-                        current =
-                            self.groups
-                                .iter()
-                                .find(|p| &p.id == parent)
-                                .ok_or_else(|| {
-                                    DocumentError(format!(
-                                        "group {}: missing parent {parent}",
-                                        g.id
-                                    ))
-                                })?;
+                        current = groups.get(parent.as_str()).copied().ok_or_else(|| {
+                            DocumentError(format!("group {}: missing parent {parent}", g.id))
+                        })?;
                     }
                 }
             }
         }
         require(
-            !self.nodes.iter().any(|n| n.id == "splinely-project"),
+            !index.nodes.contains_key("splinely-project"),
             "splinely-project is a reserved node ID",
         )?;
         let poses = crate::bones::solve_bones(&self.bones)?;
-        crate::bones::attach_nodes(&mut self.nodes.clone(), &poses)?;
+        crate::bones::check_attachments(&self.nodes, &poses)?;
+        crate::motion::validate(self, &index.nodes)?;
         for n in &self.nodes {
             if let Some(original) = &n.original_kind {
                 require(
@@ -134,7 +158,7 @@ impl Project {
             }
             if let Some(group) = &n.group {
                 require(
-                    self.groups.iter().any(|g| &g.id == group),
+                    groups.contains_key(group.as_str()),
                     format!("node {}: missing group {group}", n.id),
                 )?;
             }
@@ -187,15 +211,21 @@ impl Project {
                 }
             }
         }
-        // Index targets once; projects can hold thousands of keyframes.
-        let bone_ids: HashSet<&str> = self.bones.iter().map(|b| b.id.as_str()).collect();
-        let node_ids: std::collections::HashMap<&str, &Node> =
-            self.nodes.iter().map(|n| (n.id.as_str(), n)).collect();
         require(self.guides.len() <= 1000, "at most 1000 guides")?;
         for g in &self.guides {
             finite(&[g.position], "guide")?;
             require(g.position.abs() <= 1e7, "guide position out of range")?;
         }
+        if let Some(info) = &self.svg_import {
+            for hash in [&info.source_hash, &info.document_hash] {
+                require(
+                    hash.strip_prefix("fnv1a64:")
+                        .is_some_and(|h| h.len() == 16 && h.bytes().all(|b| b.is_ascii_hexdigit())),
+                    "svgImport hashes must look like fnv1a64:<16 hex digits>",
+                )?;
+            }
+        }
+        self.validate_blend_spaces()?;
         for c in &self.clips {
             validate_clip_weight(c.weight)?;
             require(
@@ -204,6 +234,11 @@ impl Project {
             )?;
             let mut targets = HashSet::new();
             for t in &c.tracks {
+                require(
+                    c.blend_mode != BlendMode::Additive
+                        || !matches!(t.property, Property::Gradient | Property::D),
+                    "additive clips support numeric and RGBA tracks, not gradients or paths",
+                )?;
                 require(
                     targets.insert((&t.node_id, t.property)),
                     format!("clip {}: duplicate property track", c.id),
@@ -216,11 +251,12 @@ impl Project {
                         c.id, t.property, t.node_id
                     ),
                 )?;
-                let target = if bone_ids.contains(t.node_id.as_str()) {
+                let target = if index.bones.contains(t.node_id.as_str()) {
                     Target::Bone
                 } else {
                     Target::Node(
-                        node_ids
+                        index
+                            .nodes
                             .get(t.node_id.as_str())
                             .copied()
                             .ok_or_else(|| DocumentError(format!("missing node {}", t.node_id)))?,
@@ -255,17 +291,18 @@ impl Project {
         }
         for m in &self.state_machines {
             unique(m.states.iter().map(|s| s.id.as_str()), "states")?;
-            let exists = |s: &str| m.states.iter().any(|state| state.id == s);
+            let state_ids: HashSet<&str> = m.states.iter().map(|s| s.id.as_str()).collect();
+            let exists = |s: &str| state_ids.contains(s);
             require(
                 exists(&m.initial),
                 format!("machine {}: missing initial state", m.id),
             )?;
             for s in &m.states {
                 for o in &s.overrides {
-                    self.validate_property(&o.node_id, o.property, &o.value)?;
+                    self.validate_property_in(&index, &o.node_id, o.property, &o.value)?;
                 }
-                for a in &s.on_enter {
-                    self.validate_action(a)?;
+                for a in s.on_enter.iter().chain(&s.on_exit) {
+                    self.validate_action(&index, a)?;
                 }
             }
             for t in &m.transitions {
@@ -273,7 +310,7 @@ impl Project {
                     exists(&t.from) && exists(&t.to),
                     "transition references missing state",
                 )?;
-                self.validate_event(&t.event)?;
+                self.validate_event(&index, &t.event)?;
                 if let Some(g) = &t.guard {
                     require(
                         self.variables
@@ -283,8 +320,59 @@ impl Project {
                     )?;
                 }
                 for a in &t.actions {
-                    self.validate_action(a)?;
+                    self.validate_action(&index, a)?;
                 }
+                require(
+                    t.blend.is_finite() && (0.0..=60.0).contains(&t.blend),
+                    "transition blend must be 0..60 seconds",
+                )?;
+                match t.after {
+                    Some(after) => require(
+                        after.is_finite() && (0.0..=3600.0).contains(&after) && t.event.name == TIMER_EVENT,
+                        "timer transition: after must be 0..3600 seconds and the event named \"after\"",
+                    )?,
+                    None => require(
+                        t.event.name != TIMER_EVENT,
+                        "event \"after\" is reserved for timer transitions (set after)",
+                    )?,
+                }
+            }
+        }
+        for f in &self.followers {
+            let node = index.nodes.contains_key(f.target.as_str());
+            require(
+                node || index.bones.contains(f.target.as_str()),
+                format!("follower {}: unknown node or bone {}", f.id, f.target),
+            )?;
+            unit(f.strength, "follower strength")?;
+            let max_limit = match f.mode {
+                FollowMode::Offset => 1e7,
+                FollowMode::Rotate => 180.0,
+            };
+            require(
+                f.max.is_finite() && (0.0..=max_limit).contains(&f.max),
+                format!("follower {}: max must be 0..{max_limit}", f.id),
+            )?;
+            require(
+                f.smoothing.is_finite() && (0.0..=10.0).contains(&f.smoothing),
+                format!("follower {}: smoothing must be 0..10 seconds", f.id),
+            )?;
+            finite(&[f.rest_angle], "follower restAngle")?;
+            if let Some(origin) = f.origin {
+                finite(&origin, "follower origin")?;
+            }
+            if let Some(when) = &f.when {
+                let machine = self.state_machines.iter().find(|m| m.id == when.machine);
+                require(
+                    machine.is_some_and(|m| {
+                        !when.states.is_empty()
+                            && when
+                                .states
+                                .iter()
+                                .all(|s| m.states.iter().any(|st| &st.id == s))
+                    }),
+                    format!("follower {}: unknown machine or state in when", f.id),
+                )?;
             }
         }
         for a in &self.audio_assets {
@@ -302,9 +390,21 @@ impl Project {
                 format!("asset {}: invalid base64", a.id),
             )?;
         }
-        for c in &self.audio_cues {
+        for clip in &self.clips {
+            for cue in &clip.audio_cues {
+                require(
+                    cue.time < clip.duration,
+                    "clip audio cue must start before clip end",
+                )?;
+            }
+        }
+        for c in self
+            .audio_cues
+            .iter()
+            .chain(self.clips.iter().flat_map(|c| &c.audio_cues))
+        {
             require(
-                self.audio_assets.iter().any(|a| a.id == c.asset_id),
+                index.audio_assets.contains(c.asset_id.as_str()),
                 "audio cue references missing asset",
             )?;
             nonnegative(c.time, "audio cue time")?;
@@ -317,7 +417,7 @@ impl Project {
                 )?;
             }
         }
-        Ok(())
+        self.validate_accessibility()
     }
     pub(crate) fn validate_property(&self, node_id: &str, p: Property, v: &AnimValue) -> Result {
         let target = if self.bones.iter().any(|b| b.id == node_id) {
@@ -332,32 +432,52 @@ impl Project {
         };
         check_property(target, p, v)
     }
-    fn validate_event(&self, e: &Event) -> Result {
+    fn validate_property_in(
+        &self,
+        index: &Index,
+        node_id: &str,
+        p: Property,
+        v: &AnimValue,
+    ) -> Result {
+        let target = if index.bones.contains(node_id) {
+            Target::Bone
+        } else {
+            Target::Node(
+                index
+                    .nodes
+                    .get(node_id)
+                    .copied()
+                    .ok_or_else(|| DocumentError(format!("missing node {node_id}")))?,
+            )
+        };
+        check_property(target, p, v)
+    }
+    fn validate_event(&self, index: &Index, e: &Event) -> Result {
         require(!e.name.is_empty(), "event name is empty")?;
         if let Some(target) = &e.target {
             if e.name == "clip.end" {
                 require(
-                    self.clips.iter().any(|clip| &clip.id == target) || target == "@timeline",
+                    index.clips.contains_key(target.as_str()) || target == "@timeline",
                     "clip.end event references missing clip",
                 )?;
             } else {
                 require(
-                    self.nodes.iter().any(|n| &n.id == target),
+                    index.nodes.contains_key(target.as_str()),
                     "event references missing node",
                 )?;
             }
         }
         Ok(())
     }
-    fn validate_action(&self, a: &Action) -> Result {
+    fn validate_action(&self, index: &Index, a: &Action) -> Result {
         match a {
             Action::SetProperty {
                 node_id,
                 property,
                 value,
-            } => self.validate_property(node_id, *property, value),
+            } => self.validate_property_in(index, node_id, *property, value),
             Action::PlayClip { clip_id } | Action::StopClip { clip_id } => require(
-                self.clips.iter().any(|c| &c.id == clip_id),
+                index.clips.contains_key(clip_id.as_str()),
                 "action references missing clip",
             ),
             Action::BlendClip {
@@ -366,10 +486,11 @@ impl Project {
                 duration,
             } => {
                 require(
-                    self.clips
-                        .iter()
-                        .any(|c| &c.id == clip_id && c.blend_mode == BlendMode::Weighted),
-                    "blendClip requires an existing weighted clip",
+                    index
+                        .clips
+                        .get(clip_id.as_str())
+                        .is_some_and(|c| c.blend_mode != BlendMode::Override),
+                    "blendClip requires an existing weighted or additive clip",
                 )?;
                 validate_clip_weight(*weight)?;
                 require(
@@ -377,15 +498,20 @@ impl Project {
                     "blendClip duration must be nonnegative and finite",
                 )
             }
-            Action::SetVariable { name, value } => require(
-                self.variables
-                    .get(name)
-                    .is_some_and(|v| same_type(v, value)),
-                "action references missing variable or mismatched type",
-            ),
-            Action::Emit { event } => self.validate_event(event),
+            Action::SetVariable { name, value } => {
+                require(
+                    self.variables
+                        .get(name)
+                        .is_some_and(|v| same_type(v, value)),
+                    "action references missing variable or mismatched type",
+                )?;
+                // `validate` already ran `validate_blend_spaces` on this project.
+                self.blend_space_weights_unchecked(&[(name.clone(), value.clone())].into())?;
+                Ok(())
+            }
+            Action::Emit { event } => self.validate_event(index, event),
             Action::PlayAudio { asset_id } => require(
-                self.audio_assets.iter().any(|a| &a.id == asset_id),
+                index.audio_assets.contains(asset_id.as_str()),
                 "action references missing audio asset",
             ),
         }
@@ -459,6 +585,13 @@ fn check_property(target: Target, p: Property, v: &AnimValue) -> Result {
         (Property::Fill | Property::Stroke | Property::Gradient | Property::D, _)
         | (_, AnimValue::Color(_) | AnimValue::Gradient(_) | AnimValue::Path(_)) => {
             return Err(DocumentError("property value type mismatch".into()))
+        }
+        (Property::MotionProgress, AnimValue::Number(v)) => {
+            require(
+                n.motion_path.is_some(),
+                "motionProgress requires a motionPath binding",
+            )?;
+            unit(*v, "motion progress")?;
         }
         (Property::Opacity, AnimValue::Number(v)) => unit(*v, "opacity")?,
         (

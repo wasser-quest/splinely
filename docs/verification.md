@@ -50,4 +50,7 @@ The original debug executable is approximately 222 MiB. Removing debug symbols y
 
 ## Remaining limitations
 
-No full SVG importer, graphical Pen/Bézier point editor, IK/mesh skinning, native audio engine, arbitrary path morphing, full visual state graph or sandboxed untrusted scripting. Bones use rigid bindings; paths use bounds-based picking. Custom JS is explicit trust opt-in. Plugins are trusted statically compiled Rust code. See README and PLAN for scope.
+No full SVG importer (the limited importer is described in docs/svg-import.md), graphical Pen/Bézier point editor, IK/mesh skinning, native audio engine, arbitrary path morphing, full visual state graph or sandboxed untrusted scripting. Bones use rigid bindings; paths use bounds-based picking. Custom JS is explicit trust opt-in. Plugins are trusted statically compiled Rust code. See README and PLAN for scope.
+
+
+Browser matrix (PLAN item 9, see [browser-tests.md](browser-tests.md#browsermatrix-chromium--firefox--webkit-und-audio-latenz)): the Firefox-only statements above predate it. `scripts/browser-matrix.sh` now runs the smoke scenarios in Chromium, Firefox and Playwright WebKit and measures null-sink audio latency in Chromium/Firefox; still not covered: physical audio hardware, WebKit audio, Safari.

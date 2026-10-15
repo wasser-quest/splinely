@@ -22,8 +22,16 @@ fn success(args: &[&str]) -> Value {
     assert!(output.stdout.ends_with(b"\n"));
     serde_json::from_slice(&output.stdout).unwrap()
 }
+/// Raw JSON value tree of a project file, binary `.sply` or JSON text.
+fn project_value(bytes: &[u8]) -> Value {
+    if splinely_document::Project::is_binary(bytes) {
+        splinely_document::decode_to_value(bytes).unwrap()
+    } else {
+        serde_json::from_slice(bytes).unwrap()
+    }
+}
 fn saved(path: &Path) -> Value {
-    serde_json::from_slice(&std::fs::read(path).unwrap()).unwrap()
+    project_value(&std::fs::read(path).unwrap())
 }
 fn error(args: &[&str], code: &str) {
     let output = invoke(args);

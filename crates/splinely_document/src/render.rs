@@ -148,6 +148,7 @@ mod tests {
         let mut p = Project::default();
         p.nodes.push(Node::rect("r", 0., 0., 100., 100.));
         p.clips.push(Clip {
+            audio_cues: vec![],
             id: "move".into(),
             name: String::new(),
             duration: 1.,

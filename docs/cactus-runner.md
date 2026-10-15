@@ -2,7 +2,7 @@
 
 Open `examples/cactus-runner.html` or `examples/cactus-runner.svg` directly in a script-capable browser. Both contain the complete vector scene, project metadata and runtime; the HTML embeds the SVG rather than fetching an adjacent object. No server, external library, image, audio or network is needed. Links to the editable JSON and these notes are optional.
 
-Click the scene or press Space to jump. HTML also provides Jump, Pause, Play and Restart. The original ten-bone stickfigure walks through a seeded desert with occasional cacti. This is a motion study: cacti do not cause collisions or game-over.
+Click the scene or press Space to jump. The world starts running on load; the HTML page has no buttons (the scene click and Space are the jump input). The scripting events `runner.pause`, `runner.play`, `runner.restart` and `runner.jump` remain available through `splinely.emit(...)`. The original ten-bone stickfigure walks through a seeded desert with occasional cacti. This is a motion study: cacti do not cause collisions or game-over.
 
 ## Reproduce through the CLI
 
@@ -18,7 +18,7 @@ python3 scripts/runner-smoke.py
 
 The generator supports `--cli PATH` and `--output DIR`. It constructs original SVG vectors, runs **import-svg → apply → validate → export → evaluate**, and checks that the compiled exporter preserved weighted clip fields and `blendClip` actions. Imported path geometry is retained in the authored nodes. The patch attaches local transforms, bone bindings, clips, machines and reviewed custom JavaScript. Temporary authoring inputs live under `TMPDIR`.
 
-Export deliberately passes **`--trusted-js`** because the small `customJs` controller handles click/Space, jump completion and transport controls. It does not animate geometry, use timers or access the network. Only use this option for reviewed code; a restrictive CSP can block its dynamic compilation. `--author-only` writes draft JSON only and makes no export/verification claim.
+Export deliberately passes **`--trusted-js`** because the small `customJs` controller handles click/Space, jump completion and the optional transport events. It does not animate geometry, use timers or access the network. Only use this option for reviewed code; a restrictive CSP can block its dynamic compilation. `--author-only` writes draft JSON only and makes no export/verification claim.
 
 Generated artifacts:
 
@@ -47,7 +47,7 @@ Verified locally with installed **Firefox 157.0.1** (user agent Firefox/157.0), 
 - Real scene click produces simultaneous nonzero walk/jump weights: one captured pair was **0.7375 / 0.2625**.
 - At jump time **0.412 s**, weights were **0 / 1** and torso Y was **188.96**, versus ground Y=310. Scroll advanced from **0.504 s** while walking to **0.976 s** near the apex.
 - Landing crossfades back, then settles to **1 / 0**, Y=310, with scroll at **1.917 s**.
-- Pause holds the crossfade and scene; Play resumes; keyboard jump and Restart work.
+- Nothing is pressed after load (the page has no buttons): the scene runs on its own and a real scene click or Space jumps. The scripted `runner.pause`/`runner.play` events hold and resume the crossfade and scene; `runner.restart` works.
 - A full wall-time 24-second loop respawns **all eight** cacti offscreen and preserves their authored positions/speed.
 - Standalone SVG autoplays, accepts a real scene click, blends into jump and returns to walking while scrolling continues.
 

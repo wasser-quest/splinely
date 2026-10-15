@@ -1,5 +1,6 @@
 //! User settings: one window (Strg+, or Ansicht › Einstellungen) for every
-//! tool option, saved to `~/.config/splinely/settings.json` (or `$XDG_CONFIG_HOME`).
+//! tool option, saved to `~/.config/splinely/settings.json` (or `$XDG_CONFIG_HOME`; `%APPDATA%\splinely` on Windows,
+//! `~/Library/Application Support/splinely` on macOS).
 //! Unknown or missing fields fall back to defaults, so older files keep working.
 use super::*;
 use serde::{Deserialize, Serialize};

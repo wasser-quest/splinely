@@ -1,12 +1,30 @@
 # Splinely
 
+**Movimiento por trayectorias:** enlace opcional, progreso animado 0–1 y orientación tangente en el inspector, CLI y ambas runtimes. [Uso y límites](docs/motion-paths.md).
+
 [English](README.md) · [Deutsch](README.de.md) · **Español** · [Français](README.fr.md) · [日本語](README.ja.md) · [简体中文](README.zh.md)
 
 ![Logotipo de Splinely](assets/splinely-logo.svg)
 
-Splinely es un editor de escritorio en Rust con **archivos de proyecto `.sply`** y un runtime de JavaScript integrado para SVG interactivos. Dibuja formas y trazados, anímalos con fotogramas clave, huesos y máquinas de estados, y exporta un único SVG autónomo. **Estado actual: un prototipo funcional, no todo el alcance de [PLAN.md](PLAN.md).**
+Splinely es un editor de animación vectorial escrito en Rust. Los proyectos viven en **archivos `.sply`**: formas y trazados, fotogramas clave, huesos, máquinas de estados, seguimiento del puntero y audio, todo en un archivo. El **Splinely Runtime** reproduce los proyectos `.sply` con todo su comportamiento: en el navegador, de forma nativa (Rust/C) o en Splinely Viewer. **Estado actual: un prototipo funcional, no todo el alcance de [PLAN.md](PLAN.md).**
 
 El editor está disponible en **inglés, alemán, español, francés, japonés y chino simplificado**. Sigue el idioma del sistema y se puede cambiar en **Ajustes › General › Idioma**. El japonés y el chino necesitan una fuente CJK instalada (p. ej. Noto Sans CJK). Los documentos detallados de `docs/` están en alemán.
+
+## Cómo funciona Splinely
+
+- **`.sply` es la fuente.** Describe cómo se ven las cosas *y* cómo se comportan: clips, máquinas de estados, transiciones con fundidos y temporizadores, seguimiento del puntero, audio y variables.
+- **El Splinely Runtime le da vida.** Un archivo SVG por sí solo es solo una imagen: no tiene máquinas de estados, temporizadores ni seguimiento del puntero. Esa lógica está en el runtime, que existe como runtime de navegador (JavaScript), runtime nativo (`splinely_runtime`, ABI de Rust/C) y en el **Splinely Viewer** de escritorio.
+- **Exportaciones:** el *SVG estático* es una imagen fija de un instante. El *reproductor web* (`splinely-cli export`, «Exportar SVG interactivo») es un único archivo autónomo que incluye el proyecto `.sply` junto con el runtime de navegador, así que funciona en cualquier navegador sin servidor.
+
+### Muchas interacciones a la vez
+
+Varias máquinas de estados funcionan en paralelo y cada una **funde** sus estados (`blend` en segundos), de modo que hover, clic y estado de ánimo se superponen con suavidad. Las **transiciones temporizadas** (`after`) cambian solas (parpadear, volver al reposo), las **acciones de salida** se ejecutan al abandonar un estado y los **seguidores** hacen que formas o huesos sigan al puntero (pupilas, cabeza, brazos) por encima de todo lo demás. El runtime respeta el ajuste del sistema *reducir movimiento*. Ejemplo: la [cara curiosa](examples/curious-face.svg): las pupilas siguen al ratón, el hover la inclina, un clic sonríe y un temporizador parpadea, todo sin código propio.
+
+```sh
+splinely-cli on face.sply --event click --target face --machine mood --to happy --state face.fill=gold --blend 0.4
+splinely-cli on face.sply --machine blink --from open --to shut --after 3 --state eye.scaleY=0.1 --blend 0.08
+splinely-cli follow face.sply --target pupil --max 8 --strength 0.15 --smoothing 0.1
+```
 
 ## Instalar con un LLM
 
@@ -19,6 +37,8 @@ Basta con decirle a un agente de IA con acceso a la terminal (p. ej. Claude Code
 ## Primeros pasos
 
 **Sin compilar:** cada [release](https://github.com/wasser-quest/splinely/releases/latest) incluye paquetes precompilados para Linux (`splinely-vX.Y.Z-x86_64-linux.tar.gz` con editor, CLI, visor, runtime y `libsplinely_runtime.so`). Instalación: [docs/INSTALL-BINARIES.md](docs/INSTALL-BINARIES.md).
+
+Windows x86_64 (`.zip`) y macOS Apple Silicon/Intel (`.tar.gz`) están **configurados, pero no probados en hardware real**: el código solo se ha comprobado a nivel de tipos desde Linux; los binarios no están firmados/notarizados. Detalles: [docs/INSTALL-BINARIES.md](docs/INSTALL-BINARIES.md).
 
 Desde el código fuente:
 
@@ -41,7 +61,7 @@ cargo run -p splinely_editor --bin splinely
 cargo run -p splinely_editor --bin splinely -- --demo-export /tmp/splinely-demo.svg
 ```
 
-El editor arranca con su propia demo. **Arrastra un archivo `.sply`**, usa **Archivo → Abrir …** (Ctrl+O, diálogo del sistema) o **Recientes**, o inicia directamente: `cargo run -p splinely_editor --bin splinely -- examples/demo.sply`. Los cambios sin guardar y los borradores de dibujo/código se confirman antes de cambiar de proyecto y al cerrar la ventana; el título muestra el archivo y `•` si hay cambios sin guardar. **Guardar** conserva el proyecto editable; el SVG es solo una exportación opcional.
+El editor arranca con un lienzo vacío. **Arrastra un archivo `.sply`**, usa **Archivo → Abrir …** (Ctrl+O, diálogo del sistema) o **Recientes**, o inicia directamente: `cargo run -p splinely_editor --bin splinely -- examples/demo.sply`. Los cambios sin guardar y los borradores de dibujo/código se confirman antes de cambiar de proyecto y al cerrar la ventana; el título muestra el archivo y `•` si hay cambios sin guardar. **Guardar** conserva el proyecto editable; el SVG es solo una exportación opcional.
 
 **Diseñar / Animar / Avanzado** separan dibujo, animación y código. Selección, Pluma, Puntos del trazado y Mano alzada son herramientas exclusivas; las opciones adicionales permanecen plegadas. **Vista previa**, **Reproducir** y **Abrir Splinely Viewer** están siempre a mano. [Uso, gestos y límites](docs/usability.md).
 
@@ -49,7 +69,7 @@ El JavaScript propio solo se ejecuta tras una autorización explícita por sesi�
 
 ## Un solo archivo de proyecto: `.sply`
 
-Geometría, capas, huesos, fotogramas clave, estados, pesos de mezcla, variables, audio incrustado y código propio quedan **juntos en un archivo**. No hace falta JSON/SVG adicional ni carpeta de recursos. Internamente `.sply` es JSON legible y validado estrictamente; los proyectos antiguos `.json`/`.splinely.json` siguen siendo compatibles. La aplicación/runtime y los plugins instalados no forman parte del archivo de proyecto. [Formato y compatibilidad](docs/sply-format.md).
+Geometría, capas, huesos, fotogramas clave, estados, pesos de mezcla, variables, audio incrustado y código propio quedan **juntos en un archivo**. No hace falta JSON/SVG adicional ni carpeta de recursos. Por defecto `.sply` se guarda en **binario** compacto (sin pérdida, validado estrictamente, con CRC); `.json`/`.splinely.json` siguen siendo JSON legible y el formato se detecta automáticamente al abrir (también los `.sply` JSON antiguos). `splinely-cli cat`/`convert` muestran o escriben JSON. La aplicación/runtime y los plugins instalados no forman parte del archivo de proyecto. [Formato y compatibilidad](docs/sply-format.md).
 
 En **Animar**, **Animar fácil** (fotograma clave/preajuste) y **Máquina de estados guiada** (clic/hover, visibilidad, inicio de clip) te guían en los primeros pasos. La mezcla ponderada y los fundidos temporizados siguen disponibles junto a las herramientas expertas. [Paso a paso y límites de mezcla](docs/animation-workflow.md).
 
@@ -137,7 +157,7 @@ El runtime incluido y el archivo de ejemplo no necesitan bibliotecas externas ni
 - **Navegación:** F/Inicio ajusta la escena; +/- hace zoom, 0 vuelve al 100 %. Botón central o Espacio + botón izquierdo desplazan la vista sin cambiar formas; Espacio sin arrastrar inicia/detiene al soltar. Las reglas se pueden mostrar/ocultar y se mantienen en coordenadas del documento. La línea de tiempo se puede ocultar. **Vista previa** separa los eventos de la escena de la edición.
 - **Mano alzada/tableta:** el modo a mano alzada crea trazados SVG editables, un trazo por paso de deshacer. Trazos sensibles a la presión solo si hay eventos de fuerza; sin promesa general de hardware/controladores. [Notas sobre tabletas](docs/tablet.md).
 - **Plugins instalables:** coloca un `splinely-plugin.json` en la carpeta de plugins y reinicia: herramientas de formas declarativas y paletas se cargan solas, sin compilar. [Formato, carpetas y ejemplos](docs/drop-in-plugins.md); nunca se ejecutan scripts/bibliotecas de terceros automáticamente.
-- **Plugins:** extensiones ECS estáticas en Rust con recursos propios y una fase de decoración. [Plantilla](plugin-templates/editor/README.md); `splinely-cli plugin` genera código fuente pero nunca lo ejecuta. Los plugins nativos son código de confianza, no una sandbox.
+- **Plugins:** extensiones ECS estáticas en Rust con recursos propios y una fase de decoración. [Plantilla](plugin-templates/editor/README.md); `splinely-cli plugin` genera código fuente pero nunca lo ejecuta. Los plugins nativos son código de confianza, no una sandbox. → [docs/plugins.md](docs/plugins.md) (hover-wiggle, `plugin list|validate|apply`, `export --plugin … --trusted-js`).
 
 ```sh
 cargo run -p splinely-cli -- import-svg drawing.svg --output drawing.splinely.json
@@ -162,9 +182,9 @@ Más comandos de formas, organización, huesos, capas y conversión: [CLI.md](CL
 | Rectángulo, círculo, texto, trazados, polígono/estrella/línea; selección múltiple y por rectángulo, tiradores de escala/rotación, guías inteligentes y manuales, menú contextual, paleta de comandos (Ctrl+K), ajustes (Ctrl+,) con atajos reasignables, tema claro/oscuro, idioma de la interfaz y cuadrícula visible, modo de grabación (auto-key), historial, medidas junto al puntero, línea de tiempo visual con fotogramas clave arrastrables y menú de transiciones, papel cebolla configurable, edición de texto en el lienzo, colores del documento, plantillas para proyectos nuevos, exportación PNG/GIF, cuentagotas, degradados lineales/radiales, grupos anidados (vista de árbol, exportación `<g>`), texto a trazado, alinear/distribuir/voltear, operaciones booleanas que conservan curvas, morphing de trazados, degradados animados, orden de capas, copiar/pegar, colores/transparencia, conversión, deshacer/rehacer | El morphing entre formas de topología distinta es aproximado (subtrazados que crecen/encogen), sin correspondencia exacta de agujeros |
 | Cargar/guardar proyectos mediante archivo temporal + renombrado; guardado automático cada 30 s con diálogo de recuperación | Migraciones históricas del esquema, cuotas de recursos completas |
 | Línea de tiempo, fotogramas clave, easing, relojes de clip independientes, estados paralelos, clips ponderados y fundidos cruzados temporizados (`blendClip`) | Mezcla aditiva, blend tree/blend space visual |
-| Modelo de estados, guardas/acciones, grafo de estados editable, edición JSON y vista previa nativa de estados | Conexiones libres por arrastre, disposición automática del grafo |
+| Modelo de estados, guardas/acciones, acciones de salida, transiciones temporizadas, fundidos entre estados (varias máquinas a la vez), seguimiento del puntero, grafo de estados editable, edición JSON y vista previa nativa con hover | Conexiones libres por arrastre, disposición automática del grafo, movimiento a lo largo de trazados |
 | Eventos del navegador, API de clips/transporte, recursos y señales de audio incrustados | Ejecución nativa de JS o latencia de audio garantizada; la vista previa nativa solo cubre señales globales vía ffplay |
-| Exportación SVG estática/interactiva, importación vectorial SVG limitada, campos de código JS/SVG en bruto | **Sin importador completo para SVG arbitrarios**; texto/imágenes/degradados/filtros se rechazan al importar; el SVG en bruto solo queda como metadatos |
+| Exportación SVG estática/interactiva, importación vectorial SVG limitada, campos de código JS/SVG en bruto | **Sin importador completo para SVG arbitrarios**; texto, degradados e imágenes SVG data-URI se importan con un informe de lo aproximado/descartado; las imágenes rasterizadas se validan pero no se importan; clips/máscaras/filtros/archivos externos se rechazan; el SVG en bruto sigue siendo metadatos, con aviso de conflicto si difiere del dibujo ([detalles](docs/svg-import.md)) |
 | Proyección ECS de Bevy, plugins estáticos registrables, huesos y vínculos rígidos | Plugins nativos dinámicos, skinning de mallas, cadenas IK generales, traducción automática de sistemas Bevy a código de navegador, vista previa aislada no fiable |
 
 La vista previa nativa renderiza SVG con resvg: trazados, esquinas redondeadas y transformaciones se ven. El texto usa fuentes locales del sistema y puede variar entre navegadores. Las formas se seleccionan por su contorno exacto; las formas invisibles (opacidad 0) no se pueden pulsar. El esquema 1 se ha ampliado; los proyectos antiguos cargan con valores por defecto para los campos nuevos. Las versiones antiguas de Splinely no entienden los campos nuevos. El archivo `.sply` (JSON por dentro) es la referencia; la exportación SVG no es un viaje de ida y vuelta sin pérdidas.
@@ -186,6 +206,7 @@ El script ejecuta las pruebas del workspace, las pruebas del runtime en Node, la
 - [Cinder / Flux – Stickfight](examples/stickfight.html): pelea animada original de ocho segundos entre dos rigs con esquivas/contraataques, sombras/chispas y reproducir/pausar/reiniciar. `python3 scripts/generate-stickfight.py`, prueba: `python3 scripts/stickfight-smoke.py`.
 - [Búho marrón](examples/brown-owl.html): un búho en una rama con estados directos de clic/hover; al pasar el ratón los ojos siguen el puntero y se levantan los penachos; un clic le hace cerrar los ojos y alzar las alas. Prueba: `python3 scripts/owl-smoke.py`.
 - [Aoi dice hola](examples/anime-hello.html): personaje original de inspiración anime con mano articulada. **Un WAV generado localmente va incrustado en el SVG**; no hace falta conexión. Un clic desbloquea el audio. Reproducir: `python3 scripts/generate-anime-demo.py` (requiere `espeak-ng`/`espeak` local); prueba en navegador: `python3 scripts/anime-smoke.py`.
+- [Cara curiosa](examples/curious-face.svg) ([`.sply`](examples/curious-face.sply)): tres máquinas de estados a la vez – el hover la inclina, un clic funde a una sonrisa, un temporizador parpadea – mientras las pupilas siguen al ratón. Sin código propio. Generar: `python3 scripts/generate-curious-face.py`, prueba: `python3 scripts/face-smoke.py`.
 - [Gota de agua sobre una esfera azul](examples/water-drop.html): escena SVG autónoma con squash/stretch, brillos y ondas; reproducir/pausar.
 - [Figuras aleatorias](examples/random-figures.html): reproducibles por semilla, secuencia automática de estados con rótulos. Pulsa **Play**. Los cambios de estado siguen el final de los clips.
 - Ambos HTML incrustan el SVG vecino mediante `object`; sin API de servidor. El servidor de pruebas es solo una ayuda local.

@@ -12,6 +12,7 @@ import re
 import time
 import xml.etree.ElementTree as ET
 from firefox_harness import Firefox
+from sply_py import load_project_file, project_from_metadata
 
 ROOT = Path(__file__).resolve().parents[1]
 SVG = ROOT/'examples/stickfight.svg'
@@ -26,16 +27,17 @@ return {time:f.clip('duel').time,playing:f.timeline.playing,bones:f.bones(),
 """)
 
 
-def click(browser, id):
-    element = browser.command('WebDriver:FindElement', {'using':'css selector','value':'#'+id})
-    browser.command('WebDriver:ElementClick', {'id':element.get('element-6066-11e4-a52e-4f735466cecf',element.get('ELEMENT'))})
+def transport(browser, action):
+    # Scripting API of the runtime; the host page offers no buttons.
+    browser.js("""const f=document.querySelector('#scene').contentDocument.documentElement.splinely;
+if(arguments[0]==='play')f.clip('duel').play();f.timeline[arguments[0]]();""", [action])
 
 
 def main():
     tree = ET.parse(SVG)
     ns = '{http://www.w3.org/2000/svg}'
     metadata = tree.find(f"{ns}metadata[@id='splinely-project']")
-    project = json.loads(metadata.text)
+    project = project_from_metadata(metadata)
     assert len(project['bones']) == 20 and project['clips'][0]['duration'] == 8
     assert not project['customJs'] and not project['audioAssets']
     for element in tree.iter():
@@ -46,15 +48,18 @@ def main():
     html = (ROOT/'examples/stickfight.html').read_text()
     assert not re.search(r'(?:src|href|data)=["\'](?:https?:|//)',html)
     with Firefox() as browser:
+        hold = lambda action: transport(browser, action)
         browser.command('WebDriver:Navigate', {'url':(ROOT/'examples/stickfight.html').as_uri()})
         deadline = time.monotonic()+15
         while time.monotonic() < deadline:
-            if browser.js("return !document.querySelector('#pause').disabled;"):
+            if browser.js("try{return !!document.querySelector('#scene').contentDocument.documentElement.splinely;}catch(e){return false;}"):
                 break
             time.sleep(.1)
-        assert browser.js("return !document.querySelector('#pause').disabled;"), 'Local-file runtime not ready'
-        click(browser,'restart')
+        assert browser.js("return !!document.querySelector('#scene').contentDocument.documentElement.splinely;"), 'Local-file runtime not ready'
+        # Nothing is pressed: the page has no buttons and the autoplay loop already runs.
+        assert not browser.js("return document.querySelectorAll('button').length;"), 'Host page still has buttons'
         first = sample(browser)
+        assert first['playing'], 'Duel did not start by itself'
         time.sleep(.85)
         second = sample(browser)
         assert second['time'] > first['time']+.5 and second['bones'] != first['bones'], (first,second)
@@ -64,15 +69,15 @@ def main():
         poses = {b['id']:b for b in second['bones']}
         assert abs(poses['cinder-arm-front']['x']-poses['cinder-torso']['tipX']) < 1e-7
         assert abs(poses['cinder-arm-front']['y']-poses['cinder-torso']['tipY']) < 1e-7
-        click(browser,'pause')
+        hold('pause')
         held = sample(browser)
         time.sleep(.6)
         assert sample(browser) == held and not held['playing'], 'Pause failed to hold exact bone/DOM sample'
-        click(browser,'play')
+        hold('play')
         time.sleep(.4)
         resumed = sample(browser)
         assert resumed['time'] > held['time']+.2 and resumed['nodes'] != held['nodes'], 'Resume failed'
-        click(browser,'restart')
+        browser.js("const f=document.querySelector('#scene').contentDocument.documentElement.splinely;f.timeline.pause();f.timeline.seek(0);f.clip('duel').play();f.timeline.play();")
         restarted = sample(browser)
         assert restarted['time'] < .35 and restarted['playing'], restarted
         time.sleep(3.8)
@@ -91,7 +96,7 @@ def main():
         time.sleep(.5)
         later = browser.js('return {time:document.documentElement.splinely.clip("duel").time,bones:document.documentElement.splinely.bones()};')
         assert later['time'] > direct['time']+.2 and later['bones'] != direct['bones']
-    print('PASS: XML/local resources; Firefox file:// bone FK + scene wall-time movement, pause/resume/restart, 8s wrap, standalone SVG. Screenshot: /tmp/splinely-stickfight.png')
+    print('PASS: XML/local resources; Firefox file:// starts on load without any button, bone FK + scene wall-time movement, scripted pause/resume/restart, 8s wrap, standalone SVG. Screenshot: /tmp/splinely-stickfight.png')
 
 
 if __name__ == '__main__':

@@ -480,18 +480,33 @@ impl Project {
         }
         let mut next = self.clone();
         next.nodes.retain(|n| n.id != id);
+        let mut unbound = Vec::new();
+        for node in &mut next.nodes {
+            if node.motion_path.as_ref().is_some_and(|m| m.path == id) {
+                unbound.push(node.id.clone());
+                node.motion_path = None;
+            }
+        }
+        let removed_progress = |target: &str, property: Property| {
+            property == Property::MotionProgress && unbound.iter().any(|id| id == target)
+        };
         for clip in &mut next.clips {
-            clip.tracks.retain(|t| t.node_id != id);
+            clip.tracks
+                .retain(|t| t.node_id != id && !removed_progress(&t.node_id, t.property));
         }
         let keep_action = |a: &Action| {
-            !matches!(a, Action::SetProperty { node_id, .. } if node_id == id)
+            !matches!(a, Action::SetProperty { node_id, property, .. } if node_id == id || removed_progress(node_id, *property))
                 && !matches!(a, Action::Emit { event } if event.target.as_deref() == Some(id))
         };
         next.prune_empty_groups();
+        next.followers.retain(|f| f.target != id);
         for machine in &mut next.state_machines {
             for state in &mut machine.states {
-                state.overrides.retain(|o| o.node_id != id);
+                state
+                    .overrides
+                    .retain(|o| o.node_id != id && !removed_progress(&o.node_id, o.property));
                 state.on_enter.retain(keep_action);
+                state.on_exit.retain(keep_action);
             }
             machine
                 .transitions
@@ -528,7 +543,14 @@ impl Project {
                 || self.state_machines.iter().any(|n| n.id == id)
                 || self.audio_assets.iter().any(|n| n.id == id)
                 || self.audio_cues.iter().any(|n| n.id == id)
+                || self
+                    .clips
+                    .iter()
+                    .flat_map(|c| &c.audio_cues)
+                    .any(|n| n.id == id)
+                || self.followers.iter().any(|n| n.id == id)
                 || self.groups.iter().any(|g| g.id == id)
+                || self.blend_spaces.iter().any(|s| s.id == id)
         };
         (1..)
             .map(|i| format!("{prefix}-{i}"))
@@ -724,10 +746,22 @@ mod tests {
             }))
             .unwrap(),
         );
+        p.followers.push(Follower {
+            id: "look".into(),
+            target: "a".into(),
+            mode: FollowMode::Offset,
+            strength: 1.,
+            max: 5.,
+            smoothing: 0.,
+            rest_angle: 0.,
+            origin: None,
+            when: None,
+        });
         p.validate().unwrap();
         let id = "a".to_string();
         p.remove_node_with_references(&id).unwrap();
         assert!(!p.nodes.iter().any(|n| n.id == id));
+        assert!(p.followers.is_empty());
         assert!(p.remove_node_with_references("nope").is_err());
         assert_eq!(p.unused_id("node"), "node-1");
     }

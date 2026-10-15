@@ -4,7 +4,7 @@ use splinely_document::{AnimValue, Clip, Easing, Keyframe, Property, Track};
 
 pub fn property(source: &str) -> std::result::Result<Property, String> {
     let property: Property = serde_json::from_value(Value::String(source.into()))
-        .map_err(|_| "Unknown property; use x, y, rotation, scaleX, scaleY, opacity, width, height, radius, fontSize, fill, stroke, gradient or d".to_string())?;
+        .map_err(|_| "Unknown property; use motionProgress, x, y, rotation, scaleX, scaleY, opacity, width, height, radius, fontSize, fill, stroke, gradient or d".to_string())?;
     Ok(property)
 }
 
@@ -112,6 +112,7 @@ pub fn run(
         Some(index) => index,
         None => {
             project.clips.push(Clip {
+                audio_cues: vec![],
                 id: clip_id.into(),
                 name: clip_id.into(),
                 duration: time.max(0.001),

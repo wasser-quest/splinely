@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="120" height="80" viewBox="0 0 120 80">
+  <rect width="120" height="80" fill="#eeeeee"/>
+  <image id="photo" x="5" y="5" width="40" height="30" xlink:href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg=="/>
+  <image id="badge" x="60" y="10" width="50" height="50" href="data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 10'%3E%3Ccircle id='dot' cx='5' cy='5' r='4' fill='%23ff0000'/%3E%3C/svg%3E"/>
+</svg>

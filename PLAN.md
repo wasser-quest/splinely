@@ -1,272 +1,74 @@
-# Splinely — Implementierungsplan
+# Splinely — Plan und Stand
 
 ## Ziel
 
-Splinely ist ein einfacher Rust-Desktopeditor für SVG-Grafiken mit Keyframe-Animationen, State Machines, programmierbaren Interaktionen und Audio. Der interaktive Export soll als einzelne SVG-Datei offline ohne Server, API oder nachgeladene Bibliotheken funktionieren.
+Splinely ist ein Vektor-Animationseditor in Rust. Projekte stehen in **`.sply`-Dateien**: Formen und Pfade, Keyframes, Knochen, Zustandsmaschinen, Mausverfolgung, Audio und eigener Code – alles in einer Datei. Die **Splinely-Runtime** spielt `.sply`-Projekte mit ihrem ganzen Verhalten ab.
 
-Dieser Plan beschreibt die Umsetzung; die Implementierung beginnt anschließend schrittweise. Der Name der App ist **Splinely**.
+- **`.sply` ist die Quelle.** Darin steht, wie etwas aussieht *und* wie es sich verhält.
+- **Die Runtime erweckt es zum Leben.** Eine reine SVG-Datei ist nur ein Bild; Zustandsmaschinen, Timer, Überblendungen und Mausverfolgung kann erst die Runtime. Es gibt sie als Browser-Runtime (JavaScript), native Runtime (`splinely_runtime`, Rust/C-ABI) und im Desktop-Viewer.
+- **Exporte:** *Statisches SVG* = Standbild. *Web-Player* = eine eigenständige Datei mit `.sply`-Projekt und Browser-Runtime, die offline ohne Server läuft.
 
-## Leitlinien und Grenzen
+## Leitlinien
 
-- Einfache Oberfläche: Zeichenfläche, Eigenschaftenpanel, einklappbare Timeline; zusätzliche Tabs für Zustände und Code.
-- Rust für Editor und Dokumentkern; eingebettetes JavaScript für die Browser-Runtime.
-- Plugin-/ECS-Architektur nach Bevy-Vorbild, mit klaren Modulgrenzen.
-- Projektformat und SVG-Export sind getrennt: das Projekt erhält alle bearbeitbaren Daten.
-- Kein Netzwerkbedarf der mitgelieferten Runtime; alle benötigten Ressourcen werden im eigenständigen Export eingebettet.
-- Interaktive SVGs benötigen einen Browserkontext, der SVG-Skripte erlaubt. Als `<img>` oder in vielen Bildbetrachtern laufen sie nicht. CSP und Browserrichtlinien können weitere Einschränkungen verursachen.
-- Ohne Skriptausführung bleibt eine sinnvolle statische Grafik sichtbar.
-- „Alle Möglichkeiten offen“ bedeutet Erweiterbarkeit und Quelltextzugriff, nicht vollständige Unterstützung jedes SVG-Features im ersten Release.
+- Einfache Oberfläche: Zeichenfläche, Inspektor, einklappbare Zeitleiste; Arbeitsbereiche Gestalten / Animieren / Erweitert.
+- Ein Dokumentkern für Editor, CLI, Viewer und Runtimes; Vorschau und Export werten gleich aus (gemeinsame Tests).
+- Strenges, validiertes Format; alte Projekte laden weiter (Felder entfallener Funktionen werden beim Laden verworfen).
+- Kein Netzwerk für die mitgelieferte Runtime. Eigener Code läuft nur nach ausdrücklicher Freigabe und ist keine Sandbox.
+- Der Editor startet leer und ist in sechs Sprachen verfügbar (de, en, es, fr, ja, zh).
 
-## 1. Architektur
+## Stand: Version 0.5.0
 
-### Stack
-
-- Rust-Workspace.
-- Bevy ECS und Plugin-Scheduling, mit egui-Oberfläche über eine kompatible Integration.
-- Versioniertes Dokumentmodell mit Serde und JSON.
-- JavaScript-Runtime ohne externe Laufzeitabhängigkeiten für SVG-Export.
-- Rust-Tests für Modell und Auswertung; Browsertests für Export, Interaktion und Audio.
-
-Konkrete Bibliotheksversionen werden beim Projektstart auf gegenseitige Kompatibilität geprüft und festgeschrieben. Rendering und Desktopintegration werden zuerst durch einen kleinen technischen Prototyp validiert.
-
-### Datenfluss
-
-```text
-UI / Werkzeuge / Quelltextänderungen
-                 |
-              Commands
-                 |
-        Dokumentkern + History
-                 |
-           ECS-Projektion
-                 |
- Animation / Zustände / Interaktion / Audio
-                 |
-         ausgewertete Darstellung
-                 |
-        Editorvorschau / SVG-Export
-```
-
-Das gespeicherte Dokument ist die einzige autoritative Quelle. ECS-Entitäten sind Laufzeitobjekte; stabile Dokument-IDs bleiben unabhängig von ECS-Entity-IDs. Vorschau und Playback verändern das Dokument nicht dauerhaft.
-
-### Vorgesehene Workspace-Struktur
-
-```text
-crates/
-  splinely_document/    # Schema, IDs, Validierung, Migrationen
-  splinely_core/        # Commands, History, Geometrie
-  splinely_animation/   # Tracks, Interpolation, Transport
-  splinely_behavior/    # State Machines, Events, Variablen
-  splinely_audio/       # Assets, Cues, Transportregeln
-  splinely_svg/         # Import, Export, Quelltexterhaltung
-  splinely_editor/      # Desktopapp, ECS-Plugins, egui
-runtime/
-  src/               # eingebettete Browser-Runtime und öffentliche API
-  tests/             # Browser- und Konformitätstests
-fixtures/
-  projects/          # Referenzprojekte
-  svg/               # SVG-Import-/Exportfälle
-  conformance/       # gemeinsame Rust-/JS-Auswertungsfälle
-```
-
-## 2. Plugin-/ECS-System
-
-| Plugin | Verantwortung |
+| Bereich | Umgesetzt |
 | --- | --- |
-| ScenePlugin | Formen, Gruppen, Darstellung und Transformationen |
-| EditorPlugin | Werkzeuge, Auswahl, Inspector und Shortcuts |
-| HistoryPlugin | Commands, Transaktionen, Undo/Redo |
-| TimelinePlugin | Tracks, Clips, Keyframes und Transport |
-| InteractionPlugin | Pointer, Touch, Tastatur, Fokus und Drag |
-| StateMachinePlugin | Zustände, Guards, Aktionen und Variablen |
-| AudioPlugin | Assets und Audio-Cues |
-| CodePlugin | Codeansicht, Diagnostik und Runtime-API |
-| SvgPlugin | Import, Export und SVG-Quelltext |
+| Dokument & Bearbeitung | Rechteck, Kreis, Text, Pfade, Polygon/Stern/Linie, Gruppen, Ebenen, Undo/Redo-Verlauf, Autosave mit Wiederherstellung, Hilfslinien, Raster/Snapping, boolesche Operationen, Text in Pfad, SVG-Vektorimport (begrenzt) |
+| Bewegungspfade | Optionale `motionPath`-Bindung an einen Pfad, animierbarer `motionProgress` 0–1, optionale Tangentenausrichtung; gemeinsamer Rust-Kern, Browser-Runtime, Inspektor/Zeitleiste/Auto-Key, CLI `motion-path` und Übersetzungen in allen sechs UI-Sprachen |
+| Animation | Clips, Tracks, Keyframes (einfügen, verschieben, **kopieren/einfügen**, löschen), Easing, Zwiebelhaut, Auto-Key, Pfad-Morphing, animierte Verläufe, gewichtete und additive Clips mit Fades, 2D-Blend-Spaces, Knochen mit Zwei-Bone-IK |
+| Zustandsmaschinen | Mehrere parallele Maschinen, Guards, Variablen, Aktionen, **Überblendung zwischen Zuständen** (auch mehrere Maschinen gleichzeitig), **Timer-Übergänge** (`after`), **Exit-Aktionen**, visueller Zustandsgraph mit Drag-Verbindungen, Auto-Layout und strukturierten Guards/Aktionen, Vorschau mit Klick **und Hover** |
+| Interaktion | Klick, Doppelklick, Pointer rein/raus/bewegen, Drag, Mausrad, Tastatur; **Mausverfolgung** (Versatz oder Drehung, Maximum, Stärke, Glättung, nur in bestimmten Zuständen) – alles kombinierbar |
+| Audio | Eingebettete Assets, globale und Clip-Cues, `playAudio`, Freigabe per Nutzergeste, native ffplay-Vorschau, Größenanzeige, optionaler Export mit externen Dateien |
+| Runtimes | Browser-Runtime (im Web-Player), native Rust-Runtime mit C-ABI und JSON-Zeilenprozess, Desktop-Viewer; **reduzierte Bewegung** wird beachtet |
+| Werkzeuge | CLI für LLMs und Skripte (`new`, `node`, `keyframe`, `on`, **`follow`**, `check`, `render`, `export` …), `llms.txt`, Absturzberichte als vorausgefüllte GitHub-Issues, fertige Linux-Pakete in jedem Release |
+| Qualität | Rust-, Node- und echte Firefox-Tests (Showcases, Eule, Cactus Runner, Stickfights, **neugieriges Gesicht**), CI auf GitHub, Clippy ohne Warnungen |
 
-Plugins können Komponenten, Systeme, Ereignisse, Inspector-Felder und serialisierbare Erweiterungen registrieren. Rust-Plugins werden zunächst statisch eingebunden. Dynamische native Plugins sind kein MVP-Ziel.
+## Abgeschlossen: bisherige Priorität 1 – Bewegung entlang von Pfaden
 
-Ein exportierbares Plugin muss eine Browserimplementierung oder eine Übersetzung in unterstützte Runtime-Daten liefern. Bevy-Systeme werden nicht automatisch im Browser ausgeführt. Nicht exportierbare Funktionen führen zu verständlichen Diagnosen, nicht zu stillem Datenverlust.
+Modell, strenge Validierung, Rust-Auswertung (Editor/CLI/native Runtime), JavaScript-Parität, CLI, Editor-UI, Auto-Key, Übersetzungen und [Dokumentation](docs/motion-paths.md) sind umgesetzt. Rückwärtskompatibel: Ohne Bindung wird kein neues Feld geschrieben. Rust-Workspace-Tests, Node-Tests und `scripts/motion-smoke.py` in echtem Firefox bestanden (35 Browser-Matrizen gegen Rust, inklusive animierter Quelltransformation und Pfad-Morphing).
 
-Systemphasen: Eingaben sammeln → Events und Zustände verarbeiten → Animation auswerten → Werte zusammensetzen → Darstellung aktualisieren. Audio-Scheduling folgt derselben Transportzeit, nutzt aber die Audio-Uhr.
+Zusätzlich mit REA in Chromium geprüft: 269 erfolgreiche Prüfungen für Seek/Set, sichtbare SVG-Matrizen, animierte Quellen und wiederholte Auswertung ohne Drift; keine unbehandelten Browserfehler. Dabei gefundene Tangenten-Rundungsfehler an Segmentgrenzen wurden in Rust und JavaScript behoben und durch Regressionstests abgesichert; wissenschaftliche Zahlenschreibweise beim Pfad-Morphing und fehlerhafte Kommatrenner sind ebenfalls abgedeckt.
 
-## 3. Dokument und Bearbeitung
+Bewusster Umfang: M/L/Q/C/Z absolut/relativ; Bogenlänge über 64 Sehnen pro Segment, keine exakte analytische Integration. Quelle und Ziel dürfen nicht knochengebunden sein; keine verketteten Bindungen. Position und Tangente beziehen sich auf den lokalen Ursprung des Ziels; x/y/Drehung bleiben additive Offsets. Degenerierte ausgewertete Pfade melden Fehler. Spezialwerkzeuge für Banking oder Pfadversatz sind nicht enthalten.
 
-Das Projekt enthält:
+## Abgeschlossen: Zustandsgraph, isolierte Vorschau, Blending, Audio
 
-- `schemaVersion` und Migrationen.
-- Szenenknoten mit stabilen IDs, Gruppen, Geometrie, Stil und Transformationen.
-- SVG-Definitionen und eingebettete Assets.
-- Animationsclips, Tracks und Keyframes.
-- State Machines, Variablen, Events und Aktionen.
-- Audio-Cues.
-- Nutzercode und erhaltene SVG-Quelltextbereiche.
-- Plugin-Daten mit Namensraum und Version.
+- **Zustandsgraph** ([Doku](docs/state-graph.md)): Verbindungen per Drag (auch Selbstübergänge), verschiebbare Zustände, automatisches Layout, strukturierte Bedingungen und Aktionen, Priorität der Übergänge, ID-Validierung; komplexe JSON-Werte bleiben erhalten.
+- **Isolierte Vorschau** ([Doku](docs/isolated-preview.md)): Editor-Export und `splinely-cli isolated-preview`; Browser-HTML mit Sandbox-Iframe ohne `allow-same-origin`, restriktiver CSP, Zustimmung pro Öffnen. Getestet in Chromium (`scripts/isolated-preview-smoke.cjs`). Keine vollständige Netzwerk- oder Ressourcenisolation (z. B. WebRTC, Endlosschleifen); keine Sandbox für native Plugins.
+- **Additives Blending und 2D-Blend-Spaces** ([Doku](docs/blend-spaces.md)): `additive`-Clips, Blend-Spaces mit inversen quadratischen Distanzgewichten; Rust, Browser-Runtime, CLI, Editor, Firefox-Smoke. Keine Triangulation, keine automatische Clip-Aktivierung/Synchronisation.
+- **Audio** ([Doku](docs/audio-workflow.md)): Cues pro Clip im Editor und in beiden Runtimes/nativer Vorschau, Größen- und Speichergrenzen sichtbar, optionaler Export mit externen Audiodateien (neuer Ordner, kein Überschreiben, HTTP(S)). Standardexport bleibt eigenständig und offline. Dekodierter PCM-Speicher wird erklärt, nicht begrenzt.
 
-Alle abgeschlossenen Bearbeitungen laufen über Commands. Ein Drag oder eine Keyframe-Verschiebung erzeugt eine Undo-Transaktion. Autosave, Laden und atomisches Speichern gehören zum Fundament.
+## Abgeschlossen: SVG-Import (Text, Verläufe, Bilder, Bericht, Konfliktanzeige)
 
-Geometrie unterstützt Matrixinversion, Bildschirm-/SVG-/Objektkoordinaten, Bounding Boxes, Hit-Testing und später Snapping sowie Bézierbearbeitung.
+([Doku](docs/svg-import.md)) Getestet in `splinely_document` (Fixtures Inkscape-/Figma-artig, Data-URI-Bild, defekt; feindliche Eingaben; Export→Re-Import-Rundlauf von Verlaufsstopps und Text), CLI (`import-svg --strict/--report`, `inspect`) und Editor (Berichtsfenster, Sprachtabellen).
+- **Importiert:** `<text>`/`<tspan>` als Textknoten (ein Knoten pro `<text>`, tspans zusammengefügt, tspan mit eigener Position = neuer Knoten); `linearGradient`/`radialGradient` mit Stopps, `gradientUnits`, `gradientTransform`, `href`-Vererbung, `url(#id)` in Füllung; `<use>` (nur `#id`); `image/svg+xml`-Data-URIs als Gruppen aus Vektorknoten.
+- **Bericht:** strukturierte Diagnosen (importiert/angenähert/verworfen/abgelehnt, Codes, Summen exakt) in CLI-JSON (`report`, `error.importReport`), Editor-Fenster nach jedem Import; `--strict` bricht bei Verlusten ab. Nichts wird still verworfen.
+- **Konfliktanzeige:** Der „Quelltext“ ist `rawSvg`. Der Import speichert Hashes (`svgImport`); Editor (Statusleiste + SVG-Quelltext-Tab, mit Bestätigen-Knopf) und `inspect` (`svgSourceSync`) melden `visualEdited`/`sourceEdited`/`both`. Vergleich nur Quelltext ↔ Knoten (nicht Animationen); Hashes sind keine Sicherheitsfunktion.
+- **Grenzen/Nicht unterstützt:** Es gibt **keinen Bildknoten und keinen Bild-Asset-Speicher** – PNG/JPEG-Data-URIs werden geprüft, aber **verworfen** (mit Diagnose); externe URLs/Dateien werden abgelehnt, nie geladen. Text hat nur `font-size` (keine Schriftfamilie/Ausrichtung gespeichert; Textbreite grob geschätzt 0,6 em, daher `text-anchor` angenähert). Strichverläufe → erste Stopp-Farbe; Verlaufsgeometrie auf den festen Modellvektor abgebildet (Abweichungen gemeldet); `spreadMethod` nur pad; verschachtelte SVG-Bilder ohne Clip. Weiterhin abgelehnt: Clip/Masken/Filter/Muster/Strichmuster/`<style>`. Harte Limits (4 MiB, `<use>`-Expansion 50 000, 512 Verläufe, 4096 Stopps, 20 000 Knoten …) in der Doku.
 
-## 4. Keyframe-Editor
+## Was noch zu tun ist
 
-### MVP
+Nach Priorität (bisherige Nummerierung beibehalten):
+4. **Mehr Plattformen** – *konfiguriert, nicht auf echter Hardware getestet* ([Doku](docs/INSTALL-BINARIES.md)). **Verifiziert (von Linux aus):** `cargo check` und `cargo clippy --all-targets -D warnings` für den ganzen Workspace (Editor, Viewer, CLI, Runtime, Dokumentkern inkl. Tests) auf `x86_64-pc-windows-gnu`, `x86_64-pc-windows-msvc`, `aarch64-apple-darwin`, `x86_64-apple-darwin`; die Prüfung fand und behob einen echten macOS-Fehler (variadisches `openat` mit `u16`-Modus) und `unused_mut`/`dead_code`-Warnungen; Linux-Tests/Clippy weiter grün. Portabel gemacht: Konfig-/Daten-/Crash-Verzeichnisse (`%APPDATA%`/`%LOCALAPPDATA%`, `~/Library/Application Support`, XDG-Variablen überschreiben wie zuvor), Windows-Rückfall für das No-Follow-Schreiben der Audio-Bundles (Verzeichnis-Handle ohne `FILE_SHARE_DELETE`, Reparse-Point-Prüfung, `create_new`), Crash-Report-Link ohne `cmd /C start` (`&` in der URL), `ffplay`/Viewer ohne Konsolenfenster, `eframe` x11/wayland nur unter Linux. Pakete: `scripts/package-release.sh` (Linux, macOS, optional lipo-universal, ad-hoc `codesign`), `scripts/package-release.ps1` (Windows-zip); CI-Job `portable` und Release-Jobs `windows-x86_64`, `macos-aarch64`, `macos-x86_64`. **Offen/nicht geprüft:** nichts davon wurde unter echtem Windows/macOS gelinkt, gestartet oder getestet; die neuen Workflow-Jobs und `package-release.ps1` sind nie gelaufen (YAML nur syntaktisch geprüft); Intel-Runner-Label `macos-15-intel` (statt `macos-13`) ungeprüft; WebView2/WKWebView-Viewer, `rfd`-Dialoge, Eingabe/IME und `ffplay`-Audio ungetestet; keine Windows-Authenticode-Signatur, keine macOS-Notarisierung, kein `.app`/Installer; Linux-Pakete nur x86_64 (aarch64 weiterhin offen).
+8. **Barrierefreiheit** – Tastaturbedienung der Zeichenfläche, Beschriftungen für Bildschirmleser im Web-Player. *Web-Player und Editor umgesetzt mit Grenzen.*. *Web-Player-Teil:* opt-in `description`/`a11y`/`announce`, Rollen, Labels, Tastaturaktivierung (Enter/Leertaste), Fokusring, `aria-live`, `splinely-cli a11y` + `check`-Warnung; Tests: Rust, Fake-DOM, CLI, Browser-Matrix `accessibility-web-player` (Chromium/Firefox/WebKit); **kein echter Bildschirmleser, keine WCAG-Aussage**, `customJs`-only-Interaktionen werden nicht erkannt – Details im Abschnitt „Web-Player und SVG“ in `docs/accessibility.md`. *Editor-Teil erledigt mit Grenzen:* Tab/Umschalt+Tab, Enter, Esc und Pfeile auf der Zeichenfläche (F6 fokussiert), Fokusring und Statuszeilen-Ansage, Tastenkürzel-Fenster (F1/?, aus der Tastentabelle erzeugt), Namen/Hover-Texte für die Symbolknöpfe in Ebenen-, Eigenschaften- und Mischraum-Panels; Tests: Modell-Unit-Tests und kopflose egui-Tests. **Nicht erledigt/ungeprüft:** AccessKit ist aus (egui 0.31 braucht `accesskit_winit 0.23`/`accesskit_unix`, offline nicht verfügbar), also sehen Bildschirmleser den Editor nicht; kein echter Bildschirmleser getestet, keine WCAG-Aussage; Zeitleiste, Zustandsgraph, Transformationsgriffe und Pfadpunkte bleiben Mausarbeit. Details: Abschnitt „Editor“ in `docs/accessibility.md`.
+9. **Browsermatrix** – *teilweise erledigt* ([Doku](docs/browser-tests.md#browsermatrix-chromium--firefox--webkit-und-audio-latenz)). **Lokal gelaufen** (`bash scripts/browser-matrix.sh`, Fedora): 10 Szenarien in Chromium 156, Firefox 157 und Playwright-WebKit 27.2 (WPE headless) – je 10/10 Szenarien, 79/79 Checks; Querbrowser-Abweichung der Zahlen ≤ 3·10⁻⁸ (SVG-Matrizen, Stickfight-Posen); Audio über Null-Sink: Stille vor der Geste, hörbar danach, Klick→Ton Median ≈ 242 ms (Chromium) / ≈ 318 ms (Firefox), `ffplay` ≈ 224 ms. **Nur konfiguriert, nicht auf GitHub gelaufen:** CI-Job `browser-matrix` (Audio-Schritt `continue-on-error`). **Offen:** WebKit-Audio, echte Hardware-Latenz, Safari/WebKitGTK des Viewers, macOS/Windows-Browser; WebKit lief lokal nur mit nachinstallierten Ubuntu-Bibliotheken und übersprungener Host-Validierung.
+10. **Plugins** – *umgesetzt mit Grenzen* ([Doku](docs/plugins.md)). Beispiel `examples/plugins/hover-wiggle` hat **beide Teile in einem Ordner**: Editor-Teil = deklarative Drop-in-Werkzeuge mit der neuen Aktion `addBehavior` (fügt Clip + Zustandsmaschine + Variablen + optionales a11y-Label an den gewählten Knoten ein; kollisionsfreie IDs, `Project::validate()` vor dem Commit, Undo über den normalen Kandidatenpfad, Größenlimits); Runtime-Teil = JavaScript-Datei `runtime.entry`, versionierte Hook-API v1 (`createRuntime(…,{plugins})` / `splinely.use`, `setup/onEvent/onState/onFrame`, schreibgeschützte Snapshots, Ausnahmen → Diagnosen, Fehler-/Zeitbudget schaltet Plugin ab; ohne Plugins keine neue Arbeit). Export nur mit `splinely-cli export --plugin DIR --trusted-js` (ohne Flag: Fehler `trust_required`), SHA-256 in `<metadata id="splinely-plugins">`; `isolated-preview --plugin` führt den Code im Sandbox-Frame nach Einwilligung aus. CLI `plugin list|validate|apply`, Editor-Seitenleiste zeigt beide Teile samt Hash und Hinweis, Fehler bleiben sichtbar (i18n en/es/fr/ja/zh). Der GUI-freie Kern liegt jetzt in `splinely_document::plugin` (Editor und CLI teilen den Kandidatenpfad). Tests: Rust (Manifest-Matrix, Hostile, Größen, ID-Kollisionen, Roundtrips, Export-Gate), CLI, 13 Node-Tests (Hooks/Ausnahmen/Budget/unveränderter Pfad ohne Plugins, Perf-Golden grün), Browsermatrix-Szenario `runtime-plugin` (Chromium 156, Firefox 157, WebKit 27.2: Hover/Klick spielen den deklarativen Clip **und** der Hook zählt; ohne Plugin-Export bleibt der Zähler 0). **Grenzen/offen:** Runtime-Plugins sind vertrauenswürdiger Code, **keine Sandbox** (gleiche Rechte wie `customJs`; der Text-Lint auf Netzwerk-/eval-Marker ist leicht umgehbar); das Frame-Budget wird nachträglich gemessen, Endlosschleifen lassen sich nicht abbrechen; keine Signaturen/Registry/Hot-Reload; der Editor führt Runtime-Code nie aus und hat keinen „Export mit Plugin“-Knopf (nur CLI); Runtime-Plugins laufen nicht im nativen Viewer; native Plugins bleiben Quelltext-Vorlage und Compile-Zeit-/Trusted-only – **dynamisch ladbare native Plugins sind und bleiben ausgeschlossen**. Nicht geprüft: Safari/WebKitGTK, Windows/macOS, Barrierefreiheit der neuen Seitenleisten-Abschnitte mit echtem Screenreader.
 
-- Tracks pro Objekt und Eigenschaft.
-- Keyframes hinzufügen, verschieben, kopieren und löschen.
-- Position, Rotation, Skalierung, Deckkraft und Farbe.
-- Lineare, diskrete und kubische Bézier-Interpolation.
-- Benannte Clips, Play/Pause, Seek/Scrubbing und Loop.
-- Eigene Audio-Tracks.
+## Bewusst nicht geplant
 
-Die Auswertung ist deterministisch: identische Eingaben und Zeit ergeben identische Eigenschaftswerte. Rust-Vorschau und JavaScript-Runtime verwenden gemeinsame Konformitätsfälle.
+- Mesh-Deformation/Skinning und allgemeine IK-Ketten über zwei Knochen hinaus.
+- Automatische Übersetzung beliebiger Bevy-Systeme in Browsercode.
+- Verlustfreier Import beliebiger SVG/JavaScript-Dateien in den visuellen Editor.
 
-Wertpriorität im MVP: Basiswerte → Zustands-Overrides → Clipwerte → explizite Runtime-Overrides. Konkurrierende Clips verwenden dokumentierte Prioritäten; komplexes additives Blending folgt später. Runtime-Overrides können ausdrücklich aufgehoben werden.
+## Arbeitsweise
 
-Später: Bewegung entlang von Pfaden, kompatibles Pfad-Morphing, erweiterter Kurveneditor und Crossfading. Beliebige Pfade sind nicht automatisch morph-kompatibel.
-
-## 5. Interaktionen und State Machines
-
-Editor-Werkzeugzustände und exportiertes Grafikverhalten bleiben getrennt.
-
-Die Grafik-Runtime unterstützt zunächst:
-
-- Klick, Doppelklick, Pointer rein/raus, runter/bewegen/loslassen.
-- Drag mit Pointer Capture und SVG-Koordinaten.
-- Touch über Pointer Events, Mausrad und Tastatur/Fokus.
-- Timer, benutzerdefinierte Events und Clip-Ende.
-- Zustände, Übergänge, Guards und typisierte Variablen.
-- Aktionen für Clipsteuerung, Eigenschaften, Events und Audio.
-
-Der visuelle Zustandseditor bietet einfache Knoten und Verbindungen, eine Vorschau und ein Eventprotokoll. Ereignisreihenfolge, Übergangspriorität und Abbruch laufender Animationen werden spezifiziert und getestet. Grenzen für unmittelbare Übergangsschleifen verhindern blockierende Runtime-Zyklen.
-
-## 6. Unabhängige Audio-API
-
-Audio hängt nicht an einem bestimmten Grafikobjekt. Assets und Cues sind eigenständige Dokumentdaten.
-
-### Audiodateien
-
-- Import einer lokalen Datei mit ID, MIME-Typ und Bytes.
-- Cue mit Zeit, Asset-ID, Offset, Lautstärke und optionalem Ende.
-- Eigenständiger Export: Bytes eingebettet im SVG, beispielsweise Base64 in einem Datenblock; Dekodierung über Web Audio.
-- Optionaler Export mit externen Dateien, klar als nicht eigenständig gekennzeichnet.
-- Codec-Unterstützung wird für Zielbrowser geprüft; Dateigröße und Speicherlimits werden angezeigt.
-
-### Transportregeln
-
-- Zentrale Transportzeit für Grafik und Audio; Audio-Uhr für geplante Audiostarts.
-- Vorladen/Dekodieren vor dem Start und klare Ladefehler.
-- Pause stoppt Quellen und bewahrt Position; Fortsetzen plant neue Quellen.
-- Seek startet überlappende Audio-Cues am richtigen Offset, wenn Wiedergabe aktiv ist.
-- Scrubbing löst standardmäßig keine kurzen Sounds aus.
-- Loop plant Audio neu.
-- Cues werden beim Überschreiten ihres Zeitpunkts genau nach festgelegten Regeln ausgelöst, auch bei ausgelassenen Renderframes.
-- Audiofreigabe nach Nutzerinteraktion, gegebenenfalls über einen Start-Button. Keine Garantie absolut verzögerungsfreier Ausgabe.
-
-## 7. Code und SVG-Quelltext
-
-### Geplante öffentliche JavaScript-API
-
-```js
-splinely.on("button", "click", async () => {
-  await splinely.audio.unlock();
-  splinely.clip("intro").play();
-});
-
-splinely.timeline.at(1.5, () => splinely.audio.play("hello"));
-splinely.machine("main").send("OPEN");
-splinely.set("circle", { opacity: 0.5 });
-splinely.variable("speed").set(2);
-```
-
-Die API wird versioniert und dokumentiert. Eventabonnements und Zeit-Callbacks besitzen Abmeldefunktionen und definierte Regeln bei Seek und Loop.
-
-### Quelltextbearbeitung
-
-- SVG/XML-Ansicht und JavaScript-Ansicht.
-- XML-Validierung vor Übernahme.
-- Unterstützte SVG-Änderungen werden in das Modell übernommen.
-- Unbekannte Elemente/Attribute bleiben soweit möglich als rohe XML-Bereiche erhalten.
-- Änderungen an IDs und Referenzen werden geprüft.
-- Konflikte zwischen visueller Bearbeitung und Quelltext werden angezeigt.
-- Ein Quelltextmodus erhält nicht visuell interpretierbare Inhalte, ohne vollständige Bearbeitbarkeit vorzutäuschen.
-
-Beliebiges SVG und JavaScript lassen sich nicht allgemein verlustfrei in einen visuellen Editor zurückübersetzen. Automatische vollständige Roundtrips werden deshalb nicht versprochen.
-
-## 8. Export und Sicherheit
-
-Exportprofile:
-
-1. Statisches SVG eines gewählten Zeitpunkts.
-2. Eigenständiges interaktives SVG mit Runtime, Verhalten, Code und Assets.
-3. Optional SVG mit externen Assets.
-
-Die Runtime wird pro SVG gekapselt und unterstützt mehrere Instanzen ohne globale Namenskollisionen. XML, Daten und Script-Inhalte werden korrekt escaped. Eingebettete Fonts und Bilder benötigen geeignete Rechte und Browserunterstützung.
-
-Standardimport führt keinen fremden Code aus. Skripte und gefährliche URLs werden im sicheren Importmodus entfernt oder deaktiviert. Bewusst aktivierter Code wird getrennt behandelt; untrusted Vorschauen benötigen eine isolierte Browserumgebung. Frei ausführbarer JavaScript-Code kann selbst Netzwerkaufrufe durchführen; Offlinefähigkeit der Runtime ist keine Sicherheitsgarantie für Nutzercode.
-
-SVG-Komplexitäts-, Ressourcen- und Dateigrößenlimits sowie klare Fehlermeldungen schützen den Editor.
-
-## 9. Implementierungsphasen und Abnahmekriterien
-
-### Phase 0 — Technischer Prototyp
-
-- Rust-Workspace und kompatible Bevy-/egui-Versionen festlegen.
-- Fenster, einfache Form, Eigenschaftenpanel und ECS-Projektion.
-- Ein offline geöffnetes SVG mit eingebettetem Klickhandler und Audiofreigabe testen.
-- Vorschau-Rendering und Browser-Teststrategie entscheiden.
-
-**Abnahme:** Desktopfenster funktioniert; Export läuft in den vorgesehenen Browserkontexten ohne Netzwerk.
-
-### Phase 1 — Dokument und Minimaleditor
-
-- Schema, stabile IDs, Commands und History.
-- Rechteck, Kreis, Auswahl, Verschieben, Skalieren und Rotation.
-- Laden, Speichern, Autosave und statischer Export.
-
-**Abnahme:** Projekt-Roundtrip und Undo/Redo bestehen automatisierte Tests.
-
-### Phase 2 — Browser-Runtime und Keyframes
-
-- Runtime-Grundgerüst und Exportdatenformat.
-- Timeline, Eigenschaftstracks, Easing, Clips und Transport.
-- Gemeinsame Rust-/JS-Konformitätsfälle.
-
-**Abnahme:** Vorschau und Export ergeben zu vorgegebenen Zeiten dieselben Werte innerhalb festgelegter numerischer Toleranzen.
-
-### Phase 3 — Interaktion und Zustände
-
-- Pointer-/Tastaturereignisse, Drag und Koordinatenumrechnung.
-- State-Machine-Modell, visueller Editor und Eventprotokoll.
-- Clips und Zustandswechsel verbinden.
-
-**Abnahme:** Klick-, Hover- und Drag-Beispiele funktionieren offline; Schleifen und Abbrüche sind getestet.
-
-### Phase 4 — Audio
-
-- Audioassets, eingebetteter Export und Cue-Tracks.
-- Laden, Freigabe, Pause, Seek und Loop.
-
-**Abnahme:** Eingebettete Aufnahme startet am geplanten Cue; Transporttests prüfen Offsets und vermeiden doppelte Auslösungen. Timing-Toleranzen werden im Browserprototyp gemessen und festgelegt.
-
-### Phase 5 — Code und SVG-Quelltext
-
-- Codeeditor, Runtime-API und Diagnostik.
-- SVG-Validierung, Quelltexterhaltung und Konfliktanzeige.
-- Sichere Vorschau für untrusted Projekte.
-
-**Abnahme:** Eigener Code kann Clips, Zustände und Audio steuern; fehlerhafte Eingaben zerstören kein gespeichertes Projekt.
-
-### Phase 6 — Erweiterung und Qualität
-
-- Gruppen, Text, Bézierpfade, Snapping und fortgeschrittene Animation.
-- Plugin-Beispiel mit Editor- und Exportintegration.
-- Browsermatrix, Performance, Accessibility und reduzierte Bewegung.
-
-**Abnahme:** Referenzprojekte, Offline-Tests und Regressionstests bestehen in dokumentierten Zielbrowsern.
-
-## 10. Erstes durchgängiges Beispiel
-
-Ein Kreis bewegt sich per Keyframes. Ein Klick aktiviert die State Machine und startet den Clip. Bei Sekunde 1,5 spielt ein eingebetteter Ton. Ein optionales Codeskript verändert anschließend die Farbe. Das Projekt lässt sich speichern, erneut bearbeiten und als eine eigenständige SVG-Datei exportieren.
-
-## Nächster Umsetzungsschritt
-
-Phase 0 beginnen: Workspace anlegen, Abhängigkeiten prüfen und einen minimalen Desktop-/SVG-Runtime-Prototyp bauen. Erst nach dessen Validierung die vollständige Timeline und Audiointegration erweitern.
+- Eine Funktion gilt erst als fertig, wenn Modell, Validierung, beide Runtimes, Editor, CLI, Übersetzungen und Doku sie abdecken und Tests (inklusive Firefox, wo sichtbar) bestehen.
+- Neue Felder bleiben optional und werden weggelassen, wenn sie leer sind, damit Projekte ohne die Funktion auch mit älteren Versionen lesbar bleiben.
+- Releases: Version im Workspace erhöhen, `scripts/check.sh` und Browser-Smokes grün, Tag pushen – der Release-Workflow baut und lädt die Pakete hoch.

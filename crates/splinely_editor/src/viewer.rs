@@ -26,6 +26,7 @@ impl ViewerSession {
             .as_nanos();
         let directory =
             std::env::temp_dir().join(format!("splinely-viewer-{}-{stamp}", std::process::id()));
+        #[cfg_attr(not(unix), allow(unused_mut))]
         let mut builder = fs::DirBuilder::new();
         #[cfg(unix)]
         {
@@ -49,7 +50,14 @@ impl ViewerSession {
             let _ = fs::remove_dir_all(&directory);
             return Err(error.to_string());
         }
-        let child = match Command::new(viewer).arg(&path).spawn() {
+        let mut command = Command::new(viewer);
+        command.arg(&path);
+        #[cfg(windows)]
+        {
+            use std::os::windows::process::CommandExt;
+            command.creation_flags(0x0800_0000); // CREATE_NO_WINDOW: no console flash
+        }
+        let child = match command.spawn() {
             Ok(child) => child,
             Err(error) => {
                 let _ = fs::remove_dir_all(&directory);

@@ -72,7 +72,7 @@ impl Editor {
             self.pen_press = None;
             return false;
         }
-        if !ui.ctx().wants_keyboard_input() && ui.input(|i| i.key_pressed(egui::Key::Escape)) {
+        if !self.typing(ui.ctx()) && ui.input(|i| i.key_pressed(egui::Key::Escape)) {
             let was_active = self.pen.is_some() || self.path_drag.is_some();
             self.pen = None;
             self.pen_press = None;
@@ -83,7 +83,7 @@ impl Editor {
         }
         if self.pen.is_some() {
             let map = CanvasMap::from_transform(origin, self.zoom as f64, Transform::default());
-            if !ui.ctx().wants_keyboard_input() && ui.input(|i| i.key_pressed(egui::Key::Enter)) {
+            if !self.typing(ui.ctx()) && ui.input(|i| i.key_pressed(egui::Key::Enter)) {
                 self.finish_pen();
                 return true;
             }

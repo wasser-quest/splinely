@@ -17,6 +17,7 @@ fn number(property: Property, value: f64) -> Track {
 }
 fn clip(id: &str, mode: BlendMode, weight: f64, tracks: Vec<Track>) -> Clip {
     Clip {
+        audio_cues: vec![],
         id: id.into(),
         name: String::new(),
         duration: 1.0,
@@ -162,6 +163,8 @@ fn mixed_boundaries_playback_priority_and_overrides() {
             id: "walking".into(),
             on_enter: vec![],
             overrides: vec![patch(20.0)],
+            on_exit: vec![],
+            announce: None,
         }],
         transitions: vec![],
     });
@@ -355,6 +358,8 @@ fn action_project(action: Action) -> Project {
             id: "idle".into(),
             on_enter: vec![action],
             overrides: vec![],
+            on_exit: vec![],
+            announce: None,
         }],
         transitions: vec![],
     });
@@ -457,8 +462,7 @@ fn additive_json_defaults_strict_preservation_and_host_actions() {
     );
     assert!(Project::from_json(r#"{"clips":[{"id":"a","duration":9007199254740993}]}"#).is_err());
     assert!(
-        Project::from_json(r#"{"clips":[{"id":"a","duration":1,"blendMode":"additive"}]}"#)
-            .is_err()
+        Project::from_json(r#"{"clips":[{"id":"a","duration":1,"blendMode":"invalid"}]}"#).is_err()
     );
 }
 
@@ -509,6 +513,8 @@ fn parallel_walking_jumping_states_keep_scroll_and_sparse_jump_baseline() {
                 id: "scrolling".into(),
                 on_enter: vec![],
                 overrides: vec![],
+                on_exit: vec![],
+                announce: None,
             }],
             transitions: vec![],
         },
@@ -520,11 +526,15 @@ fn parallel_walking_jumping_states_keep_scroll_and_sparse_jump_baseline() {
                     id: "walking".into(),
                     on_enter: vec![fade("walk", 1.0), fade("jump", 0.0)],
                     overrides: vec![],
+                    on_exit: vec![],
+                    announce: None,
                 },
                 State {
                     id: "jumping".into(),
                     on_enter: vec![fade("walk", 0.0), fade("jump", 1.0)],
                     overrides: vec![],
+                    on_exit: vec![],
+                    announce: None,
                 },
             ],
             transitions: vec![
@@ -537,6 +547,8 @@ fn parallel_walking_jumping_states_keep_scroll_and_sparse_jump_baseline() {
                     },
                     guard: None,
                     actions: vec![],
+                    blend: 0.0,
+                    after: None,
                 },
                 Transition {
                     from: "jumping".into(),
@@ -547,6 +559,8 @@ fn parallel_walking_jumping_states_keep_scroll_and_sparse_jump_baseline() {
                     },
                     guard: None,
                     actions: vec![],
+                    blend: 0.0,
+                    after: None,
                 },
             ],
         },
@@ -624,10 +638,5 @@ fn core_export_smoke_uses_blended_pose_and_preserves_metadata() {
     let svg = p.to_static_svg(0.0).unwrap();
     assert!(svg.contains("translate(20 0)"));
     let svg = p.to_svg("").unwrap();
-    let xml = roxmltree::Document::parse(&svg).unwrap();
-    let metadata = xml
-        .descendants()
-        .find(|n| n.has_tag_name("metadata") && n.attribute("id") == Some("splinely-project"))
-        .unwrap();
-    assert_eq!(Project::from_json(metadata.text().unwrap()).unwrap(), p);
+    assert_eq!(Project::from_svg_metadata(&svg).unwrap(), p);
 }

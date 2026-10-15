@@ -534,17 +534,33 @@ impl Editor {
         }
     }
 
+    /// Everything the overview shows, as (keys, description) rows; an empty
+    /// key text marks a heading. Built from the live key bindings and the
+    /// fixed-key table, so the list follows both.
+    pub(super) fn shortcut_rows(&self) -> Vec<(String, String)> {
+        let mut rows = vec![(String::new(), tr("Befehle").to_owned())];
+        for (cmd, keys) in self.bindings() {
+            if !keys.is_empty() {
+                let keys: Vec<String> = keys.iter().map(|k| k.label()).collect();
+                rows.push((keys.join(" / "), command_label(&cmd).to_owned()));
+            }
+        }
+        for (keys, what) in FIXED_SHORTCUTS {
+            rows.push((
+                if keys.is_empty() {
+                    String::new()
+                } else {
+                    tr(keys).to_owned()
+                },
+                tr(what).to_owned(),
+            ));
+        }
+        rows
+    }
+
     fn shortcuts_window(&mut self, ctx: &egui::Context) {
         let mut open = self.shortcuts_open;
-        let bound: Vec<(String, &'static str)> = self
-            .bindings()
-            .into_iter()
-            .filter(|(_, keys)| !keys.is_empty())
-            .map(|(cmd, keys)| {
-                let keys: Vec<String> = keys.iter().map(|k| k.label()).collect();
-                (keys.join(" / "), command_label(&cmd))
-            })
-            .collect();
+        let rows = self.shortcut_rows();
         let mut customize = false;
         egui::Window::new(tr("Tastenkürzel"))
             .open(&mut open)
@@ -562,21 +578,14 @@ impl Editor {
                             .striped(true)
                             .num_columns(2)
                             .show(ui, |ui| {
-                                ui.strong(tr("Befehle"));
-                                ui.end_row();
-                                for (keys, what) in &bound {
-                                    ui.monospace(keys);
-                                    ui.label(*what);
-                                    ui.end_row();
-                                }
-                                for (keys, what) in FIXED_SHORTCUTS {
+                                for (keys, what) in &rows {
                                     if keys.is_empty() {
-                                        ui.strong(tr(what));
+                                        ui.strong(what);
                                         ui.end_row();
                                         continue;
                                     }
-                                    ui.monospace(tr(keys));
-                                    ui.label(tr(what));
+                                    ui.monospace(keys);
+                                    ui.label(what);
                                     ui.end_row();
                                 }
                             });
@@ -604,6 +613,24 @@ const FIXED_SHORTCUTS: &[(&str, &str)] = &[
         "Verschieben (großer Schritt, siehe Einstellungen)",
     ),
     ("Esc", "Auswahl aufheben / abbrechen"),
+    ("", "Tastaturbedienung der Zeichenfläche"),
+    ("F6", "Zeichenfläche fokussieren"),
+    (
+        "Tab / Umschalt+Tab",
+        "Nächste / vorherige sichtbare, entsperrte Form (Gruppe als eine Station)",
+    ),
+    ("Enter", "Gruppe betreten / Text bearbeiten"),
+    ("Umschalt+Enter", "Gruppe verlassen"),
+    (
+        "Pfeile",
+        "Auswahl um einen kleinen Schritt verschieben (Standard 1)",
+    ),
+    (
+        "Esc, Esc",
+        "Auswahl aufheben, dann die Zeichenfläche verlassen",
+    ),
+    ("? oder F1", "Diese Übersicht"),
+    ("", "Maus und Ansicht"),
     ("Griffe + Umschalt / Alt", "Proportional / von der Mitte"),
     ("Strg+Mausrad", "Zoomen"),
     ("Mausrad, Leertaste+Ziehen", "Ansicht verschieben"),

@@ -15,6 +15,8 @@ mod audio_preview;
 mod autokey;
 #[path = "blend_preview.rs"]
 mod blend_preview;
+#[path = "blending_ui.rs"]
+mod blending_ui;
 #[path = "bones.rs"]
 mod bones;
 #[cfg(test)]
@@ -30,6 +32,10 @@ mod dopesheet;
 mod files;
 #[path = "history_panel.rs"]
 mod history_panel;
+#[path = "isolated_preview.rs"]
+mod isolated_preview;
+#[path = "keyboard_nav.rs"]
+mod keyboard_nav;
 #[path = "keymap.rs"]
 mod keymap;
 #[path = "layers.rs"]
@@ -57,6 +63,8 @@ mod shortcuts;
 mod snapping;
 #[path = "state_graph.rs"]
 mod state_graph;
+#[path = "svg_import_ui.rs"]
+mod svg_import_ui;
 #[cfg(test)]
 #[path = "tests.rs"]
 mod tests;
@@ -83,6 +91,7 @@ pub fn demo() -> Project {
         "Click the circle; edit, animate, export.",
     ));
     p.clips.push(Clip {
+        audio_cues: vec![],
         id: "intro".into(),
         name: "Intro".into(),
         duration: 3.,
@@ -120,11 +129,15 @@ pub fn demo() -> Project {
                 id: "idle".into(),
                 on_enter: vec![],
                 overrides: vec![],
+                on_exit: vec![],
+                announce: None,
             },
             State {
                 id: "active".into(),
                 on_enter: vec![],
                 overrides: vec![],
+                on_exit: vec![],
+                announce: None,
             },
         ],
         transitions: vec![Transition {
@@ -138,6 +151,8 @@ pub fn demo() -> Project {
             actions: vec![Action::PlayClip {
                 clip_id: "intro".into(),
             }],
+            blend: 0.0,
+            after: None,
         }],
     });
     p
@@ -237,6 +252,7 @@ pub struct Editor {
     space_pan_used: bool,
     code_buffer: String,
     svg_buffer: String,
+    import_report: Option<svg_import_ui::ImportReportView>,
     machine_buffer: String,
     variables_buffer: String,
     timeline_visible: bool,
@@ -272,6 +288,9 @@ pub struct Editor {
     recovery: Option<(String, Project)>,
     eyedropper: bool,
     selected_key: Option<dopesheet::KeyRef>,
+    /// A copied keyframe (target, property, key) and whether Ctrl+V should paste it.
+    key_clipboard: Option<(String, Property, Keyframe)>,
+    paste_key_next: bool,
     palette: Option<(String, usize)>,
     onion_skin: bool,
     auto_key: bool,
@@ -286,6 +305,7 @@ pub struct Editor {
     new_size: Option<(f64, f64, String)>,
     onion_rasters: Vec<crate::raster::Raster>,
     shortcuts_open: bool,
+    kbd: keyboard_nav::KeyboardState,
     key_drag: Option<dopesheet::KeyRef>,
     guide_drag: Option<(Option<usize>, snapping::Guide)>,
     scene_cache: Option<(Project, String, Vec<SceneNode>)>,
@@ -296,6 +316,16 @@ pub struct Editor {
     recent: Vec<String>,
     view_center: Option<[f64; 2]>,
     preview_mode: bool,
+    /// Preview: shape under the pointer (for pointerenter/pointerleave) and
+    /// pointer position in scene units (for followers).
+    preview_hover: Option<String>,
+    preview_pointer: Option<[f64; 2]>,
+    /// Preview: running state crossfades (machine → from, elapsed, duration).
+    state_fades: std::collections::BTreeMap<String, (String, f64, f64)>,
+    /// Preview: current follower values.
+    follow: std::collections::BTreeMap<String, [f64; 2]>,
+    /// Preview: seconds each machine spent in its state (timer transitions).
+    state_elapsed: std::collections::BTreeMap<String, f64>,
     highlight: bool,
     snap_grid: bool,
     edit_path_handles: bool,
@@ -322,6 +352,7 @@ impl Default for Editor {
         Self {
             code_buffer: project.custom_js.clone(),
             svg_buffer: project.raw_svg.clone(),
+            import_report: None,
             machine_buffer: serde_json::to_string_pretty(&project.state_machines).unwrap(),
             variables_buffer: serde_json::to_string_pretty(&project.variables).unwrap(),
             saved_settings: Some(settings.clone()),
@@ -401,6 +432,8 @@ impl Default for Editor {
             recovery: None,
             eyedropper: false,
             selected_key: None,
+            key_clipboard: None,
+            paste_key_next: false,
             palette: None,
             onion_skin: settings.onion_skin,
             auto_key: false,
@@ -414,6 +447,7 @@ impl Default for Editor {
             new_size: None,
             onion_rasters: Default::default(),
             shortcuts_open: false,
+            kbd: Default::default(),
             key_drag: None,
             guide_drag: None,
             scene_cache: None,
@@ -424,6 +458,11 @@ impl Default for Editor {
             recent: files::load_recent(),
             view_center: None,
             preview_mode: false,
+            preview_hover: None,
+            preview_pointer: None,
+            state_fades: Default::default(),
+            follow: Default::default(),
+            state_elapsed: Default::default(),
             highlight: false,
             snap_grid: settings.snap_grid,
             edit_path_handles: false,
@@ -512,7 +551,14 @@ impl Editor {
                 || self.project.state_machines.iter().any(|n| n.id == id)
                 || self.project.clips.iter().any(|n| n.id == id)
                 || self.project.audio_assets.iter().any(|n| n.id == id)
-                || self.project.audio_cues.iter().any(|n| n.id == id);
+                || self.project.audio_cues.iter().any(|n| n.id == id)
+                || self
+                    .project
+                    .clips
+                    .iter()
+                    .flat_map(|c| &c.audio_cues)
+                    .any(|n| n.id == id)
+                || self.project.followers.iter().any(|n| n.id == id);
             if !used {
                 return id;
             }
@@ -522,6 +568,7 @@ impl Editor {
         // Document replacement/history must never carry script trust to another source.
         self.disable_native_audio();
         self.projection.reset_document();
+        self.reset_preview_motion();
         self.text_draft = None;
         self.scene_cache = None;
         self.state_graph = Default::default();
@@ -646,6 +693,13 @@ impl Editor {
             });
         }
     }
+    /// A blank, untitled 800 × 600 project: how the desktop editor starts.
+    pub fn blank() -> Self {
+        let mut editor = Self::default();
+        editor.new_project();
+        editor.status = tr("Hallo! Zeichne eine Form oder zieh eine .sply-Datei herein.").into();
+        editor
+    }
     pub fn open_project_file(path: &str) -> Result<Self, String> {
         let project = Project::load_file(path).map_err(|e| e.to_string())?;
         let mut editor = Self {
@@ -660,10 +714,8 @@ impl Editor {
         Ok(editor)
     }
     fn save(&mut self) {
-        let result = self
-            .project
-            .save_file(&self.path)
-            .map_err(|e| e.to_string());
+        // `.sply` is written as binary, other extensions as JSON text.
+        let result = files::save_project_file(&self.project, &self.path);
         match result {
             Ok(()) => {
                 self.status = trf(
@@ -766,15 +818,27 @@ impl Editor {
                 }
                 if ui
                     .selectable_label(self.preview_mode, tr("Vorschau"))
-                    .on_hover_text(tr("Formen anklicken, um Zustände zu testen. Ein Zeichenwerkzeug wechselt zurück zur Bearbeitung."))
+                    .on_hover_text(tr("Formen anklicken oder mit der Maus überfahren: testet Zustände, Überblendungen und Mausverfolgung. Ein Zeichenwerkzeug wechselt zurück zur Bearbeitung."))
                     .clicked()
                 {
                     let preview = !self.preview_mode;
                     self.choose_tool(CanvasTool::Selection);
                     self.preview_mode = preview;
+                    if !preview {
+                        self.reset_preview_motion();
+                    }
                 }
                 self.viewer_button(ui);
                 ui.menu_button(tr("Datei"), |ui| self.file_menu(ui));
+                let help = tr("Tastenkürzel (F1)");
+                if splinely_editor::accessible::Named::named(
+                    ui.button("?").on_hover_text(help),
+                    help,
+                )
+                .clicked()
+                {
+                    self.shortcuts_open = !self.shortcuts_open;
+                }
             });
             ui.horizontal_wrapped(|ui| {
                 for (workspace, label, hint) in [
@@ -824,10 +888,16 @@ impl Editor {
             }
         });
         egui::TopBottomPanel::bottom("status").show(ctx, |ui| {
-            ui.label(&self.status);
+            ui.horizontal(|ui| {
+                ui.label(&self.status);
+                if let Some(text) = svg_import_ui::conflict_text(self.project.source_sync()) {
+                    ui.colored_label(Color32::from_rgb(220, 120, 60), format!("⚠ {text}"));
+                }
+            });
         });
     }
     fn viewer_button(&mut self, ui: &mut egui::Ui) {
+        self.isolated_preview_button(ui);
         if ui.button(tr("Splinely Viewer öffnen"))
             .on_hover_text(tr("Echte SVG-Runtime in einem eigenen Fenster. Momentaufnahme; zum Aktualisieren erneut öffnen.")).clicked() {
             self.open_viewer();
@@ -863,6 +933,123 @@ impl Editor {
                     });
             });
     }
+    /// Preview: hover events and the pointer position for followers.
+    fn preview_pointer_moved(&mut self, scene: &[SceneNode], point: Option<Vec2>) {
+        self.preview_pointer = point.map(|p| [p.x as f64, p.y as f64]);
+        let hovered = point.and_then(|p| {
+            scene
+                .iter()
+                .rev()
+                .find(|node| {
+                    hit(node, p)
+                        && self
+                            .project
+                            .nodes
+                            .iter()
+                            .any(|n| n.id == node.id && n.visible)
+                })
+                .map(|n| n.id.clone())
+        });
+        if hovered != self.preview_hover {
+            if let Some(old) = self.preview_hover.take() {
+                self.send_event("pointerleave".into(), Some(old));
+            }
+            if let Some(new) = hovered.clone() {
+                self.send_event("pointerenter".into(), Some(new));
+            }
+            self.preview_hover = hovered;
+        }
+        self.update_followers(0.);
+    }
+    /// Advance state crossfades and followers; true while something moves.
+    fn advance_preview_blends(&mut self, dt: f64) -> bool {
+        let timers = (self.preview_mode || self.playing)
+            && self
+                .project
+                .state_machines
+                .iter()
+                .any(|m| m.transitions.iter().any(|t| t.after.is_some()));
+        if timers {
+            for machine in &self.machines {
+                *self
+                    .state_elapsed
+                    .entry(machine.machine_id.clone())
+                    .or_default() += dt;
+            }
+            let mut pending = std::collections::VecDeque::new();
+            for index in 0..self.machines.len() {
+                let elapsed = self
+                    .state_elapsed
+                    .get(&self.machines[index].machine_id)
+                    .copied()
+                    .unwrap_or(0.);
+                match self.machines[index].send_timeout(&self.project, elapsed) {
+                    Ok(actions) => {
+                        self.note_preview_transition(index);
+                        self.preview_actions(actions, &mut pending);
+                    }
+                    Err(e) => self.status = e.to_string(),
+                }
+            }
+            for event in pending {
+                self.send_event(event.name, event.target);
+            }
+        }
+        for (_, elapsed, duration) in self.state_fades.values_mut() {
+            *elapsed = (*elapsed + dt).min(*duration);
+        }
+        let fading = !self.state_fades.is_empty();
+        self.state_fades
+            .retain(|_, (_, elapsed, duration)| elapsed < duration);
+        self.update_followers(dt) || fading
+    }
+    fn update_followers(&mut self, dt: f64) -> bool {
+        let pointer = if self.preview_mode {
+            self.preview_pointer
+        } else {
+            None
+        };
+        let states = self
+            .machines
+            .iter()
+            .map(|m| (m.machine_id.clone(), m.current_state.clone()))
+            .collect();
+        let mut moved = false;
+        for follower in &self.project.followers {
+            let goal = self.project.follower_goal(follower, pointer, &states);
+            let current = self.follow.get(&follower.id).copied().unwrap_or([0., 0.]);
+            let next = smooth_toward(current, goal, follower.smoothing, dt).map(|v| {
+                if v.abs() < 1e-6 {
+                    0.
+                } else {
+                    v
+                }
+            });
+            moved |= next != current;
+            self.follow.insert(follower.id.clone(), next);
+        }
+        moved
+    }
+    /// Reset preview-only motion (leaving the preview or resetting it).
+    pub(super) fn reset_preview_motion(&mut self) {
+        self.preview_hover = None;
+        self.preview_pointer = None;
+        self.state_fades.clear();
+        self.follow.clear();
+        self.state_elapsed.clear();
+    }
+    /// After a preview machine changed state: start its crossfade and timer clock.
+    pub(super) fn note_preview_transition(&mut self, index: usize) {
+        let machine = self.machines[index].machine_id.clone();
+        if let Some((from, blend)) = self.machines[index].last_transition.take() {
+            self.state_elapsed.insert(machine.clone(), 0.);
+            if blend > 0. {
+                self.state_fades.insert(machine, (from, 0., blend));
+            } else {
+                self.state_fades.remove(&machine);
+            }
+        }
+    }
     fn preview_context(&self) -> EvaluationContext {
         let mut context = EvaluationContext {
             states: self
@@ -890,8 +1077,27 @@ impl Editor {
                 .cloned()
                 .chain(self.live_overrides())
                 .collect(),
+            state_fades: self
+                .state_fades
+                .iter()
+                .map(|(machine, (from, elapsed, duration))| {
+                    (
+                        machine.clone(),
+                        StateFade {
+                            from: from.clone(),
+                            progress: elapsed / duration,
+                        },
+                    )
+                })
+                .collect(),
+            follow: self.follow.clone(),
             ..Default::default()
         };
+        context.variables = self
+            .machines
+            .first()
+            .map(|m| m.variables.clone())
+            .unwrap_or_else(|| self.project.variables.clone());
         self.blend_preview.apply(&self.project, &mut context);
         context
     }
@@ -1148,10 +1354,11 @@ impl Editor {
         ui.scope(|ui| {
             let (response, painter) =
                 ui.allocate_painter(ui.available_size(), Sense::click_and_drag());
+            self.canvas_keyboard_setup(ui, &response);
             // Response::dragged_by and wants_keyboard_input also read context input;
             // evaluate them outside the input closure to avoid re-entering its lock.
             let primary_dragging = response.dragged_by(egui::PointerButton::Primary);
-            let keyboard_available = !ui.ctx().wants_keyboard_input();
+            let keyboard_available = !self.typing(ui.ctx());
             let pan_input = ui.input(|i| PanInput {
                 in_canvas: response.contains_pointer(),
                 middle_pressed: i.pointer.button_pressed(egui::PointerButton::Middle),
@@ -1245,6 +1452,7 @@ impl Editor {
                 );
             }
             self.paint_selection_bounds(&painter, origin, &scene);
+            self.paint_keyboard_focus(&painter, &response, origin, content, &scene);
             self.paint_guides(&painter, origin, content);
             self.paint_pointer_hint(ui, &painter);
             if self.zoom_selection_requested {
@@ -1330,6 +1538,10 @@ impl Editor {
             self.canvas_text_edit(ui, &response, origin, &scene);
             if self.text_draft.is_some() {
                 return;
+            }
+            if self.preview_mode {
+                let hover = response.hover_pos().map(|p| (p - origin) / self.zoom);
+                self.preview_pointer_moved(&scene, hover);
             }
             if self.transform_handles(ui, &response, &painter, origin, &scene) {
                 return;
@@ -1510,6 +1722,7 @@ impl eframe::App for Editor {
         self.window_chrome(ctx);
         self.palette_ui(ctx);
         self.history_window(ctx);
+        self.import_report_window(ctx);
         self.settings_window(ctx);
         self.crash_report_window(ctx);
         if let Some(viewer) = self.viewer.as_mut() {
@@ -1523,7 +1736,7 @@ impl eframe::App for Editor {
             }
         }
         self.poll_native_audio(ctx);
-        self.editing = ctx.input(|i| i.pointer.primary_down()) || ctx.wants_keyboard_input();
+        self.editing = ctx.input(|i| i.pointer.primary_down()) || self.typing(ctx);
         if !self.editing {
             self.finish_edit();
         }
@@ -1534,6 +1747,9 @@ impl eframe::App for Editor {
         self.dispatch_events(None);
         let repaint_playback = self.playing;
         self.advance_playback(dt);
+        if self.advance_preview_blends(dt) {
+            ctx.request_repaint();
+        }
         if self.blend_preview.ticking() {
             ctx.request_repaint();
         }
@@ -1578,7 +1794,7 @@ impl eframe::App for Editor {
         });
         // Defer Space's playback shortcut until release so Space+drag cannot toggle it.
         if ctx.input(|i| i.key_released(egui::Key::Space)) {
-            if !ctx.wants_keyboard_input() && !self.space_pan_used && !self.modal_open() {
+            if !self.typing(ctx) && !self.space_pan_used && !self.modal_open() {
                 self.playing = !self.playing;
                 self.preview_animation = true;
             }

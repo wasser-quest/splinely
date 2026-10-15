@@ -1,6 +1,7 @@
 //! Vector inspector and transactional authoring commands, without app state.
 use eframe::egui;
 use splinely_document::{Color, NodeKind, Project};
+use splinely_editor::accessible::Named;
 use splinely_editor::i18n::{tr, trf};
 
 #[path = "vector_tools.rs"]
@@ -254,6 +255,7 @@ fn gradient_ui(ui: &mut egui::Ui, node: &mut splinely_document::Node, colors: &[
                 && ui
                     .small_button("🗑")
                     .on_hover_text(tr("Farbstopp entfernen"))
+                    .named(tr("Farbstopp entfernen"))
                     .clicked()
             {
                 remove = Some(i);
@@ -357,7 +359,7 @@ pub(crate) fn vector_inspector_ui(
             ).on_hover_text(tr("Randstärke in lokalen SVG-Einheiten vor Skalierung · 0–1000 px · 0 blendet den Rand aus."));
         });
         ui.horizontal(|ui| {
-            if ui.button("−").on_hover_text(tr("Rand 1 px dünner")).clicked() {
+            if ui.button("−").on_hover_text(tr("Rand 1 px dünner")).named(tr("Rand 1 px dünner")).clicked() {
                 node.style.stroke_width = (node.style.stroke_width - 1.0).clamp(0.0, 1000.0);
             }
             for width in [1.0, 2.0, 4.0, 8.0] {
@@ -365,7 +367,7 @@ pub(crate) fn vector_inspector_ui(
                     node.style.stroke_width = width;
                 }
             }
-            if ui.button("+").on_hover_text(tr("Rand 1 px dicker")).clicked() {
+            if ui.button("+").on_hover_text(tr("Rand 1 px dicker")).named(tr("Rand 1 px dicker")).clicked() {
                 node.style.stroke_width = (node.style.stroke_width + 1.0).clamp(0.0, 1000.0);
             }
         });

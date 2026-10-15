@@ -1,0 +1,250 @@
+{
+  "nodes": [
+    {
+      "id": "n",
+      "kind": {
+        "type": "rect",
+        "x": 0,
+        "y": 0,
+        "width": 10,
+        "height": 10
+      },
+      "transform": {
+        "x": 10,
+        "y": 20
+      },
+      "style": {
+        "fill": {
+          "r": 0.2,
+          "g": 0.4,
+          "b": 0.6,
+          "a": 1
+        },
+        "opacity": 1
+      }
+    }
+  ],
+  "bones": [
+    {
+      "id": "root",
+      "x": 3,
+      "y": 0,
+      "rotation": 0,
+      "length": 10
+    }
+  ],
+  "variables": {
+    "speed": 1,
+    "turn": 0
+  },
+  "blendSpaces": [
+    {
+      "id": "locomotion",
+      "parameters": [
+        "speed",
+        "turn"
+      ],
+      "samples": [
+        {
+          "clipId": "walk",
+          "position": [
+            0,
+            0
+          ]
+        },
+        {
+          "clipId": "run",
+          "position": [
+            2,
+            0
+          ]
+        }
+      ]
+    }
+  ],
+  "clips": [
+    {
+      "id": "walk",
+      "duration": 2,
+      "autoplay": true,
+      "blendMode": "weighted",
+      "weight": 1,
+      "tracks": [
+        {
+          "nodeId": "n",
+          "property": "x",
+          "keyframes": [
+            {
+              "time": 0,
+              "value": {
+                "type": "number",
+                "value": 30
+              }
+            }
+          ]
+        },
+        {
+          "nodeId": "n",
+          "property": "y",
+          "keyframes": [
+            {
+              "time": 0,
+              "value": {
+                "type": "number",
+                "value": 40
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "run",
+      "duration": 2,
+      "autoplay": true,
+      "blendMode": "weighted",
+      "weight": 1,
+      "tracks": [
+        {
+          "nodeId": "n",
+          "property": "x",
+          "keyframes": [
+            {
+              "time": 0,
+              "value": {
+                "type": "number",
+                "value": 50
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "offset",
+      "duration": 2,
+      "autoplay": true,
+      "blendMode": "additive",
+      "weight": 0.5,
+      "tracks": [
+        {
+          "nodeId": "n",
+          "property": "x",
+          "keyframes": [
+            {
+              "time": 0,
+              "value": {
+                "type": "number",
+                "value": 14
+              }
+            }
+          ]
+        },
+        {
+          "nodeId": "n",
+          "property": "y",
+          "keyframes": [
+            {
+              "time": 0,
+              "value": {
+                "type": "number",
+                "value": 24
+              }
+            }
+          ]
+        },
+        {
+          "nodeId": "n",
+          "property": "rotation",
+          "keyframes": [
+            {
+              "time": 0,
+              "value": {
+                "type": "number",
+                "value": 30
+              }
+            }
+          ]
+        },
+        {
+          "nodeId": "n",
+          "property": "scaleX",
+          "keyframes": [
+            {
+              "time": 0,
+              "value": {
+                "type": "number",
+                "value": 1.5
+              }
+            }
+          ]
+        },
+        {
+          "nodeId": "n",
+          "property": "opacity",
+          "keyframes": [
+            {
+              "time": 0,
+              "value": {
+                "type": "number",
+                "value": 0.2
+              }
+            }
+          ]
+        },
+        {
+          "nodeId": "n",
+          "property": "fill",
+          "keyframes": [
+            {
+              "time": 0,
+              "value": {
+                "type": "color",
+                "value": {
+                  "r": 0.6,
+                  "g": 0.2,
+                  "b": 1,
+                  "a": 0.5
+                }
+              }
+            }
+          ]
+        },
+        {
+          "nodeId": "root",
+          "property": "x",
+          "keyframes": [
+            {
+              "time": 0,
+              "value": {
+                "type": "number",
+                "value": 7
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "stateMachines": [
+    {
+      "id": "state",
+      "initial": "idle",
+      "states": [
+        {
+          "id": "idle",
+          "overrides": [
+            {
+              "nodeId": "n",
+              "property": "x",
+              "value": {
+                "type": "number",
+                "value": 20
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

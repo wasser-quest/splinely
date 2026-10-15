@@ -37,9 +37,9 @@ local clients during the test.
 ## Assertions and evidence
 
 - HTML `<object>` contains an SVG whose own `documentElement.splinely` mounted.
-- Both showcases start through their authored Play control (`#start-control`).
-- Marionette viewport pointer actions click the correctly scrolled, transformed control position. Firefox frame `ElementClick` could silently miss offscreen SVG controls in actual testing, so it is not trusted here. Captured `isTrusted` must confirm the gesture; no JavaScript `.click()` is used.
-- Start disappears, the timeline plays and advances, and real rendered node DOM
+- Both showcases start by themselves on load (no Play button, no input sent by the test).
+- The test sends no pointer or keyboard input at all (the telemetry must record zero clicks) and the host page contains no buttons; the water-drop clip autoplays and the random-figures machine starts in its first figure.
+- The timeline plays and advances, and real rendered node DOM
   attributes differ across wall-clock samples (including the water animation).
 - Random figures automatically visit **every declared state of every machine**.
   Initial states are counted only when actually observed; runtime `state.change`

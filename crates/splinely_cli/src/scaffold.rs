@@ -20,6 +20,33 @@ pub enum PluginCommand {
         #[arg(long)]
         editor_path: Option<PathBuf>,
     },
+    /// List drop-in plugins (editor tools and runtime part) in a directory; nothing is executed.
+    List {
+        /// Plugin directory (default: the editor's plugin folder, or SPLINELY_PLUGIN_DIR).
+        #[arg(long)]
+        dir: Option<PathBuf>,
+    },
+    /// Validate one plugin folder: manifest, behaviors and runtime file (size, UTF-8, lint, sha256).
+    Validate {
+        /// Plugin folder containing splinely-plugin.json.
+        path: String,
+    },
+    /// Apply one plugin tool to a project via the editor's candidate path; validated, atomic.
+    Apply {
+        /// Plugin folder containing splinely-plugin.json.
+        plugin: String,
+        /// Tool or palette id inside the plugin.
+        tool: String,
+        /// Project file to edit (.sply or JSON; `-` reads stdin).
+        #[arg(long)]
+        project: String,
+        /// Target node for tools that need one (`addBehavior`, `setStyle`).
+        #[arg(long, alias = "id")]
+        node: Option<String>,
+        /// Where to save (default: overwrite --project).
+        #[arg(long)]
+        output: Option<String>,
+    },
 }
 
 pub fn run(command: PluginCommand) -> Result<Value> {
@@ -27,7 +54,10 @@ pub fn run(command: PluginCommand) -> Result<Value> {
         name,
         output,
         editor_path,
-    } = command;
+    } = command
+    else {
+        return Err(failure("invalid_arguments", "Not a scaffold command"));
+    };
     if !name.as_bytes().first().is_some_and(u8::is_ascii_lowercase)
         || !name
             .bytes()

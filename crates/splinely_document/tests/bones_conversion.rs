@@ -113,10 +113,13 @@ fn clip_state_explicit_precedence_and_single_attachment() {
                 value: AnimValue::Number(30.0),
             }],
             overrides: vec![patch("root", Property::Rotation, 45.0)],
+            on_exit: vec![],
+            announce: None,
         }],
         transitions: vec![],
     });
     p.clips.push(Clip {
+        audio_cues: vec![],
         id: "pose".into(),
         name: "".into(),
         duration: 1.0,
@@ -181,13 +184,7 @@ fn svg_poses_metadata_visibility_and_z_order() {
     assert!(svg.contains("translate(33 0) rotate(5)"));
     assert!(svg.find("<rect ").unwrap() < svg.find("<circle ").unwrap());
     let doc = roxmltree::Document::parse(&svg).unwrap();
-    let metadata = doc
-        .descendants()
-        .find(|n| n.has_tag_name("metadata") && n.attribute("id") == Some("splinely-project"))
-        .unwrap()
-        .text()
-        .unwrap();
-    assert_eq!(Project::from_json(metadata).unwrap(), p);
+    assert_eq!(Project::from_svg_metadata(&svg).unwrap(), p);
     assert!(!doc.descendants().any(|n| n.attribute("id") == Some("root")));
     p.nodes[0].visible = false;
     let svg = p.to_static_svg(0.0).unwrap();

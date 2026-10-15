@@ -1,0 +1,577 @@
+{
+  "schemaVersion": 1,
+  "name": "Curious face",
+  "width": 400.0,
+  "height": 300.0,
+  "nodes": [
+    {
+      "id": "background",
+      "name": "Background",
+      "boneId": null,
+      "visible": true,
+      "locked": false,
+      "originalKind": null,
+      "transform": {
+        "x": 0.0,
+        "y": 0.0,
+        "rotation": 0.0,
+        "scaleX": 1.0,
+        "scaleY": 1.0
+      },
+      "style": {
+        "fill": {
+          "r": 0.10588235294117647,
+          "g": 0.13333333333333333,
+          "b": 0.25098039215686274,
+          "a": 1.0
+        },
+        "stroke": null,
+        "strokeWidth": 1.0,
+        "opacity": 1.0
+      },
+      "kind": {
+        "type": "rect",
+        "x": 0.0,
+        "y": 0.0,
+        "width": 400.0,
+        "height": 300.0,
+        "rx": 0.0
+      }
+    },
+    {
+      "id": "head",
+      "name": "",
+      "boneId": null,
+      "visible": true,
+      "locked": false,
+      "originalKind": null,
+      "transform": {
+        "x": 200.0,
+        "y": 150.0,
+        "rotation": 0.0,
+        "scaleX": 1.0,
+        "scaleY": 1.0
+      },
+      "style": {
+        "fill": {
+          "r": 0.9490196078431372,
+          "g": 0.7568627450980392,
+          "b": 0.3058823529411765,
+          "a": 1.0
+        },
+        "stroke": null,
+        "strokeWidth": 1.0,
+        "opacity": 1.0
+      },
+      "kind": {
+        "type": "circle",
+        "cx": 0.0,
+        "cy": 0.0,
+        "radius": 90.0
+      }
+    },
+    {
+      "id": "cheek-left",
+      "name": "",
+      "boneId": null,
+      "visible": true,
+      "locked": false,
+      "originalKind": null,
+      "transform": {
+        "x": 0.0,
+        "y": 0.0,
+        "rotation": 0.0,
+        "scaleX": 1.0,
+        "scaleY": 1.0
+      },
+      "style": {
+        "fill": {
+          "r": 1.0,
+          "g": 0.4823529411764706,
+          "b": 0.4823529411764706,
+          "a": 1.0
+        },
+        "stroke": null,
+        "strokeWidth": 1.0,
+        "opacity": 0.0
+      },
+      "kind": {
+        "type": "circle",
+        "cx": 150.0,
+        "cy": 182.0,
+        "radius": 13.0
+      }
+    },
+    {
+      "id": "cheek-right",
+      "name": "",
+      "boneId": null,
+      "visible": true,
+      "locked": false,
+      "originalKind": null,
+      "transform": {
+        "x": 0.0,
+        "y": 0.0,
+        "rotation": 0.0,
+        "scaleX": 1.0,
+        "scaleY": 1.0
+      },
+      "style": {
+        "fill": {
+          "r": 1.0,
+          "g": 0.4823529411764706,
+          "b": 0.4823529411764706,
+          "a": 1.0
+        },
+        "stroke": null,
+        "strokeWidth": 1.0,
+        "opacity": 0.0
+      },
+      "kind": {
+        "type": "circle",
+        "cx": 220.0,
+        "cy": 182.0,
+        "radius": 13.0
+      }
+    },
+    {
+      "id": "eye-left",
+      "name": "",
+      "boneId": null,
+      "visible": true,
+      "locked": false,
+      "originalKind": null,
+      "transform": {
+        "x": 170.0,
+        "y": 130.0,
+        "rotation": 0.0,
+        "scaleX": 1.0,
+        "scaleY": 1.0
+      },
+      "style": {
+        "fill": {
+          "r": 1.0,
+          "g": 1.0,
+          "b": 1.0,
+          "a": 1.0
+        },
+        "stroke": null,
+        "strokeWidth": 1.0,
+        "opacity": 1.0
+      },
+      "kind": {
+        "type": "circle",
+        "cx": 0.0,
+        "cy": 0.0,
+        "radius": 18.0
+      }
+    },
+    {
+      "id": "pupil-left",
+      "name": "",
+      "boneId": null,
+      "visible": true,
+      "locked": false,
+      "originalKind": null,
+      "transform": {
+        "x": 170.0,
+        "y": 130.0,
+        "rotation": 0.0,
+        "scaleX": 1.0,
+        "scaleY": 1.0
+      },
+      "style": {
+        "fill": {
+          "r": 0.12156862745098039,
+          "g": 0.13725490196078433,
+          "b": 0.2,
+          "a": 1.0
+        },
+        "stroke": null,
+        "strokeWidth": 1.0,
+        "opacity": 1.0
+      },
+      "kind": {
+        "type": "circle",
+        "cx": 0.0,
+        "cy": 0.0,
+        "radius": 8.0
+      }
+    },
+    {
+      "id": "eye-right",
+      "name": "",
+      "boneId": null,
+      "visible": true,
+      "locked": false,
+      "originalKind": null,
+      "transform": {
+        "x": 230.0,
+        "y": 130.0,
+        "rotation": 0.0,
+        "scaleX": 1.0,
+        "scaleY": 1.0
+      },
+      "style": {
+        "fill": {
+          "r": 1.0,
+          "g": 1.0,
+          "b": 1.0,
+          "a": 1.0
+        },
+        "stroke": null,
+        "strokeWidth": 1.0,
+        "opacity": 1.0
+      },
+      "kind": {
+        "type": "circle",
+        "cx": 0.0,
+        "cy": 0.0,
+        "radius": 18.0
+      }
+    },
+    {
+      "id": "pupil-right",
+      "name": "",
+      "boneId": null,
+      "visible": true,
+      "locked": false,
+      "originalKind": null,
+      "transform": {
+        "x": 230.0,
+        "y": 130.0,
+        "rotation": 0.0,
+        "scaleX": 1.0,
+        "scaleY": 1.0
+      },
+      "style": {
+        "fill": {
+          "r": 0.12156862745098039,
+          "g": 0.13725490196078433,
+          "b": 0.2,
+          "a": 1.0
+        },
+        "stroke": null,
+        "strokeWidth": 1.0,
+        "opacity": 1.0
+      },
+      "kind": {
+        "type": "circle",
+        "cx": 0.0,
+        "cy": 0.0,
+        "radius": 8.0
+      }
+    },
+    {
+      "id": "mouth",
+      "name": "",
+      "boneId": null,
+      "visible": true,
+      "locked": false,
+      "originalKind": null,
+      "transform": {
+        "x": 0.0,
+        "y": 0.0,
+        "rotation": 0.0,
+        "scaleX": 1.0,
+        "scaleY": 1.0
+      },
+      "style": {
+        "fill": {
+          "r": 0.0,
+          "g": 0.0,
+          "b": 0.0,
+          "a": 0.0
+        },
+        "stroke": {
+          "r": 0.12156862745098039,
+          "g": 0.13725490196078433,
+          "b": 0.2,
+          "a": 1.0
+        },
+        "strokeWidth": 6.0,
+        "opacity": 1.0
+      },
+      "kind": {
+        "type": "path",
+        "d": "M 165 188 Q 200 196 235 188",
+        "bounds": [
+          165.0,
+          188.0,
+          70.0,
+          4.0
+        ],
+        "evenodd": false
+      }
+    },
+    {
+      "id": "face-area",
+      "name": "",
+      "boneId": null,
+      "visible": true,
+      "locked": false,
+      "originalKind": null,
+      "transform": {
+        "x": 0.0,
+        "y": 0.0,
+        "rotation": 0.0,
+        "scaleX": 1.0,
+        "scaleY": 1.0
+      },
+      "style": {
+        "fill": {
+          "r": 1.0,
+          "g": 1.0,
+          "b": 1.0,
+          "a": 1.0
+        },
+        "stroke": null,
+        "strokeWidth": 1.0,
+        "opacity": 0.0
+      },
+      "kind": {
+        "type": "circle",
+        "cx": 200.0,
+        "cy": 150.0,
+        "radius": 92.0
+      }
+    }
+  ],
+  "bones": [],
+  "clips": [],
+  "stateMachines": [
+    {
+      "id": "attention",
+      "initial": "idle",
+      "states": [
+        {
+          "id": "idle",
+          "onEnter": [],
+          "overrides": []
+        },
+        {
+          "id": "near",
+          "onEnter": [],
+          "overrides": [
+            {
+              "nodeId": "head",
+              "property": "scaleX",
+              "value": {
+                "type": "number",
+                "value": 1.06
+              }
+            },
+            {
+              "nodeId": "head",
+              "property": "scaleY",
+              "value": {
+                "type": "number",
+                "value": 1.06
+              }
+            }
+          ]
+        }
+      ],
+      "transitions": [
+        {
+          "from": "idle",
+          "to": "near",
+          "event": {
+            "name": "pointerenter",
+            "target": "face-area"
+          },
+          "guard": null,
+          "actions": [],
+          "blend": 0.25
+        },
+        {
+          "from": "near",
+          "to": "idle",
+          "event": {
+            "name": "pointerleave",
+            "target": "face-area"
+          },
+          "guard": null,
+          "actions": [],
+          "blend": 0.4
+        }
+      ]
+    },
+    {
+      "id": "mood",
+      "initial": "idle",
+      "states": [
+        {
+          "id": "idle",
+          "onEnter": [],
+          "overrides": []
+        },
+        {
+          "id": "happy",
+          "onEnter": [],
+          "overrides": [
+            {
+              "nodeId": "cheek-left",
+              "property": "opacity",
+              "value": {
+                "type": "number",
+                "value": 0.85
+              }
+            },
+            {
+              "nodeId": "cheek-right",
+              "property": "opacity",
+              "value": {
+                "type": "number",
+                "value": 0.85
+              }
+            },
+            {
+              "nodeId": "head",
+              "property": "fill",
+              "value": {
+                "type": "color",
+                "value": {
+                  "r": 1.0,
+                  "g": 0.7019607843137254,
+                  "b": 0.2784313725490196,
+                  "a": 1.0
+                }
+              }
+            },
+            {
+              "nodeId": "mouth",
+              "property": "d",
+              "value": {
+                "type": "path",
+                "value": "M 165 182 Q 200 220 235 182"
+              }
+            }
+          ]
+        }
+      ],
+      "transitions": [
+        {
+          "from": "idle",
+          "to": "happy",
+          "event": {
+            "name": "click",
+            "target": "face-area"
+          },
+          "guard": null,
+          "actions": [],
+          "blend": 0.35
+        },
+        {
+          "from": "happy",
+          "to": "idle",
+          "event": {
+            "name": "click",
+            "target": "face-area"
+          },
+          "guard": null,
+          "actions": [],
+          "blend": 0.6
+        }
+      ]
+    },
+    {
+      "id": "blink",
+      "initial": "open",
+      "states": [
+        {
+          "id": "open",
+          "onEnter": [],
+          "overrides": []
+        },
+        {
+          "id": "shut",
+          "onEnter": [],
+          "overrides": [
+            {
+              "nodeId": "eye-left",
+              "property": "scaleY",
+              "value": {
+                "type": "number",
+                "value": 0.1
+              }
+            },
+            {
+              "nodeId": "eye-right",
+              "property": "scaleY",
+              "value": {
+                "type": "number",
+                "value": 0.1
+              }
+            },
+            {
+              "nodeId": "pupil-left",
+              "property": "scaleY",
+              "value": {
+                "type": "number",
+                "value": 0.1
+              }
+            },
+            {
+              "nodeId": "pupil-right",
+              "property": "scaleY",
+              "value": {
+                "type": "number",
+                "value": 0.1
+              }
+            }
+          ]
+        }
+      ],
+      "transitions": [
+        {
+          "from": "open",
+          "to": "shut",
+          "event": {
+            "name": "after",
+            "target": null
+          },
+          "guard": null,
+          "actions": [],
+          "blend": 0.06,
+          "after": 3.2
+        },
+        {
+          "from": "shut",
+          "to": "open",
+          "event": {
+            "name": "after",
+            "target": null
+          },
+          "guard": null,
+          "actions": [],
+          "blend": 0.06,
+          "after": 0.12
+        }
+      ]
+    }
+  ],
+  "variables": {},
+  "audioAssets": [],
+  "audioCues": [],
+  "customJs": "",
+  "rawSvg": "",
+  "followers": [
+    {
+      "id": "follow-pupil-left",
+      "target": "pupil-left",
+      "mode": "offset",
+      "strength": 0.12,
+      "max": 8.0,
+      "smoothing": 0.12
+    },
+    {
+      "id": "follow-pupil-right",
+      "target": "pupil-right",
+      "mode": "offset",
+      "strength": 0.12,
+      "max": 8.0,
+      "smoothing": 0.12
+    }
+  ]
+}

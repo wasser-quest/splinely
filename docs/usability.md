@@ -7,7 +7,7 @@
 - **Erweitert** enthält JavaScript und den bewahrten SVG-Quelltext. Quelltext ist kein Zeichenwerkzeug.
 - **Speichern**, **Abspielen/Pause**, **Vorschau** und **Splinely Viewer öffnen** sind direkt erreichbar. Das Sternchen bei Speichern zeigt ungespeicherte Dokumentänderungen an.
 - **Datei** bündelt Neu (Strg+N), Öffnen … (Strg+O), Zuletzt geöffnet, Speichern (Strg+S), Speichern unter … (Strg+Umschalt+S), SVG-Import und beide SVG-Exporte (Strg+E: interaktiv). Die Dialoge sind native System-Dateidialoge (XDG-Portal/GTK, `rfd`) und laufen in einem Hilfsthread, die Zeichenfläche bleibt bedienbar. **Pfade manuell eingeben** bleibt als Rückfallebene.
-- Ein nie gespeichertes Projekt („Unbenannt“) fragt beim Speichern nach dem Ziel, statt still ins Arbeitsverzeichnis zu schreiben. Sein Autosave liegt unter `~/.local/share/splinely/autosave/`. Zuletzt geöffnete Dateien stehen in `~/.config/splinely/recent.txt`.
+- Ein nie gespeichertes Projekt („Unbenannt“) fragt beim Speichern nach dem Ziel, statt still ins Arbeitsverzeichnis zu schreiben. Sein Autosave liegt unter `~/.local/share/splinely/autosave/`. Zuletzt geöffnete Dateien stehen in `~/.config/splinely/recent.txt`. (Windows: `%LOCALAPPDATA%\splinely\autosave` bzw. `%APPDATA%\splinely`; macOS: `~/Library/Application Support/splinely`; `XDG_*`-Variablen überschreiben überall – Windows/macOS ungetestet.)
 - Fenstertitel: `• datei.sply — Splinely` bei ungespeicherten Änderungen. Beim Schließen mit ungespeicherten Änderungen: **Speichern / Nicht speichern / Abbrechen**.
 
 Leere Zeichenflächen und fehlende Auswahl geben einen kurzen nächsten Schritt statt einer Anleitung in Absatzlänge. Werkzeughinweise stehen direkt beim Arbeiten; Details und Tastenkürzel sind in Hover-Hilfen. Ein dunkles Theme mit dezentem Petrol-Akzent und etwas größeren Abständen kommt ohne neue Abhängigkeiten aus.
@@ -68,6 +68,7 @@ Standardbelegung; alles außer Pfeiltasten, Entf, Esc, Leertaste und Zwischenabl
 | V · P · A · B | Auswahl · Pen · Pfadpunkte · Freihand |
 | R · E · T | Rechteck · Kreis · Text in der Mitte der Ansicht einfügen |
 | Entf / Rücktaste | Auswahl löschen (wie „Form löschen“, inkl. Spur-/Zustandsbezügen) |
+| F6 · Tab / Umschalt+Tab · Enter · Umschalt+Enter | Zeichenfläche fokussieren · nächste / vorherige Form wählen · Gruppe betreten / Text bearbeiten · Gruppe verlassen (Fokusring und Statuszeile nennen Name, Typ, Position); F1 oder ? zeigt alle Tasten |
 | Strg+A | Alle sichtbaren, entsperrten Formen auswählen |
 | Strg+G · Strg+Umschalt+G | Gruppieren · Gruppe lösen |
 | Bild↑ / Bild↓ (Umschalt) | Eine Ebene (ganz) nach vorne / hinten |

@@ -10,6 +10,28 @@ pub(super) struct TextDraft {
 }
 
 impl Editor {
+    /// Open the in-place editor for a text shape and select it (double-click
+    /// on the canvas, or Enter on a keyboard-selected text).
+    pub(super) fn begin_text_draft(&mut self, id: &str) {
+        if self.text_draft.is_some() || self.preview_mode {
+            return;
+        }
+        if let Some(NodeKind::Text { text, .. }) = self
+            .project
+            .nodes
+            .iter()
+            .find(|m| m.id == id && !m.locked)
+            .map(|m| &m.kind)
+        {
+            self.text_draft = Some(TextDraft {
+                id: id.to_owned(),
+                text: text.clone(),
+                focused: false,
+            });
+            self.set_selection(vec![id.to_owned()]);
+        }
+    }
+
     /// Start editing on double-click; draw the editor while active.
     pub(super) fn canvas_text_edit(
         &mut self,
@@ -31,20 +53,7 @@ impl Editor {
                         && self.project.nodes.iter().any(|m| m.id == n.id && !m.locked)
                 });
                 if let Some(node) = hit_text {
-                    if let Some(NodeKind::Text { text, .. }) = self
-                        .project
-                        .nodes
-                        .iter()
-                        .find(|m| m.id == node.id)
-                        .map(|m| &m.kind)
-                    {
-                        self.text_draft = Some(TextDraft {
-                            id: node.id.clone(),
-                            text: text.clone(),
-                            focused: false,
-                        });
-                        self.set_selection(vec![node.id.clone()]);
-                    }
+                    self.begin_text_draft(&node.id.clone());
                 }
             }
         }

@@ -1,12 +1,30 @@
 # Splinely
 
+**运动路径：** 检查器、CLI 和两种运行时支持可选路径绑定、0–1 进度动画和切线定向。[用法与限制](docs/motion-paths.md)。
+
 [English](README.md) · [Deutsch](README.de.md) · [Español](README.es.md) · [Français](README.fr.md) · [日本語](README.ja.md) · **简体中文**
 
 ![Splinely 标志](assets/splinely-logo.svg)
 
-Splinely 是一款用 Rust 编写的桌面编辑器,使用 **`.sply` 项目文件**,并内置用于交互式 SVG 的 JavaScript 运行时。你可以绘制形状和路径,用关键帧、骨骼和状态机制作动画,最后导出为一个独立的 SVG 文件。**当前状态:可用的原型,尚未实现 [PLAN.md](PLAN.md) 中的全部功能。**
+Splinely 是一款用 Rust 编写的矢量动画编辑器。项目保存在 **`.sply` 文件**中:形状与路径、关键帧、骨骼、状态机、鼠标跟随和音频,全部在一个文件里。**Splinely 运行时**负责连同所有行为一起播放 `.sply` 项目:在浏览器中、原生(Rust/C)或在 Splinely Viewer 中。**当前状态:可用的原型,尚未实现 [PLAN.md](PLAN.md) 中的全部功能。**
 
 编辑器支持**英语、德语、西班牙语、法语、日语和简体中文**。默认跟随系统语言,可在 **设置 › 常规 › 语言** 中切换。日语和中文需要安装 CJK 字体(例如 Noto Sans CJK)。`docs/` 中的详细文档为德语。
+
+## Splinely 如何工作
+
+- **`.sply` 是源头。** 它描述外观*和*行为:片段、状态机、带过渡混合与计时器的转换、鼠标跟随、音频和变量。
+- **Splinely 运行时让它动起来。** 单纯的 SVG 文件只是一张图片:没有状态机、计时器或鼠标跟随。这些逻辑都在运行时里,运行时有浏览器版(JavaScript)、原生版(`splinely_runtime`,Rust/C ABI)以及桌面版 **Splinely Viewer**。
+- **导出:** *静态 SVG* 是某一时刻的静止图像。*Web 播放器*(`splinely-cli export`,"导出交互式 SVG")是一个独立文件,把 `.sply` 项目和浏览器运行时打包在一起,无需服务器即可在任何浏览器中播放。
+
+### 同时进行多种交互
+
+多个状态机并行运行,每个都会在自身状态之间**过渡混合**(`blend`,单位秒),因此悬停、单击和情绪可以平滑叠加。**计时转换**(`after`)会自动切换(眨眼、回到空闲),**退出动作**在离开状态时执行,**跟随者**让形状或骨骼跟随鼠标指针(瞳孔、头部、手臂),并叠加在其他一切之上。运行时会遵循系统的*减少动态效果*设置。示例:[好奇的脸](examples/curious-face.svg)——瞳孔跟随鼠标,悬停时前倾,单击会微笑,计时器让它眨眼,全部无需自定义代码。
+
+```sh
+splinely-cli on face.sply --event click --target face --machine mood --to happy --state face.fill=gold --blend 0.4
+splinely-cli on face.sply --machine blink --from open --to shut --after 3 --state eye.scaleY=0.1 --blend 0.08
+splinely-cli follow face.sply --target pupil --max 8 --strength 0.15 --smoothing 0.1
+```
 
 ## 用 LLM 安装
 
@@ -19,6 +37,8 @@ Splinely 是一款用 Rust 编写的桌面编辑器,使用 **`.sply` 项目文�
 ## 快速开始
 
 **无需编译:** 每个 [发布版本](https://github.com/wasser-quest/splinely/releases/latest) 都附带 Linux 预编译包(`splinely-vX.Y.Z-x86_64-linux.tar.gz`,包含编辑器、CLI、查看器、运行时和 `libsplinely_runtime.so`)。安装说明:[docs/INSTALL-BINARIES.md](docs/INSTALL-BINARIES.md)。
+
+Windows x86_64(`.zip`)和 macOS Apple Silicon/Intel(`.tar.gz`)包**已配置,但未在真实硬件上测试**(仅在 Linux 上做了类型检查;二进制未签名/未公证)。详情:[docs/INSTALL-BINARIES.md](docs/INSTALL-BINARIES.md)。
 
 从源码构建:
 
@@ -41,7 +61,7 @@ cargo run -p splinely_editor --bin splinely
 cargo run -p splinely_editor --bin splinely -- --demo-export /tmp/splinely-demo.svg
 ```
 
-编辑器启动时会打开自带的演示。可以**拖入 `.sply` 文件**,使用 **文件 → 打开 …**(Ctrl+O,系统文件对话框)或 **最近打开**,也可以直接启动:`cargo run -p splinely_editor --bin splinely -- examples/demo.sply`。切换项目或关闭窗口前,会询问是否保留未保存的更改和绘图/源码草稿;窗口标题显示文件名,未保存时显示 `•`。**保存** 会保留可编辑的项目;SVG 只是可选的导出格式。
+编辑器启动时是一张空白画布。可以**拖入 `.sply` 文件**,使用 **文件 → 打开 …**(Ctrl+O,系统文件对话框)或 **最近打开**,也可以直接启动:`cargo run -p splinely_editor --bin splinely -- examples/demo.sply`。切换项目或关闭窗口前,会询问是否保留未保存的更改和绘图/源码草稿;窗口标题显示文件名,未保存时显示 `•`。**保存** 会保留可编辑的项目;SVG 只是可选的导出格式。
 
 **设计 / 动画 / 高级** 将绘图、动画和代码分开。选择、钢笔、路径节点和手绘是互斥的工具;额外选项默认折叠。**预览**、**播放** 和 **打开 Splinely Viewer** 随时可用。[操作、手势与限制](docs/usability.md)。
 
@@ -49,7 +69,7 @@ cargo run -p splinely_editor --bin splinely -- --demo-export /tmp/splinely-demo.
 
 ## 一个项目文件:`.sply`
 
-几何形状、图层、骨骼、关键帧、状态、混合权重、变量、嵌入的音频和自定义代码都**保存在同一个文件中**。不需要额外的 JSON/SVG 或资源目录。`.sply` 内部是经过严格校验、可读的 JSON;旧的 `.json`/`.splinely.json` 项目仍然兼容。应用程序/运行时和已安装的编辑器插件不属于项目文件。[格式与兼容性](docs/sply-format.md)。
+几何形状、图层、骨骼、关键帧、状态、混合权重、变量、嵌入的音频和自定义代码都**保存在同一个文件中**。不需要额外的 JSON/SVG 或资源目录。`.sply` 默认以紧凑的**二进制**保存(无损、严格校验、带 CRC);`.json`/`.splinely.json` 仍是可读的 JSON,打开时自动识别格式(包括旧的 JSON 版 `.sply`)。`splinely-cli cat`/`convert` 可输出或写出 JSON。应用程序/运行时和已安装的编辑器插件不属于项目文件。[格式与兼容性](docs/sply-format.md)。
 
 在 **动画** 中,**轻松制作动画**(关键帧/预设)和 **引导式状态机**(单击/悬停、可见性、片段开始)会带你完成最初的步骤。加权混合和定时淡化与专家工具并列可用。[分步说明与混合限制](docs/animation-workflow.md)。
 
@@ -137,7 +157,7 @@ cargo run -p splinely-cli -- export examples/demo.splinely.json --trusted-js --o
 - **导航:** F/Home 适应整个场景;+/- 缩放,0 恢复 100 %。中键或空格+左键平移视图而不改动形状;不拖动的空格在松开时开始/停止播放。标尺可以显示/隐藏,平移/缩放时仍保持文档坐标。时间轴可以隐藏。**预览** 将场景事件与编辑分开。
 - **手绘/数位板:** 手绘模式生成可编辑的 SVG 路径,每一笔对应一步撤销。仅在有压力事件时支持压感;不对所有硬件/驱动作保证。[数位板说明](docs/tablet.md)。
 - **即放即用插件:** 将 `splinely-plugin.json` 放入插件目录并重启,声明式的形状工具和调色板会自动加载,无需编译。[格式、目录与示例](docs/drop-in-plugins.md);绝不会自动执行第三方脚本/库。
-- **插件:** 带有自身资源和装饰阶段的静态 Rust ECS 扩展。[模板](plugin-templates/editor/README.md);`splinely-cli plugin` 只生成源码,从不执行。原生插件属于受信任的代码,不是沙箱。
+- **插件:** 带有自身资源和装饰阶段的静态 Rust ECS 扩展。[模板](plugin-templates/editor/README.md);`splinely-cli plugin` 只生成源码,从不执行。原生插件属于受信任的代码,不是沙箱。 → [docs/plugins.md](docs/plugins.md) (hover-wiggle, `plugin list|validate|apply`, `export --plugin … --trusted-js`).
 
 ```sh
 cargo run -p splinely-cli -- import-svg drawing.svg --output drawing.splinely.json
@@ -162,12 +182,12 @@ cargo run -p splinely-cli -- render scene.sply --output scene.png --width 800
 | 矩形、圆形、文本、路径、多边形/星形/直线;多选和框选、缩放/旋转控制柄、智能参考线与手动参考线、右键菜单、命令面板(Ctrl+K)、可自定义快捷键的设置(Ctrl+,)、浅色/深色主题、界面语言、可见网格、录制模式(自动关键帧)、历史记录列表、指针旁的尺寸显示、带可拖动关键帧和缓动菜单的可视时间轴、可配置的洋葱皮、在画布上直接编辑文本、文档颜色、新项目预设、PNG/GIF 导出、吸管、线性/径向渐变、嵌套编组(树状视图、`<g>` 导出)、文本转路径、对齐/分布/翻转、保留曲线的布尔运算、路径变形、渐变动画、图层顺序、复制/粘贴、颜色/透明度、转换、撤销/重做 | 不同拓扑结构形状之间的变形为近似处理(子路径生长/收缩),不做精确的孔洞匹配 |
 | 通过临时文件+重命名加载/保存项目;已修改项目每 30 秒自动保存并提供恢复对话框 | 历史架构迁移、完整的资源配额 |
 | 时间轴、关键帧、缓动、独立的片段时钟、并行状态、加权片段和定时交叉淡化(`blendClip`) | 叠加混合、可视化混合树/混合空间 |
-| 状态模型、守卫/动作、可编辑的状态图、JSON 编辑和本地状态预览 | 自由拖拽连线、自动图布局 |
+| 状态模型、守卫/动作、退出动作、计时转换、状态间的过渡混合(多个状态机同时)、鼠标跟随、可编辑的状态图、JSON 编辑和支持悬停的本地预览 | 自由拖拽连线、自动图布局、沿路径运动 |
 | 浏览器事件、片段/播放 API、嵌入的音频资源/提示 | 原生 JS 执行或有保证的音频延迟;本地音频预览仅通过 ffplay 支持全局提示 |
-| 静态/交互式 SVG 导出、有限的 SVG 矢量导入、JS/原始 SVG 源码字段 | **不支持任意 SVG 的完整导入**;导入时会拒绝文本/图像/渐变/滤镜;单独的原始 SVG 只作为元数据 |
+| 静态/交互式 SVG 导出、有限的 SVG 矢量导入、JS/原始 SVG 源码字段 | **不支持任意 SVG 的完整导入**;文本、渐变和 SVG data-URI 图像会导入并附带近似/丢弃报告;位图只校验、不导入;裁剪/蒙版/滤镜/外部文件会被拒绝;原始 SVG 仍只是元数据,与画面不一致时显示冲突警告([详情](docs/svg-import.md)) |
 | Bevy ECS 投影、可注册的静态插件、骨骼与刚性绑定 | 动态原生插件、网格蒙皮、通用 IK 链、将任意 Bevy 系统自动转换为浏览器代码、隔离的不受信任预览 |
 
-本地预览使用 resvg 渲染 SVG:路径、圆角和变换都可见。文本使用本地系统字体,不同浏览器中可能略有差异。形状按精确轮廓选取;不可见的形状(不透明度为 0)无法点击。架构 1 已扩展;旧项目加载时新字段使用默认值。旧版 Splinely 无法识别新字段。`.sply` 项目文件(内部为 JSON)是唯一权威来源;SVG 导出不能无损地往返导入。
+本地预览使用 resvg 渲染 SVG:路径、圆角和变换都可见。文本使用本地系统字体,不同浏览器中可能略有差异。形状按精确轮廓选取;不可见的形状(不透明度为 0)无法点击。架构 1 已扩展;旧项目加载时新字段使用默认值。旧版 Splinely 无法识别新字段。`.sply` 项目文件(默认二进制,可无损转换为 JSON)是唯一权威来源;SVG 导出不能无损地往返导入。
 
 ## 检查
 
@@ -186,6 +206,7 @@ bash scripts/check.sh
 - [Cinder / Flux – Stickfight](examples/stickfight.html):两个骨骼角色之间原创的 8 秒动画格斗,包含闪避/反击、阴影/火花以及播放/暂停/重新开始。`python3 scripts/generate-stickfight.py`,检查:`python3 scripts/stickfight-smoke.py`。
 - [棕色猫头鹰](examples/brown-owl.html):树枝上的猫头鹰,带有直接的单击/悬停状态——悬停时眼睛跟随指针、耳羽竖起;单击时它会满足地闭上眼睛并抬起翅膀。检查:`python3 scripts/owl-smoke.py`。
 - [Aoi 打招呼](examples/anime-hello.html):带骨骼手部的原创动漫风格角色。**本地生成的 WAV 嵌入在 SVG 中**,无需网络连接。单击解锁音频。复现:`python3 scripts/generate-anime-demo.py`(需要本地的 `espeak-ng`/`espeak`);浏览器检查:`python3 scripts/anime-smoke.py`。
+- [好奇的脸](examples/curious-face.svg)([`.sply`](examples/curious-face.sply)):三个状态机同时运行——悬停时前倾,单击过渡为微笑,计时器眨眼——同时瞳孔跟随鼠标。无需自定义代码。生成:`python3 scripts/generate-curious-face.py`,检查:`python3 scripts/face-smoke.py`。
 - [蓝色球体上的水滴](examples/water-drop.html):独立的 SVG 场景,带有挤压/拉伸、高光和涟漪;播放/暂停。
 - [随机图形](examples/random-figures.html):可通过种子复现,状态带字幕自动依次切换。点击 **Play**。状态切换跟随片段结束。
 - 两个 HTML 文件都通过 `object` 嵌入相邻的 SVG,不使用服务器 API。测试服务器只是本地浏览器测试辅助工具。

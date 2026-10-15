@@ -16,3 +16,6 @@ serde = "1"
 clap = { version = "4", features = ["derive"] }
 tempfile = "3"
 svgtypes = "0.15"
+
+[dev-dependencies]
+base64 = "0.22"

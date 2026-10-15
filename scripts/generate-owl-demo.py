@@ -172,6 +172,10 @@ def main():
         }, ensure_ascii=False), encoding='utf-8')
         project_path = OUT / (STEM + '.splinely.json')
         cli('apply', imported, '--patch', patch, '--output', project_path)
+        # Opt-in screen-reader data: describe the owl, hide purely decorative backdrop nodes.
+        cli('a11y', project_path, '--description', 'A brown owl on a branch reacts to the pointer: its mood changes between idle, attentive and content.')
+        for decoration in ['background', 'halo', 'branch', 'branch-twig']:
+            cli('a11y', project_path, '--node', decoration, '--hidden', 'true')
         cli('validate', project_path)
         cli('convert', project_path, '--output', OUT / (STEM + '.sply'))
         cli('export', project_path, '--output', OUT / (STEM + '.svg'), '--trusted-js')

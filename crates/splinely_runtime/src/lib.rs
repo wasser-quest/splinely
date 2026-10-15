@@ -5,6 +5,7 @@ use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use splinely_document::*;
 use std::collections::{BTreeMap, VecDeque};
+use std::sync::Arc;
 
 pub const MAX_EVENTS: usize = 256;
 pub const MAX_OUTPUTS: usize = 4096;
@@ -39,10 +40,26 @@ struct Fade {
     rename_all_fields = "camelCase"
 )]
 pub enum HostAction {
-    Event { event: Event },
-    PlayAudio { asset_id: String },
-    AudioCue { cue: AudioCue },
-    Callback { id: String, data: Value },
+    Event {
+        event: Event,
+    },
+    PlayAudio {
+        asset_id: String,
+    },
+    AudioCue {
+        cue: AudioCue,
+    },
+    /// Clip-local start/resume. Offset and duration describe the remaining
+    /// portion, truncated at the clip end. Hosts own voice cancellation on
+    /// pause/stop/seek, just as for global cue voices.
+    ClipAudioCue {
+        clip_id: String,
+        cue: AudioCue,
+    },
+    Callback {
+        id: String,
+        data: Value,
+    },
 }
 #[derive(Clone, Debug, Serialize)]
 #[serde(rename_all = "camelCase")]
@@ -119,6 +136,20 @@ pub enum Request {
     CancelCallback {
         id: String,
     },
+    /// Pointer position in scene coordinates (drives followers).
+    Pointer {
+        x: f64,
+        y: f64,
+    },
+    /// The pointer left the scene; followers return to rest.
+    PointerLeave,
+}
+
+#[derive(Clone, Debug)]
+struct RunningFade {
+    from: String,
+    elapsed: f64,
+    duration: f64,
 }
 #[derive(Clone, Debug)]
 struct Callback {
@@ -131,7 +162,11 @@ struct Callback {
 
 #[derive(Clone, Debug)]
 pub struct Runtime {
-    project: Project,
+    /// Immutable after construction and shared by `Arc`, so the per-request
+    /// rollback snapshot in `execute` copies only the mutable playback state.
+    project: Arc<Project>,
+    /// Validated once in `new`; resolves IDs without re-validating per evaluation.
+    index: Arc<EvalIndex>,
     time: f64,
     running: bool,
     machines: Vec<MachineInstance>,
@@ -142,7 +177,13 @@ pub struct Runtime {
     outputs: Vec<HostAction>,
     callbacks: Vec<Callback>,
     audio_fired: Vec<bool>,
+    clip_audio_fired: Vec<Vec<bool>>,
     events_processed: usize,
+    state_fades: BTreeMap<String, RunningFade>,
+    pointer: Option<[f64; 2]>,
+    follow: BTreeMap<String, [f64; 2]>,
+    /// Seconds each machine has spent in its current state (timer transitions).
+    state_elapsed: Vec<f64>,
 }
 fn error(message: impl Into<String>) -> DocumentError {
     DocumentError(message.into())
@@ -167,11 +208,11 @@ impl Runtime {
         Self::new(Project::from_json(json)?)
     }
     pub fn new(project: Project) -> Result<Self> {
-        project.validate()?;
+        let index = project.eval_index()?;
         let machines = project
             .state_machines
             .iter()
-            .map(|m| MachineInstance::new(&project, &m.id))
+            .map(|m| MachineInstance::new_indexed(&project, &index, &m.id))
             .collect::<Result<Vec<_>>>()?;
         let mut runtime = Self {
             time: 0.0,
@@ -190,14 +231,25 @@ impl Runtime {
                 })
                 .collect(),
             audio_fired: vec![false; project.audio_cues.len()],
-            project,
+            clip_audio_fired: project
+                .clips
+                .iter()
+                .map(|c| vec![false; c.audio_cues.len()])
+                .collect(),
+            project: Arc::new(project),
+            index: Arc::new(index),
             machines,
             overrides: vec![],
             events: VecDeque::new(),
             outputs: vec![],
             callbacks: vec![],
             events_processed: 0,
+            state_fades: BTreeMap::new(),
+            pointer: None,
+            follow: BTreeMap::new(),
+            state_elapsed: vec![],
         };
+        runtime.state_elapsed = vec![0.0; runtime.machines.len()];
         // All entries run in machine order before emitted events are dispatched.
         for index in 0..runtime.machines.len() {
             let actions = std::mem::take(&mut runtime.machines[index].initial_actions);
@@ -235,15 +287,33 @@ impl Runtime {
                 .map(|c| (c.id.clone(), c.weight))
                 .collect(),
             overrides: self.overrides.clone(),
+            state_fades: self
+                .state_fades
+                .iter()
+                .map(|(machine, fade)| {
+                    (
+                        machine.clone(),
+                        StateFade {
+                            from: fade.from.clone(),
+                            progress: fade.elapsed / fade.duration,
+                        },
+                    )
+                })
+                .collect(),
+            follow: self.follow.clone(),
+            variables: self.variables.clone(),
         };
+        let (nodes, bones) = self
+            .project
+            .evaluate_frame(&self.index, self.time, &context)?;
         Ok(Frame {
             time: self.time,
             running: self.running,
-            states: context.states.clone(),
+            states: context.states,
             variables: self.variables.clone(),
             clips: self.clips.clone(),
-            nodes: self.project.evaluate_with_context(self.time, &context)?,
-            bones: self.project.evaluate_bones(self.time, &context)?,
+            nodes,
+            bones,
         })
     }
     /// Atomic request: validation, queue/segment exhaustion or evaluation errors roll back.
@@ -253,6 +323,8 @@ impl Runtime {
         next.events_processed = 0;
         next.apply_request(request)?;
         next.drain_events()?;
+        next.fire_timers()?;
+        next.update_followers(0.0);
         let frame = next.evaluate()?;
         let host_actions = std::mem::take(&mut next.outputs);
         *self = next;
@@ -298,14 +370,132 @@ impl Runtime {
                 event: event.clone(),
             })?;
             for index in 0..self.machines.len() {
+                // A machine with no matching transition would only return
+                // nothing, so skip it (and the variable-snapshot clone).
+                if !self.event_may_fire(index, &event) {
+                    continue;
+                }
                 self.machines[index].variables = self.variables.clone();
-                let actions = self.machines[index].send(&self.project, &event)?;
+                let actions =
+                    self.machines[index].send_indexed(&self.project, &self.index, &event)?;
+                self.note_transition(index);
                 for action in actions {
                     self.apply_action(action)?;
                 }
             }
         }
         Ok(())
+    }
+    /// After a machine changed state: start its crossfade and timer clock.
+    fn note_transition(&mut self, index: usize) {
+        let Some((from, blend)) = self.machines[index].last_transition.take() else {
+            return;
+        };
+        self.state_elapsed[index] = 0.0;
+        let machine = self.machines[index].machine_id.clone();
+        if blend > 0.0 {
+            self.state_fades.insert(
+                machine,
+                RunningFade {
+                    from,
+                    elapsed: 0.0,
+                    duration: blend,
+                },
+            );
+        } else {
+            self.state_fades.remove(&machine);
+        }
+    }
+    /// Fire due timer transitions (each machine at most once per call, so a
+    /// zero-second timer loop cannot spin).
+    fn fire_timers(&mut self) -> Result<()> {
+        for index in 0..self.machines.len() {
+            if !self.timer_may_fire(index) {
+                continue;
+            }
+            self.machines[index].variables = self.variables.clone();
+            let actions = self.machines[index].send_timeout_indexed(
+                &self.project,
+                &self.index,
+                self.state_elapsed[index],
+            )?;
+            self.note_transition(index);
+            for action in actions {
+                self.apply_action(action)?;
+            }
+        }
+        self.drain_events()
+    }
+    /// Whether `send` could select a transition for this event (guards aside).
+    /// `MachineInstance::send_indexed` returns nothing otherwise, so skipping
+    /// the call avoids a variable-snapshot clone per machine per event.
+    fn event_may_fire(&self, index: usize, event: &Event) -> bool {
+        let machine = &self.machines[index];
+        self.project
+            .state_machines
+            .get(index)
+            .filter(|m| m.id == machine.machine_id)
+            .is_none_or(|m| {
+                m.transitions.iter().any(|t| {
+                    t.from == machine.current_state
+                        && t.after.is_none()
+                        && t.event.name == event.name
+                        && (t.event.target.is_none() || t.event.target == event.target)
+                })
+            })
+    }
+    /// Counterpart of `event_may_fire` for `send_timeout`.
+    fn timer_may_fire(&self, index: usize) -> bool {
+        let machine = &self.machines[index];
+        let elapsed = self.state_elapsed[index];
+        self.project
+            .state_machines
+            .get(index)
+            .filter(|m| m.id == machine.machine_id)
+            .is_none_or(|m| {
+                m.transitions.iter().any(|t| {
+                    t.from == machine.current_state
+                        && t.after.is_some_and(|after| after <= elapsed + 1e-9)
+                })
+            })
+    }
+    /// Seconds until the next timer transition of any machine.
+    fn next_timer(&self) -> Option<f64> {
+        self.machines
+            .iter()
+            .zip(&self.state_elapsed)
+            .filter_map(|(m, elapsed)| {
+                m.next_timer(&self.project)
+                    .map(|after| (after - elapsed).max(0.0))
+            })
+            .min_by(f64::total_cmp)
+    }
+    /// Crossfades and followers advance on every tick, like clip fades.
+    fn advance_blends(&mut self, delta: f64) {
+        for elapsed in &mut self.state_elapsed {
+            *elapsed += delta;
+        }
+        for fade in self.state_fades.values_mut() {
+            fade.elapsed = (fade.elapsed + delta).min(fade.duration);
+        }
+        self.state_fades.retain(|_, f| f.elapsed < f.duration);
+        self.update_followers(delta);
+    }
+    fn update_followers(&mut self, delta: f64) {
+        if self.project.followers.is_empty() {
+            return;
+        }
+        let states: BTreeMap<String, String> = self
+            .machines
+            .iter()
+            .map(|m| (m.machine_id.clone(), m.current_state.clone()))
+            .collect();
+        for follower in &self.project.followers {
+            let goal = self.project.follower_goal(follower, self.pointer, &states);
+            let current = self.follow.get(&follower.id).copied().unwrap_or([0.0, 0.0]);
+            let next = smooth_toward(current, goal, follower.smoothing, delta);
+            self.follow.insert(follower.id.clone(), next);
+        }
     }
     fn clip_index(&self, id: &str) -> Result<usize> {
         self.clips
@@ -317,8 +507,8 @@ impl Runtime {
         weight_valid(weight)?;
         time_valid(duration)?;
         let index = self.clip_index(id)?;
-        if self.project.clips[index].blend_mode != BlendMode::Weighted {
-            return Err(error("fades require a weighted clip"));
+        if self.project.clips[index].blend_mode == BlendMode::Override {
+            return Err(error("fades require a weighted or additive clip"));
         }
         let clip = &mut self.clips[index];
         clip.fade = if duration == 0.0 {
@@ -347,7 +537,8 @@ impl Runtime {
                     value,
                 };
                 // Reuse core validation, including bone property and geometry constraints.
-                self.project.evaluate_with_context(
+                self.project.evaluate_frame(
+                    &self.index,
                     0.0,
                     &EvaluationContext {
                         clips: Some(vec![]),
@@ -380,6 +571,8 @@ impl Runtime {
                 if kind(old) != kind(&value) || kind(&value) == 4 {
                     return Err(error("variable type mismatch"));
                 }
+                self.project
+                    .blend_space_weights(&[(name.clone(), value.clone())].into())?;
                 self.variables.insert(name, value);
             }
             Action::PlayClip { clip_id } => {
@@ -390,6 +583,7 @@ impl Runtime {
                     && c.time >= self.project.clips[i].duration
                 {
                     c.time = 0.0;
+                    self.clip_audio_fired[i].fill(false);
                 }
                 c.active = true;
                 c.playing = true;
@@ -401,6 +595,7 @@ impl Runtime {
                 c.playing = false;
                 c.time = 0.0;
                 c.fade = None;
+                self.clip_audio_fired[i].fill(false);
             }
             Action::BlendClip {
                 clip_id,
@@ -428,6 +623,7 @@ impl Runtime {
             Request::PauseClip { clip_id } => {
                 let i = self.clip_index(&clip_id)?;
                 self.clips[i].playing = false;
+                self.clip_audio_fired[i].fill(false);
             }
             Request::SeekClip { clip_id, time } => {
                 time_valid(time)?;
@@ -438,6 +634,11 @@ impl Runtime {
                 } else {
                     time.min(c.duration)
                 };
+                self.clips[i].active = true;
+                self.clip_audio_fired[i].fill(false);
+                if self.running {
+                    self.clip_audio_boundary_for(Some(i))?;
+                }
             }
             Request::SetWeight { clip_id, weight } => {
                 weight_valid(weight)?;
@@ -451,7 +652,12 @@ impl Runtime {
                 duration,
             } => self.fade(&clip_id, weight, duration)?,
             Request::Play => self.running = true,
-            Request::Pause => self.running = false,
+            Request::Pause => {
+                self.running = false;
+                for fired in &mut self.clip_audio_fired {
+                    fired.fill(false);
+                }
+            }
             Request::Seek { time } => {
                 time_valid(time)?;
                 self.time = time;
@@ -463,6 +669,12 @@ impl Runtime {
                             time.min(model.duration)
                         };
                     }
+                }
+                for fired in &mut self.clip_audio_fired {
+                    fired.fill(false);
+                }
+                if self.running {
+                    self.clip_audio_boundary()?;
                 }
                 for (fired, cue) in self.audio_fired.iter_mut().zip(&self.project.audio_cues) {
                     *fired = cue.time <= time;
@@ -497,6 +709,52 @@ impl Runtime {
                 });
             }
             Request::CancelCallback { id } => self.callbacks.retain(|c| c.id != id),
+            Request::Pointer { x, y } => {
+                if !(x.is_finite() && y.is_finite() && x.abs() <= 1e7 && y.abs() <= 1e7) {
+                    return Err(error(
+                        "pointer coordinates must be finite and within +/- 10000000",
+                    ));
+                }
+                self.pointer = Some([x, y]);
+            }
+            Request::PointerLeave => self.pointer = None,
+        }
+        Ok(())
+    }
+    fn clip_audio_boundary(&mut self) -> Result<()> {
+        self.clip_audio_boundary_for(None)
+    }
+    fn clip_audio_boundary_for(&mut self, only: Option<usize>) -> Result<()> {
+        for i in 0..self.clips.len() {
+            if only.is_some_and(|index| index != i) {
+                continue;
+            }
+            let status = &self.clips[i];
+            if !status.active || !status.playing {
+                continue;
+            }
+            for j in 0..self.clip_audio_fired[i].len() {
+                let source = &self.project.clips[i].audio_cues[j];
+                if self.clip_audio_fired[i][j] || source.time > self.clips[i].time {
+                    continue;
+                }
+                self.clip_audio_fired[i][j] = true;
+                let elapsed = self.clips[i].time - source.time;
+                let length = source
+                    .duration
+                    .unwrap_or(f64::INFINITY)
+                    .min(self.project.clips[i].duration - source.time);
+                if elapsed >= length {
+                    continue;
+                }
+                let mut cue = source.clone();
+                cue.offset += elapsed;
+                cue.duration = Some(length - elapsed);
+                self.output(HostAction::ClipAudioCue {
+                    clip_id: self.clips[i].id.clone(),
+                    cue,
+                })?;
+            }
         }
         Ok(())
     }
@@ -538,6 +796,7 @@ impl Runtime {
         }
         if self.running {
             self.global_boundary()?;
+            self.clip_audio_boundary()?;
             self.drain_events()?;
         }
         let mut remaining = if self.running {
@@ -552,6 +811,10 @@ impl Runtime {
             }
             segments += 1;
             let mut step = remaining;
+            // Split at the next timer so it fires exactly on time.
+            if let Some(timer) = self.next_timer().filter(|t| *t > 1e-9) {
+                step = step.min(timer);
+            }
             if self.running {
                 for (i, cue) in self.project.audio_cues.iter().enumerate() {
                     if !self.audio_fired[i] {
@@ -563,12 +826,19 @@ impl Runtime {
                         step = step.min((cb.time - self.time).max(0.0));
                     }
                 }
-                for (c, model) in self.clips.iter().zip(&self.project.clips) {
+                for (i, (c, model)) in self.clips.iter().zip(&self.project.clips).enumerate() {
                     if c.playing {
                         step = step.min((model.duration - c.time).max(0.0));
+                        for (j, cue) in model.audio_cues.iter().enumerate() {
+                            if !self.clip_audio_fired[i][j] {
+                                step = step.min((cue.time - c.time).max(0.0));
+                            }
+                        }
                     }
                 }
             }
+            self.advance_blends(step);
+            self.fire_timers()?;
             // Fades advance even on paused or ended clips and while timeline is paused.
             for c in &mut self.clips {
                 if let Some(f) = &mut c.fade {
@@ -589,12 +859,13 @@ impl Runtime {
                 }
                 self.time = next;
                 let mut boundaries = vec![];
-                for (c, model) in self.clips.iter_mut().zip(&self.project.clips) {
+                for (i, (c, model)) in self.clips.iter_mut().zip(&self.project.clips).enumerate() {
                     if c.playing {
                         c.time = (c.time + step).min(model.duration);
                         if model.duration - c.time <= 8.0 * f64::EPSILON * model.duration {
                             if model.looping {
                                 c.time = 0.0;
+                                self.clip_audio_fired[i].fill(false);
                             } else {
                                 c.time = model.duration;
                                 c.playing = false;
@@ -612,6 +883,7 @@ impl Runtime {
                     }
                 }
                 self.global_boundary()?;
+                self.clip_audio_boundary()?;
                 for event in boundaries {
                     self.enqueue(event)?;
                 }

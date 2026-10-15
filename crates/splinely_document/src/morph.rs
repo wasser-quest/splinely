@@ -162,6 +162,7 @@ impl Project {
             .visible = false;
         let id = next.unused_id("morph");
         next.clips.push(Clip {
+            audio_cues: vec![],
             id: id.clone(),
             name: "Morph".into(),
             duration,

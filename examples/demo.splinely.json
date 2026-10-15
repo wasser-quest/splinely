@@ -1,178 +1,166 @@
 {
-  "audioAssets": [
+  "schemaVersion": 1,
+  "name": "Splinely: Klick, Keyframes und eingebetteter Ton",
+  "width": 640.0,
+  "height": 360.0,
+  "nodes": [
     {
-      "dataBase64": "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",
-      "id": "tone",
-      "mimeType": "audio/wav",
-      "name": "Silbenartiger Ton (keine Worte)"
-    }
-  ],
-  "audioCues": [
+      "id": "background",
+      "name": "",
+      "boneId": null,
+      "visible": true,
+      "locked": false,
+      "originalKind": null,
+      "a11y": {
+        "hidden": true
+      },
+      "transform": {
+        "x": 0.0,
+        "y": 0.0,
+        "rotation": 0.0,
+        "scaleX": 1.0,
+        "scaleY": 1.0
+      },
+      "style": {
+        "fill": {
+          "r": 0.06,
+          "g": 0.08,
+          "b": 0.14,
+          "a": 1.0
+        },
+        "stroke": null,
+        "strokeWidth": 1.0,
+        "opacity": 1.0
+      },
+      "kind": {
+        "type": "rect",
+        "x": 0.0,
+        "y": 0.0,
+        "width": 640.0,
+        "height": 360.0,
+        "rx": 0.0
+      }
+    },
     {
-      "assetId": "tone",
-      "duration": null,
-      "id": "tone-cue",
-      "offset": 0.0,
-      "time": 1.5,
-      "volume": 0.6
+      "id": "ball",
+      "name": "",
+      "boneId": null,
+      "visible": true,
+      "locked": false,
+      "originalKind": null,
+      "a11y": {
+        "label": "Ball: Klick startet Bewegung und Ton",
+        "description": "Der Kreis bewegt sich nach rechts; bei 1,5 Sekunden erklingt ein Ton."
+      },
+      "transform": {
+        "x": 0.0,
+        "y": 0.0,
+        "rotation": 0.0,
+        "scaleX": 1.0,
+        "scaleY": 1.0
+      },
+      "style": {
+        "fill": {
+          "r": 0.2,
+          "g": 0.7,
+          "b": 1.0,
+          "a": 1.0
+        },
+        "stroke": null,
+        "strokeWidth": 1.0,
+        "opacity": 1.0
+      },
+      "kind": {
+        "type": "circle",
+        "cx": 80.0,
+        "cy": 180.0,
+        "radius": 32.0
+      }
+    },
+    {
+      "id": "label",
+      "name": "",
+      "boneId": null,
+      "visible": true,
+      "locked": false,
+      "originalKind": null,
+      "transform": {
+        "x": 0.0,
+        "y": 0.0,
+        "rotation": 0.0,
+        "scaleX": 1.0,
+        "scaleY": 1.0
+      },
+      "style": {
+        "fill": {
+          "r": 1.0,
+          "g": 1.0,
+          "b": 1.0,
+          "a": 1.0
+        },
+        "stroke": null,
+        "strokeWidth": 1.0,
+        "opacity": 1.0
+      },
+      "kind": {
+        "type": "text",
+        "x": 32.0,
+        "y": 48.0,
+        "text": "Kreis klicken: Bewegung + Ton bei 1,5 s",
+        "fontSize": 16.0
+      }
     }
   ],
   "bones": [],
   "clips": [
     {
+      "id": "travel",
+      "name": "Klick-Bewegung",
+      "duration": 3.0,
+      "looping": false,
       "autoplay": false,
       "blendMode": "override",
-      "duration": 3.0,
-      "id": "travel",
-      "looping": false,
-      "name": "Klick-Bewegung",
+      "weight": 1.0,
       "tracks": [
         {
+          "nodeId": "ball",
+          "property": "x",
           "keyframes": [
             {
-              "easing": {
-                "type": "linear"
-              },
               "time": 0.0,
               "value": {
                 "type": "number",
                 "value": 0.0
+              },
+              "easing": {
+                "type": "linear"
               }
             },
             {
-              "easing": {
-                "type": "linear"
-              },
               "time": 1.5,
               "value": {
                 "type": "number",
                 "value": 480.0
+              },
+              "easing": {
+                "type": "linear"
               }
             },
             {
-              "easing": {
-                "type": "linear"
-              },
               "time": 3.0,
               "value": {
                 "type": "number",
                 "value": 0.0
+              },
+              "easing": {
+                "type": "linear"
               }
             }
-          ],
-          "nodeId": "ball",
-          "property": "x"
+          ]
         }
-      ],
-      "weight": 1.0
+      ]
     }
   ],
-  "customJs": "// Trusted example only: unlock embedded audio on a real user gesture.\nsplinely.on('ball', 'click', async () => {\n  try {\n    await splinely.audio.unlock();\n    splinely.clip('travel').stop();\n    splinely.timeline.seek(0);\n    splinely.clip('travel').play();\n  } catch (error) {\n    console.error('Splinely demo audio failed', error);\n  }\n});\n",
-  "height": 360.0,
-  "name": "Splinely: Klick, Keyframes und eingebetteter Ton",
-  "nodes": [
-    {
-      "boneId": null,
-      "id": "background",
-      "kind": {
-        "height": 360.0,
-        "rx": 0.0,
-        "type": "rect",
-        "width": 640.0,
-        "x": 0.0,
-        "y": 0.0
-      },
-      "locked": false,
-      "name": "",
-      "originalKind": null,
-      "style": {
-        "fill": {
-          "a": 1.0,
-          "b": 0.14,
-          "g": 0.08,
-          "r": 0.06
-        },
-        "opacity": 1.0,
-        "stroke": null,
-        "strokeWidth": 1.0
-      },
-      "transform": {
-        "rotation": 0.0,
-        "scaleX": 1.0,
-        "scaleY": 1.0,
-        "x": 0.0,
-        "y": 0.0
-      },
-      "visible": true
-    },
-    {
-      "boneId": null,
-      "id": "ball",
-      "kind": {
-        "cx": 80.0,
-        "cy": 180.0,
-        "radius": 32.0,
-        "type": "circle"
-      },
-      "locked": false,
-      "name": "",
-      "originalKind": null,
-      "style": {
-        "fill": {
-          "a": 1.0,
-          "b": 1.0,
-          "g": 0.7,
-          "r": 0.2
-        },
-        "opacity": 1.0,
-        "stroke": null,
-        "strokeWidth": 1.0
-      },
-      "transform": {
-        "rotation": 0.0,
-        "scaleX": 1.0,
-        "scaleY": 1.0,
-        "x": 0.0,
-        "y": 0.0
-      },
-      "visible": true
-    },
-    {
-      "boneId": null,
-      "id": "label",
-      "kind": {
-        "fontSize": 16.0,
-        "text": "Kreis klicken: Bewegung + Ton bei 1,5 s",
-        "type": "text",
-        "x": 32.0,
-        "y": 48.0
-      },
-      "locked": false,
-      "name": "",
-      "originalKind": null,
-      "style": {
-        "fill": {
-          "a": 1.0,
-          "b": 1.0,
-          "g": 1.0,
-          "r": 1.0
-        },
-        "opacity": 1.0,
-        "stroke": null,
-        "strokeWidth": 1.0
-      },
-      "transform": {
-        "rotation": 0.0,
-        "scaleX": 1.0,
-        "scaleY": 1.0,
-        "x": 0.0,
-        "y": 0.0
-      },
-      "visible": true
-    }
-  ],
-  "rawSvg": "",
-  "schemaVersion": 1,
   "stateMachines": [
     {
       "id": "interaction",
@@ -186,42 +174,63 @@
         {
           "id": "clicked",
           "onEnter": [],
-          "overrides": []
+          "overrides": [],
+          "announce": "Der Ball bewegt sich."
         }
       ],
       "transitions": [
         {
-          "actions": [
-            {
-              "nodeId": "ball",
-              "property": "fill",
-              "type": "setProperty",
-              "value": {
-                "type": "color",
-                "value": {
-                  "a": 1.0,
-                  "b": 0.2,
-                  "g": 0.4,
-                  "r": 1.0
-                }
-              }
-            },
-            {
-              "clipId": "travel",
-              "type": "playClip"
-            }
-          ],
+          "from": "idle",
+          "to": "clicked",
           "event": {
             "name": "click",
             "target": "ball"
           },
-          "from": "idle",
           "guard": null,
-          "to": "clicked"
+          "actions": [
+            {
+              "type": "setProperty",
+              "nodeId": "ball",
+              "property": "fill",
+              "value": {
+                "type": "color",
+                "value": {
+                  "r": 1.0,
+                  "g": 0.4,
+                  "b": 0.2,
+                  "a": 1.0
+                }
+              }
+            },
+            {
+              "type": "playClip",
+              "clipId": "travel"
+            }
+          ]
         }
       ]
     }
   ],
   "variables": {},
-  "width": 640.0
+  "audioAssets": [
+    {
+      "id": "tone",
+      "name": "Silbenartiger Ton (keine Worte)",
+      "mimeType": "audio/wav",
+      "dataBase64": "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"
+    }
+  ],
+  "audioCues": [
+    {
+      "id": "tone-cue",
+      "assetId": "tone",
+      "time": 1.5,
+      "offset": 0.0,
+      "duration": null,
+      "volume": 0.6
+    }
+  ],
+  "customJs": "// Trusted example only: unlock embedded audio on a real user gesture.\nsplinely.on('ball', 'click', async () => {\n  try {\n    await splinely.audio.unlock();\n    splinely.clip('travel').stop();\n    splinely.timeline.seek(0);\n    splinely.clip('travel').play();\n  } catch (error) {\n    console.error('Splinely demo audio failed', error);\n  }\n});\n",
+  "rawSvg": "",
+  "description": "Ein Kreis auf farbigem Grund. Per Klick, Enter oder Leertaste bewegt er sich nach rechts und spielt einen kurzen Ton."
 }

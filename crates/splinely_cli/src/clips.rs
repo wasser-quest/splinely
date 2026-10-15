@@ -205,6 +205,7 @@ pub fn run(command: ClipCommand) -> Result<Value> {
                 );
             }
             project.clips.push(splinely_document::Clip {
+                audio_cues: vec![],
                 id: id.clone(),
                 name: name.unwrap_or_else(|| id.clone()),
                 duration,
@@ -341,8 +342,16 @@ pub fn on(
     machine: &str,
     from: Option<String>,
     to: Option<String>,
+    state_set: Vec<String>,
+    blend: f64,
+    after: Option<f64>,
 ) -> Result<Value> {
     let project = load(input)?;
+    if !state_set.is_empty() && to.is_none() {
+        return Err(failure("invalid_arguments", "--state needs --to").hint(
+            "Name the state that should look like this, e.g. --to happy --state face.fill=gold",
+        ));
+    }
     if let Some(t) = &target {
         if !project.nodes.iter().any(|n| &n.id == t) {
             return Err(crate::assist::not_found(
@@ -364,7 +373,7 @@ pub fn on(
     for spec in &set {
         actions.push(set_action(&project, spec)?);
     }
-    if actions.is_empty() && from == to {
+    if actions.is_empty() && from == to && state_set.is_empty() {
         return Err(
             failure("invalid_arguments", "Nothing happens on this event")
                 .hint("Add --play CLIP, --stop CLIP, --set NODE.PROPERTY=VALUE or --to STATE."),
@@ -375,7 +384,9 @@ pub fn on(
     let index = match machines.iter().position(|m| m["id"] == machine) {
         Some(i) => i,
         None => {
-            machines.push(json!({"id": machine, "initial": "idle", "states": [{"id": "idle"}], "transitions": []}));
+            // A new machine starts in --from (or "idle"), so timers can run from it.
+            let initial = from.clone().unwrap_or_else(|| "idle".into());
+            machines.push(json!({"id": machine, "initial": initial, "states": [{"id": initial}], "transitions": []}));
             machines.len() - 1
         }
     };
@@ -389,16 +400,41 @@ pub fn on(
             states.push(json!({"id": state}));
         }
     }
-    m["transitions"].as_array_mut().expect("array").push(json!({
+    for spec in &state_set {
+        let action = set_action(&project, spec)?;
+        let states = m["states"].as_array_mut().expect("array");
+        let state = states
+            .iter_mut()
+            .find(|s| s["id"] == to.as_str())
+            .expect("added above");
+        if state.get("overrides").is_none() {
+            state["overrides"] = json!([]);
+        }
+        let overrides = state["overrides"].as_array_mut().expect("array");
+        overrides
+            .retain(|o| !(o["nodeId"] == action["nodeId"] && o["property"] == action["property"]));
+        overrides.push(json!({"nodeId": action["nodeId"], "property": action["property"], "value": action["value"]}));
+    }
+    let mut transition = json!({
         "from": from, "to": to,
         "event": {"name": event, "target": target},
         "actions": actions,
-    }));
+    });
+    if blend != 0.0 {
+        transition["blend"] = json!(blend);
+    }
+    if let Some(after) = after {
+        transition["after"] = json!(after);
+    }
+    m["transitions"]
+        .as_array_mut()
+        .expect("array")
+        .push(transition);
     let project = validated(value)?;
     let mut result = save_project(&project, output)?;
     if output != "-" {
         result["machine"] = json!(machine);
-        if !EVENTS.contains(&event) {
+        if after.is_none() && !EVENTS.contains(&event) {
             result["warning"] = json!(format!(
                 "'{event}' is not a built-in event; it only fires when emitted by an emit action or host code. Built-in: {}",
                 EVENTS.join(", ")

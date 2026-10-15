@@ -1,0 +1,70 @@
+{
+  "id": "hover-wiggle",
+  "title": "Hover wiggle and click bounce",
+  "tools": [
+    {
+      "id": "wiggle",
+      "title": "Wiggle on hover",
+      "action": {
+        "type": "addBehavior",
+        "behavior": {
+          "trigger": { "event": "pointerenter" },
+          "clip": {
+            "duration": 0.6,
+            "tracks": [
+              {
+                "property": "rotation",
+                "keyframes": [
+                  { "time": 0, "value": 0 },
+                  { "time": 0.15, "value": -8, "easing": "ease-out" },
+                  { "time": 0.3, "value": 8, "easing": "ease-in-out" },
+                  { "time": 0.45, "value": -4, "easing": "ease-in-out" },
+                  { "time": 0.6, "value": 0, "easing": "ease-in" }
+                ]
+              }
+            ]
+          },
+          "variables": { "wiggleCount": 0, "wiggleLast": "" }
+        }
+      }
+    },
+    {
+      "id": "bounce",
+      "title": "Bounce on click",
+      "action": {
+        "type": "addBehavior",
+        "behavior": {
+          "trigger": { "event": "click" },
+          "clip": {
+            "duration": 0.5,
+            "tracks": [
+              {
+                "property": "y",
+                "keyframes": [
+                  { "time": 0, "value": 0 },
+                  { "time": 0.25, "value": -24, "easing": "ease-out" },
+                  { "time": 0.5, "value": 0, "easing": "ease-in" }
+                ]
+              },
+              {
+                "property": "scaleY",
+                "keyframes": [
+                  { "time": 0, "value": 1 },
+                  { "time": 0.25, "value": 1.15, "easing": "ease-out" },
+                  { "time": 0.5, "value": 1, "easing": "ease-in" }
+                ]
+              }
+            ]
+          },
+          "variables": { "wiggleCount": 0, "wiggleLast": "" },
+          "a11yLabel": "Button (bounces when activated)"
+        }
+      }
+    }
+  ],
+  "runtime": {
+    "apiVersion": 1,
+    "entry": "runtime.js",
+    "description": "Counts hover/click events into the project variable wiggleCount and records the last event in wiggleLast. Embedded only by an explicitly trusted export."
+  }
+}

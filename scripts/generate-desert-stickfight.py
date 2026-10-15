@@ -4,6 +4,7 @@ import argparse
 import json
 import math
 import os
+import re
 from pathlib import Path
 import subprocess
 import tempfile
@@ -65,11 +66,14 @@ def capsule(length, r):
 
 
 CONTROLLER = """
-// Trusted transport only. Geometry and phase progression are canonical clips/actions.
+// Trusted transport only; the film starts by itself and is not driven by buttons. Geometry and phase progression are canonical clips/actions.
 const ids=['approach','punches','sweep','impact','accord'], story=splinely.machine('story');
 splinely.on('film.pause',()=>splinely.timeline.pause());
 splinely.on('film.play',()=>{if(story.state==='finished')return;splinely.clip(story.state).play();splinely.timeline.play();});
-splinely.on('film.replay',()=>{splinely.timeline.pause();for(const id of ids)splinely.clip(id).stop();splinely.timeline.seek(0);story.send('RESET');splinely.timeline.play();});
+function replay(){splinely.timeline.pause();for(const id of ids)splinely.clip(id).stop();splinely.timeline.seek(0);story.send('RESET');splinely.timeline.play();}
+splinely.on('film.replay',replay);
+// The film starts by itself (the initial state plays its clip). When it has ended, clicking the scene replays it.
+splinely.on('click',()=>{if(story.state==='finished')replay();});
 splinely.on('state.change',d=>{if(story.state==='finished')splinely.timeline.pause();});
 """
 
@@ -165,11 +169,11 @@ def build():
 
 
 HTML = '''<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Sand / Accord</title>
-<style>*{box-sizing:border-box}body{margin:0;background:#13292b;color:#f8eed6;font:16px system-ui}main{max-width:1100px;margin:4vh auto;padding:24px}.eyebrow{color:#e8b979;letter-spacing:.25em;font-size:12px}h1{font-size:clamp(36px,7vw,74px);letter-spacing:-.06em;margin:12px 0}h1 span{color:#e8b979}p,footer{color:#b7c8bc;line-height:1.6}.frame{border:1px solid #46605a;border-radius:22px;overflow:hidden;box-shadow:0 25px 75px #0004}#scene{display:block;width:100%;height:auto;aspect-ratio:16/9}.controls{display:flex;gap:10px;flex-wrap:wrap;padding:18px;background:#203b3b}button{font:inherit;color:#f8eed6;background:#2d504d;border:1px solid #668279;border-radius:9px;padding:10px 17px;cursor:pointer}button:disabled{opacity:.4}button:focus-visible{outline:3px solid #e8b979}output{margin-left:auto;align-self:center;font:12px monospace}progress{width:100%;accent-color:#e8b979}footer{font-size:13px}a{color:#e8b979}</style>
-<main><div class="eyebrow">SPLINELY / ORIGINAL DESERT SHORT</div><h1>Sand <span>/ Accord</span></h1><p>Reed & Clay: a playful disagreement on the trail.<br>Approach → jab & slip → sweep & vault → stretched-time impact → a friendly fist bump.</p><section class="frame">__SVG__<div class="controls"><button id="play" disabled>Play</button><button id="pause" disabled>Pause</button><button id="replay" disabled>Replay</button><output id="status">Loading…</output><progress id="progress" max="20" value="0" aria-label="Film progress"></progress></div></section><footer>20 seconds · Original vector silhouettes and choreography · No gore, audio, external assets or network.<br><a href="desert-stickfight.sply">Editable project</a> · <a href="desert-stickfight.svg">Standalone SVG</a> · <a href="../docs/desert-stickfight.md">Notes</a></footer></main>
+<style>*{box-sizing:border-box}body{margin:0;background:#13292b;color:#f8eed6;font:16px system-ui}main{max-width:1100px;margin:4vh auto;padding:24px}.eyebrow{color:#e8b979;letter-spacing:.25em;font-size:12px}h1{font-size:clamp(36px,7vw,74px);letter-spacing:-.06em;margin:12px 0}h1 span{color:#e8b979}p,footer{color:#b7c8bc;line-height:1.6}.frame{border:1px solid #46605a;border-radius:22px;overflow:hidden;box-shadow:0 25px 75px #0004}#scene{display:block;width:100%;height:auto;aspect-ratio:16/9}.controls{display:flex;gap:10px;flex-wrap:wrap;padding:18px;background:#203b3b}output{margin-left:auto;align-self:center;font:12px monospace}progress{width:100%;accent-color:#e8b979}footer{font-size:13px}a{color:#e8b979}</style>
+<main><div class="eyebrow">SPLINELY / ORIGINAL DESERT SHORT</div><h1>Sand <span>/ Accord</span></h1><p>Reed & Clay: a playful disagreement on the trail.<br>Approach → jab & slip → sweep & vault → stretched-time impact → a friendly fist bump.</p><section class="frame">__SVG__<div class="controls"><output id="status">Loading…</output><progress id="progress" max="20" value="0" aria-label="Film progress"></progress></div></section><footer>20 seconds · Original vector silhouettes and choreography · No gore, audio, external assets or network.<br><a href="desert-stickfight.sply">Editable project</a> · <a href="desert-stickfight.svg">Standalone SVG</a> · <a href="../docs/desert-stickfight.md">Notes</a></footer></main>
 <script>const scene=document.querySelector('#scene'), f=scene.splinely; const starts={approach:0,punches:3,sweep:7,impact:11,accord:15.5};
-if(f){for(const id of ['play','pause','replay']){const b=document.getElementById(id);b.disabled=false;b.onclick=()=>f.emit('film.'+id)}
-function status(){const state=f.machine('story').state,t=state==='finished'?20:starts[state]+f.clip(state).time;document.querySelector('#status').textContent=state+' / '+t.toFixed(1)+' / 20s'+(f.timeline.playing?'':' / held');document.querySelector('#progress').value=t;requestAnimationFrame(status)}status()}
+if(f){
+function status(){const state=f.machine('story').state,t=state==='finished'?20:starts[state]+f.clip(state).time;document.querySelector('#status').textContent=state+' / '+t.toFixed(1)+' / 20s'+(state==='finished'?' / click the scene to replay':f.timeline.playing?'':' / held');document.querySelector('#progress').value=t;requestAnimationFrame(status)}status()}
 </script></html>'''
 
 
@@ -189,14 +193,16 @@ def main():
         nodes=json.loads(imported.read_text())['nodes']
         for n in nodes:
             if n['id'] in binds: n['boneId']=binds[n['id']]
-        patch={'name':'Sand / Accord — original desert sparring film','nodes':nodes,'bones':bones,'clips':clips,'stateMachines':machines,'customJs':CONTROLLER}
+        for n in nodes:  # decorative scenery is hidden from assistive technology
+            if re.fullmatch(r'sky|sun|sun-ring|sand|ridge|dune|trail|cactus-\d+',n['id']): n['a11y']={'hidden':True}
+        patch={'description':'Two teal stickfigures spar playfully on a desert trail between cacti: approach, jab and slip, sweep and vault, impact, finish.','name':'Sand / Accord — original desert sparring film','nodes':nodes,'bones':bones,'clips':clips,'stateMachines':machines,'customJs':CONTROLLER}
         (tmp/'patch.json').write_text(json.dumps(patch))
         project=args.output/'desert-stickfight.sply'
         cli('apply',imported,'--patch',tmp/'patch.json','--output',project); cli('validate',project)
         svg=args.output/'desert-stickfight.svg'
         cli('export',project,'--output',svg,'--trusted-js')
         ET.parse(svg)
-        embedded=svg.read_text().replace('<svg ','<svg id="scene" role="img" aria-label="Two teal stickfigures spar in a warm cactus desert" ',1)
+        embedded=svg.read_text().replace('<svg ','<svg id="scene" ',1)
         (args.output/'desert-stickfight.html').write_text(HTML.replace('__SVG__',embedded))
     print('EXPORTED: import/apply/validate/trusted export; run scripts/desert-stickfight-smoke.py for real Firefox evidence.')
 

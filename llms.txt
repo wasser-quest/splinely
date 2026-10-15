@@ -1,7 +1,7 @@
 # Splinely
 
 > Splinely is a vector animation tool: a desktop editor plus a command-line tool
-> (`splinely-cli`) that creates `.sply` projects (strict JSON) with shapes, paths,
+> (`splinely-cli`) that creates `.sply` projects (compact binary by default, strict canonical JSON via `convert`/`cat`) with shapes, paths,
 > keyframe animation, bones, state machines and embedded audio, and exports them
 > as one self-contained interactive SVG. This file tells an LLM agent with shell
 > access how to install the prebuilt binaries and start using them.
@@ -29,8 +29,12 @@ glibc 2.35 or newer (Ubuntu 22.04+, Debian 12+, Fedora 36+).
 
    Stop and report if the checksum does not match. Ask the user before adding
    the PATH line to their shell profile.
-3. On another OS or architecture there is no prebuilt package: tell the user and
-   offer to build from source (`cargo build --release`, see README.md).
+3. On macOS (`splinely-<tag>-aarch64-macos.tar.gz` / `-x86_64-macos.tar.gz`) or
+   Windows (`splinely-<tag>-x86_64-windows.zip`) packages are configured but have
+   NOT been tested on real hardware: tell the user, then follow
+   docs/INSTALL-BINARIES.md if they agree. On any other OS or architecture there
+   is no prebuilt package: offer to build from source (`cargo build --release`,
+   see README.md).
 
 ## Package contents
 
@@ -42,6 +46,8 @@ glibc 2.35 or newer (Ubuntu 22.04+, Debian 12+, Fedora 36+).
 - `bin/splinely-runtime`, `lib/libsplinely_runtime.so`, `include/splinely_runtime.h`:
   native runtime for embedding animations in other programs.
 - `LLM.md`, `CLI.md`, `prompts/splinely-author.md`: authoring guides.
+- SVG import (`import-svg`: text, gradients, data-URI images, structured report, limits, source/visual conflict state): https://github.com/wasser-quest/splinely/blob/main/docs/svg-import.md
+- Accessibility of the web player/SVG (`splinely-cli a11y`, `check` warning `interactive_without_label`; supported/unsupported/unverified): https://github.com/wasser-quest/splinely/blob/main/docs/accessibility.md
 - `examples/`: sample projects and exported SVGs.
 
 ## Using it
@@ -53,7 +59,9 @@ glibc 2.35 or newer (Ubuntu 22.04+, Debian 12+, Fedora 36+).
   then `splinely-cli export scene.sply --output scene.svg`.
 - `splinely-cli COMMAND --help` documents every command; output is JSON.
 - Only pass `--trusted-js` to `export` when the user explicitly approves the
-  project's custom JavaScript.
+  project's custom JavaScript. The same applies to `export --plugin DIR`, which
+  embeds a plugin's runtime JavaScript (hash-pinned, not a sandbox); `plugin apply`
+  and `plugin validate` only touch declarative project data and are safe.
 - If a command fails with error code `internal_error`, Splinely itself crashed.
   Tell the user and show them the `reportUrl` (a pre-filled GitHub issue they
   may submit). Never submit it yourself.
@@ -62,6 +70,7 @@ glibc 2.35 or newer (Ubuntu 22.04+, Debian 12+, Fedora 36+).
 
 ## Links
 
+- Plugins (editor + browser-runtime parts, trust model): https://github.com/wasser-quest/splinely/blob/main/docs/plugins.md
 - Repository: https://github.com/wasser-quest/splinely
 - Releases: https://github.com/wasser-quest/splinely/releases
 - CLI reference: https://github.com/wasser-quest/splinely/blob/main/CLI.md

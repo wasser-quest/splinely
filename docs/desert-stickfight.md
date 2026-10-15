@@ -1,6 +1,6 @@
 # Sand / Accord
 
-Open [`examples/desert-stickfight.html`](../examples/desert-stickfight.html) locally in Firefox. The HTML contains the complete animated SVG, not an image/object or a network-loaded player. The [SVG](../examples/desert-stickfight.svg) also autoplays by itself. HTML provides **Play**, **Pause**, **Replay**, a phase label, and progress. The final pose holds; Play resumes a pause, while Replay starts a new showing.
+Open [`examples/desert-stickfight.html`](../examples/desert-stickfight.html) locally in Firefox. The HTML contains the complete animated SVG, not an image/object or a network-loaded player. The [SVG](../examples/desert-stickfight.svg) also autoplays by itself. The HTML page has no buttons: the film starts by itself on load, shows a phase label and progress, and the final pose holds. Clicking the scene after the ending replays it (scripting events `film.pause`, `film.play` and `film.replay` remain available).
 
 An original 20-second, non-gory sparring short in Cactus Runner’s warm sand, sage ridge, dark teal ink, copper scarf, rounded-stick visual language. Reed wears rust; Clay wears sea-teal. No licensed character shapes, external assets, audio, or libraries are required. Existing runner/stickfight templates were read, not edited. Runtime, UI, CLI, and README are unchanged.
 
@@ -20,7 +20,7 @@ Two ten-bone parent-tip rigs: torso, neck, upper/lower arms and upper/lower legs
 
 All geometry movement is canonical numeric clip tracks. One continuously authored performance is sliced at exact boundaries into five non-looping clips, with matching end/start values for every channel. Native `clip.end` transitions on the `story` state machine stop the completed clip and start the next. The final `finished` state holds the last clip’s evaluated pose. Dunes and cacti drift independently; shadows follow roots; dust ellipses expand, squash and fade, and tapered rays pulse at impact. Slow motion is authored by spacing the contact poses over a longer interval, not changing wall-clock speed.
 
-The small reviewed `customJs` controller only implements transport events, deterministic reset of all five clips, and pausing at the ending. It does not animate geometry or use timers, fetch, remote scripts or audio. Export explicitly opts into this reviewed code using `--trusted-js`; do not use that flag for unreviewed projects. HTML buttons emit the same transport events exposed by the standalone SVG (`film.play`, `film.pause`, `film.replay`).
+The small reviewed `customJs` controller only implements transport events, deterministic reset of all five clips, and pausing at the ending. It does not animate geometry or use timers, fetch, remote scripts or audio. Export explicitly opts into this reviewed code using `--trusted-js`; do not use that flag for unreviewed projects. The same transport events (`film.play`, `film.pause`, `film.replay`) can be emitted by host scripts through `splinely.emit(...)`; after the ending a scene click replays.
 
 ## Reproduce
 
@@ -41,7 +41,7 @@ The smoke test uses the existing standard-library Marionette harness and actual 
 - JSON/SVG/HTML project consistency, 20 bones and five clips totaling 20 seconds; static resource attributes contain no remote references.
 - Actual elapsed playback (with pause time excluded), ordered phase progression and the held ending.
 - Both fighters’ changing bone poses **and** rendered arm transforms in every phase, parent-tip FK, moving cactus scenery, an airborne vault, and transient dust/spark opacity.
-- Exact paused clip/bone/DOM samples, position-preserving resume, replay during playback and after completion, and standalone SVG autoplay/motion.
+- Auto-start on load without any button or input, exact paused clip/bone/DOM samples via the scripting events, position-preserving resume, replay during playback and click-to-replay after completion, and standalone SVG autoplay/motion.
 
 Evidence is written to `.work-tmp/desert-stickfight-telemetry.json` and genuine Firefox screenshots `desert-stickfight-{approach,punches,sweep,impact,accord,finished}.png`. Screenshots were inspected for the vault, contact and friendly resolution. The runtime’s one pre-bootstrap advisory (`customJs is preserved but not executed; attach trusted handlers explicitly`) is retained and explicitly allowed; any other diagnostic fails the test.
 

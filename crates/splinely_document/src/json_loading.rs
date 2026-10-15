@@ -120,51 +120,197 @@ impl<'de> Deserialize<'de> for UniqueValue {
     }
 }
 
+/// Lazily rendered JSON-pointer-like location: segments are only turned into a
+/// string when an error is reported, so the success path never allocates.
+#[derive(Clone, Copy)]
+struct Location<'p> {
+    parent: Option<&'p Location<'p>>,
+    key: Option<&'p str>,
+    index: usize,
+}
+
+fn render(base: &str, location: Option<&Location<'_>>) -> String {
+    let mut segments = Vec::new();
+    let mut cursor = location;
+    while let Some(l) = cursor {
+        segments.push(l);
+        cursor = l.parent;
+    }
+    let mut out = base.to_owned();
+    for l in segments.into_iter().rev() {
+        out.push('/');
+        match l.key {
+            Some(key) => out.push_str(&key.replace('~', "~0").replace('/', "~1")),
+            None => out.push_str(&l.index.to_string()),
+        }
+    }
+    out
+}
+
+/// The number-preservation rule shared by `check_preserved` and the fast path
+/// in `tree.rs`: equal tokens, or an integer that the canonical float holds exactly.
+/// Integer tokens compare exactly (never through `f64`), an integer input may
+/// become a float holding exactly that integer (never `-0.0`), a float input
+/// never matches an integer canonical value, and floats compare by bit pattern
+/// so the sign of zero is preserved.
+pub(crate) fn numbers_equivalent(a: &serde_json::Number, b: &serde_json::Number) -> bool {
+    let integer = |n: &serde_json::Number| {
+        n.as_i64()
+            .map(i128::from)
+            .or_else(|| n.as_u64().map(i128::from))
+    };
+    match (integer(a), integer(b)) {
+        (Some(x), Some(y)) => x == y,
+        (Some(x), None) => b.as_f64().is_some_and(|number| {
+            number.fract() == 0.0
+                && !(number == 0.0 && number.is_sign_negative())
+                && number as i128 == x
+        }),
+        (None, Some(_)) => false,
+        (None, None) => match (a.as_f64(), b.as_f64()) {
+            (Some(x), Some(y)) => x.to_bits() == y.to_bits(),
+            _ => false,
+        },
+    }
+}
+
 // Serde models may ignore unknown fields. Reject them rather than silently
 // discarding authored data during apply or export. Missing/default fields are OK.
 pub(crate) fn check_preserved(input: &Value, canonical: &Value, path: &str) -> Result<()> {
+    check_preserved_coded(input, canonical, path).map_err(|e| DocumentError(e.message))
+}
+
+/// Same check, keeping the machine-readable failure code (`unknown_field` or `data_loss`).
+pub(crate) fn check_preserved_coded(
+    input: &Value,
+    canonical: &Value,
+    path: &str,
+) -> std::result::Result<(), crate::StrictLoadError> {
+    preserved(input, canonical, path, None)
+}
+
+fn coded(code: &'static str, message: impl std::fmt::Display) -> crate::StrictLoadError {
+    crate::StrictLoadError {
+        code,
+        message: message.to_string(),
+    }
+}
+
+fn preserved(
+    input: &Value,
+    canonical: &Value,
+    base: &str,
+    here: Option<&Location<'_>>,
+) -> std::result::Result<(), crate::StrictLoadError> {
     match (input, canonical) {
         (Value::Object(a), Value::Object(b)) => {
             for (key, value) in a {
-                let child = format!("{path}/{}", key.replace('~', "~0").replace('/', "~1"));
+                let location = Location {
+                    parent: here,
+                    key: Some(key),
+                    index: 0,
+                };
                 let other = b.get(key).ok_or_else(|| {
-                    failure("unknown_field", format!("Unsupported field at {child}"))
+                    coded(
+                        "unknown_field",
+                        format!("Unsupported field at {}", render(base, Some(&location))),
+                    )
                 })?;
-                check_preserved(value, other, &child)?;
+                preserved(value, other, base, Some(&location))?;
             }
         }
         (Value::Array(a), Value::Array(b)) => {
             if a.len() != b.len() {
-                return Err(failure("data_loss", format!("Array changed at {path}")));
+                return Err(coded(
+                    "data_loss",
+                    format!("Array changed at {}", render(base, here)),
+                ));
             }
             for (index, (value, other)) in a.iter().zip(b).enumerate() {
-                check_preserved(value, other, &format!("{path}/{index}"))?;
+                let location = Location {
+                    parent: here,
+                    key: None,
+                    index,
+                };
+                preserved(value, other, base, Some(&location))?;
             }
         }
         (Value::Number(a), Value::Number(b)) => {
-            let equivalent = if a == b {
-                true
-            } else if let Some(integer) = a
-                .as_i64()
-                .map(i128::from)
-                .or_else(|| a.as_u64().map(i128::from))
-            {
-                b.as_f64()
-                    .is_some_and(|number| number.fract() == 0.0 && number as i128 == integer)
-            } else {
-                a.as_f64() == b.as_f64()
-            };
-            if !equivalent {
-                return Err(failure(
+            if !numbers_equivalent(a, b) {
+                return Err(coded(
                     "data_loss",
-                    format!("Number cannot be represented exactly at {path}"),
+                    format!(
+                        "Number cannot be represented exactly at {}",
+                        render(base, here)
+                    ),
                 ));
             }
         }
         _ if input != canonical => {
-            return Err(failure("data_loss", format!("Value changed at {path}")));
+            return Err(coded(
+                "data_loss",
+                format!("Value changed at {}", render(base, here)),
+            ));
         }
         _ => {}
     }
     Ok(())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::numbers_equivalent;
+    use serde_json::Number;
+
+    fn n(text: &str) -> Number {
+        serde_json::from_str(text).unwrap()
+    }
+
+    #[test]
+    fn integers_compare_exactly() {
+        assert!(numbers_equivalent(&n("5"), &n("5")));
+        assert!(!numbers_equivalent(
+            &n("9007199254740993"),
+            &n("9007199254740992")
+        ));
+        assert!(!numbers_equivalent(&n("-1"), &n("1")));
+        assert!(numbers_equivalent(
+            &n("18446744073709551615"),
+            &n("18446744073709551615")
+        ));
+        assert!(!numbers_equivalent(&n("18446744073709551615"), &n("-1")));
+    }
+
+    #[test]
+    fn integer_input_may_become_the_exact_float_only() {
+        assert!(numbers_equivalent(&n("3"), &n("3.0")));
+        assert!(numbers_equivalent(&n("0"), &n("0.0")));
+        assert!(!numbers_equivalent(&n("0"), &n("-0.0")));
+        // 2^53 + 1 is not representable: the float holds 2^53, so data would be lost.
+        assert!(!numbers_equivalent(
+            &n("9007199254740993"),
+            &n("9007199254740992.0")
+        ));
+        assert!(!numbers_equivalent(&n("3"), &n("3.5")));
+    }
+
+    #[test]
+    fn float_input_never_matches_an_integer_canonical_value() {
+        assert!(!numbers_equivalent(&n("3.0"), &n("3")));
+        assert!(!numbers_equivalent(&n("0.0"), &n("0")));
+        assert!(!numbers_equivalent(
+            &n("9007199254740992.0"),
+            &n("9007199254740993")
+        ));
+    }
+
+    #[test]
+    fn floats_keep_the_sign_of_zero() {
+        assert!(numbers_equivalent(&n("-0.0"), &n("-0.0")));
+        assert!(numbers_equivalent(&n("0.0"), &n("0.0")));
+        assert!(!numbers_equivalent(&n("-0.0"), &n("0.0")));
+        assert!(!numbers_equivalent(&n("0.0"), &n("-0.0")));
+        assert!(numbers_equivalent(&n("1.5e-7"), &n("1.5e-7")));
+        assert!(!numbers_equivalent(&n("1.5"), &n("1.25")));
+    }
 }

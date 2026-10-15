@@ -55,13 +55,13 @@ test('segmented fade actions parity; parallel scroll continues through sparse ju
 });
 test('strict inactive fields/actions and API inputs reject before mutation',()=>{
   for(const weight of [null,-1,1.1,NaN,Infinity,'0.5'])assert.throws(()=>normalize({clips:[weighted('a',weight,[])]}),/weight/);
-  for(const blendMode of [null,'additive',false])assert.throws(()=>normalize({clips:[{id:'a',duration:1,blendMode}]}),/blendMode/);
-  for(const action of [{type:'blendClip',clipId:'missing',weight:0},{type:'blendClip',clipId:'a',weight:0,duration:-1},{type:'blendClip',clipId:'a',weight:Infinity}])assert.throws(()=>normalize({clips:[weighted('a',1,[])],interactions:[{actions:[action]}]}),/weighted clip|duration|weight/);
-  assert.throws(()=>normalize({clips:[{id:'a',duration:1}],interactions:[{actions:[{type:'blendClip',clipId:'a',weight:0}]}]}),/weighted clip/);
+  for(const blendMode of [null,'invalid',false])assert.throws(()=>normalize({clips:[{id:'a',duration:1,blendMode}]}),/blendMode/);
+  for(const action of [{type:'blendClip',clipId:'missing',weight:0},{type:'blendClip',clipId:'a',weight:0,duration:-1},{type:'blendClip',clipId:'a',weight:Infinity}])assert.throws(()=>normalize({clips:[weighted('a',1,[])],interactions:[{actions:[action]}]}),/weighted.*clip|duration|weight/);
+  assert.throws(()=>normalize({clips:[{id:'a',duration:1}],interactions:[{actions:[{type:'blendClip',clipId:'a',weight:0}]}]}),/weighted.*clip/);
   const {f}=mount({clips:[weighted('a',1,[]),{id:'o',duration:1}]});const c=f.clip('a');
   for(const value of [-1,2,NaN,Infinity,'1',null])assert.throws(()=>c.setWeight(value),/weight/);
   for(const seconds of [-1,NaN,Infinity,'1',null])assert.throws(()=>c.fadeTo(0,seconds),/duration/);
-  assert.throws(()=>f.clip('o').setWeight(0),/weighted clip/);near(c.weight,1);f.destroy();assert.throws(()=>c.fadeTo(0,1),/destroyed/);
+  assert.throws(()=>f.clip('o').setWeight(0),/weighted.*clip/);near(c.weight,1);f.destroy();assert.throws(()=>c.fadeTo(0,1),/destroyed/);
 });
 test('clip.end return fade consumes leftover delta with duration callbacks before end',()=>{
   function run(parts) {

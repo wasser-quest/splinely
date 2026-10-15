@@ -35,6 +35,37 @@ char *splinely_runtime_request(SplinelyRuntimeHandle *handle, const uint8_t *dat
 void splinely_runtime_destroy(SplinelyRuntimeHandle *handle);
 void splinely_runtime_result_free(char *result);
 
+/* Additive buffer API (same ABI v1; the four functions above are unchanged).
+ * Avoids the per-call result allocation: the same {"ok":...} JSON envelope as
+ * splinely_runtime_request is written to a caller buffer (UTF-8, NOT NUL
+ * terminated; object key order is unspecified). *out_length always receives the
+ * envelope size. Status codes:
+ *   SPLINELY_STATUS_OK (0)               envelope copied; it may itself be {"ok":false,...}.
+ *   SPLINELY_STATUS_BUFFER_TOO_SMALL (1) capacity < *out_length. The request HAS
+ *       executed; the response is retained by the handle: fetch it with
+ *       splinely_runtime_response_copy into a buffer of at least *out_length bytes.
+ *       Do not resend the request.
+ *   SPLINELY_STATUS_INVALID_ARGUMENT (2) NULL handle/out_length, or NULL out with
+ *       capacity != 0; nothing was executed.
+ * The retained response is replaced by the next _into call and dies with the
+ * handle. Same CALLER MEMORY CONTRACT as above: out points to capacity writable
+ * bytes (may be NULL when capacity is 0), out_length to a writable size_t, none
+ * overlapping the input; no concurrent operations on one handle.
+ *
+ * request_into: like splinely_runtime_request (JSON request bytes).
+ * tick_into:    {"type":"tick","delta":delta} without request JSON parsing.
+ * response_copy: re-copy the retained response (also usable before any _into
+ *               call: it is then empty and *out_length is 0). */
+#define SPLINELY_STATUS_OK 0
+#define SPLINELY_STATUS_BUFFER_TOO_SMALL 1
+#define SPLINELY_STATUS_INVALID_ARGUMENT 2
+int32_t splinely_runtime_request_into(SplinelyRuntimeHandle *handle, const uint8_t *data, size_t length,
+                                      uint8_t *out, size_t capacity, size_t *out_length);
+int32_t splinely_runtime_tick_into(SplinelyRuntimeHandle *handle, double delta,
+                                   uint8_t *out, size_t capacity, size_t *out_length);
+int32_t splinely_runtime_response_copy(SplinelyRuntimeHandle *handle,
+                                       uint8_t *out, size_t capacity, size_t *out_length);
+
 #ifdef __cplusplus
 }
 #endif

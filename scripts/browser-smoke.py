@@ -93,7 +93,7 @@ with tempfile.TemporaryDirectory(prefix="splinely-firefox-") as profile:
             circle = circle.get("value", circle)
             command("WebDriver:ElementClick", {"id": circle.get("element-6066-11e4-a52e-4f735466cecf", circle.get("ELEMENT"))})
             time.sleep(0.15)
-            result = js("const f=document.documentElement.splinely;return {fill:document.getElementById('ball').getAttribute('fill'),machines:JSON.parse(document.getElementById('splinely-project').textContent).stateMachines.map(m=>f.machine(m.id).state)};")
+            result = js("const f=document.documentElement.splinely;return {fill:document.getElementById('ball').getAttribute('fill'),machines:f.sourceProject.stateMachines.map(m=>f.machine(m.id).state)};")
             assert "clicked" in result["machines"] and result["fill"] == "rgb(255,102,51)", result
             security = js("""
 const root=document.documentElement, f=root.splinely, ns='http://www.w3.org/2000/svg';
@@ -103,7 +103,7 @@ const div=document.createElementNS('http://www.w3.org/1999/xhtml','div');div.id=
 fo.append(div);nested.append(fo);root.append(nested);f.set('ball',{opacity:.75});
 const isolated=div.getAttribute('opacity')===null, safe=!root.querySelector('#ball').getAttribute('fill').includes('127.0.0.1')&&!root.querySelector('#ball').hasAttribute('srcset');
 f.destroy();const controls=root.querySelectorAll('[data-splinely-host-control]').length;
-const retry=window.SplinelyRuntime.createRuntime(root,JSON.parse(root.querySelector('[id="splinely-project"]').textContent),{autoTick:false});
+const retry=window.SplinelyRuntime.createRuntime(root,f.sourceProject,{autoTick:false});
 let drag=false;retry.on('dragstart',()=>drag=true);retry.on('pointerdown',()=>retry.destroy());
 root.querySelector('#ball').dispatchEvent(new PointerEvent('pointerdown',{bubbles:true,pointerId:7}));
 nested.remove();return {isolated,safe,controls,destroyed:!root.splinely,drag};
@@ -133,7 +133,7 @@ Promise.all(sources.map(source=>new Promise((resolve,reject)=>{
                 command('WebDriver:Navigate', {'url': rig.with_name(rig.name.removesuffix('.splinely.json').removesuffix('.json') + '.svg').as_uri()})
                 for time_value in [0., .5, 1.5, 2.5]:
                     expected = json.loads(subprocess.check_output(['target/debug/splinely-cli', 'evaluate', str(rig), '--time', str(time_value)], text=True))['nodes']
-                    actual = js(f"const f=document.documentElement.splinely;f.timeline.pause();f.timeline.seek({time_value});return JSON.parse(document.getElementById('splinely-project').textContent).nodes.map(n=>({{id:n.id,transform:document.getElementById(n.id).getAttribute('transform')}}));")
+                    actual = js(f"const f=document.documentElement.splinely;f.timeline.pause();f.timeline.seek({time_value});return f.sourceProject.nodes.map(n=>({{id:n.id,transform:document.getElementById(n.id).getAttribute('transform')}}));")
                     by_id = {n['id']: n['transform'] for n in actual}
                     for node in expected:
                         t = node['transform']

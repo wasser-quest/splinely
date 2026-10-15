@@ -272,6 +272,14 @@ fn findings(project: &Project, file: &str) -> Vec<Finding> {
             }
         }
     }
+    for id in project.unlabeled_interactive_nodes() {
+        add(
+            "warning",
+            "interactive_without_label",
+            format!("'{id}' reacts to the pointer or keyboard but has no accessible label, so screen readers can only announce its name or ID."),
+            format!("splinely-cli a11y {file} --node {id} --label 'LABEL'"),
+        );
+    }
     let moves = project
         .clips
         .iter()
@@ -356,6 +364,7 @@ mod tests {
         assert!(!found.contains(&"hidden_behind"), "{found:?}");
         assert!(found.contains(&"low_contrast"), "{found:?}");
         project.clips.push(splinely_document::Clip {
+            audio_cues: vec![],
             id: "idle".into(),
             name: "idle".into(),
             duration: 1.,

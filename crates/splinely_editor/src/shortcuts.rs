@@ -289,7 +289,13 @@ impl Editor {
         }
         let mut p = self.project.clone();
         match p.translate_nodes(&ids, delta.x as f64, delta.y as f64) {
-            Ok(()) => self.commit(p),
+            Ok(()) => {
+                self.commit(p);
+                self.kbd.ring = true;
+                if let Some(text) = self.describe_selection() {
+                    self.status = trf("Verschoben: {}", &[text]);
+                }
+            }
             Err(error) => self.status = error.to_string(),
         }
     }
@@ -311,8 +317,9 @@ impl Editor {
     /// Global shortcuts; ignored while a text field has keyboard focus. The
     /// configurable ones go through the keymap, the fixed ones are handled here.
     pub(super) fn shortcuts(&mut self, ctx: &egui::Context) {
+        self.focus_canvas_key(ctx);
         self.dispatch_keys(ctx);
-        if ctx.wants_keyboard_input() || self.modal_open() || self.editing_keymap() {
+        if self.typing(ctx) || self.modal_open() || self.editing_keymap() {
             return;
         }
         let events = ctx.input(|i| i.events.clone());
@@ -327,15 +334,35 @@ impl Editor {
                 _ => {}
             }
         }
+        // "?" opens the shortcut overview like F1 (typed character, any layout).
+        if events
+            .iter()
+            .any(|e| matches!(e, egui::Event::Text(t) if t == "?"))
+        {
+            self.shortcuts_open = true;
+        }
         let (command, shift) = ctx.input(|i| (i.modifiers.command, i.modifiers.shift));
         let pressed = |k: egui::Key| ctx.input(|i| i.key_pressed(k));
         if self.preview_mode {
             return;
         }
-        if (copy || cut) && self.copy_selected(ctx) && cut {
-            self.delete_selected();
+        if let Some(key) = self.selected_key.filter(|_| copy || cut) {
+            // A selected timeline key takes Ctrl+C/X before shapes do.
+            self.copy_key(key);
+            if cut {
+                self.selected_key = None;
+                self.delete_key(key);
+            }
+        } else if (copy || cut) && self.copy_selected(ctx) {
+            self.paste_key_next = false;
+            if cut {
+                self.delete_selected();
+            }
         }
-        if let Some(text) = pasted {
+        let paste = pasted.is_some() || (command && pressed(egui::Key::V));
+        if paste && self.paste_key_next && self.key_clipboard.is_some() {
+            self.paste_key();
+        } else if let Some(text) = pasted {
             self.paste(Some(&text));
         } else if command && pressed(egui::Key::V) {
             self.paste(None);
@@ -350,26 +377,32 @@ impl Editor {
             {
                 self.delete_selected();
             }
-            let step = if shift {
-                self.settings.nudge_large
-            } else {
-                self.settings.nudge_small
-            } as f32;
-            for (k, d) in [
-                (egui::Key::ArrowLeft, Vec2::new(-step, 0.)),
-                (egui::Key::ArrowRight, Vec2::new(step, 0.)),
-                (egui::Key::ArrowUp, Vec2::new(0., -step)),
-                (egui::Key::ArrowDown, Vec2::new(0., step)),
+            for k in [
+                egui::Key::ArrowLeft,
+                egui::Key::ArrowRight,
+                egui::Key::ArrowUp,
+                egui::Key::ArrowDown,
             ] {
-                if pressed(k) {
-                    self.nudge(d);
+                let delta = keyboard_nav::nudge_delta(
+                    k,
+                    shift,
+                    self.settings.nudge_small,
+                    self.settings.nudge_large,
+                );
+                if let (true, Some(delta)) = (pressed(k), delta) {
+                    self.nudge(delta);
                 }
             }
+            self.keyboard_navigation(ctx);
             if pressed(egui::Key::Escape) {
                 if self.eyedropper {
                     self.eyedropper = false;
                     self.status = tr("Pipette abgebrochen.").into();
                 } else {
+                    if self.selected.is_some() {
+                        self.status = tr("Auswahl aufgehoben.").into();
+                    }
+                    self.kbd.scope = None;
                     self.set_selection(vec![]);
                 }
             }

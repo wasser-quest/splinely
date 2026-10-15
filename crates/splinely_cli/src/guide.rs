@@ -4,7 +4,7 @@
 
 pub const TEXT: &str = r##"# Splinely CLI – quick guide
 
-Splinely projects (.sply, strict JSON) hold vector shapes, animation clips and
+Splinely projects (.sply, binary by default; `cat`/`convert` give JSON) hold vector shapes, animation clips and
 interactions; `export` turns them into one self-contained animated SVG.
 
 ## Rules that keep results good
@@ -18,6 +18,21 @@ interactions; `export` turns them into one self-contained animated SVG.
    unreadable text … each with a ready fix), then `render FILE --output a.png`
    and look at the picture if you can view images.
 6. Prefer CLI commands over hand-written JSON. For many steps use `batch`.
+
+## Motion along paths
+`motion-path FILE --target ball --path route --orient` binds the local origin
+of ball to route (a path node). Draw ball around (0,0); its x/y and rotation
+remain additional offsets. Animate with `keyframe FILE --clip travel --target
+ball --property motionProgress --time 2 --value 1 --autoplay`; set a start key
+at time 0 with value 0. In the editor use Motion path in the inspector, then
+Path progress in the timeline (or Auto-Key). `--remove` unbinds; remove related
+progress tracks/overrides first. Source and target cannot be bone-bound; sources
+cannot themselves follow a motion path. M/L/Q/C/Z commands (absolute/relative)
+only; curves use 64 chords per segment for shared Rust/browser arc length.
+Progress is 0..1, endpoints included, disconnected subpaths concatenate without
+measuring jumps; closed paths include the closing segment. Animated source
+transforms and path data are sampled before motion; pointer followers add their
+offsets before motion. Degenerate evaluated paths report an evaluation error.
 
 ## Coordinates
 - Canvas: `new --width W --height H` (default 800×600), origin top-left, y down.
@@ -64,10 +79,36 @@ for P in scaleX scaleY; do
 done
 splinely-cli on $F --event click --target sun --play pulse --set sun.fill=red
 splinely-cli on $F --event pointerenter --target ground --set ground.opacity=0.8
+splinely-cli a11y $F --description "A sun rises over a field." --node sun --label "Sun: click to pulse"
+splinely-cli a11y $F --node ground --label "Ground"
 ```
+Shapes with interactions are focusable buttons in the web player (Tab, Enter/Space);
+`a11y` gives them screen-reader labels (`check` warns `interactive_without_label`),
+and `a11y F --node ID --hidden true` hides decoration. See docs/accessibility.md.
 Events: click, dblclick, pointerenter, pointerleave, pointerdown, pointerup,
 keydown, dragstart, drag, dragend, clip.end. `--to STATE`/`--from STATE` build
 real state machines (e.g. toggle: `--from off --to on`, then `--from on --to off`).
+
+## Recipe: smooth states, several at once, and eyes that follow the mouse
+```sh
+splinely-cli node add $F --kind circle --id face --x 400 --y 200 --radius 70 --fill gold --pivot center
+splinely-cli node add $F --kind circle --id pupil --x 400 --y 190 --radius 10 --fill black
+splinely-cli node add $F --kind rect --id head --x -20 --y -30 --width 40 --height 30 --tx 400 --ty 110 --fill tomato
+splinely-cli on $F --event pointerenter --target face --machine hover --to near --state face.scaleX=1.1 --blend 0.3
+splinely-cli on $F --event pointerleave --target face --machine hover --from near --to idle --blend 0.3
+splinely-cli on $F --event click --target face --machine mood --to happy --state face.fill=gold --blend 0.4
+splinely-cli follow $F --target pupil --max 8 --strength 0.15 --smoothing 0.1
+splinely-cli follow $F --target head --mode rotate --max 25 --machine hover --states near
+splinely-cli on $F --machine blink --from open --to shut --after 3 --state pupil.scaleY=0.1 --blend 0.08
+splinely-cli on $F --machine blink --from shut --to open --after 0.15 --blend 0.08
+splinely-cli a11y $F --node face --label "Face: reacts to pointer and click"
+```
+`--state` values describe how the `--to` state looks and fade in over `--blend`
+(leaving the state fades them out again); `--set` changes things instantly.
+Each machine blends on its own, so hover, mood and followers all work together.
+`follow` adds on top of everything (offset for pupils, rotate for heads/arms).
+`--after SECONDS` replaces `--event`: the machine switches by itself after that
+time in `--from` (blinking, returning to idle, slideshows).
 
 ## Recipe: many steps in one call (all or nothing)
 ```sh
@@ -101,6 +142,11 @@ fails, nothing is saved and the error names the step.
 - Advanced JSON: `apply F --patch patch.json` (RFC 7396; arrays are REPLACED
   entirely), `schema` (format + examples), `capabilities` (full reference).
 - Bones, blending, audio: see `capabilities` and CLI.md.
+- Plugins (docs/plugins.md): `plugin validate DIR` checks a drop-in plugin folder;
+  `plugin apply DIR TOOL --project F --node ID` merges its declarative behavior
+  (clip + state machine + variables, validated, atomic). A plugin's browser-runtime
+  part is embedded only by `export F --output x.svg --plugin DIR --trusted-js`
+  after the user approved that code; never add `--trusted-js` on your own.
 
 ## Common mistakes
 - Background added last covers everything → `arrange order F --nodes background --to back`.

@@ -61,6 +61,7 @@ fn bone_pose_keys_are_sorted_replaceable_and_preview_matches_projection() {
     e.add_bone(false);
     e.bind_selected(true);
     e.project.clips.push(Clip {
+        audio_cues: vec![],
         id: "pose".into(),
         name: "Pose".into(),
         duration: 3.,

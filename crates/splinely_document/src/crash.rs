@@ -29,13 +29,7 @@ pub struct CrashReport {
 
 /// Where the last crash report is kept until the user reports or dismisses it.
 pub fn report_path() -> Option<PathBuf> {
-    let base = std::env::var_os("XDG_STATE_HOME")
-        .filter(|v| !v.is_empty())
-        .map(PathBuf::from)
-        .or_else(|| {
-            let home = std::env::var_os("HOME").or_else(|| std::env::var_os("USERPROFILE"))?;
-            Some(PathBuf::from(home).join(".local").join("state"))
-        })?;
+    let base = crate::platform_dirs::base_dir(crate::platform_dirs::Kind::State)?;
     Some(base.join("splinely").join("last-crash.json"))
 }
 
@@ -45,10 +39,10 @@ pub fn system_description() -> String {
 
 /// Replace the home directory so reports don't reveal the user name.
 fn redact(text: &str) -> String {
-    match std::env::var("HOME") {
-        Ok(home) if home.len() > 1 => text.replace(&home, "~"),
-        _ => text.to_owned(),
-    }
+    // HOME, and USERPROFILE on Windows.
+    crate::platform_dirs::home_dirs()
+        .iter()
+        .fold(text.to_owned(), |text, home| text.replace(home, "~"))
 }
 
 /// Keep Splinely's own frames (with their source lines) and drop the
@@ -243,8 +237,9 @@ pub fn issue_url(report: Option<&CrashReport>) -> String {
 /// Open a URL in the default browser.
 pub fn open_in_browser(url: &str) -> std::io::Result<()> {
     let mut command = if cfg!(target_os = "windows") {
-        let mut c = std::process::Command::new("cmd");
-        c.args(["/C", "start", ""]);
+        // Not `cmd /C start`: cmd would treat the `&` in the issue URL as a command separator.
+        let mut c = std::process::Command::new("rundll32");
+        c.arg("url.dll,FileProtocolHandler");
         c
     } else if cfg!(target_os = "macos") {
         std::process::Command::new("open")

@@ -30,12 +30,13 @@ the common mistakes. Its recipes are executed verbatim by the test suite.
 
 Use **`.sply`** for the self-contained authored Project: geometry, animations,
 states, bones, code, SVG-source metadata and embedded audio all live in one file.
-It is strict UTF-8 canonical Project JSON, not ZIP or a binary container.
-Legacy `.splinely.json` and `.json` remain supported with the same schema and strict
-unknown-field, duplicate-member and integer rules. No sidecar SVG is needed for
+It is saved as compact **binary** by default (a lossless encoding of the canonical
+Project JSON model, see [docs/sply-binary-format.md](docs/sply-binary-format.md)),
+not ZIP. Legacy JSON-text `.sply`, `.splinely.json` and `.json` remain supported
+with the same schema and strict unknown-field, duplicate-member and integer rules;
+every command sniffs the encoding (also on stdin), whatever the extension. No sidecar SVG is needed for
 authoring; `.sply` needs a compatible host to render, or an explicit SVG export.
 Loading/saving/conversion never executes authored JavaScript or grants trust.
-Editor/viewer dialogs and startup loading are not changed by this CLI/core work.
 See [docs/sply-format.md](docs/sply-format.md) for format, limits and shared APIs.
 
 ```sh
@@ -44,14 +45,20 @@ splinely-cli example --output example.sply
 splinely-cli import-svg drawing.svg --output drawing.sply
 splinely-cli validate scene.sply
 splinely-cli convert legacy.splinely.json --output scene.sply
-splinely-cli convert scene.sply --output interoperable.json
+splinely-cli convert scene.sply --output interoperable.json   # binary -> JSON
+splinely-cli convert scene.json --output scene.dat --format binary
+splinely-cli cat scene.sply                      # canonical JSON of any project file
+splinely-cli export scene.sply --output scene.svg --embed json   # legacy readable embedding
 splinely-cli export scene.sply --output scene.svg
 ```
 
 Every project authoring operation accepts `.sply` input/output paths, including
 atomic in-place edits. `convert` validates and canonicalizes Projects, not
 exported SVG; it preserves supported authored values, not original JSON text.
-Input `-` and `--output -` keep the JSON streaming protocol. Outputs remain
+Output encoding follows the extension (`.sply` = binary, everything else JSON) unless
+`convert --format json|binary` says otherwise; stdout (`--output -`, `example`, `cat`)
+is always JSON so LLM workflows keep working; binary on stdout is refused. Input `-`
+reads either encoding; patch/context inputs must be JSON text. Outputs remain
 explicit to avoid surprising sibling-file overwrites. Project file reads/saves
 are bounded to 64 MiB; CLI patch/context JSON inputs and project stdout outputs
 also use this limit. SVG export is not a project-file save and has no such limit.
@@ -82,23 +89,25 @@ never happens automatically.
 | --- | --- |
 | `guide` | Short Markdown workflow with recipes and pitfalls; read first |
 | `check INPUT [--strict]` | Lint a valid project: findings with level, code, message and a runnable `fix` |
+| `a11y INPUT [--title T] [--description D] [--node ID --label L --description D --role R --hidden true\|false] [--state-announce MACHINE.STATE=TEXT]` | Opt-in screen-reader data for the web player/SVG (scene title/description, node label/role/hidden, state announcements); without edit arguments prints a report; see [docs/accessibility.md](docs/accessibility.md) |
 | `batch INPUT --steps FILE [--output PATH]` | Run many edit commands, all or nothing |
 | `clip list\|add\|update\|delete INPUT …` | Manage clips: duration, `--autoplay`, `--loop`, name, easing of all keys |
 | `on INPUT --event E [--target NODE] [--play CLIP] [--stop CLIP] [--set N.P=V] [--from S] [--to S]` | Add an interaction (state-machine transition) |
 | `schema` | Complete canonical field/default guide, action/value templates and validated project examples (not formal JSON Schema) |
 | `capabilities` | Features, limitations, model and command/argument metadata sourced from the CLI parser |
-| `import-svg INPUT --output PATH` | Import supported editable vectors; reject unsupported appearance/resources |
+| `import-svg INPUT --output PATH [--strict] [--report FILE\|-]` | Import paths, text, gradients and SVG data-URI images as editable nodes with a structured import `report` (imported/approximated/dropped); reject unsupported appearance/external resources. `--strict` fails on any approximation/drop. Details: [docs/svg-import.md](docs/svg-import.md) |
 | `keyframe INPUT --clip ID --target ID --property PROPERTY --time N (--value N \| --by N \| --color C \| --gradient SPEC \| --path D) [--easing E] [--autoplay] [--loop]` | Insert/replace a key (numeric, colour, gradient, path); creates the clip if needed and a start key at 0 s for new tracks |
 | `blend-clip INPUT --clip ID [--weight 0..1] [--mode weighted\|override] --output PATH` | Set existing clip's authored blend settings; defaults weighted/1; does not activate it |
 | `path-insert INPUT ID --segment N [--t 0.5] --output PATH` | Shape-preserving split of a zero-based L/Q/C segment (M/Z excluded) |
 | `path-handle INPUT ID --command-index N --handle control1\|control2\|anchor --x N --y N --output PATH` | Edit a normalized path command handle and recompute bounds |
 | `new --output PATH [--demo]` | Valid empty/demo project saved to PATH; JSON acknowledgement |
 | `example [--output PATH]` | Complete demo Project JSON on stdout by default; optionally save `.sply`/JSON atomically |
-| `convert INPUT --output PATH` | Validate/canonicalize between `.sply`, `.splinely.json` and `.json`; no container conversion or SVG import |
+| `convert INPUT --output PATH [--format json\|binary]` | Validate/canonicalize between binary/JSON `.sply`, `.splinely.json` and `.json`; extension picks the encoding unless `--format`; no SVG import |
+| `cat INPUT` | Canonical JSON of any project file (binary or JSON) on stdout |
 | `validate PATH` | Validates JSON, schema, references and numerical constraints; `{ "ok": true, "schemaVersion": 1 }` |
-| `inspect PATH` | Dimensions, nodes, clips, machines, variables, audio summaries and code-presence flags |
+| `inspect PATH` | Dimensions, nodes, clips, machines, variables, audio summaries and code-presence flags, plus `file` (format, bytes, schemaVersion, JSON/binary-equivalent sizes; binary: formatVersion, stringCount, section sizes, crc32c, crcOk — always `true` when printed, a CRC mismatch is an `invalid_binary` error) and `stats` counts; damaged binary → typed `invalid_binary` error |
 | `apply INPUT --patch PATCH --output PATH` | RFC 7396 merge patch, followed by full validation and atomic output |
-| `export INPUT --output SVG [--trusted-js]` | Interactive SVG containing project metadata, runtime and embedded assets |
+| `export INPUT --output SVG [--trusted-js] [--embed json\|binary]` | Interactive SVG containing project metadata (base64 binary by default, `--embed json` for legacy text), runtime and embedded assets |
 | `evaluate INPUT [--time SECONDS] [--context JSON_PATH]` | Evaluate with optional states, ordered independent clip clocks, weights and final overrides; no side effects |
 | `rig-demo --output PATH` | Visible Pivot-style skeleton with bound vector shapes and a looping bone clip |
 | `water-drop --output PATH` | Deterministic polished blue-ball scene with looping drop squash/stretch, shadow and impact ripple |
@@ -131,6 +140,10 @@ never happens automatically.
 | `render INPUT --output PNG [--time S] [--width PX]` | Static PNG preview at a time (resvg, no scripts, local fonts) |
 | `render INPUT --output ANIM.gif [--fps 15] [--duration S] [--width PX] [--clip ID]` | Looping animated GIF of the autoplay clips (or only `--clip`) (default length: longest autoplay clip; 1..50 fps, max 600 frames, white background) |
 | `plugin new --name NAME --output DIR [--editor-path DIR]` | Generate trusted native editor-only source; never build or execute |
+| `plugin list [--dir DIR]` | List drop-in plugins (editor tools + runtime part with sha256); executes nothing |
+| `plugin validate DIR` | Validate one plugin folder (manifest, behaviors, runtime file size/UTF-8/lint/hash) |
+| `plugin apply DIR TOOL --project FILE [--node ID] [--output FILE]` | Merge a plugin tool's declarative result into the project (validated, atomic; returns added clip/machine/variable ids) |
+| `export INPUT --output SVG --plugin DIR_OR_JS --trusted-js` | Also embed a plugin's runtime part (hash-pinned `<metadata id="splinely-plugins">`); `--plugin` without `--trusted-js` fails with `trust_required` |
 
 Use `-` for an input or patch to read stdin. Only one stream may consume stdin
 per invocation. Use `--output -` for project JSON on stdout; SVG export instead
@@ -341,8 +354,13 @@ The result is a normal path that every editor tool, export and runtime supports.
 Groups live in `project.groups` (`id`, `name`, `parentId`) and nodes reference
 their direct group via `group`. `node list` also returns `groupPath` (outermost
 first) and all groups; exports wrap members in nested `<g id="…">` elements.
-`import-svg` keeps `<g id="…">` as groups and approximates linear/radial
-gradient fills (stops and direction). `convert-to-path` also outlines text with
+`import-svg` keeps `<g id="…">` as groups, imports `<text>` as text nodes and
+linear/radial gradient fills (stops, units, transform, href inheritance; stroke
+gradients become their first stop colour), and reports everything approximated or
+dropped in `report` (`error.importReport` when refused). Raster `data:` images are
+validated but dropped (no image node kind); SVG data-URI images become groups. The
+project stores `svgImport` hashes; `inspect` returns `svgSourceSync`
+(`inSync`/`visualEdited`/`sourceEdited`/`both`/`noBaseline`). See [docs/svg-import.md](docs/svg-import.md). `convert-to-path` also outlines text with
 local system fonts. Ruler guides are stored in `project.guides`.
 
 `node list` reports approximate text bounds (0.6 × font size per character).
@@ -415,6 +433,27 @@ fetch or automatically register generated code. Manual Cargo commands can run
 build scripts and tests; review dependencies too. Project JSON and browser
 JavaScript cannot request native plugin loading. See the generated README for
 registration, lifecycle and export limitations.
+
+## Drop-in plugins with editor and runtime parts
+
+```sh
+splinely-cli plugin validate examples/plugins/hover-wiggle     # manifest + runtime.js (size, UTF-8, lint, sha256)
+splinely-cli plugin apply examples/plugins/hover-wiggle wiggle --project scene.sply --node ball
+splinely-cli export scene.sply --output scene.svg --plugin examples/plugins/hover-wiggle --trusted-js
+```
+
+`plugin apply` uses the editor's candidate path: the declarative `addBehavior` result
+(a non-looping clip, a state machine reacting to the trigger event on `--node`, declared
+variables, an a11y label if the node has none) is merged with collision-free ids,
+validated as a whole and saved atomically or not at all. It runs on both runtimes because it
+is plain project data. The acknowledgement lists `added.clips/stateMachines/variables`.
+
+`export --plugin` embeds the plugin's `runtime.entry` JavaScript. That is **executable code**
+with the same trust gate as `customJs`: without `--trusted-js` the command fails with
+`trust_required` and writes nothing. The file is pinned by sha256 in
+`<metadata id="splinely-plugins">`. The lint for network/dynamic-code tokens is best-effort,
+**not a sandbox**. `isolated-preview --plugin` embeds the same file behind the in-page consent
+and the sandboxed iframe. Native plugins are never loaded dynamically. Details: docs/plugins.md.
 
 ## Guided authoring: `guide`, `check`, `batch`, `clip`, `on`
 

@@ -223,6 +223,7 @@ pub fn default_hint(code: &str) -> Option<String> {
         "not_found" => "IDs are case-sensitive. `splinely-cli node list FILE` (or `inspect FILE`) shows all IDs.",
         "unknown_field" => "Field names are camelCase and must exist in `splinely-cli schema` (model section). Remove or rename the field.",
         "invalid_json" => "The file or patch is not strict JSON (no comments, no trailing commas, double quotes).",
+        "invalid_binary" => "The file starts with the binary .sply magic but is damaged or unsupported (nothing was changed). Restore it from a backup or from a JSON export (`splinely-cli convert`).",
         "invalid_project" => "Compare with `splinely-cli example` or `splinely-cli schema` (examples.complete) for the exact shape.",
         "data_loss" => "The value cannot be stored exactly; use plain finite numbers and keep arrays complete when patching.",
         "read_error" => "Check the path. Create a project first with `splinely-cli new --output FILE.sply`.",

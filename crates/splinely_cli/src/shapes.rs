@@ -413,8 +413,20 @@ pub enum ArrangeCommand {
 pub struct StrokeArg(Option<Color>);
 
 fn color(text: &str) -> std::result::Result<Color, String> {
+    // "none" (no fill) is a fully transparent colour in the model.
+    if matches!(
+        text.trim().to_ascii_lowercase().as_str(),
+        "none" | "transparent"
+    ) {
+        return Ok(Color {
+            r: 0.,
+            g: 0.,
+            b: 0.,
+            a: 0.,
+        });
+    }
     let parsed: svgtypes::Color = text.trim().parse().map_err(|_| {
-        format!("Unknown colour {text:?}; use #RRGGBB, #RRGGBBAA, a CSS name or rgb()")
+        format!("Unknown colour {text:?}; use #RRGGBB, #RRGGBBAA, a CSS name, rgb() or none")
     })?;
     Ok(Color {
         r: parsed.red as f64 / 255.,

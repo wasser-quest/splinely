@@ -6,6 +6,7 @@ use serde_json::{json, Value};
 pub enum Mode {
     Override,
     Weighted,
+    Additive,
 }
 
 pub fn run(input: &str, output: &str, id: &str, weight: f64, mode: Mode) -> Result<Value> {
@@ -26,6 +27,7 @@ pub fn run(input: &str, output: &str, id: &str, weight: f64, mode: Mode) -> Resu
     clip["blendMode"] = json!(match mode {
         Mode::Override => "override",
         Mode::Weighted => "weighted",
+        Mode::Additive => "additive",
     });
     // Includes checking blendClip actions when changing a weighted clip to override.
     save_project(&validated(value)?, output)

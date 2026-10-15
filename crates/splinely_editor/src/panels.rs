@@ -1,5 +1,7 @@
 use super::*;
-use base64::Engine;
+use splinely_editor::accessible::Named;
+#[path = "audio_tools.rs"]
+mod audio_tools;
 
 #[path = "animation_assistant.rs"]
 mod animation_assistant;
@@ -52,6 +54,7 @@ fn entry_clip_ui(ui: &mut egui::Ui, project: &Project, label: &str, entry: &mut 
 
 fn property_label(property: Property) -> &'static str {
     match property {
+        Property::MotionProgress => tr("Pfadfortschritt"),
         Property::X => "Position X",
         Property::Y => "Position Y",
         Property::Rotation => "Drehung °",
@@ -71,6 +74,7 @@ fn property_label(property: Property) -> &'static str {
 
 fn properties() -> &'static [Property] {
     &[
+        Property::MotionProgress,
         Property::X,
         Property::Y,
         Property::Rotation,
@@ -89,6 +93,7 @@ fn properties() -> &'static [Property] {
 }
 fn base_value(node: &Node, property: Property) -> AnimValue {
     AnimValue::Number(match property {
+        Property::MotionProgress => node.motion_path.as_ref().map_or(0., |m| m.progress),
         Property::X => node.transform.x,
         Property::Y => node.transform.y,
         Property::Rotation => node.transform.rotation,
@@ -146,6 +151,7 @@ fn property_supported(node: &Node, property: Property) -> bool {
         Property::Width | Property::Height => matches!(node.kind, NodeKind::Rect { .. }),
         Property::Radius => matches!(node.kind, NodeKind::Circle { .. }),
         Property::FontSize => matches!(node.kind, NodeKind::Text { .. }),
+        Property::MotionProgress => node.motion_path.is_some(),
         Property::Gradient => node.gradient.is_some(),
         Property::D => matches!(node.kind, NodeKind::Path { .. }),
         _ => true,
@@ -179,7 +185,53 @@ impl Editor {
                 self.commit(p);
                 return;
             }
+            let motion_sources: Vec<String> = p
+                .nodes
+                .iter()
+                .filter(|n| {
+                    n.id != p.nodes[index].id
+                        && n.bone_id.is_none()
+                        && n.motion_path.is_none()
+                        && matches!(n.kind, NodeKind::Path { .. })
+                })
+                .map(|n| n.id.clone())
+                .collect();
             let node = &mut p.nodes[index];
+            ui.collapsing(tr("Bewegungspfad"), |ui| {
+                let mut source = node
+                    .motion_path
+                    .as_ref()
+                    .map_or(String::new(), |m| m.path.clone());
+                egui::ComboBox::from_id_salt("motion_source")
+                    .selected_text(if source.is_empty() {
+                        tr("Keiner")
+                    } else {
+                        &source
+                    })
+                    .show_ui(ui, |ui| {
+                        ui.selectable_value(&mut source, String::new(), tr("Keiner"));
+                        if node.bone_id.is_none() {
+                            for id in &motion_sources {
+                                ui.selectable_value(&mut source, id.clone(), id);
+                            }
+                        }
+                    });
+                if source.is_empty() {
+                    node.motion_path = None;
+                } else if node.motion_path.as_ref().is_none_or(|m| m.path != source) {
+                    node.motion_path = Some(MotionPath {
+                        path: source,
+                        progress: 0.,
+                        orient: false,
+                    });
+                }
+                if let Some(m) = &mut node.motion_path {
+                    ui.add(
+                        egui::Slider::new(&mut m.progress, 0.0..=1.0).text(tr("Pfadfortschritt")),
+                    );
+                    ui.checkbox(&mut m.orient, tr("An Tangente ausrichten"));
+                }
+            });
             ui.heading(tr("Deine Auswahl"));
             ui.small(trf("Feste ID: {}", std::slice::from_ref(&node.id)));
             if let Some(bone) = &node.bone_id {
@@ -276,16 +328,21 @@ impl Editor {
             vector::vector_inspector_ui(&mut p, ui, &mut self.selected);
         }
         ui.separator();
-        ui.collapsing(tr("Erweiterungen"), |ui| {
-            ui.add_enabled_ui(
-                !self.playing && !self.preview_mode && !self.blend_preview.ticking(),
-                |ui| match self.extensions.ui(ui, &p, self.selected.as_deref()) {
-                    Ok(Some(next)) => p = next,
-                    Ok(None) => {}
-                    Err(error) => self.status = error,
-                },
-            );
-        });
+        // The warning count in the header keeps plugin diagnostics visible while collapsed.
+        let extensions_header = self.extensions.header();
+        egui::CollapsingHeader::new(extensions_header)
+            .id_salt("extensions-panel")
+            .default_open(self.extensions.has_problems())
+            .show(ui, |ui| {
+                ui.add_enabled_ui(
+                    !self.playing && !self.preview_mode && !self.blend_preview.ticking(),
+                    |ui| match self.extensions.ui(ui, &p, self.selected.as_deref()) {
+                        Ok(Some(next)) => p = next,
+                        Ok(None) => {}
+                        Err(error) => self.status = error,
+                    },
+                );
+            });
         self.commit(p);
         ui.separator();
         if self.workspace == Workspace::Animate {
@@ -599,6 +656,7 @@ impl Editor {
                 });
             if ui.button(tr("+ Clip")).clicked() {
                 p.clips.push(Clip {
+                    audio_cues: vec![],
                     id: self.new_id("clip"),
                     name: tr("Neuer Clip").into(),
                     duration: 5.,
@@ -663,10 +721,13 @@ impl Editor {
                 "Bring deine Idee in Bewegung! + Clip › Form auswählen › Spur hinzufügen.",
             ));
         }
+        blending_ui::spaces(ui, &mut p);
         ui.label(tr("Spuren & Schlüssel (Experten)"));
         egui::ScrollArea::vertical()
             .id_salt("tracks_scroll")
             .show(ui, |ui| {
+                let allowed_modes = blending_ui::allowed_modes(&p, self.active_clip);
+                let space_sample = p.clips.get(self.active_clip).is_some_and(|c| p.blend_spaces.iter().any(|s| s.samples.iter().any(|v| v.clip_id == c.id)));
                 if let Some(clip) = p.clips.get_mut(self.active_clip) {
                     let mut delete_clip = false;
                     ui.horizontal(|ui| {
@@ -681,21 +742,14 @@ impl Editor {
                                 .any(|n| n.id == t.node_id && n.locked)
                         });
                         delete_clip = ui
-                            .add_enabled(!locked_tracks, egui::Button::new(tr("Clip löschen")))
+                            .add_enabled(!locked_tracks && !space_sample, egui::Button::new(tr("Clip löschen")))
                             .clicked();
                     });
                     ui.collapsing(tr("Clip-Optionen & Mischgewicht"), |ui| {
                         ui.horizontal_wrapped(|ui| {
                             ui.checkbox(&mut clip.looping, tr("Im Export wiederholen"));
                             ui.checkbox(&mut clip.autoplay, tr("Automatisch starten"));
-                            egui::ComboBox::from_id_salt("clip_blend_mode")
-                                .selected_text(match clip.blend_mode { BlendMode::Override => tr("Ersetzen"), BlendMode::Weighted => tr("Gewichtet") })
-                                .show_ui(ui, |ui| {
-                                    ui.selectable_value(&mut clip.blend_mode, BlendMode::Override, tr("Ersetzen"));
-                                    ui.selectable_value(&mut clip.blend_mode, BlendMode::Weighted, tr("Gewichtet"));
-                                });
-                            ui.add_enabled(clip.blend_mode == BlendMode::Weighted,
-                                egui::Slider::new(&mut clip.weight, 0.0..=1.0).text(tr("Gewicht")));
+                            blending_ui::clip_options(ui, clip, allowed_modes);
                         });
                     });
                     if let Some(node) = self
@@ -874,7 +928,12 @@ impl Editor {
                                                 if ui.small_button(tr("Kopieren")).clicked() {
                                                     copy_key = Some(key.clone());
                                                 }
-                                                if ui.small_button("×").clicked() {
+                                                if ui
+                                                    .small_button("×")
+                                                    .on_hover_text(tr("Löschen"))
+                                                    .named(tr("Löschen"))
+                                                    .clicked()
+                                                {
                                                     remove_key = Some(ki);
                                                 }
                                             });
@@ -913,11 +972,147 @@ impl Editor {
             });
         self.commit(p);
     }
+    /// Shapes or bones that follow the pointer (eyes, heads, turrets).
+    fn followers_ui(&mut self, ui: &mut egui::Ui) {
+        egui::CollapsingHeader::new(tr("Mausverfolgung"))
+            .default_open(!self.project.followers.is_empty())
+            .show(ui, |ui| {
+                ui.small(tr("Formen oder Knochen folgen dem Mauszeiger – zusammen mit Klick, Hover und allen Zustandsmaschinen. In der Vorschau ausprobieren."));
+                let mut p = self.project.clone();
+                let mut remove = None;
+                let targets: Vec<String> = p
+                    .nodes
+                    .iter()
+                    .map(|n| n.id.clone())
+                    .chain(p.bones.iter().map(|b| b.id.clone()))
+                    .collect();
+                let machines = p.state_machines.clone();
+                for (i, f) in p.followers.iter_mut().enumerate() {
+                    ui.push_id(("follower", i), |ui| {
+                        ui.separator();
+                        ui.horizontal(|ui| {
+                            egui::ComboBox::from_id_salt("target")
+                                .selected_text(&f.target)
+                                .show_ui(ui, |ui| {
+                                    for id in &targets {
+                                        ui.selectable_value(&mut f.target, id.clone(), id);
+                                    }
+                                });
+                            ui.selectable_value(&mut f.mode, FollowMode::Offset, tr("Versatz"))
+                                .on_hover_text(tr("Bewegt sich in Richtung Zeiger, z. B. Pupillen."));
+                            ui.selectable_value(&mut f.mode, FollowMode::Rotate, tr("Drehung"))
+                                .on_hover_text(tr("Dreht sich zum Zeiger, z. B. Kopf oder Arm."));
+                            if ui
+                                .small_button("×")
+                                .on_hover_text(tr("Löschen"))
+                                .named(tr("Löschen"))
+                                .clicked()
+                            {
+                                remove = Some(i);
+                            }
+                        });
+                        let max_label = match f.mode {
+                            FollowMode::Offset => tr("Maximaler Weg"),
+                            FollowMode::Rotate => tr("Maximaler Winkel °"),
+                        };
+                        let max_limit = match f.mode {
+                            FollowMode::Offset => 1000.,
+                            FollowMode::Rotate => 180.,
+                        };
+                        f.max = f.max.min(max_limit);
+                        egui::Grid::new("follower_grid").num_columns(2).show(ui, |ui| {
+                            ui.label(tr("Stärke"));
+                            ui.add(egui::Slider::new(&mut f.strength, 0.0..=1.0));
+                            ui.end_row();
+                            ui.label(max_label);
+                            ui.add(egui::DragValue::new(&mut f.max).range(0.0..=max_limit).speed(0.5));
+                            ui.end_row();
+                            ui.label(tr("Glättung (s)"));
+                            ui.add(egui::Slider::new(&mut f.smoothing, 0.0..=2.0));
+                            ui.end_row();
+                            if f.mode == FollowMode::Rotate {
+                                ui.label(tr("Ruherichtung °"))
+                                    .on_hover_text(tr("Richtung, in die die Form ohne Zeiger schaut: 0 = rechts, 90 = unten."));
+                                ui.add(egui::DragValue::new(&mut f.rest_angle).range(-360.0..=360.0));
+                                ui.end_row();
+                            }
+                            ui.label(tr("Nur in Zustand"));
+                            let current = f
+                                .when
+                                .as_ref()
+                                .map_or_else(|| tr("Immer").to_owned(), |w| w.machine.clone());
+                            egui::ComboBox::from_id_salt("when")
+                                .selected_text(current)
+                                .show_ui(ui, |ui| {
+                                    if ui.selectable_label(f.when.is_none(), tr("Immer")).clicked() {
+                                        f.when = None;
+                                    }
+                                    for m in &machines {
+                                        let chosen = f.when.as_ref().is_some_and(|w| w.machine == m.id);
+                                        if ui.selectable_label(chosen, &m.id).clicked() && !chosen {
+                                            f.when = Some(FollowCondition {
+                                                machine: m.id.clone(),
+                                                states: vec![m.initial.clone()],
+                                            });
+                                        }
+                                    }
+                                });
+                            ui.end_row();
+                        });
+                        if let Some(when) = f.when.as_mut() {
+                            if let Some(m) = machines.iter().find(|m| m.id == when.machine) {
+                                ui.horizontal_wrapped(|ui| {
+                                    for state in &m.states {
+                                        let mut on = when.states.contains(&state.id);
+                                        if ui.checkbox(&mut on, &state.id).changed() {
+                                            if on {
+                                                when.states.push(state.id.clone());
+                                            } else if when.states.len() > 1 {
+                                                when.states.retain(|s| s != &state.id);
+                                            }
+                                        }
+                                    }
+                                });
+                            }
+                        }
+                    });
+                }
+                if let Some(i) = remove {
+                    p.followers.remove(i);
+                }
+                ui.separator();
+                let target = self.selected.clone().or_else(|| self.selected_bone.clone());
+                if ui
+                    .add_enabled(target.is_some(), egui::Button::new(tr("+ Auswahl folgt der Maus")))
+                    .on_disabled_hover_text(tr("Zuerst eine Form auswählen."))
+                    .clicked()
+                {
+                    if let Some(target) = target {
+                        p.followers.push(Follower {
+                            id: self.new_id("follow"),
+                            target,
+                            mode: FollowMode::Offset,
+                            strength: 0.2,
+                            max: 8.,
+                            smoothing: 0.15,
+                            rest_angle: 0.,
+                            origin: None,
+                            when: None,
+                        });
+                    }
+                }
+                if p != self.project {
+                    self.commit(p);
+                }
+            });
+    }
+
     pub(super) fn states_ui(&mut self, ui: &mut egui::Ui) {
         ui.heading(tr("Zustände"));
         ui.small(tr("Reaktionen gestalten: Vorschau aktivieren und eine Form anklicken – oder unten ein Ereignis senden."))
-            .on_hover_text(tr("JSON-Änderungen werden erst beim Übernehmen validiert. Native Vorschau: Eigenschaften und Clips. Zustands-Audio im Viewer/Browser; native Audiovorschau nur für globale Audioeinsätze."));
+            .on_hover_text(tr("JSON-Änderungen werden erst beim Übernehmen validiert. Native Vorschau: Eigenschaften und Clips. Zustands-Audio im Viewer/Browser; Cue-Audio: native Vorschau für globale und Clip-Cues."));
         self.machine_assistant_ui(ui);
+        self.followers_ui(ui);
         ui.horizontal(|ui| {
             if ui.button(tr("Zustands-JSON übernehmen")).clicked() {
                 match serde_json::from_str::<Vec<StateMachine>>(&self.machine_buffer) {
@@ -967,6 +1162,7 @@ impl Editor {
                 );
             }
             if ui.button(tr("Vorschau zurücksetzen")).clicked() {
+                self.reset_preview_motion();
                 self.machines.clear();
                 self.blend_preview = Default::default();
                 self.runtime_overrides.clear();
@@ -1058,7 +1254,10 @@ impl Editor {
                 .push(format!("{} › {:?}", event.name, event.target));
             for index in 0..self.machines.len() {
                 match self.machines[index].send(&self.project, &event) {
-                    Ok(actions) => self.preview_actions(actions, &mut pending),
+                    Ok(actions) => {
+                        self.note_preview_transition(index);
+                        self.preview_actions(actions, &mut pending)
+                    }
                     Err(e) => self.status = e.to_string(),
                 }
             }
@@ -1138,7 +1337,7 @@ impl Editor {
             ui.text_edit_singleline(&mut self.audio_path);
             if ui.button(tr("Audio einbetten")).clicked() {
                 let id = self.new_id("audio");
-                match import_audio(&self.audio_path, id) {
+                match audio_tools::import(&self.audio_path, id, &self.project) {
                     Ok(asset) => {
                         let mut p = self.project.clone();
                         p.audio_assets.push(asset);
@@ -1149,6 +1348,56 @@ impl Editor {
                 }
             }
         });
+        ui.label(trf(
+            "Audio: {} Quellbytes · {} Base64-Bytes",
+            &[
+                audio_tools::total_bytes(&self.project).to_string(),
+                self.project
+                    .audio_assets
+                    .iter()
+                    .map(|a| a.data_base64.len())
+                    .sum::<usize>()
+                    .to_string(),
+            ],
+        ));
+        ui.small(tr("Grenzen: 32 MiB pro Asset, 128 MiB gesamt. Dekodierter PCM-Speicher ist formatabhängig (Sekunden × Kanäle × Samplerate × 4 Bytes). Browser: 64 MiB Base64 pro Asset, 128 MiB zusätzliche Loop-Puffer. Native Vorschau: 64 Assets, 4096 Cues, 8 Stimmen."));
+        ui.collapsing(tr("Externe Audiodateien exportieren (optional)"), |ui| {
+            ui.label(tr("Standardexport bleibt offline und eigenständig. Dieser Export erzeugt einen neuen Ordner mit animation.svg und Audio-Sidecars. Über HTTP bereitstellen; file:// kann blockiert sein. Vorhandene Ordner werden nie überschrieben."));
+            ui.label(format!("{}{}", self.export_path, ".audio"));
+            if ui.button(tr("Neuen externen Audio-Export erstellen")).clicked() {
+                let destination = format!("{}.audio", self.export_path);
+                self.status = match audio_tools::export_bundle(&self.project, std::path::Path::new(&destination), self.trusted_js_export) {
+                    Ok(()) => format!("Export: {destination}/animation.svg"),
+                    Err(e) => e,
+                };
+            }
+        });
+        let scope_id = ui.id().with("audio-cue-scope");
+        let mut scope = ui
+            .ctx()
+            .data_mut(|data| data.get_temp::<String>(scope_id))
+            .unwrap_or_default();
+        if !scope.is_empty() && !self.project.clips.iter().any(|c| c.id == scope) {
+            scope.clear();
+        }
+        egui::ComboBox::from_id_salt("audio-cue-scope")
+            .selected_text(
+                self.project
+                    .clips
+                    .iter()
+                    .find(|c| c.id == scope)
+                    .map(|c| c.name.as_str())
+                    .unwrap_or(tr("Globale Zeitleiste")),
+            )
+            .show_ui(ui, |ui| {
+                ui.selectable_value(&mut scope, String::new(), tr("Globale Zeitleiste"));
+                for clip in &self.project.clips {
+                    ui.selectable_value(&mut scope, clip.id.clone(), &clip.name);
+                }
+            });
+        ui.ctx()
+            .data_mut(|data| data.insert_temp(scope_id, scope.clone()));
+        ui.small(tr("Clip-Cues nutzen die lokale Clipzeit, starten mit dem Clip und wiederholen sich bei Schleifen. Native Audiovorschau oben einschalten; Browser-Audio muss freigegeben werden."));
         let mut p = self.project.clone();
         egui::ScrollArea::vertical().show(ui, |ui| {
             for (i, asset) in p.audio_assets.iter_mut().enumerate() {
@@ -1156,20 +1405,28 @@ impl Editor {
                     ui.selectable_value(&mut self.audio_asset, i, &asset.id);
                     ui.text_edit_singleline(&mut asset.name);
                     ui.label(trf(
-                        "{} · ~{} bytes",
+                        "{} · {} bytes",
                         &[
                             asset.mime_type.to_string(),
-                            format!("{}", asset.data_base64.len() * 3 / 4),
+                            format!("{}", audio_tools::asset_bytes(asset)),
                         ],
                     ));
                 });
             }
-            if ui.button(tr("+ Audioeinsatz hier")).clicked() {
+            let clip = p.clips.iter_mut().find(|c| c.id == scope);
+            let cue_time = self.time;
+            let valid_time = cue_time.is_finite() && cue_time >= 0.
+                && clip.as_ref().is_none_or(|c| cue_time < c.duration);
+            if !valid_time {
+                ui.small(tr("Für Clip-Cues eine lokale Zeit vor dem Clipende wählen; die Position wird nicht automatisch umgebrochen."));
+            }
+            let cues = if let Some(clip) = clip { &mut clip.audio_cues } else { &mut p.audio_cues };
+            if ui.add_enabled(valid_time && !p.audio_assets.is_empty(), egui::Button::new(tr("+ Audioeinsatz hier"))).clicked() {
                 if let Some(asset) = p.audio_assets.get(self.audio_asset) {
-                    p.audio_cues.push(AudioCue {
+                    cues.push(AudioCue {
                         id: self.new_id("cue"),
                         asset_id: asset.id.clone(),
-                        time: self.time,
+                        time: cue_time,
                         offset: 0.,
                         duration: None,
                         volume: 1.,
@@ -1177,7 +1434,7 @@ impl Editor {
                 }
             }
             let mut remove = None;
-            for (i, cue) in p.audio_cues.iter_mut().enumerate() {
+            for (i, cue) in cues.iter_mut().enumerate() {
                 ui.push_id(("cue", i), |ui| {
                     ui.horizontal_wrapped(|ui| {
                         ui.label(&cue.id);
@@ -1202,14 +1459,19 @@ impl Editor {
                         if let Some(duration) = &mut cue.duration {
                             number(ui, tr("Dauer"), duration);
                         }
-                        if ui.button("×").clicked() {
+                        if ui
+                            .button("×")
+                            .on_hover_text(tr("Löschen"))
+                            .named(tr("Löschen"))
+                            .clicked()
+                        {
                             remove = Some(i);
                         }
                     });
                 });
             }
             if let Some(i) = remove {
-                p.audio_cues.remove(i);
+                cues.remove(i);
             }
         });
         self.commit(p);
@@ -1222,6 +1484,9 @@ impl Editor {
             tr("Bewahrter SVG-Quelltext")
         });
         ui.label(if is_js {tr("Dein Code bleibt erhalten. Ausführung nur nach ausdrücklicher Freigabe im Viewer/Browser, nie nativ. Syntax dort in der Konsole prüfen; CSP kann die Ausführung blockieren.")}else{tr("SVG wird als XML geprüft und in Projekt/Export-Metadaten bewahrt – nicht als Formen importiert oder gerendert. Visuelle Änderungen überschreiben diesen Entwurf nicht.")});
+        if !is_js {
+            self.source_conflict_ui(ui);
+        }
         if is_js {
             ui.checkbox(&mut self.trusted_js_export,tr("Vertrauenswürdiges eigenes JavaScript im interaktiven Export / Viewer ausführen (Browser-Zugriff auf Netzwerk/Dateien möglich)"));
         }
@@ -1306,37 +1571,6 @@ fn validate_xml(source: &str) -> Result<(), String> {
         }
     }
     Ok(())
-}
-fn import_audio(path: &str, id: String) -> Result<AudioAsset, String> {
-    let metadata = fs::metadata(path).map_err(|e| e.to_string())?;
-    if metadata.len() > 32 * 1024 * 1024 {
-        return Err(tr("Audio-Import ist auf 32 MiB begrenzt").into());
-    }
-    let extension = std::path::Path::new(path)
-        .extension()
-        .and_then(|s| s.to_str())
-        .unwrap_or("")
-        .to_lowercase();
-    let mime = match extension.as_str() {
-        "wav" => "audio/wav",
-        "mp3" => "audio/mpeg",
-        "ogg" | "oga" => "audio/ogg",
-        "m4a" | "mp4" => "audio/mp4",
-        "flac" => "audio/flac",
-        "webm" => "audio/webm",
-        _ => return Err(tr("Unterstützte Audioformate: wav, mp3, ogg, m4a, flac, webm").into()),
-    };
-    let bytes = fs::read(path).map_err(|e| e.to_string())?;
-    Ok(AudioAsset {
-        id,
-        name: std::path::Path::new(path)
-            .file_name()
-            .unwrap_or_default()
-            .to_string_lossy()
-            .into_owned(),
-        mime_type: mime.into(),
-        data_base64: base64::engine::general_purpose::STANDARD.encode(bytes),
-    })
 }
 
 #[cfg(test)]

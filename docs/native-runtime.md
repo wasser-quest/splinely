@@ -210,6 +210,64 @@ behavior. Serialize calls to each handle; independent handles share no runtime
 state. Allocation failure or process abort is not recoverable. The header is the
 explicit allocation/free and pointer-validity contract.
 
+### Buffer API (no per-call allocation)
+
+Additive to the four functions above (same ABI v1, nothing removed). Hot loops can
+write the response envelope into a caller buffer instead of receiving an allocated
+string:
+
+```c
+int32_t splinely_runtime_request_into(SplinelyRuntimeHandle *handle, const uint8_t *data,
+                                      size_t length, uint8_t *out, size_t capacity,
+                                      size_t *out_length);
+int32_t splinely_runtime_tick_into(SplinelyRuntimeHandle *handle, double delta,
+                                   uint8_t *out, size_t capacity, size_t *out_length);
+int32_t splinely_runtime_response_copy(SplinelyRuntimeHandle *handle, uint8_t *out,
+                                       size_t capacity, size_t *out_length);
+```
+
+The envelope is the same document as for `splinely_runtime_request`, UTF-8 and
+**not** NUL terminated; object key order is unspecified. `*out_length` always gets
+its size. Status `0` means it was copied (it may be an `{"ok":false,...}` error
+envelope), `1` (`SPLINELY_STATUS_BUFFER_TOO_SMALL`) means the buffer was too small:
+the request **has already executed** and the handle retains the response, so call
+`splinely_runtime_response_copy` with a buffer of `*out_length` bytes rather than
+resending, and `2` means a null argument (nothing executed). `tick_into` skips
+request JSON parsing. The same memory contract as above applies.
+
+## Evaluation cost
+
+The project is validated once in `Runtime::new` (which builds a
+`splinely_document::EvalIndex` of ID to position tables); ticks, `evaluate` and
+`SetProperty` validation use `Project::evaluate_frame`, which evaluates nodes and
+bones in one pass without re-validating or scanning IDs. The public
+`Project::evaluate*` functions still validate their (possibly unvalidated) input
+and give identical results. The project is shared by `Arc`, so the per-request
+rollback snapshot copies only the mutable playback state. Machines are only asked
+to fire when one of their transitions can match the event/timer. Measure with:
+
+```sh
+cargo run --release -p splinely_runtime --example tick_bench [project.json ...]
+```
+
+## Viewer: starting this runtime (`splinely-viewer --runtime rust`)
+
+`splinely-viewer <project> --runtime js|rust` chooses who animates the project in the
+native window. `js` (default) runs `runtime/src/splinely.js` in the WebView. `rust` links
+this crate into the viewer process: `Runtime::new(project)`, a fixed 1/60 s `Request::Tick`
+from the event loop, and the resulting `Frame` is applied to the static SVG
+(`Project::to_static_svg(0.0)`) by a small dependency-free page script using the JS runtime's
+attribute formats. WebView pointer/keyboard events return over a validated, size-limited IPC
+and become `Pointer`, `PointerLeave` and `Event` requests. Details, limits and the IPC schema:
+[crates/splinely_viewer/README.md](../crates/splinely_viewer/README.md).
+
+Not reproduced in rust mode: `customJs` (never executed; `--trusted-js` is refused), all audio
+(assets, `playAudio`, audio cues, no unlock control) and callback host actions, reduced-motion
+handling, accessibility semantics (roles, `tabindex`, `aria-*`, keyboard activation, focus ring, live region – see [accessibility.md](accessibility.md)), DOM event details beyond name and target, SVG (non-project) input. The viewer shows a
+visible diagnostic for the applicable items and falls back to the JS runtime (with the reason) if
+`Runtime::new` rejects the project. Parity of applied attributes with the JS runtime is tested to
+1e-9 for several examples (`crates/splinely_viewer/tests/rust_runtime.rs`).
+
 ## JSON-lines process protocol
 
 Send one UTF-8 JSON object per stdin line; stdout returns exactly one envelope per
@@ -228,3 +286,9 @@ All subsequent records use the Request table above. Invalid records (including
 invalid UTF-8) return errors without breaking framing or ending the process. No
 CLI banners are written to stdout; I/O/process failures remain process failures.
 The real subprocess smoke compares results against the shared-library API.
+
+**Accessibility data:** the optional project `description`, node `a11y` and state
+`announce` fields are validated and preserved by strict loading, but the native
+runtime ignores them (it has no DOM, focus or live region). Screen-reader
+semantics exist only in the browser web player, see
+[accessibility.md](accessibility.md).
