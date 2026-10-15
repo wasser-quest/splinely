@@ -35,10 +35,13 @@ jobs:
     env:
       PLAYWRIGHT_VERSION: "1.64.0"
       PLAYWRIGHT_BROWSERS_PATH: ${{ github.workspace }}/.playwright-browsers
-      SPLINELY_SCRATCH: ${{ runner.temp }}/splinely-scratch
-      MATRIX_OUT: ${{ runner.temp }}/browser-matrix-results
     steps:
       - uses: actions/checkout@v4
+      # The `runner` context is not available in job-level `env`, so derive these paths in a step.
+      - name: Scratch and result directories
+        run: |
+          echo "SPLINELY_SCRATCH=$RUNNER_TEMP/splinely-scratch" >> "$GITHUB_ENV"
+          echo "MATRIX_OUT=$RUNNER_TEMP/browser-matrix-results" >> "$GITHUB_ENV"
       - uses: dtolnay/rust-toolchain@stable
       - uses: actions/setup-node@v4
         with:
