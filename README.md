@@ -4,6 +4,10 @@ Splinely ist ein Rust-Desktopeditor mit **`.sply`-Projektdateien** und eingebett
 
 ## Start
 
+**Ohne Kompilieren:** Fertige Linux-Pakete (`splinely-vX.Y.Z-x86_64-linux.tar.gz` mit Editor, CLI, Viewer, Runtime und `libsplinely_runtime.so`) liegen bei jedem [Release](https://github.com/wasser-quest/splinely/releases/latest). Installation und ein fertiger Text, mit dem sich ein LLM-Agent Splinely selbst holt: [docs/INSTALL-BINARIES.md](docs/INSTALL-BINARIES.md).
+
+Aus dem Quellcode:
+
 Voraussetzungen: Rust/Cargo; für das Desktopfenster eine funktionierende Grafik-/Fensterumgebung. Beim ersten Build lädt Cargo Abhängigkeiten herunter. Node.js und Python 3 werden nur für die Prüfskripte (`scripts/check.sh`) benötigt.
 
 Unter Linux braucht der Build von Editor und Viewer die GTK-/WebKit-, ALSA- und D-Bus-Entwicklerpakete:
