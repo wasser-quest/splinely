@@ -3,8 +3,8 @@
 use crate::bones::number;
 use crate::{failure, load, project_value, save_project, validated, Result};
 use clap::Subcommand;
-use splinely_document::{Easing, Project};
 use serde_json::{json, Value};
+use splinely_document::{Easing, Project};
 
 /// CSS-like easing names, `cubic-bezier(x1,y1,x2,y2)` or four numbers.
 pub fn easing(text: &str) -> std::result::Result<Easing, String> {

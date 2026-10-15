@@ -1,8 +1,8 @@
 //! `check`: finds valid-but-probably-wrong authoring (hidden shapes, clips that
 //! never play, unreadable text …) and suggests the exact command that fixes it.
 use crate::{failure, load, Result};
-use splinely_document::{AnimValue, Bounds, Color, NodeKind, Project, Property};
 use serde_json::{json, Value};
+use splinely_document::{AnimValue, Bounds, Color, NodeKind, Project, Property};
 
 struct Finding {
     level: &'static str,

@@ -247,9 +247,6 @@ pub struct Editor {
     runtime_overrides: Vec<PropertyOverride>,
     audio_path: String,
     audio_asset: usize,
-    speech_text: String,
-    speech_lang: String,
-    speech_preview: Option<std::process::Child>,
     last_autosave: Instant,
     dirty: bool,
     next_id: u64,
@@ -372,9 +369,6 @@ impl Default for Editor {
             runtime_overrides: vec![],
             audio_path: String::new(),
             audio_asset: 0,
-            speech_text: "Hallo von Splinely".into(),
-            speech_lang: "de-DE".into(),
-            speech_preview: None,
             last_autosave: Instant::now(),
             dirty: false,
             next_id: 1,
@@ -508,8 +502,7 @@ impl Editor {
                 || self.project.state_machines.iter().any(|n| n.id == id)
                 || self.project.clips.iter().any(|n| n.id == id)
                 || self.project.audio_assets.iter().any(|n| n.id == id)
-                || self.project.audio_cues.iter().any(|n| n.id == id)
-                || self.project.speech_cues.iter().any(|n| n.id == id);
+                || self.project.audio_cues.iter().any(|n| n.id == id);
             if !used {
                 return id;
             }
@@ -611,7 +604,8 @@ impl Editor {
                 self.status = "Bitte nur eine Projektdatei hereinziehen.".into();
             } else if let Some(path) = &dropped[0].path {
                 let extension = path.extension().and_then(|s| s.to_str()).unwrap_or("");
-                if extension.eq_ignore_ascii_case("sply") || extension.eq_ignore_ascii_case("json") {
+                if extension.eq_ignore_ascii_case("sply") || extension.eq_ignore_ascii_case("json")
+                {
                     self.request_open(path.to_string_lossy().into());
                 } else {
                     self.status = "Hier .sply oder ältere JSON-Projekte ablegen; SVG über Datei & Export importieren.".into();

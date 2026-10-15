@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="640" height="480" viewBox="0 0 640 480" data-splinely-version="1">
-<!-- Created with Splinely 0.1.0 -->
-<metadata><splinely:generator xmlns:splinely="urn:splinely:metadata" name="Splinely" version="0.1.0" schemaVersion="1"/></metadata>
+<!-- Created with Splinely 0.3.0 -->
+<metadata><splinely:generator xmlns:splinely="urn:splinely:metadata" name="Splinely" version="0.3.0" schemaVersion="1"/></metadata>
 <title>Pivot-style bone demo</title>
 <rect id="background" data-splinely-node="background" transform="translate(0 0) rotate(0) scale(1 1)" fill="rgb(95% 96% 98%)" fill-opacity="1" stroke="none" stroke-opacity="1" stroke-width="1" opacity="1" x="0" y="0" width="640" height="480" rx="0"/>
 <rect id="torso-shape" data-splinely-node="torso-shape" transform="translate(320 245) rotate(-90) scale(1 1)" fill="rgb(12% 22% 40%)" fill-opacity="1" stroke="none" stroke-opacity="1" stroke-width="1" opacity="1" x="0" y="-5" width="95" height="10" rx="0"/>
@@ -14,7 +14,7 @@
 <rect id="right-thigh-shape" data-splinely-node="right-thigh-shape" transform="translate(320 245) rotate(65) scale(1 1)" fill="rgb(12% 22% 40%)" fill-opacity="1" stroke="none" stroke-opacity="1" stroke-width="1" opacity="1" x="0" y="-5" width="80" height="10" rx="0"/>
 <rect id="right-shin-shape" data-splinely-node="right-shin-shape" transform="translate(353.8094609392559 317.504622962932) rotate(85) scale(1 1)" fill="rgb(12% 22% 40%)" fill-opacity="1" stroke="none" stroke-opacity="1" stroke-width="1" opacity="1" x="0" y="-5" width="75" height="10" rx="0"/>
 <circle id="head" data-splinely-node="head" transform="translate(320 150) rotate(-90) scale(1 1)" fill="rgb(31.372549019607842% 54.90196078431373% 94.11764705882352%)" fill-opacity="1" stroke="none" stroke-opacity="1" stroke-width="1" opacity="1" cx="25" cy="0" r="22"/>
-<metadata id="splinely-project">{&quot;schemaVersion&quot;:1,&quot;name&quot;:&quot;Pivot-style bone demo&quot;,&quot;width&quot;:640.0,&quot;height&quot;:480.0,&quot;nodes&quot;:[{&quot;id&quot;:&quot;background&quot;,&quot;name&quot;:&quot;&quot;,&quot;boneId&quot;:null,&quot;visible&quot;:true,&quot;locked&quot;:false,&quot;originalKind&quot;:null,&quot;transform&quot;:{&quot;x&quot;:0.0,&quot;y&quot;:0.0,&quot;rotation&quot;:0.0,&quot;scaleX&quot;:1.0,&quot;scaleY&quot;:1.0},&quot;style&quot;:{&quot;fill&quot;:{&quot;r&quot;:0.95,&quot;g&quot;:0.96,&quot;b&quot;:0.98,&quot;a&quot;:1.0},&quot;stroke&quot;:null,&quot;strokeWidth&quot;:1.0,&quot;opacity&quot;:1.0},&quot;kind&quot;:{&quot;type&quot;:&quot;rect&quot;,&quot;x&quot;:0.0,&quot;y&quot;:0.0,&quot;width&quot;:640.0,&quot;height&quot;:480.0,&quot;rx&quot;:0.0}},{&quot;id&quot;:&quot;torso-shape&quot;,&quot;name&quot;:&quot;&quot;,&quot;boneId&quot;:&quot;torso&quot;,&quot;visible&quot;:true,&quot;locked&quot;:false,&quot;originalKind&quot;:null,&quot;transform&quot;:{&quot;x&quot;:0.0,&quot;y&quot;:0.0,&quot;rotation&quot;:0.0,&quot;scaleX&quot;:1.0,&quot;scaleY&quot;:1.0},&quot;style&quot;:{&quot;fill&quot;:{&quot;r&quot;:0.12,&quot;g&quot;:0.22,&quot;b&quot;:0.4,&quot;a&quot;:1.0},&quot;stroke&quot;:null,&quot;strokeWidth&quot;:1.0,&quot;opacity&quot;:1.0},&quot;kind&quot;:{&quot;type&quot;:&quot;rect&quot;,&quot;x&quot;:0.0,&quot;y&quot;:-5.0,&quot;width&quot;:95.0,&quot;height&quot;:10.0,&quot;rx&quot;:0.0}},{&quot;id&quot;:&quot;neck-shape&quot;,&quot;name&quot;:&quot;&quot;,&quot;boneId&quot;:&quot;neck&quot;,&quot;visible&quot;:true,&quot;locked&quot;:false,&quot;originalKind&quot;:null,&quot;transform&quot;:{&quot;x&quot;:0.0,&quot;y&quot;:0.0,&quot;rotation&quot;:0.0,&quot;scaleX&quot;:1.0,&quot;scaleY&quot;:1.0},&quot;style&quot;:{&quot;fill&quot;:{&quot;r&quot;:0.12,&quot;g&quot;:0.22,&quot;b&quot;:0.4,&quot;a&quot;:1.0},&quot;stroke&quot;:null,&quot;strokeWidth&quot;:1.0,&quot;opacity&quot;:1.0},&quot;kind&quot;:{&quot;type&quot;:&quot;rect&quot;,&quot;x&quot;:0.0,&quot;y&quot;:-5.0,&quot;width&quot;:25.0,&quot;height&quot;:10.0,&quot;rx&quot;:0.0}},{&quot;id&quot;:&quot;left-arm-shape&quot;,&quot;name&quot;:&quot;&quot;,&quot;boneId&quot;:&quot;left-arm&quot;,&quot;visible&quot;:true,&quot;locked&quot;:false,&quot;originalKind&quot;:null,&quot;transform&quot;:{&quot;x&quot;:0.0,&quot;y&quot;:0.0,&quot;rotation&quot;:0.0,&quot;scaleX&quot;:1.0,&quot;scaleY&quot;:1.0},&quot;style&quot;:{&quot;fill&quot;:{&quot;r&quot;:0.12,&quot;g&quot;:0.22,&quot;b&quot;:0.4,&quot;a&quot;:1.0},&quot;stroke&quot;:null,&quot;strokeWidth&quot;:1.0,&quot;opacity&quot;:1.0},&quot;kind&quot;:{&quot;type&quot;:&quot;rect&quot;,&quot;x&quot;:0.0,&quot;y&quot;:-5.0,&quot;width&quot;:65.0,&quot;height&quot;:10.0,&quot;rx&quot;:0.0}},{&quot;id&quot;:&quot;left-forearm-shape&quot;,&quot;name&quot;:&quot;&quot;,&quot;boneId&quot;:&quot;left-forearm&quot;,&quot;visible&quot;:true,&quot;locked&quot;:false,&quot;originalKind&quot;:null,&quot;transform&quot;:{&quot;x&quot;:0.0,&quot;y&quot;:0.0,&quot;rotation&quot;:0.0,&quot;scaleX&quot;:1.0,&quot;scaleY&quot;:1.0},&quot;style&quot;:{&quot;fill&quot;:{&quot;r&quot;:0.12,&quot;g&quot;:0.22,&quot;b&quot;:0.4,&quot;a&quot;:1.0},&quot;stroke&quot;:null,&quot;strokeWidth&quot;:1.0,&quot;opacity&quot;:1.0},&quot;kind&quot;:{&quot;type&quot;:&quot;rect&quot;,&quot;x&quot;:0.0,&quot;y&quot;:-5.0,&quot;width&quot;:55.0,&quot;height&quot;:10.0,&quot;rx&quot;:0.0}},{&quot;id&quot;:&quot;right-arm-shape&quot;,&quot;name&quot;:&quot;&quot;,&quot;boneId&quot;:&quot;right-arm&quot;,&quot;visible&quot;:true,&quot;locked&quot;:false,&quot;originalKind&quot;:null,&quot;transform&quot;:{&quot;x&quot;:0.0,&quot;y&quot;:0.0,&quot;rotation&quot;:0.0,&quot;scaleX&quot;:1.0,&quot;scaleY&quot;:1.0},&quot;style&quot;:{&quot;fill&quot;:{&quot;r&quot;:0.12,&quot;g&quot;:0.22,&quot;b&quot;:0.4,&quot;a&quot;:1.0},&quot;stroke&quot;:null,&quot;strokeWidth&quot;:1.0,&quot;opacity&quot;:1.0},&quot;kind&quot;:{&quot;type&quot;:&quot;rect&quot;,&quot;x&quot;:0.0,&quot;y&quot;:-5.0,&quot;width&quot;:65.0,&quot;height&quot;:10.0,&quot;rx&quot;:0.0}},{&quot;id&quot;:&quot;right-forearm-shape&quot;,&quot;name&quot;:&quot;&quot;,&quot;boneId&quot;:&quot;right-forearm&quot;,&quot;visible&quot;:true,&quot;locked&quot;:false,&quot;originalKind&quot;:null,&quot;transform&quot;:{&quot;x&quot;:0.0,&quot;y&quot;:0.0,&quot;rotation&quot;:0.0,&quot;scaleX&quot;:1.0,&quot;scaleY&quot;:1.0},&quot;style&quot;:{&quot;fill&quot;:{&quot;r&quot;:0.12,&quot;g&quot;:0.22,&quot;b&quot;:0.4,&quot;a&quot;:1.0},&quot;stroke&quot;:null,&quot;strokeWidth&quot;:1.0,&quot;opacity&quot;:1.0},&quot;kind&quot;:{&quot;type&quot;:&quot;rect&quot;,&quot;x&quot;:0.0,&quot;y&quot;:-5.0,&quot;width&quot;:55.0,&quot;height&quot;:10.0,&quot;rx&quot;:0.0}},{&quot;id&quot;:&quot;left-thigh-shape&quot;,&quot;name&quot;:&quot;&quot;,&quot;boneId&quot;:&quot;left-thigh&quot;,&quot;visible&quot;:true,&quot;locked&quot;:false,&quot;originalKind&quot;:null,&quot;transform&quot;:{&quot;x&quot;:0.0,&quot;y&quot;:0.0,&quot;rotation&quot;:0.0,&quot;scaleX&quot;:1.0,&quot;scaleY&quot;:1.0},&quot;style&quot;:{&quot;fill&quot;:{&quot;r&quot;:0.12,&quot;g&quot;:0.22,&quot;b&quot;:0.4,&quot;a&quot;:1.0},&quot;stroke&quot;:null,&quot;strokeWidth&quot;:1.0,&quot;opacity&quot;:1.0},&quot;kind&quot;:{&quot;type&quot;:&quot;rect&quot;,&quot;x&quot;:0.0,&quot;y&quot;:-5.0,&quot;width&quot;:80.0,&quot;height&quot;:10.0,&quot;rx&quot;:0.0}},{&quot;id&quot;:&quot;left-shin-shape&quot;,&quot;name&quot;:&quot;&quot;,&quot;boneId&quot;:&quot;left-shin&quot;,&quot;visible&quot;:true,&quot;locked&quot;:false,&quot;originalKind&quot;:null,&quot;transform&quot;:{&quot;x&quot;:0.0,&quot;y&quot;:0.0,&quot;rotation&quot;:0.0,&quot;scaleX&quot;:1.0,&quot;scaleY&quot;:1.0},&quot;style&quot;:{&quot;fill&quot;:{&quot;r&quot;:0.12,&quot;g&quot;:0.22,&quot;b&quot;:0.4,&quot;a&quot;:1.0},&quot;stroke&quot;:null,&quot;strokeWidth&quot;:1.0,&quot;opacity&quot;:1.0},&quot;kind&quot;:{&quot;type&quot;:&quot;rect&quot;,&quot;x&quot;:0.0,&quot;y&quot;:-5.0,&quot;width&quot;:75.0,&quot;height&quot;:10.0,&quot;rx&quot;:0.0}},{&quot;id&quot;:&quot;right-thigh-shape&quot;,&quot;name&quot;:&quot;&quot;,&quot;boneId&quot;:&quot;right-thigh&quot;,&quot;visible&quot;:true,&quot;locked&quot;:false,&quot;originalKind&quot;:null,&quot;transform&quot;:{&quot;x&quot;:0.0,&quot;y&quot;:0.0,&quot;rotation&quot;:0.0,&quot;scaleX&quot;:1.0,&quot;scaleY&quot;:1.0},&quot;style&quot;:{&quot;fill&quot;:{&quot;r&quot;:0.12,&quot;g&quot;:0.22,&quot;b&quot;:0.4,&quot;a&quot;:1.0},&quot;stroke&quot;:null,&quot;strokeWidth&quot;:1.0,&quot;opacity&quot;:1.0},&quot;kind&quot;:{&quot;type&quot;:&quot;rect&quot;,&quot;x&quot;:0.0,&quot;y&quot;:-5.0,&quot;width&quot;:80.0,&quot;height&quot;:10.0,&quot;rx&quot;:0.0}},{&quot;id&quot;:&quot;right-shin-shape&quot;,&quot;name&quot;:&quot;&quot;,&quot;boneId&quot;:&quot;right-shin&quot;,&quot;visible&quot;:true,&quot;locked&quot;:false,&quot;originalKind&quot;:null,&quot;transform&quot;:{&quot;x&quot;:0.0,&quot;y&quot;:0.0,&quot;rotation&quot;:0.0,&quot;scaleX&quot;:1.0,&quot;scaleY&quot;:1.0},&quot;style&quot;:{&quot;fill&quot;:{&quot;r&quot;:0.12,&quot;g&quot;:0.22,&quot;b&quot;:0.4,&quot;a&quot;:1.0},&quot;stroke&quot;:null,&quot;strokeWidth&quot;:1.0,&quot;opacity&quot;:1.0},&quot;kind&quot;:{&quot;type&quot;:&quot;rect&quot;,&quot;x&quot;:0.0,&quot;y&quot;:-5.0,&quot;width&quot;:75.0,&quot;height&quot;:10.0,&quot;rx&quot;:0.0}},{&quot;id&quot;:&quot;head&quot;,&quot;name&quot;:&quot;&quot;,&quot;boneId&quot;:&quot;neck&quot;,&quot;visible&quot;:true,&quot;locked&quot;:false,&quot;originalKind&quot;:null,&quot;transform&quot;:{&quot;x&quot;:0.0,&quot;y&quot;:0.0,&quot;rotation&quot;:0.0,&quot;scaleX&quot;:1.0,&quot;scaleY&quot;:1.0},&quot;style&quot;:{&quot;fill&quot;:{&quot;r&quot;:0.3137254901960784,&quot;g&quot;:0.5490196078431373,&quot;b&quot;:0.9411764705882353,&quot;a&quot;:1.0},&quot;stroke&quot;:null,&quot;strokeWidth&quot;:1.0,&quot;opacity&quot;:1.0},&quot;kind&quot;:{&quot;type&quot;:&quot;circle&quot;,&quot;cx&quot;:25.0,&quot;cy&quot;:0.0,&quot;radius&quot;:22.0}}],&quot;bones&quot;:[{&quot;id&quot;:&quot;torso&quot;,&quot;parentId&quot;:null,&quot;x&quot;:320.0,&quot;y&quot;:245.0,&quot;rotation&quot;:-90.0,&quot;length&quot;:95.0},{&quot;id&quot;:&quot;neck&quot;,&quot;parentId&quot;:&quot;torso&quot;,&quot;x&quot;:0.0,&quot;y&quot;:0.0,&quot;rotation&quot;:0.0,&quot;length&quot;:25.0},{&quot;id&quot;:&quot;left-arm&quot;,&quot;parentId&quot;:&quot;torso&quot;,&quot;x&quot;:0.0,&quot;y&quot;:0.0,&quot;rotation&quot;:-135.0,&quot;length&quot;:65.0},{&quot;id&quot;:&quot;left-forearm&quot;,&quot;parentId&quot;:&quot;left-arm&quot;,&quot;x&quot;:0.0,&quot;y&quot;:0.0,&quot;rotation&quot;:-25.0,&quot;length&quot;:55.0},{&quot;id&quot;:&quot;right-arm&quot;,&quot;parentId&quot;:&quot;torso&quot;,&quot;x&quot;:0.0,&quot;y&quot;:0.0,&quot;rotation&quot;:135.0,&quot;length&quot;:65.0},{&quot;id&quot;:&quot;right-forearm&quot;,&quot;parentId&quot;:&quot;right-arm&quot;,&quot;x&quot;:0.0,&quot;y&quot;:0.0,&quot;rotation&quot;:25.0,&quot;length&quot;:55.0},{&quot;id&quot;:&quot;left-thigh&quot;,&quot;parentId&quot;:null,&quot;x&quot;:320.0,&quot;y&quot;:245.0,&quot;rotation&quot;:115.0,&quot;length&quot;:80.0},{&quot;id&quot;:&quot;left-shin&quot;,&quot;parentId&quot;:&quot;left-thigh&quot;,&quot;x&quot;:0.0,&quot;y&quot;:0.0,&quot;rotation&quot;:-20.0,&quot;length&quot;:75.0},{&quot;id&quot;:&quot;right-thigh&quot;,&quot;parentId&quot;:null,&quot;x&quot;:320.0,&quot;y&quot;:245.0,&quot;rotation&quot;:65.0,&quot;length&quot;:80.0},{&quot;id&quot;:&quot;right-shin&quot;,&quot;parentId&quot;:&quot;right-thigh&quot;,&quot;x&quot;:0.0,&quot;y&quot;:0.0,&quot;rotation&quot;:20.0,&quot;length&quot;:75.0}],&quot;clips&quot;:[{&quot;id&quot;:&quot;wave&quot;,&quot;name&quot;:&quot;Wave&quot;,&quot;duration&quot;:2.0,&quot;looping&quot;:true,&quot;autoplay&quot;:true,&quot;blendMode&quot;:&quot;override&quot;,&quot;weight&quot;:1.0,&quot;tracks&quot;:[{&quot;nodeId&quot;:&quot;right-forearm&quot;,&quot;property&quot;:&quot;rotation&quot;,&quot;keyframes&quot;:[{&quot;time&quot;:0.0,&quot;value&quot;:{&quot;type&quot;:&quot;number&quot;,&quot;value&quot;:25.0},&quot;easing&quot;:{&quot;type&quot;:&quot;linear&quot;}},{&quot;time&quot;:1.0,&quot;value&quot;:{&quot;type&quot;:&quot;number&quot;,&quot;value&quot;:-110.0},&quot;easing&quot;:{&quot;type&quot;:&quot;linear&quot;}},{&quot;time&quot;:2.0,&quot;value&quot;:{&quot;type&quot;:&quot;number&quot;,&quot;value&quot;:25.0},&quot;easing&quot;:{&quot;type&quot;:&quot;linear&quot;}}]}]}],&quot;stateMachines&quot;:[],&quot;variables&quot;:{},&quot;audioAssets&quot;:[],&quot;audioCues&quot;:[],&quot;speechCues&quot;:[],&quot;customJs&quot;:&quot;&quot;,&quot;rawSvg&quot;:&quot;&quot;}</metadata>
+<metadata id="splinely-project">{&quot;schemaVersion&quot;:1,&quot;name&quot;:&quot;Pivot-style bone demo&quot;,&quot;width&quot;:640.0,&quot;height&quot;:480.0,&quot;nodes&quot;:[{&quot;id&quot;:&quot;background&quot;,&quot;name&quot;:&quot;&quot;,&quot;boneId&quot;:null,&quot;visible&quot;:true,&quot;locked&quot;:false,&quot;originalKind&quot;:null,&quot;transform&quot;:{&quot;x&quot;:0.0,&quot;y&quot;:0.0,&quot;rotation&quot;:0.0,&quot;scaleX&quot;:1.0,&quot;scaleY&quot;:1.0},&quot;style&quot;:{&quot;fill&quot;:{&quot;r&quot;:0.95,&quot;g&quot;:0.96,&quot;b&quot;:0.98,&quot;a&quot;:1.0},&quot;stroke&quot;:null,&quot;strokeWidth&quot;:1.0,&quot;opacity&quot;:1.0},&quot;kind&quot;:{&quot;type&quot;:&quot;rect&quot;,&quot;x&quot;:0.0,&quot;y&quot;:0.0,&quot;width&quot;:640.0,&quot;height&quot;:480.0,&quot;rx&quot;:0.0}},{&quot;id&quot;:&quot;torso-shape&quot;,&quot;name&quot;:&quot;&quot;,&quot;boneId&quot;:&quot;torso&quot;,&quot;visible&quot;:true,&quot;locked&quot;:false,&quot;originalKind&quot;:null,&quot;transform&quot;:{&quot;x&quot;:0.0,&quot;y&quot;:0.0,&quot;rotation&quot;:0.0,&quot;scaleX&quot;:1.0,&quot;scaleY&quot;:1.0},&quot;style&quot;:{&quot;fill&quot;:{&quot;r&quot;:0.12,&quot;g&quot;:0.22,&quot;b&quot;:0.4,&quot;a&quot;:1.0},&quot;stroke&quot;:null,&quot;strokeWidth&quot;:1.0,&quot;opacity&quot;:1.0},&quot;kind&quot;:{&quot;type&quot;:&quot;rect&quot;,&quot;x&quot;:0.0,&quot;y&quot;:-5.0,&quot;width&quot;:95.0,&quot;height&quot;:10.0,&quot;rx&quot;:0.0}},{&quot;id&quot;:&quot;neck-shape&quot;,&quot;name&quot;:&quot;&quot;,&quot;boneId&quot;:&quot;neck&quot;,&quot;visible&quot;:true,&quot;locked&quot;:false,&quot;originalKind&quot;:null,&quot;transform&quot;:{&quot;x&quot;:0.0,&quot;y&quot;:0.0,&quot;rotation&quot;:0.0,&quot;scaleX&quot;:1.0,&quot;scaleY&quot;:1.0},&quot;style&quot;:{&quot;fill&quot;:{&quot;r&quot;:0.12,&quot;g&quot;:0.22,&quot;b&quot;:0.4,&quot;a&quot;:1.0},&quot;stroke&quot;:null,&quot;strokeWidth&quot;:1.0,&quot;opacity&quot;:1.0},&quot;kind&quot;:{&quot;type&quot;:&quot;rect&quot;,&quot;x&quot;:0.0,&quot;y&quot;:-5.0,&quot;width&quot;:25.0,&quot;height&quot;:10.0,&quot;rx&quot;:0.0}},{&quot;id&quot;:&quot;left-arm-shape&quot;,&quot;name&quot;:&quot;&quot;,&quot;boneId&quot;:&quot;left-arm&quot;,&quot;visible&quot;:true,&quot;locked&quot;:false,&quot;originalKind&quot;:null,&quot;transform&quot;:{&quot;x&quot;:0.0,&quot;y&quot;:0.0,&quot;rotation&quot;:0.0,&quot;scaleX&quot;:1.0,&quot;scaleY&quot;:1.0},&quot;style&quot;:{&quot;fill&quot;:{&quot;r&quot;:0.12,&quot;g&quot;:0.22,&quot;b&quot;:0.4,&quot;a&quot;:1.0},&quot;stroke&quot;:null,&quot;strokeWidth&quot;:1.0,&quot;opacity&quot;:1.0},&quot;kind&quot;:{&quot;type&quot;:&quot;rect&quot;,&quot;x&quot;:0.0,&quot;y&quot;:-5.0,&quot;width&quot;:65.0,&quot;height&quot;:10.0,&quot;rx&quot;:0.0}},{&quot;id&quot;:&quot;left-forearm-shape&quot;,&quot;name&quot;:&quot;&quot;,&quot;boneId&quot;:&quot;left-forearm&quot;,&quot;visible&quot;:true,&quot;locked&quot;:false,&quot;originalKind&quot;:null,&quot;transform&quot;:{&quot;x&quot;:0.0,&quot;y&quot;:0.0,&quot;rotation&quot;:0.0,&quot;scaleX&quot;:1.0,&quot;scaleY&quot;:1.0},&quot;style&quot;:{&quot;fill&quot;:{&quot;r&quot;:0.12,&quot;g&quot;:0.22,&quot;b&quot;:0.4,&quot;a&quot;:1.0},&quot;stroke&quot;:null,&quot;strokeWidth&quot;:1.0,&quot;opacity&quot;:1.0},&quot;kind&quot;:{&quot;type&quot;:&quot;rect&quot;,&quot;x&quot;:0.0,&quot;y&quot;:-5.0,&quot;width&quot;:55.0,&quot;height&quot;:10.0,&quot;rx&quot;:0.0}},{&quot;id&quot;:&quot;right-arm-shape&quot;,&quot;name&quot;:&quot;&quot;,&quot;boneId&quot;:&quot;right-arm&quot;,&quot;visible&quot;:true,&quot;locked&quot;:false,&quot;originalKind&quot;:null,&quot;transform&quot;:{&quot;x&quot;:0.0,&quot;y&quot;:0.0,&quot;rotation&quot;:0.0,&quot;scaleX&quot;:1.0,&quot;scaleY&quot;:1.0},&quot;style&quot;:{&quot;fill&quot;:{&quot;r&quot;:0.12,&quot;g&quot;:0.22,&quot;b&quot;:0.4,&quot;a&quot;:1.0},&quot;stroke&quot;:null,&quot;strokeWidth&quot;:1.0,&quot;opacity&quot;:1.0},&quot;kind&quot;:{&quot;type&quot;:&quot;rect&quot;,&quot;x&quot;:0.0,&quot;y&quot;:-5.0,&quot;width&quot;:65.0,&quot;height&quot;:10.0,&quot;rx&quot;:0.0}},{&quot;id&quot;:&quot;right-forearm-shape&quot;,&quot;name&quot;:&quot;&quot;,&quot;boneId&quot;:&quot;right-forearm&quot;,&quot;visible&quot;:true,&quot;locked&quot;:false,&quot;originalKind&quot;:null,&quot;transform&quot;:{&quot;x&quot;:0.0,&quot;y&quot;:0.0,&quot;rotation&quot;:0.0,&quot;scaleX&quot;:1.0,&quot;scaleY&quot;:1.0},&quot;style&quot;:{&quot;fill&quot;:{&quot;r&quot;:0.12,&quot;g&quot;:0.22,&quot;b&quot;:0.4,&quot;a&quot;:1.0},&quot;stroke&quot;:null,&quot;strokeWidth&quot;:1.0,&quot;opacity&quot;:1.0},&quot;kind&quot;:{&quot;type&quot;:&quot;rect&quot;,&quot;x&quot;:0.0,&quot;y&quot;:-5.0,&quot;width&quot;:55.0,&quot;height&quot;:10.0,&quot;rx&quot;:0.0}},{&quot;id&quot;:&quot;left-thigh-shape&quot;,&quot;name&quot;:&quot;&quot;,&quot;boneId&quot;:&quot;left-thigh&quot;,&quot;visible&quot;:true,&quot;locked&quot;:false,&quot;originalKind&quot;:null,&quot;transform&quot;:{&quot;x&quot;:0.0,&quot;y&quot;:0.0,&quot;rotation&quot;:0.0,&quot;scaleX&quot;:1.0,&quot;scaleY&quot;:1.0},&quot;style&quot;:{&quot;fill&quot;:{&quot;r&quot;:0.12,&quot;g&quot;:0.22,&quot;b&quot;:0.4,&quot;a&quot;:1.0},&quot;stroke&quot;:null,&quot;strokeWidth&quot;:1.0,&quot;opacity&quot;:1.0},&quot;kind&quot;:{&quot;type&quot;:&quot;rect&quot;,&quot;x&quot;:0.0,&quot;y&quot;:-5.0,&quot;width&quot;:80.0,&quot;height&quot;:10.0,&quot;rx&quot;:0.0}},{&quot;id&quot;:&quot;left-shin-shape&quot;,&quot;name&quot;:&quot;&quot;,&quot;boneId&quot;:&quot;left-shin&quot;,&quot;visible&quot;:true,&quot;locked&quot;:false,&quot;originalKind&quot;:null,&quot;transform&quot;:{&quot;x&quot;:0.0,&quot;y&quot;:0.0,&quot;rotation&quot;:0.0,&quot;scaleX&quot;:1.0,&quot;scaleY&quot;:1.0},&quot;style&quot;:{&quot;fill&quot;:{&quot;r&quot;:0.12,&quot;g&quot;:0.22,&quot;b&quot;:0.4,&quot;a&quot;:1.0},&quot;stroke&quot;:null,&quot;strokeWidth&quot;:1.0,&quot;opacity&quot;:1.0},&quot;kind&quot;:{&quot;type&quot;:&quot;rect&quot;,&quot;x&quot;:0.0,&quot;y&quot;:-5.0,&quot;width&quot;:75.0,&quot;height&quot;:10.0,&quot;rx&quot;:0.0}},{&quot;id&quot;:&quot;right-thigh-shape&quot;,&quot;name&quot;:&quot;&quot;,&quot;boneId&quot;:&quot;right-thigh&quot;,&quot;visible&quot;:true,&quot;locked&quot;:false,&quot;originalKind&quot;:null,&quot;transform&quot;:{&quot;x&quot;:0.0,&quot;y&quot;:0.0,&quot;rotation&quot;:0.0,&quot;scaleX&quot;:1.0,&quot;scaleY&quot;:1.0},&quot;style&quot;:{&quot;fill&quot;:{&quot;r&quot;:0.12,&quot;g&quot;:0.22,&quot;b&quot;:0.4,&quot;a&quot;:1.0},&quot;stroke&quot;:null,&quot;strokeWidth&quot;:1.0,&quot;opacity&quot;:1.0},&quot;kind&quot;:{&quot;type&quot;:&quot;rect&quot;,&quot;x&quot;:0.0,&quot;y&quot;:-5.0,&quot;width&quot;:80.0,&quot;height&quot;:10.0,&quot;rx&quot;:0.0}},{&quot;id&quot;:&quot;right-shin-shape&quot;,&quot;name&quot;:&quot;&quot;,&quot;boneId&quot;:&quot;right-shin&quot;,&quot;visible&quot;:true,&quot;locked&quot;:false,&quot;originalKind&quot;:null,&quot;transform&quot;:{&quot;x&quot;:0.0,&quot;y&quot;:0.0,&quot;rotation&quot;:0.0,&quot;scaleX&quot;:1.0,&quot;scaleY&quot;:1.0},&quot;style&quot;:{&quot;fill&quot;:{&quot;r&quot;:0.12,&quot;g&quot;:0.22,&quot;b&quot;:0.4,&quot;a&quot;:1.0},&quot;stroke&quot;:null,&quot;strokeWidth&quot;:1.0,&quot;opacity&quot;:1.0},&quot;kind&quot;:{&quot;type&quot;:&quot;rect&quot;,&quot;x&quot;:0.0,&quot;y&quot;:-5.0,&quot;width&quot;:75.0,&quot;height&quot;:10.0,&quot;rx&quot;:0.0}},{&quot;id&quot;:&quot;head&quot;,&quot;name&quot;:&quot;&quot;,&quot;boneId&quot;:&quot;neck&quot;,&quot;visible&quot;:true,&quot;locked&quot;:false,&quot;originalKind&quot;:null,&quot;transform&quot;:{&quot;x&quot;:0.0,&quot;y&quot;:0.0,&quot;rotation&quot;:0.0,&quot;scaleX&quot;:1.0,&quot;scaleY&quot;:1.0},&quot;style&quot;:{&quot;fill&quot;:{&quot;r&quot;:0.3137254901960784,&quot;g&quot;:0.5490196078431373,&quot;b&quot;:0.9411764705882353,&quot;a&quot;:1.0},&quot;stroke&quot;:null,&quot;strokeWidth&quot;:1.0,&quot;opacity&quot;:1.0},&quot;kind&quot;:{&quot;type&quot;:&quot;circle&quot;,&quot;cx&quot;:25.0,&quot;cy&quot;:0.0,&quot;radius&quot;:22.0}}],&quot;bones&quot;:[{&quot;id&quot;:&quot;torso&quot;,&quot;parentId&quot;:null,&quot;x&quot;:320.0,&quot;y&quot;:245.0,&quot;rotation&quot;:-90.0,&quot;length&quot;:95.0},{&quot;id&quot;:&quot;neck&quot;,&quot;parentId&quot;:&quot;torso&quot;,&quot;x&quot;:0.0,&quot;y&quot;:0.0,&quot;rotation&quot;:0.0,&quot;length&quot;:25.0},{&quot;id&quot;:&quot;left-arm&quot;,&quot;parentId&quot;:&quot;torso&quot;,&quot;x&quot;:0.0,&quot;y&quot;:0.0,&quot;rotation&quot;:-135.0,&quot;length&quot;:65.0},{&quot;id&quot;:&quot;left-forearm&quot;,&quot;parentId&quot;:&quot;left-arm&quot;,&quot;x&quot;:0.0,&quot;y&quot;:0.0,&quot;rotation&quot;:-25.0,&quot;length&quot;:55.0},{&quot;id&quot;:&quot;right-arm&quot;,&quot;parentId&quot;:&quot;torso&quot;,&quot;x&quot;:0.0,&quot;y&quot;:0.0,&quot;rotation&quot;:135.0,&quot;length&quot;:65.0},{&quot;id&quot;:&quot;right-forearm&quot;,&quot;parentId&quot;:&quot;right-arm&quot;,&quot;x&quot;:0.0,&quot;y&quot;:0.0,&quot;rotation&quot;:25.0,&quot;length&quot;:55.0},{&quot;id&quot;:&quot;left-thigh&quot;,&quot;parentId&quot;:null,&quot;x&quot;:320.0,&quot;y&quot;:245.0,&quot;rotation&quot;:115.0,&quot;length&quot;:80.0},{&quot;id&quot;:&quot;left-shin&quot;,&quot;parentId&quot;:&quot;left-thigh&quot;,&quot;x&quot;:0.0,&quot;y&quot;:0.0,&quot;rotation&quot;:-20.0,&quot;length&quot;:75.0},{&quot;id&quot;:&quot;right-thigh&quot;,&quot;parentId&quot;:null,&quot;x&quot;:320.0,&quot;y&quot;:245.0,&quot;rotation&quot;:65.0,&quot;length&quot;:80.0},{&quot;id&quot;:&quot;right-shin&quot;,&quot;parentId&quot;:&quot;right-thigh&quot;,&quot;x&quot;:0.0,&quot;y&quot;:0.0,&quot;rotation&quot;:20.0,&quot;length&quot;:75.0}],&quot;clips&quot;:[{&quot;id&quot;:&quot;wave&quot;,&quot;name&quot;:&quot;Wave&quot;,&quot;duration&quot;:2.0,&quot;looping&quot;:true,&quot;autoplay&quot;:true,&quot;blendMode&quot;:&quot;override&quot;,&quot;weight&quot;:1.0,&quot;tracks&quot;:[{&quot;nodeId&quot;:&quot;right-forearm&quot;,&quot;property&quot;:&quot;rotation&quot;,&quot;keyframes&quot;:[{&quot;time&quot;:0.0,&quot;value&quot;:{&quot;type&quot;:&quot;number&quot;,&quot;value&quot;:25.0},&quot;easing&quot;:{&quot;type&quot;:&quot;linear&quot;}},{&quot;time&quot;:1.0,&quot;value&quot;:{&quot;type&quot;:&quot;number&quot;,&quot;value&quot;:-110.0},&quot;easing&quot;:{&quot;type&quot;:&quot;linear&quot;}},{&quot;time&quot;:2.0,&quot;value&quot;:{&quot;type&quot;:&quot;number&quot;,&quot;value&quot;:25.0},&quot;easing&quot;:{&quot;type&quot;:&quot;linear&quot;}}]}]}],&quot;stateMachines&quot;:[],&quot;variables&quot;:{},&quot;audioAssets&quot;:[],&quot;audioCues&quot;:[],&quot;customJs&quot;:&quot;&quot;,&quot;rawSvg&quot;:&quot;&quot;}</metadata>
 <script type="application/ecmascript"><![CDATA[/* Splinely runtime v1. Dependency-free; embed this file unchanged in an SVG script. */
 (function (host) {
   'use strict';
@@ -23,7 +23,7 @@
   const weightValue = v => { finite(v,'Clip weight'); if(v<0 || v>1)throw new Error('Clip weight must be in [0,1]'); return v; };
   const fadeDuration = v => { finite(v,'Fade duration'); if(v<0)throw new Error('Fade duration must be nonnegative'); return v; };
   const list = v => Array.isArray(v) ? v : Object.entries(v || {}).map(([id, item]) => ({ ...item, id: item.id || id }));
-  const unwrap = v => v && (v.type === 'number' || v.type === 'color') ? v.value : v;
+  const unwrap = v => v && ['number','color','gradient','path'].includes(v.type) ? v.value : v;
   const own = (o, k) => Object.prototype.hasOwnProperty.call(o, k);
   function equal(a,b) {
     if(a===b)return true;if(!a || !b || typeof a!=='object' || typeof b!=='object' || Array.isArray(a)!==Array.isArray(b))return false;
@@ -35,6 +35,34 @@
     let hex = v.slice(1); if (hex.length < 5) hex = [...hex].map(c => c + c).join('');
     return [0,2,4,6].map((i) => i < hex.length ? parseInt(hex.slice(i,i+2),16) / 255 : 1);
   }
+  // Structured values as shape + numbers: gradients (angle, stops) and path
+  // data (letters, numbers) interpolate and blend number by number.
+  const pathToken = /[a-zA-Z]|[-+]?(?:\d+\.?\d*|\.\d+)(?:[eE][-+]?\d+)?/g;
+  const pathNumber = v => String(Math.round(v*1000)/1000+0);
+  function vectorOf(v) {
+    v = unwrap(v);
+    if (typeof v === 'number') return {kind:'n', shape:'n', nums:[v]};
+    const c = color(v); if (c) return {kind:'c', shape:'c', nums:c};
+    if (v && typeof v === 'object' && Array.isArray(v.stops)) {
+      const nums=[Number(v.angle)||0];
+      for (const s of v.stops) nums.push(Number(s.offset)||0, ...(color(s.color) || [0,0,0,1]));
+      return {kind:'g', shape:'g'+(v.radial?'r':'l')+v.stops.length, nums, radial:!!v.radial};
+    }
+    if (typeof v === 'string' && /^\s*[Mm]/.test(v)) {
+      const tokens = v.match(pathToken) || [];
+      return {kind:'p', shape:tokens.map(t=>/[a-zA-Z]/.test(t)?t:'#').join(''), nums:tokens.filter(t=>!/[a-zA-Z]/.test(t)).map(Number), template:tokens};
+    }
+    return null;
+  }
+  function fromVector(vec, n) {
+    if (vec.kind === 'n') return n[0];
+    if (vec.kind === 'c') return {r:n[0], g:n[1], b:n[2], a:n[3]};
+    if (vec.kind === 'g') {
+      const stops=[]; for (let i=1;i<n.length;i+=5) stops.push({offset:clamp(n[i],0,1), color:{r:n[i+1], g:n[i+2], b:n[i+3], a:n[i+4]}});
+      return {radial:vec.radial, angle:n[0], stops};
+    }
+    let k=0; return vec.template.map(t => /[a-zA-Z]/.test(t) ? t : pathNumber(n[k++])).join(' ');
+  }
   function interpolate(a, b, t) {
     a = unwrap(a); b = unwrap(b);
     if (typeof a === 'number' && typeof b === 'number') return t <= 0 ? a : t >= 1 ? b : a*(1-t)+b*t;
@@ -44,6 +72,8 @@
       return {r:c[0],g:c[1],b:c[2],a:c[3]};
     }
     if (Array.isArray(a) && Array.isArray(b) && a.length === b.length && [...a,...b].every(Number.isFinite)) return a.map((v,i) => t <= 0 ? v : t >= 1 ? b[i] : v*(1-t)+b[i]*t);
+    const va = vectorOf(a), vb = vectorOf(b);
+    if (va && vb && va.shape === vb.shape) return fromVector(va, va.nums.map((v,i) => t <= 0 ? v : t >= 1 ? vb.nums[i] : v*(1-t)+vb.nums[i]*t));
     return t < 1 ? a : b;
   }
   function easing(spec, t) {
@@ -122,7 +152,7 @@
           if (finite(k.time,'Keyframe time') < 0 || k.time > duration) throw new Error('Keyframe outside clip');
           const value=unwrap(k.value);if(value===undefined)throw new Error('Keyframe requires value');
           if(typeof value==='number' || (k.value && k.value.type==='number'))finite(value,'Keyframe value');
-          if(blendMode==='weighted' && typeof value!=='number' && !color(value))throw new Error('Weighted keyframe must be numeric or RGBA');
+          if(blendMode==='weighted' && !vectorOf(value))throw new Error('Weighted keyframe must be numeric, RGBA, gradient or path data');
           if(Array.isArray(value) && value.some(v=>typeof v!=='number' || !Number.isFinite(v)))throw new Error('Keyframe array must contain finite numbers');
           easing(k.easing,0.5);return {...k};
         }).sort((a,b)=>a.time-b.time);
@@ -136,13 +166,13 @@
       return {...m,states};
     }),'machine');
     for(const source of [project,...clips]) {
-      for(const cue of [...(source.audioCues || []),...(source.speechCues || [])]) {
+      for(const cue of source.audioCues || []) {
         if(finite(cue.time,'Cue time')<0)throw new Error('Cue time must be nonnegative');
         for(const k of ['offset','volume','duration'])if(cue[k]!=null && (finite(cue[k],'Cue '+k)<0 || (k==='duration' && cue[k]===0)))throw new Error('Invalid cue '+k);
       }
     }
     const nodes=unique(list(project.nodes),'node'), bones=unique(list(project.bones),'bone'), assets=unique(list(project.audioAssets || project.assets),'asset');
-    unique([...nodes,...bones,...clips,...machines,...assets,...(project.audioCues || []),...(project.speechCues || []),...clips.flatMap(c=>[...(c.audioCues || []),...(c.speechCues || [])])].filter(x=>x.id!=null),'global');
+    unique([...nodes,...bones,...clips,...machines,...assets,...(project.audioCues || []),...clips.flatMap(c=>c.audioCues || [])].filter(x=>x.id!=null),'global');
     const boneIds=new Set(bones.map(b=>b.id));
     for(const b of bones) if(b.parentId!=null && (typeof b.parentId!=='string' || !boneIds.has(b.parentId))) throw new Error('Missing bone parent: '+b.parentId);
     solveBones(bones);
@@ -209,8 +239,8 @@
       const el=elements.get(node.id); if (!el && node.visible!==false) {report('Missing SVG node: '+node.id); continue;}
       const core=!!node.kind;
       const base=core ? {...node.transform,...node.style} : {...node.properties};
-      if(core) { for(const k of ['width','height','radius','fontSize','d']) if(node.kind[k]!=null) base[k]=node.kind[k]; }
-      nodes.set(node.id,{el,base,core,visible:node.visible!==false,boneId:node.boneId,original:new Map(),lastKeys:new Set()});
+      if(core) { for(const k of ['width','height','radius','fontSize','d']) if(node.kind[k]!=null) base[k]=node.kind[k]; if(node.gradient) base.gradient=node.gradient; }
+      nodes.set(node.id,{el,base,core,visible:node.visible!==false,boneId:node.boneId,gradient:!!(core && node.gradient),original:new Map(),lastKeys:new Set()});
     }
     // Adapter allows exported elements without a corresponding node descriptor.
     function getNode(id) {
@@ -225,6 +255,25 @@
     const aliases={radius:'r',fontSize:'font-size',strokeWidth:'stroke-width',scaleX:'scaleX',scaleY:'scaleY'};
     const attrName=k => Object.prototype.hasOwnProperty.call(aliases,k)?aliases[k]:k;
     const supported=new Set('x y cx cy r radius rx ry width height fill stroke opacity fill-opacity stroke-opacity strokeWidth stroke-width fontSize font-size rotation scaleX scaleY transform d points visibility'.split(' '));
+    // Update the exported <linearGradient>/<radialGradient> referenced by fill="url(#…)".
+    function applyGradient(node,g) {
+      if(!node.el || !g || !Array.isArray(g.stops)) return;
+      const ref=/url\(#([^)]+)\)/.exec(node.el.getAttribute('fill') || '');
+      const el=ref && elements.get(ref[1]);
+      if(!el) return;
+      if(!g.radial) {
+        const a=(Number(g.angle)||0)*Math.PI/180, r=v=>Math.round(v*1e6)/1e6+0;
+        el.setAttribute('x1',r(0.5-Math.cos(a)/2)); el.setAttribute('y1',r(0.5-Math.sin(a)/2));
+        el.setAttribute('x2',r(0.5+Math.cos(a)/2)); el.setAttribute('y2',r(0.5+Math.sin(a)/2));
+      }
+      const stops=[...(el.children || [])].filter(c=>(c.tagName || '').toLowerCase()==='stop');
+      stops.forEach((stop,i)=>{
+        const s=g.stops[i], c=s && color(s.color); if(!c) return;
+        stop.setAttribute('offset',clamp(Number(s.offset)||0,0,1));
+        stop.setAttribute('stop-color',`rgb(${c.slice(0,3).map(v=>Math.round(clamp(v,0,1)*255)).join(',')})`);
+        stop.setAttribute('stop-opacity',clamp(c[3],0,1));
+      });
+    }
     function render() {
       if(dead) return;
       const values=new Map([...nodes].map(([id,n]) => [id,{...n.base}]));
@@ -260,6 +309,18 @@
               const baseline=residual===0?0:finite(base==null?fallback:unwrap(base),'Weighted baseline');
               value=baseline*residual+samples.reduce((s,v)=>s+v.value*(v.weight/divisor),0);
               finite(value,'Weighted result');
+            } else if(['gradient','d'].includes(property)) {
+              // Structured values blend number by number when shapes match;
+              // otherwise the heaviest contribution wins.
+              const vectors=samples.map(v=>vectorOf(v.value)), baseVector=vectorOf(base);
+              const shape=vectors[0] && vectors[0].shape;
+              if(vectors.every(v=>v && v.shape===shape) && (residual===0 || (baseVector && baseVector.shape===shape))) {
+                const nums=vectors[0].nums.map((_,i)=>(residual===0?0:baseVector.nums[i]*residual)+vectors.reduce((s,v,k)=>s+v.nums[i]*(samples[k].weight/divisor),0));
+                value=fromVector(vectors[0],nums);
+              } else {
+                const heaviest=samples.reduce((a,b)=>b.weight>a.weight?b:a);
+                value=heaviest.weight>=residual?heaviest.value:base;
+              }
             } else {
               const baseline=residual===0?[0,0,0,0]:color(unwrap(base)) || (property==='stroke' && base==null?[0,0,0,0]:null);
               if(!baseline)throw new Error('Weighted baseline must be RGBA');
@@ -319,7 +380,10 @@
           if(composed && ['x','y','rotation','scaleX','scaleY'].includes(key)) continue;
           if(composed && key==='transform') {report('Raw transform is unsupported on composed nodes');continue;}
           // Never turn schema properties into scripts, URLs, or markup.
+          if(key==='gradient') {applyGradient(node,unwrap(raw));continue;}
           if(!supported.has(key)) {report('Unsupported property: '+key);continue;}
+          // A gradient fill is static SVG; colour values must not replace its url().
+          if(node.gradient && (key==='fill' || key==='fill-opacity')) continue;
           if(node.visible===false && key==='visibility') continue;
           const name=attrName(key), value=unwrap(raw), col=color(value);
           if((key==='fill'||key==='stroke') && col) {
@@ -356,7 +420,6 @@
             case 'emit': emit(typeof a.event === 'object'?a.event.name:a.event,detail,typeof a.event==='object'?a.event.target:undefined);break;
             case 'machine.send': send(a.machine,a.event,detail);break;
             case 'playAudio': case 'audio.play': audio.play(a.assetId || a.asset);break;
-            case 'speak': case 'speech.say': speech.say(a.text,a);break;
             default: throw new Error('Unsupported action: '+a.type);
           }
         } catch(e) {report(e);}
@@ -395,22 +458,19 @@
     const callbacks=new Set();
     for(const [index,c] of project.clips.entries()) clips.set(c.id,{...c,index,priority:c.priority || 0,time:0,playing:false,active:false,cycle:0,revision:0,ramp:null,sources:new Map()});
     const first=project.clips[0] && project.clips[0].id;
-    const transport={id:'@timeline',duration:Infinity,time:0,playing:false,manual:false,loop:false,cycle:0,revision:0,sources:new Map(),audioCues:project.audioCues || [],speechCues:project.speechCues || []};
+    const transport={id:'@timeline',duration:Infinity,time:0,playing:false,manual:false,loop:false,cycle:0,revision:0,sources:new Map(),audioCues:project.audioCues || []};
     const cueList=c => c.audioCues || [];
-    const speechList=c => c.speechCues || [];
     function transportPlay(){if(!transport.playing){transport.playing=true;transport.revision++;if(transport.time===0)crossing(transport,0,0,true);schedule(transport);}}
-    function transportPause(){transport.playing=false;transport.revision++;stopSources(transport);speech.cancel();}
+    function transportPause(){transport.playing=false;transport.revision++;stopSources(transport);}
     function getClip(id) {ensure();const c=clips.get(id);if(!c)throw new Error('Unknown clip: '+id);return c;}
     function stopSources(c) {for(const source of c.sources.values()) source.stop(); c.sources.clear();}
     function crossing(c,from,to,zero) {
       const rev=c.revision;
-      const items=[...callbacks].filter(cb=>cb.clip===c.id).map(cb=>({...cb,type:'callback'}));
-      for(const cue of speechList(c)) items.push({time:cue.time,type:'speech',cue});
+      const items=[...callbacks].filter(cb=>cb.clip===c.id);
       items.sort((a,b)=>a.time-b.time);
       for(const item of items) if((item.time>from && item.time<=to) || (zero && item.time===0)) {
         if(c.revision!==rev || dead) return false;
-        if(item.type==='callback') {if(callbacks.has(item.ref)) try{const result=item.fn({clip:c.id,time:item.time,cycle:c.cycle},api);if(result && typeof result.catch==='function')result.catch(report);}catch(e){report(e);}}
-        else speech.say(item.cue.text,item.cue);
+        if(callbacks.has(item.ref)) try{const result=item.fn({clip:c.id,time:item.time,cycle:c.cycle},api);if(result && typeof result.catch==='function')result.catch(report);}catch(e){report(e);}
       }
       return c.revision===rev && !dead;
     }
@@ -447,8 +507,8 @@
         fadeTo(weight,seconds){ensure();weightValue(weight);fadeDuration(seconds);if(c.blendMode!=='weighted')throw new Error('Weight controls require a weighted clip');syncClock();c.ramp=seconds===0?null:{from:c.weight,to:weight,duration:seconds,elapsed:0};if(seconds===0)c.weight=weight;render();return this;},
         set loop(v){ensure();c.loop=!!v;if(c.loop)c.time%=c.duration;c.revision++;stopSources(c);render();schedule(c);},
         play(){ensure();syncClock();if(c.playing)return this;if(c.time>=c.duration){c.time=0;c.cycle=0;}c.active=true;c.playing=true;c.revision++;const revision=c.revision;transportPlay();if(dead || c.revision!==revision || !c.playing)return this;render();if(c.time===0)crossing(c,0,0,true);schedule(c);return this;},
-        pause(){ensure();syncClock();c.playing=false;c.revision++;stopSources(c);speech.cancel();if(!transport.manual && ![...clips.values()].some(c=>c.playing))transportPause();return this;},
-        seek(time){ensure();syncClock();finite(time,'Seek time');c.time=c.loop?Math.max(0,time)%c.duration:clamp(time,0,c.duration);c.cycle=0;c.active=true;c.revision++;stopSources(c);speech.cancel();render();schedule(c);return this;},
+        pause(){ensure();syncClock();c.playing=false;c.revision++;stopSources(c);if(!transport.manual && ![...clips.values()].some(c=>c.playing))transportPause();return this;},
+        seek(time){ensure();syncClock();finite(time,'Seek time');c.time=c.loop?Math.max(0,time)%c.duration:clamp(time,0,c.duration);c.cycle=0;c.active=true;c.revision++;stopSources(c);render();schedule(c);return this;},
         stop(){this.pause();c.ramp=null;c.time=0;c.cycle=0;c.active=false;render();return this;}
       };
     }
@@ -468,7 +528,6 @@
         for(const c of active) {
           step=Math.min(step,c.duration-c.time);
           for(const cb of callbacks)if(cb.clip===c.id && cb.time>c.time)step=Math.min(step,cb.time-c.time);
-          for(const cue of speechList(c))if(cue.time>c.time)step=Math.min(step,cue.time-c.time);
         }
         const snapshots=active.map(c=>({c,from:c.time,revision:c.revision}));
         for(const c of active)c.time+=step;
@@ -496,18 +555,6 @@
       const cb={clip:id,time,fn};cb.ref=cb;callbacks.add(cb);return()=>callbacks.delete(cb);
     }
     let context=null, unlocking=null,loopBytes=0;const buffers=new Map(),independent=new Set(),loopBuffers=new Map();
-    const speechOwned=new Set();
-    const speech={
-      enable(){ensure();options.speech=true;return this;},
-      get enabled(){return !!options.speech;},
-      say(text,opts){ensure();if(!options.speech){report('Speech is opt-in: createRuntime with {speech:true}; browser speech cancellation is global');return null;}if(!env.speechSynthesis || !env.SpeechSynthesisUtterance){report('Speech synthesis unavailable');return null;}
-        const u=new env.SpeechSynthesisUtterance(String(text));for(const k of ['lang','rate','pitch','volume'])if(opts && opts[k]!=null)u[k]=opts[k];
-        speechOwned.add(u);u.onend=()=>speechOwned.delete(u);u.onerror=e=>{speechOwned.delete(u);report('Speech error: '+e.error);};env.speechSynthesis.speak(u);return u;
-      },
-      cancel(){if(speechOwned.size && env.speechSynthesis){
-        const registry=env[registryKey];if(registry && registry.instances.size>1){report('Cannot isolate browser speech cancellation across instances');return;}
-        env.speechSynthesis.cancel();speechOwned.clear();}}
-    };
     const audio={
       ready:false,buffers,get context(){return context;},
       loopBuffer(c,index,cue){
@@ -591,10 +638,10 @@
         clips:[...clips.values()].map(c=>({id:c.id,time:c.time,duration:c.duration,active:c.active,playing:c.playing,weight:c.weight,fading:!!c.ramp})),
         states:Object.fromEntries([...machines].map(([id,m])=>[id,m.state])),
         audio:{ready:audio.ready,state:context?context.state:'locked',embeddedAssets:project.assets.length},
-        speech:{enabled:!!options.speech},diagnostics:diagnostics.map(e=>e.message)};
+        diagnostics:diagnostics.map(e=>e.message)};
     }
-    api={version:1,snapshot,reportError(error){ensure();return report(error);},diagnostics,on,emit,bones(){ensure();return bonePoses.map(p=>({...p}));},onDestroy(fn){ensure();if(typeof fn!=='function')throw new Error('Disposer must be a function');cleanup.push(fn);},get destroyed(){return dead;}, clip,machine,set,variable,timeline:{at,get time(){return transport.time;},get playing(){return transport.playing;},play(){ensure();syncClock();transport.manual=true;transportPlay();return this;},pause(){ensure();transport.manual=false;for(const c of clips.values())clip(c.id).pause();transportPause();return this;},seek(time){ensure();syncClock();finite(time,'Timeline seek time');if(time<0)throw new Error('Timeline seek must be nonnegative');transport.time=time;transport.revision++;stopSources(transport);for(const c of clips.values())if(c.active)clip(c.id).seek(c.loop?time%c.duration:Math.min(time,c.duration));speech.cancel();schedule(transport);return this;}},audio,speech,tick,
-      destroy(){if(dead)return;dead=true;if(raf!=null && env.cancelAnimationFrame)env.cancelAnimationFrame(raf);for(const fn of cleanup)try{fn();}catch(error){report(error);}for(const c of [transport,...clips.values()])stopSources(c);audio.pause();speech.cancel();loopBuffers.clear();buffers.clear();if(context && context.close)Promise.resolve(context.close()).catch(()=>{});subscriptions.clear();callbacks.clear();for(const [id,start] of pointerStarts)try{if(start.el.releasePointerCapture)start.el.releasePointerCapture(id);}catch(_){}pointerStarts.clear();if(svg.splinely===api)delete svg.splinely;unregister(env,api);}
+    api={version:1,snapshot,reportError(error){ensure();return report(error);},diagnostics,on,emit,bones(){ensure();return bonePoses.map(p=>({...p}));},onDestroy(fn){ensure();if(typeof fn!=='function')throw new Error('Disposer must be a function');cleanup.push(fn);},get destroyed(){return dead;}, clip,machine,set,variable,timeline:{at,get time(){return transport.time;},get playing(){return transport.playing;},play(){ensure();syncClock();transport.manual=true;transportPlay();return this;},pause(){ensure();transport.manual=false;for(const c of clips.values())clip(c.id).pause();transportPause();return this;},seek(time){ensure();syncClock();finite(time,'Timeline seek time');if(time<0)throw new Error('Timeline seek must be nonnegative');transport.time=time;transport.revision++;stopSources(transport);for(const c of clips.values())if(c.active)clip(c.id).seek(c.loop?time%c.duration:Math.min(time,c.duration));schedule(transport);return this;}},audio,tick,
+      destroy(){if(dead)return;dead=true;if(raf!=null && env.cancelAnimationFrame)env.cancelAnimationFrame(raf);for(const fn of cleanup)try{fn();}catch(error){report(error);}for(const c of [transport,...clips.values()])stopSources(c);audio.pause();loopBuffers.clear();buffers.clear();if(context && context.close)Promise.resolve(context.close()).catch(()=>{});subscriptions.clear();callbacks.clear();for(const [id,start] of pointerStarts)try{if(start.el.releasePointerCapture)start.el.releasePointerCapture(id);}catch(_){}pointerStarts.clear();if(svg.splinely===api)delete svg.splinely;unregister(env,api);}
     };
     svg.splinely=api;register(env,api);
     try {
@@ -632,15 +679,14 @@
 })(typeof window!=='undefined'?window:globalThis);
 
 ;(function(){
-const speech=false, controls=true;
+const controls=true;
 
 const svg=document.currentScript && document.currentScript.ownerSVGElement;
 if(!svg || !svg.splinely)return;
 const splinely=svg.splinely;
 const data=JSON.parse(svg.querySelector('[id="splinely-project"]').textContent);
-if(speech && splinely.speech.enable)splinely.speech.enable();
 const report=error=>{if(splinely.destroyed)return;const e=new Error('Splinely host: '+String(error));if(splinely.reportError)splinely.reportError(e);else{splinely.diagnostics.push(e);if(splinely.diagnostics.length>100)splinely.diagnostics.shift();splinely.emit('error',{error:e});}console.error('Splinely host:',error);};
-if(controls && ((data.audioAssets || []).length || speech)) {
+if(controls && (data.audioAssets || []).length) {
   const resume=(data.clips || []).filter(c=>splinely.clip(c.id).playing).map(c=>c.id);
   splinely.timeline.pause();splinely.timeline.seek(0);
   const ns='http://www.w3.org/2000/svg', button=document.createElementNS(ns,'g');

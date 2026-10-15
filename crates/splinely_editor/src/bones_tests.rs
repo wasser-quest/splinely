@@ -136,7 +136,8 @@ fn static_export_does_not_apply_binding_twice() {
     e.bind_selected(true);
     e.project.bones[0].rotation = 30.;
     let expected = e.evaluated()[0].transform;
-    let path = std::env::temp_dir().join(format!("splinely-bone-snapshot-{}.svg", std::process::id()));
+    let path =
+        std::env::temp_dir().join(format!("splinely-bone-snapshot-{}.svg", std::process::id()));
     e.export_path = path.to_string_lossy().into();
     e.export(false);
     let svg = fs::read_to_string(&path).unwrap();

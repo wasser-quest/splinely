@@ -9,8 +9,8 @@ and returns evaluated nodes/bones plus host action requests.
 runtime.** No window, DOM, hit testing, audio device or browser is required. Raw
 SVG and `customJs` remain inert project data. There is no arbitrary SVG JavaScript
 support or automatic conversion of browser callbacks to native code. Hosts supply
-input targets, render evaluated geometry and decide whether to honor audio,
-speech and custom callback output.
+input targets, render evaluated geometry and decide whether to honor audio
+and custom callback output.
 
 See [CORE_API.md](../CORE_API.md), [BLENDING_SPEC.md](../BLENDING_SPEC.md) and
 [BONES_SPEC.md](../BONES_SPEC.md) for model/evaluation contracts. This runtime uses
@@ -25,7 +25,7 @@ stripped build measured approximately **1.4 MiB for the shared library** and
 No GTK/WebKit dependency is required for this crate. From the repository root:
 
 ```sh
-export TMPDIR=/home/user/svg_editor/.work-tmp
+export TMPDIR="$PWD/.work-tmp"
 cargo test -p splinely_runtime
 cargo test --workspace
 cargo build -p splinely_runtime
@@ -106,7 +106,7 @@ canonical core types.
 All times/deltas/durations must be finite and nonnegative; weights are finite
 [0,1]. Unknown IDs, wrong scalar variable types and invalid node/bone patches
 fail rather than silently disappearing. `action` accepts core actions only:
-setProperty, playClip, stopClip, blendClip, setVariable, emit, playAudio, speak.
+setProperty, playClip, stopClip, blendClip, setVariable, emit, playAudio.
 
 ## Deterministic native transport
 
@@ -120,7 +120,7 @@ setProperty, playClip, stopClip, blendClip, setVariable, emit, playAudio, speak.
 - Local seeks wrap loops and clamp nonloops, do not activate clips, and do not
   change fade clocks. Global seek silently synchronizes active clips and rearms
   future cues/callbacks. Entries at/before the seek destination are skipped;
-  seek does not speak, emit completion events or recreate overlapping audio.
+  seek does not emit completion events or recreate overlapping audio.
 - Nonloops retain the final pose and enqueue `clip.end` targeted to their ID once
   at natural completion. Loops wrap and enqueue `clip.loop` at each boundary.
   A seek to the nonloop endpoint remains silent until a subsequent positive tick
@@ -142,7 +142,7 @@ setProperty, playClip, stopClip, blendClip, setVariable, emit, playAudio, speak.
   First matching transition wins; transition actions precede destination entry.
   State override precedence remains core machine order, then clips, then explicit
   setProperty patches. ClearOverrides removes those explicit patches.
-- Events are FIFO, not recursive. At equal times, global audio cues, speech cues,
+- Events are FIFO, not recursive. At equal times, global audio cues,
   then custom callbacks are collected (document/registration order). Callback
   events and clip boundaries (document order) are queued before draining; nested
   emitted events append after the already queued boundary batch. Host output is
@@ -153,8 +153,8 @@ setProperty, playClip, stopClip, blendClip, setVariable, emit, playAudio, speak.
 HostActions use a `type` tag:
 
 - `event {event}`: input, emitted or clip-boundary event, for host subscribers.
-- `playAudio {assetId}` and `speak {text,lang}`: state/action requests.
-- `audioCue {cue}` and `speechCue {cue}`: full authored global cue parameters.
+- `playAudio {assetId}`: state/action request.
+- `audioCue {cue}`: full authored global cue parameters.
 - `callback {id,data}`: registered native-host callback request.
 
 Global cues cross once in transport time, independent of visual clip loops.

@@ -2,7 +2,7 @@
 
 Open [`examples/desert-stickfight.html`](../examples/desert-stickfight.html) locally in Firefox. The HTML contains the complete animated SVG, not an image/object or a network-loaded player. The [SVG](../examples/desert-stickfight.svg) also autoplays by itself. HTML provides **Play**, **Pause**, **Replay**, a phase label, and progress. The final pose holds; Play resumes a pause, while Replay starts a new showing.
 
-An original 20-second, non-gory sparring short in Cactus Runner’s warm sand, sage ridge, dark teal ink, copper scarf, rounded-stick visual language. Reed wears rust; Clay wears sea-teal. No licensed character shapes, external assets, speech, audio, or libraries are required. Existing runner/stickfight templates were read, not edited. Runtime, UI, CLI, and README are unchanged.
+An original 20-second, non-gory sparring short in Cactus Runner’s warm sand, sage ridge, dark teal ink, copper scarf, rounded-stick visual language. Reed wears rust; Clay wears sea-teal. No licensed character shapes, external assets, audio, or libraries are required. Existing runner/stickfight templates were read, not edited. Runtime, UI, CLI, and README are unchanged.
 
 ## Story
 
@@ -20,7 +20,7 @@ Two ten-bone parent-tip rigs: torso, neck, upper/lower arms and upper/lower legs
 
 All geometry movement is canonical numeric clip tracks. One continuously authored performance is sliced at exact boundaries into five non-looping clips, with matching end/start values for every channel. Native `clip.end` transitions on the `story` state machine stop the completed clip and start the next. The final `finished` state holds the last clip’s evaluated pose. Dunes and cacti drift independently; shadows follow roots; dust ellipses expand, squash and fade, and tapered rays pulse at impact. Slow motion is authored by spacing the contact poses over a longer interval, not changing wall-clock speed.
 
-The small reviewed `customJs` controller only implements transport events, deterministic reset of all five clips, and pausing at the ending. It does not animate geometry or use timers, fetch, remote scripts, audio or speech. Export explicitly opts into this reviewed code using `--trusted-js`; do not use that flag for unreviewed projects. HTML buttons emit the same transport events exposed by the standalone SVG (`film.play`, `film.pause`, `film.replay`).
+The small reviewed `customJs` controller only implements transport events, deterministic reset of all five clips, and pausing at the ending. It does not animate geometry or use timers, fetch, remote scripts or audio. Export explicitly opts into this reviewed code using `--trusted-js`; do not use that flag for unreviewed projects. HTML buttons emit the same transport events exposed by the standalone SVG (`film.play`, `film.pause`, `film.replay`).
 
 ## Reproduce
 

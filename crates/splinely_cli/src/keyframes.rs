@@ -1,6 +1,6 @@
 use crate::{failure, load, save_project, Result};
-use splinely_document::{AnimValue, Clip, Easing, Keyframe, Property, Track};
 use serde_json::Value;
+use splinely_document::{AnimValue, Clip, Easing, Keyframe, Property, Track};
 
 pub fn property(source: &str) -> std::result::Result<Property, String> {
     let property: Property = serde_json::from_value(Value::String(source.into()))

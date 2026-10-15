@@ -39,5 +39,5 @@ with wave.open(io.BytesIO(base64.b64decode(asset['dataBase64'], validate=True)),
     assert len(wav.readframes(3200)) == 6400
 assert project['audioCues'][0]['time'] == 1.5
 assert project['audioCues'][0]['assetId'] == asset['id']
-assert not project['speechCues'], 'Tone demo must not claim speech'
+assert 'speechCues' not in project, 'Speech was removed'
 print(f'PASS: XML, project roundtrip, embedded 0.4 s WAV, no external resource references: {svg_path}')

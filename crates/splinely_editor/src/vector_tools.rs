@@ -3,8 +3,8 @@
 //! H/V/S/T become explicit segments, arcs become cubics, coordinates use the
 //! renderer's f32 precision. The original text is retained until an actual edit.
 use eframe::egui::{self, Color32, Pos2, Stroke};
-use splinely_document::{Node, NodeKind, Project};
 use resvg::{tiny_skia, usvg};
+use splinely_document::{Node, NodeKind, Project};
 use std::fmt::Write;
 
 pub type Point = [f64; 2];

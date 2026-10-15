@@ -121,7 +121,7 @@ huge finite coordinates, zoom endpoints, monotonic finite ticks and the combined
 512-tick limit. Once the integrator declares the module, run:
 
 ```sh
-TMPDIR=/home/user/svg_editor/.work-tmp cargo test -p splinely_editor rulers::tests
+TMPDIR="$PWD/.work-tmp" cargo test -p splinely_editor rulers::tests
 ```
 
 Before integration, the same tests can run via `rustc --test` against an existing
@@ -129,7 +129,7 @@ eframe 0.31 build (no module registration or manifest edits):
 
 ```sh
 # EFRAME_RLIB must point to the existing eframe 0.31 .rlib in target/debug/deps.
-TMPDIR=/home/user/svg_editor/.work-tmp rustc --edition 2021 --test \
+TMPDIR="$PWD/.work-tmp" rustc --edition 2021 --test \
   crates/splinely_editor/src/rulers.rs --extern eframe="$EFRAME_RLIB" \
   -L dependency=target/debug/deps -o .work-tmp/rulers-tests
 .work-tmp/rulers-tests

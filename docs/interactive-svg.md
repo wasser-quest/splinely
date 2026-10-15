@@ -7,18 +7,17 @@
 - SVG direkt im Browser oder in einem HTML-`<object>` öffnen: Skripte und direkte Figur-Events können laufen (abhängig von Browser/CSP).
 - Als `<img>`, CSS-Hintergrund oder in einem Skripte unterdrückenden Viewer: nur die Grafik; keine interaktive Runtime.
 - **Static SVG** ist ein anderer Export: Momentaufnahme ohne Verhalten.
-- Browser-Speech nutzt installierte Browser/System-Stimmen; garantierte Offline-Sprachausgabe ist nicht Teil des Self-contained-Versprechens.
 - `--trusted-js` führt ausdrücklich eigenen eingebetteten Code aus. Dieser ist **nicht sandboxed**. Nur geprüfte eigene Projekte freigeben; fremden Code nicht ungeprüft aktivieren.
 
-## Zuverlässige Offline-Sprache als eingebettetes Audio
+## Eingebettetes Audio
 
-`splinely-cli embed-speech project.json --output narrated.json --text "Hallo!" --voice de --asset-id hello --time 0.18` erzeugt lokal mit eSpeak eine WAV-Aufnahme und bettet sie als AudioAsset/Cue ins Projekt ein. Anschließend `splinely-cli export narrated.json --output narrated.svg`: Der Export enthält WAV und Runtime in einer Datei. Beim Abspielen wird eSpeak nicht mehr benötigt. Der Audio-Start verlangt einen Benutzer-Klick. Eigene WAV-Aufnahmen können ebenfalls eingebettet werden; Stimmenqualität und tatsächliche Lautsprecher sind unabhängig vom Dateiformat.
+Eigene Aufnahmen (WAV, MP3, OGG …) werden als AudioAsset mit Cue ins Projekt eingebettet (Editor: **Animieren › Audio**, CLI: `apply`). `splinely-cli export project.sply --output scene.svg` legt Audio und Runtime in eine Datei; der Audio-Start verlangt einen Benutzer-Klick.
 
-Die [Aoi-Demo](../examples/anime-hello.html) nutzt diese Art von eingebettetem Offline-Audio, nicht mehr Browser-Speech.
+Die [Aoi-Demo](../examples/anime-hello.html) nutzt eingebettetes Offline-Audio.
 
 ## State-Machine ohne sichtbare Knöpfe
 
-Events können direkt von Szenenobjekten kommen: `click`, `pointerenter`, `pointerleave`, `pointermove`. Ein separater Button ist für lautlose Animationen nicht nötig. Die [braune Eule](../examples/brown-owl.html) demonstriert direkte Klicks, Hover, Pupillen-Tracking und Zustände, die Lider und Flügel steuern. Ein Vertrauens-/Start-Klick ist gegebenenfalls für Audio und Sprache nötig, nicht für Zustandsmaschinen generell.
+Events können direkt von Szenenobjekten kommen: `click`, `pointerenter`, `pointerleave`, `pointermove`. Ein separater Button ist für lautlose Animationen nicht nötig. Die [braune Eule](../examples/brown-owl.html) demonstriert direkte Klicks, Hover, Pupillen-Tracking und Zustände, die Lider und Flügel steuern. Ein Vertrauens-/Start-Klick ist gegebenenfalls für Audio nötig, nicht für Zustandsmaschinen generell.
 
 Typischer Aufbau:
 

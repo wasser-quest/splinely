@@ -1,6 +1,6 @@
+use serde_json::json;
 use splinely_document::*;
 use splinely_runtime::*;
-use serde_json::json;
 
 fn fixture() -> Project {
     let mut p = Project::default();
@@ -114,6 +114,14 @@ fn clocks_bones_fades_pause_stop_and_immutability() {
 #[test]
 fn ordered_initial_entries_transitions_shared_guards_and_overrides() {
     let mut p = fixture();
+    for id in ["initial", "transition", "entered"] {
+        p.audio_assets.push(AudioAsset {
+            id: id.into(),
+            name: String::new(),
+            mime_type: "audio/wav".into(),
+            data_base64: "AA==".into(),
+        });
+    }
     p.state_machines = vec![
         StateMachine {
             id: "first".into(),
@@ -126,9 +134,8 @@ fn ordered_initial_entries_transitions_shared_guards_and_overrides() {
                 },
                 State {
                     id: "b".into(),
-                    on_enter: vec![Action::Speak {
-                        text: "entered".into(),
-                        lang: "en".into(),
+                    on_enter: vec![Action::PlayAudio {
+                        asset_id: "entered".into(),
                     }],
                     overrides: vec![],
                 },
@@ -143,9 +150,8 @@ fn ordered_initial_entries_transitions_shared_guards_and_overrides() {
                         name: "flag".into(),
                         value: json!(true),
                     },
-                    Action::Speak {
-                        text: "transition".into(),
-                        lang: "en".into(),
+                    Action::PlayAudio {
+                        asset_id: "transition".into(),
                     },
                 ],
             }],
@@ -156,9 +162,8 @@ fn ordered_initial_entries_transitions_shared_guards_and_overrides() {
             states: vec![
                 State {
                     id: "a".into(),
-                    on_enter: vec![Action::Speak {
-                        text: "initial".into(),
-                        lang: "en".into(),
+                    on_enter: vec![Action::PlayAudio {
+                        asset_id: "initial".into(),
                     }],
                     overrides: vec![],
                 },
@@ -192,7 +197,7 @@ fn ordered_initial_entries_transitions_shared_guards_and_overrides() {
         .host_actions
         .iter()
         .filter_map(|a| match a {
-            HostAction::Speak { text, .. } => Some(text.as_str()),
+            HostAction::PlayAudio { asset_id } => Some(asset_id.as_str()),
             _ => None,
         })
         .collect();
@@ -322,13 +327,12 @@ fn cues_zero_crossings_seek_and_host_only_audio() {
         duration: None,
         volume: 1.0,
     });
-    p.speech_cues.push(SpeechCue {
-        id: "say".into(),
+    p.audio_cues.push(AudioCue {
+        id: "later".into(),
+        asset_id: "sound".into(),
         time: 0.5,
-        text: "hi".into(),
-        lang: "en".into(),
-        rate: 1.0,
-        pitch: 1.0,
+        offset: 0.0,
+        duration: None,
         volume: 1.0,
     });
     let mut r = Runtime::new(p).unwrap();
@@ -337,8 +341,8 @@ fn cues_zero_crossings_seek_and_host_only_audio() {
         HostAction::AudioCue { .. }
     ));
     assert!(matches!(
-        r.tick(0.5).unwrap().host_actions[0],
-        HostAction::SpeechCue { .. }
+        &r.tick(0.5).unwrap().host_actions[0],
+        HostAction::AudioCue { cue } if cue.id == "later"
     ));
     assert!(r
         .execute(Request::Seek { time: 0.0 })
@@ -346,8 +350,8 @@ fn cues_zero_crossings_seek_and_host_only_audio() {
         .host_actions
         .is_empty());
     assert!(matches!(
-        r.tick(0.5).unwrap().host_actions[0],
-        HostAction::SpeechCue { .. }
+        &r.tick(0.5).unwrap().host_actions[0],
+        HostAction::AudioCue { cue } if cue.id == "later"
     ));
     assert!(matches!(
         act(

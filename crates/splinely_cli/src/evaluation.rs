@@ -1,8 +1,8 @@
 //! Strict CLI JSON adapter for the core's stateless evaluation context.
 use crate::{check_preserved, failure, load, read_json, Result};
-use splinely_document::{ClipPlayback, EvaluationContext, PropertyOverride};
 use serde::{Deserialize, Serialize};
 use serde_json::{json, Value};
+use splinely_document::{ClipPlayback, EvaluationContext, PropertyOverride};
 use std::collections::BTreeMap;
 
 #[derive(Default, Deserialize, Serialize)]

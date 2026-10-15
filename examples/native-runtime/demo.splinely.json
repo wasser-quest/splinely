@@ -10,7 +10,7 @@
   }],
   "stateMachines": [{"id": "main", "initial": "idle", "states": [
     {"id": "idle"},
-    {"id": "talking", "onEnter": [{"type": "speak", "text": "Hello from the native host", "lang": "en"}]}
+    {"id": "talking", "onEnter": [{"type": "emit", "event": {"name": "greeted", "target": null}}]}
   ], "transitions": [{"from": "idle", "to": "talking", "event": {"name": "click", "target": "box"},
     "actions": [{"type": "blendClip", "clipId": "move", "weight": 0, "duration": 1}]
   }]}],

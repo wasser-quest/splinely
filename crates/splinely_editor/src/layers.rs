@@ -105,7 +105,6 @@ pub(crate) fn apply_layer_command(
                     || next.state_machines.iter().any(|n| n.id == id)
                     || next.audio_assets.iter().any(|n| n.id == id)
                     || next.audio_cues.iter().any(|n| n.id == id)
-                    || next.speech_cues.iter().any(|n| n.id == id)
             };
             let mut suffix = 1_u64;
             let new_id = loop {

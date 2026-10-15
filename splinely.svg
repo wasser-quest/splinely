@@ -1,15 +1,19 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="800" height="600" viewBox="0 0 800 600" data-splinely-version="1">
+<!-- Created with Splinely 0.3.0 -->
+<metadata><splinely:generator xmlns:splinely="urn:splinely:metadata" name="Splinely" version="0.3.0" schemaVersion="1"/></metadata>
 <title>Splinely demo</title>
 <circle id="circle" data-splinely-node="circle" transform="translate(0 76) rotate(0) scale(1 1)" fill="rgb(25.49019607843137% 56.86274509803921% 92.15686274509804%)" fill-opacity="1" stroke="none" stroke-opacity="1" stroke-width="1" opacity="1" cx="180" cy="180" r="50"/>
 <text id="caption" data-splinely-node="caption" transform="translate(0 0) rotate(0) scale(1 1)" fill="rgb(31.372549019607842% 54.90196078431373% 94.11764705882352%)" fill-opacity="1" stroke="none" stroke-opacity="1" stroke-width="1" opacity="1" x="50" y="70" font-size="16">Click the circle; edit, animate, export.</text>
-<metadata id="splinely-project">{&quot;schemaVersion&quot;:1,&quot;name&quot;:&quot;Splinely demo&quot;,&quot;width&quot;:800.0,&quot;height&quot;:600.0,&quot;nodes&quot;:[{&quot;id&quot;:&quot;circle&quot;,&quot;name&quot;:&quot;&quot;,&quot;boneId&quot;:null,&quot;transform&quot;:{&quot;x&quot;:130.0,&quot;y&quot;:76.0,&quot;rotation&quot;:0.0,&quot;scaleX&quot;:1.0,&quot;scaleY&quot;:1.0},&quot;style&quot;:{&quot;fill&quot;:{&quot;r&quot;:0.2549019607843137,&quot;g&quot;:0.5686274509803921,&quot;b&quot;:0.9215686274509803,&quot;a&quot;:1.0},&quot;stroke&quot;:null,&quot;strokeWidth&quot;:1.0,&quot;opacity&quot;:1.0},&quot;kind&quot;:{&quot;type&quot;:&quot;circle&quot;,&quot;cx&quot;:180.0,&quot;cy&quot;:180.0,&quot;radius&quot;:50.0}},{&quot;id&quot;:&quot;caption&quot;,&quot;name&quot;:&quot;&quot;,&quot;boneId&quot;:null,&quot;transform&quot;:{&quot;x&quot;:0.0,&quot;y&quot;:0.0,&quot;rotation&quot;:0.0,&quot;scaleX&quot;:1.0,&quot;scaleY&quot;:1.0},&quot;style&quot;:{&quot;fill&quot;:{&quot;r&quot;:0.3137254901960784,&quot;g&quot;:0.5490196078431373,&quot;b&quot;:0.9411764705882353,&quot;a&quot;:1.0},&quot;stroke&quot;:null,&quot;strokeWidth&quot;:1.0,&quot;opacity&quot;:1.0},&quot;kind&quot;:{&quot;type&quot;:&quot;text&quot;,&quot;x&quot;:50.0,&quot;y&quot;:70.0,&quot;text&quot;:&quot;Click the circle; edit, animate, export.&quot;,&quot;fontSize&quot;:16.0}}],&quot;bones&quot;:[],&quot;clips&quot;:[{&quot;id&quot;:&quot;intro&quot;,&quot;name&quot;:&quot;Intro&quot;,&quot;duration&quot;:3.0,&quot;looping&quot;:true,&quot;autoplay&quot;:true,&quot;tracks&quot;:[{&quot;nodeId&quot;:&quot;circle&quot;,&quot;property&quot;:&quot;x&quot;,&quot;keyframes&quot;:[{&quot;time&quot;:0.0,&quot;value&quot;:{&quot;type&quot;:&quot;number&quot;,&quot;value&quot;:0.0},&quot;easing&quot;:{&quot;type&quot;:&quot;linear&quot;}},{&quot;time&quot;:1.5,&quot;value&quot;:{&quot;type&quot;:&quot;number&quot;,&quot;value&quot;:320.0},&quot;easing&quot;:{&quot;type&quot;:&quot;linear&quot;}},{&quot;time&quot;:3.0,&quot;value&quot;:{&quot;type&quot;:&quot;number&quot;,&quot;value&quot;:0.0},&quot;easing&quot;:{&quot;type&quot;:&quot;linear&quot;}}]}]}],&quot;stateMachines&quot;:[{&quot;id&quot;:&quot;main&quot;,&quot;initial&quot;:&quot;idle&quot;,&quot;states&quot;:[{&quot;id&quot;:&quot;idle&quot;,&quot;onEnter&quot;:[],&quot;overrides&quot;:[]},{&quot;id&quot;:&quot;active&quot;,&quot;onEnter&quot;:[],&quot;overrides&quot;:[]}],&quot;transitions&quot;:[{&quot;from&quot;:&quot;idle&quot;,&quot;to&quot;:&quot;active&quot;,&quot;event&quot;:{&quot;name&quot;:&quot;click&quot;,&quot;target&quot;:&quot;circle&quot;},&quot;guard&quot;:null,&quot;actions&quot;:[{&quot;type&quot;:&quot;playClip&quot;,&quot;clipId&quot;:&quot;intro&quot;}]}]}],&quot;variables&quot;:{},&quot;audioAssets&quot;:[],&quot;audioCues&quot;:[],&quot;speechCues&quot;:[],&quot;customJs&quot;:&quot;&quot;,&quot;rawSvg&quot;:&quot;&quot;}</metadata>
+<metadata id="splinely-project">{&quot;schemaVersion&quot;:1,&quot;name&quot;:&quot;Splinely demo&quot;,&quot;width&quot;:800.0,&quot;height&quot;:600.0,&quot;nodes&quot;:[{&quot;id&quot;:&quot;circle&quot;,&quot;name&quot;:&quot;&quot;,&quot;boneId&quot;:null,&quot;visible&quot;:true,&quot;locked&quot;:false,&quot;originalKind&quot;:null,&quot;transform&quot;:{&quot;x&quot;:130.0,&quot;y&quot;:76.0,&quot;rotation&quot;:0.0,&quot;scaleX&quot;:1.0,&quot;scaleY&quot;:1.0},&quot;style&quot;:{&quot;fill&quot;:{&quot;r&quot;:0.2549019607843137,&quot;g&quot;:0.5686274509803921,&quot;b&quot;:0.9215686274509803,&quot;a&quot;:1.0},&quot;stroke&quot;:null,&quot;strokeWidth&quot;:1.0,&quot;opacity&quot;:1.0},&quot;kind&quot;:{&quot;type&quot;:&quot;circle&quot;,&quot;cx&quot;:180.0,&quot;cy&quot;:180.0,&quot;radius&quot;:50.0}},{&quot;id&quot;:&quot;caption&quot;,&quot;name&quot;:&quot;&quot;,&quot;boneId&quot;:null,&quot;visible&quot;:true,&quot;locked&quot;:false,&quot;originalKind&quot;:null,&quot;transform&quot;:{&quot;x&quot;:0.0,&quot;y&quot;:0.0,&quot;rotation&quot;:0.0,&quot;scaleX&quot;:1.0,&quot;scaleY&quot;:1.0},&quot;style&quot;:{&quot;fill&quot;:{&quot;r&quot;:0.3137254901960784,&quot;g&quot;:0.5490196078431373,&quot;b&quot;:0.9411764705882353,&quot;a&quot;:1.0},&quot;stroke&quot;:null,&quot;strokeWidth&quot;:1.0,&quot;opacity&quot;:1.0},&quot;kind&quot;:{&quot;type&quot;:&quot;text&quot;,&quot;x&quot;:50.0,&quot;y&quot;:70.0,&quot;text&quot;:&quot;Click the circle; edit, animate, export.&quot;,&quot;fontSize&quot;:16.0}}],&quot;bones&quot;:[],&quot;clips&quot;:[{&quot;id&quot;:&quot;intro&quot;,&quot;name&quot;:&quot;Intro&quot;,&quot;duration&quot;:3.0,&quot;looping&quot;:true,&quot;autoplay&quot;:true,&quot;blendMode&quot;:&quot;override&quot;,&quot;weight&quot;:1.0,&quot;tracks&quot;:[{&quot;nodeId&quot;:&quot;circle&quot;,&quot;property&quot;:&quot;x&quot;,&quot;keyframes&quot;:[{&quot;time&quot;:0.0,&quot;value&quot;:{&quot;type&quot;:&quot;number&quot;,&quot;value&quot;:0.0},&quot;easing&quot;:{&quot;type&quot;:&quot;linear&quot;}},{&quot;time&quot;:1.5,&quot;value&quot;:{&quot;type&quot;:&quot;number&quot;,&quot;value&quot;:320.0},&quot;easing&quot;:{&quot;type&quot;:&quot;linear&quot;}},{&quot;time&quot;:3.0,&quot;value&quot;:{&quot;type&quot;:&quot;number&quot;,&quot;value&quot;:0.0},&quot;easing&quot;:{&quot;type&quot;:&quot;linear&quot;}}]}]}],&quot;stateMachines&quot;:[{&quot;id&quot;:&quot;main&quot;,&quot;initial&quot;:&quot;idle&quot;,&quot;states&quot;:[{&quot;id&quot;:&quot;idle&quot;,&quot;onEnter&quot;:[],&quot;overrides&quot;:[]},{&quot;id&quot;:&quot;active&quot;,&quot;onEnter&quot;:[],&quot;overrides&quot;:[]}],&quot;transitions&quot;:[{&quot;from&quot;:&quot;idle&quot;,&quot;to&quot;:&quot;active&quot;,&quot;event&quot;:{&quot;name&quot;:&quot;click&quot;,&quot;target&quot;:&quot;circle&quot;},&quot;guard&quot;:null,&quot;actions&quot;:[{&quot;type&quot;:&quot;playClip&quot;,&quot;clipId&quot;:&quot;intro&quot;}]}]}],&quot;variables&quot;:{},&quot;audioAssets&quot;:[],&quot;audioCues&quot;:[],&quot;customJs&quot;:&quot;&quot;,&quot;rawSvg&quot;:&quot;&quot;}</metadata>
 <script type="application/ecmascript"><![CDATA[/* Splinely runtime v1. Dependency-free; embed this file unchanged in an SVG script. */
 (function (host) {
   'use strict';
   const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
   const finite = (v, label) => { if (typeof v !== 'number' || !Number.isFinite(v)) throw new Error(label + ' must be finite'); return v; };
+  const weightValue = v => { finite(v,'Clip weight'); if(v<0 || v>1)throw new Error('Clip weight must be in [0,1]'); return v; };
+  const fadeDuration = v => { finite(v,'Fade duration'); if(v<0)throw new Error('Fade duration must be nonnegative'); return v; };
   const list = v => Array.isArray(v) ? v : Object.entries(v || {}).map(([id, item]) => ({ ...item, id: item.id || id }));
-  const unwrap = v => v && (v.type === 'number' || v.type === 'color') ? v.value : v;
+  const unwrap = v => v && ['number','color','gradient','path'].includes(v.type) ? v.value : v;
   const own = (o, k) => Object.prototype.hasOwnProperty.call(o, k);
   function equal(a,b) {
     if(a===b)return true;if(!a || !b || typeof a!=='object' || typeof b!=='object' || Array.isArray(a)!==Array.isArray(b))return false;
@@ -21,6 +25,34 @@
     let hex = v.slice(1); if (hex.length < 5) hex = [...hex].map(c => c + c).join('');
     return [0,2,4,6].map((i) => i < hex.length ? parseInt(hex.slice(i,i+2),16) / 255 : 1);
   }
+  // Structured values as shape + numbers: gradients (angle, stops) and path
+  // data (letters, numbers) interpolate and blend number by number.
+  const pathToken = /[a-zA-Z]|[-+]?(?:\d+\.?\d*|\.\d+)(?:[eE][-+]?\d+)?/g;
+  const pathNumber = v => String(Math.round(v*1000)/1000+0);
+  function vectorOf(v) {
+    v = unwrap(v);
+    if (typeof v === 'number') return {kind:'n', shape:'n', nums:[v]};
+    const c = color(v); if (c) return {kind:'c', shape:'c', nums:c};
+    if (v && typeof v === 'object' && Array.isArray(v.stops)) {
+      const nums=[Number(v.angle)||0];
+      for (const s of v.stops) nums.push(Number(s.offset)||0, ...(color(s.color) || [0,0,0,1]));
+      return {kind:'g', shape:'g'+(v.radial?'r':'l')+v.stops.length, nums, radial:!!v.radial};
+    }
+    if (typeof v === 'string' && /^\s*[Mm]/.test(v)) {
+      const tokens = v.match(pathToken) || [];
+      return {kind:'p', shape:tokens.map(t=>/[a-zA-Z]/.test(t)?t:'#').join(''), nums:tokens.filter(t=>!/[a-zA-Z]/.test(t)).map(Number), template:tokens};
+    }
+    return null;
+  }
+  function fromVector(vec, n) {
+    if (vec.kind === 'n') return n[0];
+    if (vec.kind === 'c') return {r:n[0], g:n[1], b:n[2], a:n[3]};
+    if (vec.kind === 'g') {
+      const stops=[]; for (let i=1;i<n.length;i+=5) stops.push({offset:clamp(n[i],0,1), color:{r:n[i+1], g:n[i+2], b:n[i+3], a:n[i+4]}});
+      return {radial:vec.radial, angle:n[0], stops};
+    }
+    let k=0; return vec.template.map(t => /[a-zA-Z]/.test(t) ? t : pathNumber(n[k++])).join(' ');
+  }
   function interpolate(a, b, t) {
     a = unwrap(a); b = unwrap(b);
     if (typeof a === 'number' && typeof b === 'number') return t <= 0 ? a : t >= 1 ? b : a*(1-t)+b*t;
@@ -30,6 +62,8 @@
       return {r:c[0],g:c[1],b:c[2],a:c[3]};
     }
     if (Array.isArray(a) && Array.isArray(b) && a.length === b.length && [...a,...b].every(Number.isFinite)) return a.map((v,i) => t <= 0 ? v : t >= 1 ? b[i] : v*(1-t)+b[i]*t);
+    const va = vectorOf(a), vb = vectorOf(b);
+    if (va && vb && va.shape === vb.shape) return fromVector(va, va.nums.map((v,i) => t <= 0 ? v : t >= 1 ? vb.nums[i] : v*(1-t)+vb.nums[i]*t));
     return t < 1 ? a : b;
   }
   function easing(spec, t) {
@@ -59,6 +93,7 @@
     const result={};
     for(const [key,value] of Object.entries(props)) {
       if(!boneProperties.has(key)) throw new Error('Unsupported bone property: '+key);
+      if(value && typeof value==='object' && (value.type!=='number' || !own(value,'value'))) throw new Error('Bone '+key+' must be numeric');
       result[key]=finite(unwrap(value),'Bone '+key);
     }
     return result;
@@ -83,7 +118,7 @@
         rotation+=parent.rotation;
       }
       const angle=(rotation%360)*Math.PI/180;
-      const pose={id:b.id,x:finite(x,'Bone world x'),y:finite(y,'Bone world y'),rotation:finite(rotation,'Bone world rotation'),tipX:finite(x+length*Math.cos(angle),'Bone tip x'),tipY:finite(y+length*Math.sin(angle),'Bone tip y')};
+      const pose={id:b.id,x:finite(x,'Bone world x'),y:finite(y,'Bone world y'),rotation:finite(rotation,'Bone world rotation'),length,tipX:finite(x+length*Math.cos(angle),'Bone tip x'),tipY:finite(y+length*Math.sin(angle),'Bone tip y')};
       poses.set(id,pose); return pose;
     }
     return bones.map(b=>solve(b.id,1));
@@ -97,13 +132,17 @@
     const clips = unique(list(project.clips).map(c => {
       if(c.id==='@timeline')throw new Error('Reserved clip id: @timeline');
       const duration=finite(c.duration,'Clip duration'); if (duration <= 0) throw new Error('Clip duration must be positive');
-      return {...c,duration,loop: !!(c.looping == null ? c.loop : c.looping),tracks:(c.tracks || []).map(t => {
+      const blendMode=c.blendMode===undefined?'override':c.blendMode;
+      if(!['override','weighted'].includes(blendMode))throw new Error('Unsupported blendMode: '+blendMode);
+      const weight=weightValue(c.weight===undefined?1:c.weight);
+      return {...c,duration,blendMode,weight,loop: !!(c.looping == null ? c.loop : c.looping),tracks:(c.tracks || []).map(t => {
         if(typeof (t.nodeId || t.target)!=='string' || typeof t.property!=='string')throw new Error('Track requires target and property');
         if(!t.keyframes || !t.keyframes.length)throw new Error('Track requires keyframes');
         const keyframes=t.keyframes.map(k => {
           if (finite(k.time,'Keyframe time') < 0 || k.time > duration) throw new Error('Keyframe outside clip');
           const value=unwrap(k.value);if(value===undefined)throw new Error('Keyframe requires value');
           if(typeof value==='number' || (k.value && k.value.type==='number'))finite(value,'Keyframe value');
+          if(blendMode==='weighted' && !vectorOf(value))throw new Error('Weighted keyframe must be numeric, RGBA, gradient or path data');
           if(Array.isArray(value) && value.some(v=>typeof v!=='number' || !Number.isFinite(v)))throw new Error('Keyframe array must contain finite numbers');
           easing(k.easing,0.5);return {...k};
         }).sort((a,b)=>a.time-b.time);
@@ -117,13 +156,13 @@
       return {...m,states};
     }),'machine');
     for(const source of [project,...clips]) {
-      for(const cue of [...(source.audioCues || []),...(source.speechCues || [])]) {
+      for(const cue of source.audioCues || []) {
         if(finite(cue.time,'Cue time')<0)throw new Error('Cue time must be nonnegative');
         for(const k of ['offset','volume','duration'])if(cue[k]!=null && (finite(cue[k],'Cue '+k)<0 || (k==='duration' && cue[k]===0)))throw new Error('Invalid cue '+k);
       }
     }
     const nodes=unique(list(project.nodes),'node'), bones=unique(list(project.bones),'bone'), assets=unique(list(project.audioAssets || project.assets),'asset');
-    unique([...nodes,...bones,...clips,...machines,...assets,...(project.audioCues || []),...(project.speechCues || []),...clips.flatMap(c=>[...(c.audioCues || []),...(c.speechCues || [])]).filter(x=>x.id!=null),'global');
+    unique([...nodes,...bones,...clips,...machines,...assets,...(project.audioCues || []),...clips.flatMap(c=>c.audioCues || [])].filter(x=>x.id!=null),'global');
     const boneIds=new Set(bones.map(b=>b.id));
     for(const b of bones) if(b.parentId!=null && (typeof b.parentId!=='string' || !boneIds.has(b.parentId))) throw new Error('Missing bone parent: '+b.parentId);
     solveBones(bones);
@@ -134,6 +173,16 @@
       if(Array.isArray(s.overrides)) for(const o of s.overrides) validatePatch(o.nodeId || o.target,{[o.property]:o.value});
       else for(const [id,props] of Object.entries(s.overrides || {})) validatePatch(id,props);
     }
+    const validateActions=items=>{for(const a of items || [])if(a.type==='blendClip') {
+      const c=clips.find(c=>c.id===a.clipId);
+      if(!c || c.blendMode!=='weighted')throw new Error('blendClip requires an existing weighted clip: '+a.clipId);
+      weightValue(a.weight);fadeDuration(a.duration===undefined?0:a.duration);
+    }};
+    for(const m of machines) {
+      for(const s of m.states) {for(const key of ['onEnter','entry','exit','onExit'])validateActions(s[key]);for(const t of s.transitions || [])validateActions(t.actions);}
+      for(const t of m.transitions || [])validateActions(t.actions);
+    }
+    for(const b of project.interactions || [])validateActions(b.actions);
     return {...project,nodes,bones,clips,machines,assets};
   }
   function owningSvg(el) {
@@ -177,11 +226,11 @@
     const elements=new Map(); if(svg.id) elements.set(svg.id,svg);
     for(const el of svg.querySelectorAll('[id]'))if((!owningSvg(el) || owningSvg(el)===svg) && (!el.namespaceURI || el.namespaceURI==='http://www.w3.org/2000/svg') && !['svg','script','metadata'].includes((el.tagName || '').toLowerCase()))elements.set(el.id,el);
     for (const node of project.nodes) {
-      const el=elements.get(node.id); if (!el) {report('Missing SVG node: '+node.id); continue;}
+      const el=elements.get(node.id); if (!el && node.visible!==false) {report('Missing SVG node: '+node.id); continue;}
       const core=!!node.kind;
       const base=core ? {...node.transform,...node.style} : {...node.properties};
-      if(core) { for(const k of ['width','height','radius','fontSize','d']) if(node.kind[k]!=null) base[k]=node.kind[k]; }
-      nodes.set(node.id,{el,base,core,boneId:node.boneId,original:new Map(),lastKeys:new Set()});
+      if(core) { for(const k of ['width','height','radius','fontSize','d']) if(node.kind[k]!=null) base[k]=node.kind[k]; if(node.gradient) base.gradient=node.gradient; }
+      nodes.set(node.id,{el,base,core,visible:node.visible!==false,boneId:node.boneId,gradient:!!(core && node.gradient),original:new Map(),lastKeys:new Set()});
     }
     // Adapter allows exported elements without a corresponding node descriptor.
     function getNode(id) {
@@ -189,12 +238,32 @@
       if(!nodes.has(id)) throw new Error('Unknown node: '+id); return nodes.get(id);
     }
     function attr(node,name,value) {
+      if(dead) return;
       if(!node.original.has(name)) node.original.set(name,node.el.getAttribute(name));
       if(value == null) node.el.removeAttribute(name); else node.el.setAttribute(name,String(value));
     }
     const aliases={radius:'r',fontSize:'font-size',strokeWidth:'stroke-width',scaleX:'scaleX',scaleY:'scaleY'};
     const attrName=k => Object.prototype.hasOwnProperty.call(aliases,k)?aliases[k]:k;
     const supported=new Set('x y cx cy r radius rx ry width height fill stroke opacity fill-opacity stroke-opacity strokeWidth stroke-width fontSize font-size rotation scaleX scaleY transform d points visibility'.split(' '));
+    // Update the exported <linearGradient>/<radialGradient> referenced by fill="url(#…)".
+    function applyGradient(node,g) {
+      if(!node.el || !g || !Array.isArray(g.stops)) return;
+      const ref=/url\(#([^)]+)\)/.exec(node.el.getAttribute('fill') || '');
+      const el=ref && elements.get(ref[1]);
+      if(!el) return;
+      if(!g.radial) {
+        const a=(Number(g.angle)||0)*Math.PI/180, r=v=>Math.round(v*1e6)/1e6+0;
+        el.setAttribute('x1',r(0.5-Math.cos(a)/2)); el.setAttribute('y1',r(0.5-Math.sin(a)/2));
+        el.setAttribute('x2',r(0.5+Math.cos(a)/2)); el.setAttribute('y2',r(0.5+Math.sin(a)/2));
+      }
+      const stops=[...(el.children || [])].filter(c=>(c.tagName || '').toLowerCase()==='stop');
+      stops.forEach((stop,i)=>{
+        const s=g.stops[i], c=s && color(s.color); if(!c) return;
+        stop.setAttribute('offset',clamp(Number(s.offset)||0,0,1));
+        stop.setAttribute('stop-color',`rgb(${c.slice(0,3).map(v=>Math.round(clamp(v,0,1)*255)).join(',')})`);
+        stop.setAttribute('stop-opacity',clamp(c[3],0,1));
+      });
+    }
     function render() {
       if(dead) return;
       const values=new Map([...nodes].map(([id,n]) => [id,{...n.base}]));
@@ -205,17 +274,78 @@
       } catch(e){report(e);} };
       for(const m of machines.values()) {
         const state=m.states.get(m.state); const overrides=state && state.overrides;
-        if(Array.isArray(overrides)) for(const o of overrides) merge(o.nodeId || o.target,{[o.property]:unwrap(o.value)});
+        if(Array.isArray(overrides)) for(const o of overrides) merge(o.nodeId || o.target,{[o.property]:o.value});
         else for(const [id,p] of Object.entries(overrides || {})) merge(id,p);
       }
-      for(const c of [...clips.values()].sort((a,b)=>a.priority-b.priority || a.index-b.index)) if(c.active) for(const t of c.tracks) {
-        const value=evaluateTrack(t,c.time); if(value!==undefined) merge(t.target,{[t.property]:value});
+      let group=new Map();
+      const flush=()=>{
+        for(const [id,props] of group)for(const [property,samples] of props) {
+          const total=samples.reduce((s,v)=>s+v.weight,0);if(total===0)continue;
+          try {
+            let base=(bones.has(id)?boneValues.get(id):values.get(id) || getNode(id).base)[property];
+            const residual=Math.max(0,1-total), divisor=Math.max(1,total);
+            // Adapter baselines come from original DOM, never a previously animated frame.
+            if(residual>0 && base===undefined && !bones.has(id)) {
+              const node=getNode(id), name=attrName(property);
+              if(!node.core && node.el) {
+                base=node.original.has(name)?node.original.get(name):node.el.getAttribute(name);
+                if(typeof samples[0].value==='number' && base!=null)base=Number(base);
+                if(property==='stroke' && base==='none')base=null;
+              }
+            }
+            let value;
+            if(typeof samples[0].value==='number') {
+              const fallback=['scaleX','scaleY','opacity'].includes(property)?1:0;
+              const baseline=residual===0?0:finite(base==null?fallback:unwrap(base),'Weighted baseline');
+              value=baseline*residual+samples.reduce((s,v)=>s+v.value*(v.weight/divisor),0);
+              finite(value,'Weighted result');
+            } else if(['gradient','d'].includes(property)) {
+              // Structured values blend number by number when shapes match;
+              // otherwise the heaviest contribution wins.
+              const vectors=samples.map(v=>vectorOf(v.value)), baseVector=vectorOf(base);
+              const shape=vectors[0] && vectors[0].shape;
+              if(vectors.every(v=>v && v.shape===shape) && (residual===0 || (baseVector && baseVector.shape===shape))) {
+                const nums=vectors[0].nums.map((_,i)=>(residual===0?0:baseVector.nums[i]*residual)+vectors.reduce((s,v,k)=>s+v.nums[i]*(samples[k].weight/divisor),0));
+                value=fromVector(vectors[0],nums);
+              } else {
+                const heaviest=samples.reduce((a,b)=>b.weight>a.weight?b:a);
+                value=heaviest.weight>=residual?heaviest.value:base;
+              }
+            } else {
+              const baseline=residual===0?[0,0,0,0]:color(unwrap(base)) || (property==='stroke' && base==null?[0,0,0,0]:null);
+              if(!baseline)throw new Error('Weighted baseline must be RGBA');
+              const channels=baseline.map((b,i)=>b*residual+samples.reduce((s,v)=>s+color(v.value)[i]*(v.weight/divisor),0));
+              value={r:channels[0],g:channels[1],b:channels[2],a:channels[3]};
+            }
+            merge(id,{[property]:value});
+          } catch(e){report(e);}
+        }
+        group=new Map();
+      };
+      for(const c of [...clips.values()].sort((a,b)=>a.priority-b.priority || a.index-b.index)) if(c.active) {
+        if(c.blendMode!=='weighted')flush();
+        // A clip contributes at most once per property (last duplicate track wins).
+        const sampled=new Map();
+        for(const t of c.tracks) {
+          const value=evaluateTrack(t,c.time);if(value===undefined)continue;
+          if(c.blendMode!=='weighted')merge(t.target,{[t.property]:value});
+          else {if(!sampled.has(t.target))sampled.set(t.target,new Map());sampled.get(t.target).set(t.property,value);}
+        }
+        if(c.blendMode==='weighted' && c.weight>0)for(const [id,props] of sampled) {
+          if(!group.has(id))group.set(id,new Map());
+          for(const [property,value] of props) {
+            const target=group.get(id);if(!target.has(property))target.set(property,[]);
+            target.get(property).push({value,weight:c.weight});
+          }
+        }
       }
+      flush();
       for(const [id,p] of explicit) merge(id,p);
       let poses;
       try {bonePoses=solveBones([...boneValues.values()]); poses=new Map(bonePoses.map(p=>[p.id,p]));}
       catch(e) {report(e);return;} // Keep the last valid frame on FK overflow.
       for(const [id,props] of values) {
+        if(dead) return;
         const binding=getNode(id).boneId;
         if(binding!=null) {
           try {
@@ -226,16 +356,25 @@
           } catch(e) {report(e);continue;}
         }
         const node=getNode(id), keys=new Set();
-        if(node.core) {
+        if(!node.el) continue; // Hidden descriptors remain valid animation/override targets.
+        if(node.visible===false) {attr(node,'visibility','hidden'); keys.add('visibility');}
+        const composed=node.core || binding!=null;
+        if(composed) {
           try {
             const component=(key,fallback)=>finite(props[key]==null?fallback:unwrap(props[key]),'Transform '+key);
             attr(node,'transform',`translate(${component('x',0)} ${component('y',0)}) rotate(${component('rotation',0)}) scale(${component('scaleX',1)} ${component('scaleY',1)})`);
           } catch(error){report(error);} keys.add('transform');
         }
         for(const [key,raw] of Object.entries(props)) {
-          if(node.core && ['x','y','rotation','scaleX','scaleY'].includes(key)) continue;
+          if(dead) return;
+          if(composed && ['x','y','rotation','scaleX','scaleY'].includes(key)) continue;
+          if(composed && key==='transform') {report('Raw transform is unsupported on composed nodes');continue;}
           // Never turn schema properties into scripts, URLs, or markup.
+          if(key==='gradient') {applyGradient(node,unwrap(raw));continue;}
           if(!supported.has(key)) {report('Unsupported property: '+key);continue;}
+          // A gradient fill is static SVG; colour values must not replace its url().
+          if(node.gradient && (key==='fill' || key==='fill-opacity')) continue;
+          if(node.visible===false && key==='visibility') continue;
           const name=attrName(key), value=unwrap(raw), col=color(value);
           if((key==='fill'||key==='stroke') && col) {
             attr(node,name,`rgb(${Math.round(clamp(col[0],0,1)*255)},${Math.round(clamp(col[1],0,1)*255)},${Math.round(clamp(col[2],0,1)*255)})`);
@@ -260,9 +399,10 @@
       for(const a of items || []) {
         try {
           switch(a.type) {
-            case 'setProperty': set(a.nodeId,{[a.property]:unwrap(a.value)});break;
+            case 'setProperty': set(a.nodeId,{[a.property]:a.value});break;
             case 'set': set(a.target,a.properties);break;
             case 'playClip': case 'clip.play': clip(a.clipId || a.clip).play();break;
+            case 'blendClip': clip(a.clipId).fadeTo(a.weight,a.duration===undefined?0:a.duration);break;
             case 'stopClip': case 'clip.stop': clip(a.clipId || a.clip).stop();break;
             case 'clip.pause': clip(a.clipId || a.clip).pause();break;
             case 'clip.seek': clip(a.clipId || a.clip).seek(a.time);break;
@@ -270,7 +410,6 @@
             case 'emit': emit(typeof a.event === 'object'?a.event.name:a.event,detail,typeof a.event==='object'?a.event.target:undefined);break;
             case 'machine.send': send(a.machine,a.event,detail);break;
             case 'playAudio': case 'audio.play': audio.play(a.assetId || a.asset);break;
-            case 'speak': case 'speech.say': speech.say(a.text,a);break;
             default: throw new Error('Unsupported action: '+a.type);
           }
         } catch(e) {report(e);}
@@ -279,7 +418,7 @@
     function eventMatches(spec,event,target) { return typeof spec==='string' ? spec===event : spec && spec.name===event && (spec.target==null || spec.target===target); }
     function guard(g) {if(!g)return true; if(typeof g !== 'object' || !own(g,'variable')) {report('Unsupported guard');return false;} return variables.has(g.variable) && equal(variables.get(g.variable),g.equals);}
     function send(id,event,detail,target) {ensure();if(!machines.has(id)) throw new Error('Unknown machine: '+id);enqueue({id,event,detail,target});}
-    function enqueue(item) {queue.push(item);drain();}
+    function enqueue(item) {if(!processing){syncClock();ensure();}queue.push(item);drain();}
     function drain() {
       if(processing)return; processing=true;
       try {
@@ -307,24 +446,21 @@
     }
     function machine(id) {ensure();const m=machines.get(id);if(!m) throw new Error('Unknown machine: '+id);return {send:(event,detail)=>send(id,typeof event==='object'?event.name:event,detail,typeof event==='object'?event.target:undefined),get state(){return m.state;}};}
     const callbacks=new Set();
-    for(const [index,c] of project.clips.entries()) clips.set(c.id,{...c,index,priority:c.priority || 0,time:0,playing:false,active:false,cycle:0,revision:0,sources:new Map()});
+    for(const [index,c] of project.clips.entries()) clips.set(c.id,{...c,index,priority:c.priority || 0,time:0,playing:false,active:false,cycle:0,revision:0,ramp:null,sources:new Map()});
     const first=project.clips[0] && project.clips[0].id;
-    const transport={id:'@timeline',duration:Infinity,time:0,playing:false,manual:false,loop:false,cycle:0,revision:0,sources:new Map(),audioCues:project.audioCues || [],speechCues:project.speechCues || []};
+    const transport={id:'@timeline',duration:Infinity,time:0,playing:false,manual:false,loop:false,cycle:0,revision:0,sources:new Map(),audioCues:project.audioCues || []};
     const cueList=c => c.audioCues || [];
-    const speechList=c => c.speechCues || [];
     function transportPlay(){if(!transport.playing){transport.playing=true;transport.revision++;if(transport.time===0)crossing(transport,0,0,true);schedule(transport);}}
-    function transportPause(){transport.playing=false;transport.revision++;stopSources(transport);speech.cancel();}
+    function transportPause(){transport.playing=false;transport.revision++;stopSources(transport);}
     function getClip(id) {ensure();const c=clips.get(id);if(!c)throw new Error('Unknown clip: '+id);return c;}
     function stopSources(c) {for(const source of c.sources.values()) source.stop(); c.sources.clear();}
     function crossing(c,from,to,zero) {
       const rev=c.revision;
-      const items=[...callbacks].filter(cb=>cb.clip===c.id).map(cb=>({...cb,type:'callback'}));
-      for(const cue of speechList(c)) items.push({time:cue.time,type:'speech',cue});
+      const items=[...callbacks].filter(cb=>cb.clip===c.id);
       items.sort((a,b)=>a.time-b.time);
       for(const item of items) if((item.time>from && item.time<=to) || (zero && item.time===0)) {
         if(c.revision!==rev || dead) return false;
-        if(item.type==='callback') {if(callbacks.has(item.ref)) try{const result=item.fn({clip:c.id,time:item.time,cycle:c.cycle},api);if(result && typeof result.catch==='function')result.catch(report);}catch(e){report(e);}}
-        else speech.say(item.cue.text,item.cue);
+        if(callbacks.has(item.ref)) try{const result=item.fn({clip:c.id,time:item.time,cycle:c.cycle},api);if(result && typeof result.catch==='function')result.catch(report);}catch(e){report(e);}
       }
       return c.revision===rev && !dead;
     }
@@ -356,11 +492,14 @@
       const c=getClip(id);
       return {
         get time(){return c.time;},get duration(){return c.duration;},get playing(){return c.playing;},get loop(){return c.loop;},
+        get weight(){ensure();syncClock();return c.weight;},
+        setWeight(weight){ensure();weightValue(weight);if(c.blendMode!=='weighted')throw new Error('Weight controls require a weighted clip');syncClock();c.ramp=null;c.weight=weight;render();return this;},
+        fadeTo(weight,seconds){ensure();weightValue(weight);fadeDuration(seconds);if(c.blendMode!=='weighted')throw new Error('Weight controls require a weighted clip');syncClock();c.ramp=seconds===0?null:{from:c.weight,to:weight,duration:seconds,elapsed:0};if(seconds===0)c.weight=weight;render();return this;},
         set loop(v){ensure();c.loop=!!v;if(c.loop)c.time%=c.duration;c.revision++;stopSources(c);render();schedule(c);},
         play(){ensure();syncClock();if(c.playing)return this;if(c.time>=c.duration){c.time=0;c.cycle=0;}c.active=true;c.playing=true;c.revision++;const revision=c.revision;transportPlay();if(dead || c.revision!==revision || !c.playing)return this;render();if(c.time===0)crossing(c,0,0,true);schedule(c);return this;},
-        pause(){ensure();syncClock();c.playing=false;c.revision++;stopSources(c);speech.cancel();if(!transport.manual && ![...clips.values()].some(c=>c.playing))transportPause();return this;},
-        seek(time){ensure();syncClock();finite(time,'Seek time');c.time=c.loop?Math.max(0,time)%c.duration:clamp(time,0,c.duration);c.cycle=0;c.active=true;c.revision++;stopSources(c);speech.cancel();render();schedule(c);return this;},
-        stop(){this.pause();c.time=0;c.cycle=0;c.active=false;render();return this;}
+        pause(){ensure();syncClock();c.playing=false;c.revision++;stopSources(c);if(!transport.manual && ![...clips.values()].some(c=>c.playing))transportPause();return this;},
+        seek(time){ensure();syncClock();finite(time,'Seek time');c.time=c.loop?Math.max(0,time)%c.duration:clamp(time,0,c.duration);c.cycle=0;c.active=true;c.revision++;stopSources(c);render();schedule(c);return this;},
+        stop(){this.pause();c.ramp=null;c.time=0;c.cycle=0;c.active=false;render();return this;}
       };
     }
     function tick(delta) {
@@ -372,22 +511,28 @@
       do {
         if(++segments>10000){report('Transport catch-up limit exceeded (10000)');for(const c of clips.values())if(c.playing)clip(c.id).pause();transportPause();break;}
         const active=[transport,...clips.values()].filter(c=>c.playing);
-        if(!active.length)break;
+        const fading=[...clips.values()].filter(c=>c.ramp);
+        if(!active.length && !fading.length)break;
         let step=remaining;
+        for(const c of fading)step=Math.min(step,c.ramp.duration-c.ramp.elapsed);
         for(const c of active) {
           step=Math.min(step,c.duration-c.time);
           for(const cb of callbacks)if(cb.clip===c.id && cb.time>c.time)step=Math.min(step,cb.time-c.time);
-          for(const cue of speechList(c))if(cue.time>c.time)step=Math.min(step,cue.time-c.time);
         }
         const snapshots=active.map(c=>({c,from:c.time,revision:c.revision}));
         for(const c of active)c.time+=step;
+        for(const c of fading) {
+          const r=c.ramp;r.elapsed=Math.min(r.duration,r.elapsed+step);
+          c.weight=r.elapsed===r.duration?r.to:r.from*(1-r.elapsed/r.duration)+r.to*(r.elapsed/r.duration);
+          if(r.elapsed===r.duration)c.ramp=null;
+        }
         remaining=Math.max(0,remaining-step);render();
         for(const {c,from,revision} of snapshots) {
           if(dead)return;if(c.revision!==revision || !c.playing)continue;
           if(!crossing(c,from,c.time,false))continue;
           if(c.time===c.duration) {
             if(!c.loop){c.playing=false;c.revision++;stopSources(c);emit('clip.end',{clip:c.id},c.id);}
-            else {c.time=0;c.cycle++;for(const [key,h] of c.sources)if(Number(key.split(':')[0])<c.cycle){h.stop();c.sources.delete(key);}crossing(c,0,0,true);}
+            else {c.time=0;c.cycle++;for(const [key,h] of c.sources)if(Number(key.split(':')[0])<c.cycle){h.stop();c.sources.delete(key);}render();crossing(c,0,0,true);}
           }
         }
       } while(remaining>0 && !dead);
@@ -400,18 +545,6 @@
       const cb={clip:id,time,fn};cb.ref=cb;callbacks.add(cb);return()=>callbacks.delete(cb);
     }
     let context=null, unlocking=null,loopBytes=0;const buffers=new Map(),independent=new Set(),loopBuffers=new Map();
-    const speechOwned=new Set();
-    const speech={
-      enable(){ensure();options.speech=true;return this;},
-      get enabled(){return !!options.speech;},
-      say(text,opts){ensure();if(!options.speech){report('Speech is opt-in: createRuntime with {speech:true}; browser speech cancellation is global');return null;}if(!env.speechSynthesis || !env.SpeechSynthesisUtterance){report('Speech synthesis unavailable');return null;}
-        const u=new env.SpeechSynthesisUtterance(String(text));for(const k of ['lang','rate','pitch','volume'])if(opts && opts[k]!=null)u[k]=opts[k];
-        speechOwned.add(u);u.onend=()=>speechOwned.delete(u);u.onerror=e=>{speechOwned.delete(u);report('Speech error: '+e.error);};env.speechSynthesis.speak(u);return u;
-      },
-      cancel(){if(speechOwned.size && env.speechSynthesis){
-        const registry=env[registryKey];if(registry && registry.instances.size>1){report('Cannot isolate browser speech cancellation across instances');return;}
-        env.speechSynthesis.cancel();speechOwned.clear();}}
-    };
     const audio={
       ready:false,buffers,get context(){return context;},
       loopBuffer(c,index,cue){
@@ -458,6 +591,13 @@
       pause(){for(const h of [...independent])h.stop();},seek(time){audio.pause();if(time!=null)api.timeline.seek(time);}
     };
     const pointerStarts=new Map();
+    function wantsPointerCapture(target) {
+      if(options.pointerCapture!=null)return options.pointerCapture===true;
+      const dragEvents=['dragstart','drag','dragend'];
+      return dragEvents.some(name=>subscriptions.has(name)||subscriptions.has(target+'\u0000'+name)) ||
+        (project.interactions||[]).some(b=>b.target===target && dragEvents.includes(b.event)) ||
+        (project.stateMachines||[]).some(m=>(m.transitions||[]).some(t=>t.event && dragEvents.includes(t.event.name) && (!t.event.target||t.event.target===target)));
+    }
     const eventTypes=['click','dblclick','pointerenter','pointerleave','pointerdown','pointermove','pointerup','pointercancel','lostpointercapture','wheel','keydown','keyup','focus','blur'];
     function coordinates(event) {
       let x=event.clientX || 0,y=event.clientY || 0;
@@ -476,21 +616,29 @@
         if(dead)return;
         for(const binding of project.interactions || [])if(binding.target===target && binding.event===type)actions(binding.actions,detail);
         if(dead)return;
-        if(type==='pointerdown') {pointerStarts.set(event.pointerId,{...point,target,el});try{if(el.setPointerCapture)el.setPointerCapture(event.pointerId);}catch(_){}emit('dragstart',{...detail,dx:0,dy:0},target);}
+        if(type==='pointerdown') {pointerStarts.set(event.pointerId,{...point,target,el});try{if(el && el.setPointerCapture && wantsPointerCapture(target))el.setPointerCapture(event.pointerId);}catch(_){}emit('dragstart',{...detail,dx:0,dy:0},target);}
         if(type==='pointermove' && pointerStarts.has(event.pointerId)){const start=pointerStarts.get(event.pointerId);emit('drag',{...detail,dx:point.x-start.x,dy:point.y-start.y},start.target);}
         if((type==='pointerup'||type==='pointercancel'||type==='lostpointercapture') && pointerStarts.has(event.pointerId)){const start=pointerStarts.get(event.pointerId);pointerStarts.delete(event.pointerId);try{if(start.el.releasePointerCapture)start.el.releasePointerCapture(event.pointerId);}catch(_){}emit('dragend',{...detail,dx:point.x-start.x,dy:point.y-start.y,cancelled:type!=='pointerup'},start.target);}
       };
       svg.addEventListener(type,listener,true);cleanup.push(()=>svg.removeEventListener(type,listener,true));
     }
-    api={version:1,diagnostics,on,emit,bones(){ensure();return bonePoses.map(p=>({...p}));},onDestroy(fn){ensure();if(typeof fn!=='function')throw new Error('Disposer must be a function');cleanup.push(fn);},get destroyed(){return dead;}, clip,machine,set,variable,timeline:{at,get time(){return transport.time;},get playing(){return transport.playing;},play(){ensure();syncClock();transport.manual=true;transportPlay();return this;},pause(){ensure();transport.manual=false;for(const c of clips.values())clip(c.id).pause();transportPause();return this;},seek(time){ensure();syncClock();finite(time,'Timeline seek time');if(time<0)throw new Error('Timeline seek must be nonnegative');transport.time=time;transport.revision++;stopSources(transport);for(const c of clips.values())if(c.active)clip(c.id).seek(c.loop?time%c.duration:Math.min(time,c.duration));speech.cancel();schedule(transport);return this;}},audio,speech,tick,
-      destroy(){if(dead)return;dead=true;if(raf!=null && env.cancelAnimationFrame)env.cancelAnimationFrame(raf);for(const fn of cleanup)try{fn();}catch(error){report(error);}for(const c of [transport,...clips.values()])stopSources(c);audio.pause();speech.cancel();loopBuffers.clear();buffers.clear();if(context && context.close)Promise.resolve(context.close()).catch(()=>{});subscriptions.clear();callbacks.clear();for(const [id,start] of pointerStarts)try{if(start.el.releasePointerCapture)start.el.releasePointerCapture(id);}catch(_){}pointerStarts.clear();if(svg.splinely===api)delete svg.splinely;unregister(env,api);}
+    function snapshot() {
+      // Observational only: don't advance clocks, invoke callbacks or expose handles.
+      return {version:1,destroyed:dead,time:transport.time,playing:transport.playing,
+        clips:[...clips.values()].map(c=>({id:c.id,time:c.time,duration:c.duration,active:c.active,playing:c.playing,weight:c.weight,fading:!!c.ramp})),
+        states:Object.fromEntries([...machines].map(([id,m])=>[id,m.state])),
+        audio:{ready:audio.ready,state:context?context.state:'locked',embeddedAssets:project.assets.length},
+        diagnostics:diagnostics.map(e=>e.message)};
+    }
+    api={version:1,snapshot,reportError(error){ensure();return report(error);},diagnostics,on,emit,bones(){ensure();return bonePoses.map(p=>({...p}));},onDestroy(fn){ensure();if(typeof fn!=='function')throw new Error('Disposer must be a function');cleanup.push(fn);},get destroyed(){return dead;}, clip,machine,set,variable,timeline:{at,get time(){return transport.time;},get playing(){return transport.playing;},play(){ensure();syncClock();transport.manual=true;transportPlay();return this;},pause(){ensure();transport.manual=false;for(const c of clips.values())clip(c.id).pause();transportPause();return this;},seek(time){ensure();syncClock();finite(time,'Timeline seek time');if(time<0)throw new Error('Timeline seek must be nonnegative');transport.time=time;transport.revision++;stopSources(transport);for(const c of clips.values())if(c.active)clip(c.id).seek(c.loop?time%c.duration:Math.min(time,c.duration));schedule(transport);return this;}},audio,tick,
+      destroy(){if(dead)return;dead=true;if(raf!=null && env.cancelAnimationFrame)env.cancelAnimationFrame(raf);for(const fn of cleanup)try{fn();}catch(error){report(error);}for(const c of [transport,...clips.values()])stopSources(c);audio.pause();loopBuffers.clear();buffers.clear();if(context && context.close)Promise.resolve(context.close()).catch(()=>{});subscriptions.clear();callbacks.clear();for(const [id,start] of pointerStarts)try{if(start.el.releasePointerCapture)start.el.releasePointerCapture(id);}catch(_){}pointerStarts.clear();if(svg.splinely===api)delete svg.splinely;unregister(env,api);}
     };
     svg.splinely=api;register(env,api);
     try {
     processing=true;
     try {for(const m of machines.values())actions(m.states.get(m.state).onEnter || m.states.get(m.state).entry);}
     finally {processing=false;drain();}
-    if(project.customJs)report('customJs is preserved but not executed; attach trusted handlers explicitly');
+    // Preservation-only customJs is expected, not an error. Trusted hosts decide execution separately.
     render();for(const c of project.clips)if(c.autoplay)clip(c.id).play();
     } catch(error) {api.destroy();throw error;}
     if(options.autoTick!==false && !dead){
@@ -499,10 +647,10 @@
         const current=nextClock===env?now():context.currentTime*1000;
         if(clock!==nextClock){clock=nextClock;last=current;return;}
         const delta=Math.max(0,(current-last)/1000);last=current;try{tick(delta);}catch(e){report(e);}};
-      syncClock=()=>{if(!ticking && !dead)advance();};
+      syncClock=()=>{if(!ticking && !processing && !dead)advance();};
       if(env.requestAnimationFrame){const frame=()=>{advance();if(!dead)raf=env.requestAnimationFrame(frame);};raf=env.requestAnimationFrame(frame);}
       // Replenish/audio-clock transport even when rendering is suspended. Native padded loops do not depend on either timer.
-      if(env.setInterval){const timer=env.setInterval(()=>{if(audio.ready)advance();},25);cleanup.push(()=>env.clearInterval(timer));}
+      if(env.setInterval){const timer=env.setInterval(()=>{if(audio.ready || [...clips.values()].some(c=>c.ramp))advance();},25);cleanup.push(()=>env.clearInterval(timer));}
     }
     return api;
   }
@@ -521,15 +669,14 @@
 })(typeof window!=='undefined'?window:globalThis);
 
 ;(function(){
-const speech=false, controls=true;
+const controls=true;
 
 const svg=document.currentScript && document.currentScript.ownerSVGElement;
 if(!svg || !svg.splinely)return;
 const splinely=svg.splinely;
 const data=JSON.parse(svg.querySelector('[id="splinely-project"]').textContent);
-if(speech && splinely.speech.enable)splinely.speech.enable();
-const report=error=>{splinely.diagnostics.push({message:'Splinely host: '+String(error)});console.error('Splinely host:',error);};
-if(controls && ((data.audioAssets || []).length || speech)) {
+const report=error=>{if(splinely.destroyed)return;const e=new Error('Splinely host: '+String(error));if(splinely.reportError)splinely.reportError(e);else{splinely.diagnostics.push(e);if(splinely.diagnostics.length>100)splinely.diagnostics.shift();splinely.emit('error',{error:e});}console.error('Splinely host:',error);};
+if(controls && (data.audioAssets || []).length) {
   const resume=(data.clips || []).filter(c=>splinely.clip(c.id).playing).map(c=>c.id);
   splinely.timeline.pause();splinely.timeline.seek(0);
   const ns='http://www.w3.org/2000/svg', button=document.createElementNS(ns,'g');
@@ -544,11 +691,12 @@ if(controls && ((data.audioAssets || []).length || speech)) {
   const start=async event=>{
     if(event.type==='keydown' && event.key!=='Enter' && event.key!==' ')return;
     event.preventDefault();event.stopPropagation();if(pending)return;pending=true;
+    let unlockingAudio=false;
     try {
-      if((data.audioAssets || []).length)await splinely.audio.unlock();
+      if((data.audioAssets || []).length){unlockingAudio=true;await splinely.audio.unlock();unlockingAudio=false;}
       if(splinely.destroyed)return;
       splinely.timeline.seek(0);for(const id of resume)splinely.clip(id).play();splinely.timeline.play();button.remove();
-    }catch(error){pending=false;text.textContent='Retry audio start';report(error);}
+    }catch(error){pending=false;text.textContent='Retry audio start';if(!unlockingAudio)report(error);}
   };
   button.addEventListener('click',start);button.addEventListener('keydown',start);
   splinely.onDestroy(()=>{button.removeEventListener('click',start);button.removeEventListener('keydown',start);button.remove();});

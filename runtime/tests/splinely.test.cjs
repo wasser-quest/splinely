@@ -157,29 +157,11 @@ test('audio errors reject, report and allow retry without network',async()=>{
   const {f:g}=runtime();await assert.rejects(g.audio.unlock(),/Web Audio unavailable/);g.destroy();
 });
 
-test('speech disabled by default with honest diagnostic; explicitly enabled cue crossing never replays on seek',()=>{
-  const spoken=[];let cancelled=0;const env={speechSynthesis:{speak:u=>spoken.push(u),cancel:()=>cancelled++},SpeechSynthesisUtterance:class{constructor(text){this.text=text;}}};
-  const {f}=runtime(project(),env);assert.equal(f.speech.say('hi'),null);assert.match(f.diagnostics.at(-1).message,/opt-in/);f.destroy();
-  const {f:g}=runtime(project({speechCues:[{time:1,text:'hello',lang:'en'}]}),env,['n'],{speech:true});g.timeline.play();g.tick(2);assert.equal(spoken.length,1);g.timeline.seek(0.5);assert.equal(cancelled,1);assert.equal(spoken.length,1);g.tick(0.5);assert.equal(spoken.length,2);g.destroy();
-});
-
-test('speech picks the most natural voice for the language and splits long text into sentences',()=>{
-  const voices=[
-    {name:'espeak-ng German',lang:'de',localService:true,default:true},
-    {name:'Google Deutsch',lang:'de-DE',localService:false},
-    {name:'Microsoft Katja Online (Natural) - German (Germany)',lang:'de-DE',localService:false},
-    {name:'Samantha',lang:'en-US',localService:true},
-  ];
-  const spoken=[];const env={speechSynthesis:{speak:u=>spoken.push(u),cancel(){},getVoices:()=>voices},SpeechSynthesisUtterance:class{constructor(text){this.text=text;}}};
-  const {f}=runtime(project(),env,['n'],{speech:true});
-  f.speech.say('Hallo.',{lang:'de-DE'});assert.equal(spoken[0].voice.name,voices[2].name);
-  assert.deepEqual(f.speech.voices('de-DE').map(v=>v.name),[voices[2].name,voices[1].name,voices[0].name]);
-  f.speech.say('Hi',{lang:'en-US',voice:'Samantha'});assert.equal(spoken[1].voice.name,'Samantha');
-  spoken.length=0;const long=Array.from({length:6},(_,i)=>`Satz Nummer ${i} ist absichtlich recht lang, damit der Text geteilt wird.`).join(' ');
-  f.speech.say(long,{lang:'de'});assert.ok(spoken.length>1,'split');assert.ok(spoken.every(u=>u.text.length<=200));assert.equal(spoken.map(u=>u.text).join(' '),long);
-  // Without any voice list the browser default is used.
-  const plain=[];const {f:g}=runtime(project(),{speechSynthesis:{speak:u=>plain.push(u),cancel(){}},SpeechSynthesisUtterance:class{constructor(text){this.text=text;}}},['n'],{speech:true});
-  g.speech.say('Hallo',{lang:'de'});assert.equal(plain[0].voice,undefined);f.destroy();g.destroy();
+test('speech is gone: no API, legacy speech data and actions never reach the browser',()=>{
+  const spoken=[];const env={speechSynthesis:{speak:u=>spoken.push(u),cancel(){}},SpeechSynthesisUtterance:class{constructor(text){this.text=text;}}};
+  const {f}=runtime(project({speechCues:[{time:0.5,text:'hello',lang:'en'}]}),env);
+  assert.equal(f.speech,undefined);assert.equal('speech' in f.snapshot(),false);
+  f.timeline.play();f.tick(1);assert.deepEqual(spoken,[]);f.destroy();
 });
 
 test('malformed data, callback faults, script properties and unknown IDs are handled',()=>{

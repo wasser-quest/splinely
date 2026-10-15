@@ -86,7 +86,6 @@ impl Project {
                 .chain(self.state_machines.iter().map(|n| n.id.as_str()))
                 .chain(self.audio_assets.iter().map(|n| n.id.as_str()))
                 .chain(self.audio_cues.iter().map(|n| n.id.as_str()))
-                .chain(self.speech_cues.iter().map(|n| n.id.as_str()))
                 .chain(self.groups.iter().map(|g| g.id.as_str())),
             "project",
         )?;
@@ -318,18 +317,6 @@ impl Project {
                 )?;
             }
         }
-        for c in &self.speech_cues {
-            nonnegative(c.time, "speech time")?;
-            unit(c.volume, "speech volume")?;
-            require(
-                c.rate.is_finite() && (0.1..=10.0).contains(&c.rate),
-                "speech rate must be in 0.1..10",
-            )?;
-            require(
-                c.pitch.is_finite() && (0.0..=2.0).contains(&c.pitch),
-                "speech pitch must be in 0..2",
-            )?;
-        }
         Ok(())
     }
     pub(crate) fn validate_property(&self, node_id: &str, p: Property, v: &AnimValue) -> Result {
@@ -401,7 +388,6 @@ impl Project {
                 self.audio_assets.iter().any(|a| &a.id == asset_id),
                 "action references missing audio asset",
             ),
-            Action::Speak { .. } => Ok(()),
         }
     }
 }

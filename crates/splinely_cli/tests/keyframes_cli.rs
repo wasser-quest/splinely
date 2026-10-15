@@ -202,7 +202,7 @@ fn invalid_arguments_and_input_never_overwrite_files() {
 }
 
 #[test]
-fn help_and_schema_describe_numeric_editing_without_removing_speech() {
+fn help_and_schema_describe_numeric_editing() {
     let help = invoke(&["keyframe", "--help"]);
     assert!(help.status.success());
     let text = String::from_utf8(help.stdout).unwrap();
@@ -217,7 +217,7 @@ fn help_and_schema_describe_numeric_editing_without_removing_speech() {
         assert!(text.contains(flag));
     }
     assert!(text.contains("fontSize"));
-    assert!(invoke(&["embed-speech", "--help"]).status.success());
+    assert!(!invoke(&["embed-speech", "--help"]).status.success());
     assert_eq!(
         success(&["schema"])["keyframeCommand"]["numericProperties"]
             .as_array()

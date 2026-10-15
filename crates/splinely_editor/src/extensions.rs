@@ -1,8 +1,8 @@
 //! Data-only, restart-discovered extensions. No executable plugin code is loaded.
 //! See docs/drop-in-plugins.md for the strict manifest format and host integration.
 use eframe::egui;
-use splinely_document::{Color, Node, NodeKind, Project};
 use serde_json::{Map, Value};
+use splinely_document::{Color, Node, NodeKind, Project};
 use std::{
     collections::{BTreeMap, HashSet},
     fs,
@@ -569,7 +569,6 @@ fn fresh_id(project: &Project) -> Result<String> {
         .chain(project.state_machines.iter().map(|n| n.id.as_str()))
         .chain(project.audio_assets.iter().map(|n| n.id.as_str()))
         .chain(project.audio_cues.iter().map(|n| n.id.as_str()))
-        .chain(project.speech_cues.iter().map(|n| n.id.as_str()))
         .collect();
     for i in 1..=used.len().saturating_add(1) {
         let id = format!("plugin-node-{i}");
@@ -855,7 +854,8 @@ mod tests {
     #[test]
     fn shipped_templates_validate_and_output_is_bounded() {
         for bytes in [
-            include_bytes!("../../../examples/plugins/basic-shapes/splinely-plugin.json").as_slice(),
+            include_bytes!("../../../examples/plugins/basic-shapes/splinely-plugin.json")
+                .as_slice(),
             include_bytes!("../../../examples/plugins/colors/splinely-plugin.json").as_slice(),
         ] {
             let plugin = parse_manifest(bytes).unwrap();

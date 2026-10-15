@@ -34,7 +34,7 @@ def click(browser, id):
 def main():
     tree = ET.parse(SVG)
     ns = '{http://www.w3.org/2000/svg}'
-    metadata = tree.find(f'{ns}metadata')
+    metadata = tree.find(f"{ns}metadata[@id='splinely-project']")
     project = json.loads(metadata.text)
     assert len(project['bones']) == 20 and project['clips'][0]['duration'] == 8
     assert not project['customJs'] and not project['audioAssets']

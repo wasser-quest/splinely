@@ -96,16 +96,11 @@ fn water_has_loop_continuity_and_supported_deformation() {
 }
 
 #[test]
-fn exports_require_independent_opt_ins() {
+fn trusted_js_is_opt_in_and_speech_is_gone() {
     let dir = tempfile::tempdir().unwrap();
     let file = dir.path().join("gallery.json");
     cli(&["random-figures", "--output", file.to_str().unwrap()]);
-    for flags in [
-        vec![],
-        vec!["--trusted-js"],
-        vec!["--speech"],
-        vec!["--trusted-js", "--speech"],
-    ] {
+    for flags in [vec![], vec!["--trusted-js"]] {
         let mut args = vec!["export", file.to_str().unwrap(), "--output", "-"];
         args.extend(&flags);
         let result = cli(&args);
@@ -114,9 +109,17 @@ fn exports_require_independent_opt_ins() {
             svg.contains("new Function('splinely'"),
             flags.contains(&"--trusted-js")
         );
-        assert_eq!(
-            svg.contains("const speech=true"),
-            flags.contains(&"--speech")
-        );
+        assert!(!svg.contains("speech"));
     }
+    let rejected = std::process::Command::new(env!("CARGO_BIN_EXE_splinely-cli"))
+        .args([
+            "export",
+            file.to_str().unwrap(),
+            "--output",
+            "-",
+            "--speech",
+        ])
+        .output()
+        .unwrap();
+    assert!(!rejected.status.success());
 }

@@ -1,9 +1,9 @@
 #![recursion_limit = "256"] // Complete discovery templates expand through serde_json::json!.
 
 use clap::{Parser, Subcommand};
-use splinely_document::{BrowserExportOptions, Node, Project, MAX_PROJECT_FILE_BYTES};
 use serde::de::{self, Deserialize, Deserializer, MapAccess, SeqAccess, Visitor};
 use serde_json::{json, Value};
+use splinely_document::{BrowserExportOptions, Node, Project, MAX_PROJECT_FILE_BYTES};
 use std::io::{self, Read, Write};
 use std::path::Path;
 
@@ -17,7 +17,6 @@ mod evaluation;
 mod guide;
 mod keyframes;
 mod lint;
-mod offline_speech;
 mod paths;
 mod scaffold;
 mod shapes;
@@ -177,70 +176,6 @@ enum Command {
         #[arg(long)]
         output: String,
     },
-    /// List installed local speech engines and which one `embed-speech` picks.
-    SpeechEngines,
-    /// Synthesize speech to a WAV file only (to listen before embedding).
-    Speak {
-        #[arg(long, allow_hyphen_values = true)]
-        text: String,
-        #[arg(long, default_value = "en-US")]
-        lang: String,
-        #[arg(long)]
-        voice: Option<String>,
-        #[arg(long, default_value_t = 1.0, value_parser = bones::number)]
-        rate: f64,
-        #[arg(long, default_value_t = 1.0, value_parser = bones::number)]
-        pitch: f64,
-        #[arg(long, value_enum, default_value = "auto")]
-        synth: offline_speech::Synth,
-        #[arg(long)]
-        engine: Option<std::path::PathBuf>,
-        #[arg(long)]
-        piper_model: Option<std::path::PathBuf>,
-        #[arg(long)]
-        raw: bool,
-        /// WAV file to write.
-        #[arg(long)]
-        output: String,
-    },
-    /// Synthesize speech locally (Piper, Flite or eSpeak NG), polish it and embed it as audio with a timeline cue.
-    EmbedSpeech {
-        input: String,
-        #[arg(long)]
-        output: String,
-        /// UTF-8 text, at most 4096 bytes; never interpreted as engine options.
-        #[arg(long, allow_hyphen_values = true)]
-        text: String,
-        /// Language such as de-DE or en-US (default: from --voice, else en-US).
-        #[arg(long)]
-        lang: Option<String>,
-        /// Engine voice: eSpeak "de", "de+anika", "en-us+f3"; Flite "slt", "kal", "awb", "rms".
-        #[arg(long)]
-        voice: Option<String>,
-        #[arg(long)]
-        asset_id: String,
-        /// Cue time in seconds (finite and nonnegative).
-        #[arg(long, default_value_t = 0.0)]
-        time: f64,
-        /// Speaking speed, 1 = natural (0.3..3).
-        #[arg(long, default_value_t = 1.0, value_parser = bones::number)]
-        rate: f64,
-        /// Voice pitch, 1 = natural (0.3..2).
-        #[arg(long, default_value_t = 1.0, value_parser = bones::number)]
-        pitch: f64,
-        /// auto: Piper with --piper-model, Flite for English, else eSpeak NG.
-        #[arg(long, value_enum, default_value = "auto")]
-        synth: offline_speech::Synth,
-        /// Explicit absolute path to a trusted local engine executable (eSpeak-compatible unless --synth says otherwise).
-        #[arg(long)]
-        engine: Option<std::path::PathBuf>,
-        /// Piper voice model (.onnx) for natural neural speech.
-        #[arg(long)]
-        piper_model: Option<std::path::PathBuf>,
-        /// Keep the engine's raw WAV (no filtering, trimming or loudness normalisation).
-        #[arg(long)]
-        raw: bool,
-    },
     /// Insert/replace a keyframe (number, colour, gradient or path) on a node or bone.
     Keyframe {
         /// Project .sply/JSON path, or - for stdin. Locked nodes remain explicitly editable.
@@ -301,9 +236,6 @@ enum Command {
         /// Execute authored JavaScript in the exported browser SVG. Trusted code only.
         #[arg(long)]
         trusted_js: bool,
-        /// Enable browser speech synthesis (voice availability is system-dependent).
-        #[arg(long)]
-        speech: bool,
     },
     /// Apply RFC 7396 JSON Merge Patch; validate before atomically saving.
     Apply {
@@ -750,12 +682,11 @@ fn schema() -> Result<Value> {
         "valueExamples":[{"type":"number","value":42.0},{"type":"color","value":{"r":1.0,"g":0.0,"b":0.0,"a":1.0}}],
         "audioAssetExample":{"id":"voice","name":"Voice","mimeType":"audio/wav","dataBase64":"UklGRiYAAABXQVZFZm10IBAAAAABAAEAQB8AAIA+AAACABAAZGF0YQIAAAAAAA=="},
         "audioCueExample":{"id":"hello","assetId":"voice","time":1.5,"offset":0.0,"duration":null,"volume":1.0},
-        "speechCueExample":{"id":"speech","time":2.0,"text":"Hallo","lang":"de-DE","rate":1.0,"pitch":1.0,"volume":1.0},
         "guardExample":{"variable":"enabled","equals":true},
         "overrideExample":{"nodeId":"ball","property":"opacity","value":{"type":"number","value":0.5}},
-        "actionExamples":[{"type":"setProperty","nodeId":"ball","property":"x","value":{"type":"number","value":10.0}},{"type":"playClip","clipId":"motion"},{"type":"stopClip","clipId":"motion"},{"type":"blendClip","clipId":"overlay","weight":0.5,"duration":0.25},{"type":"setVariable","name":"enabled","value":true},{"type":"emit","event":{"name":"GO","target":null}},{"type":"playAudio","assetId":"voice"},{"type":"speak","text":"Hallo","lang":"de-DE"}],
+        "actionExamples":[{"type":"setProperty","nodeId":"ball","property":"x","value":{"type":"number","value":10.0}},{"type":"playClip","clipId":"motion"},{"type":"stopClip","clipId":"motion"},{"type":"blendClip","clipId":"overlay","weight":0.5,"duration":0.25},{"type":"setVariable","name":"enabled","value":true},{"type":"emit","event":{"name":"GO","target":null}},{"type":"playAudio","assetId":"voice"}],
         "mergePatch":{"standard":"RFC 7396","objects":"recursively merge","null":"remove member","arrays":"replace entire array","otherValues":"replace target; result must validate as a project"},
-        "limitations":["Schema 1 only; rect/circle/text/path geometry", "rawSvg is preserved data, not rendered", "Evaluation does not run JS, state actions, speech or audio", "customJs is preserved; export executes it only with --trusted-js"],
+        "limitations":["Schema 1 only; rect/circle/text/path geometry", "rawSvg is preserved data, not rendered", "Evaluation does not run JS, state actions or audio", "customJs is preserved; export executes it only with --trusted-js"],
         "examples":{"empty":project_value(&Project::default())?,"demo":project_value(&demo()?)?,"rig":project_value(&bones::rig_demo()?)?,"complete":discovery::complete_example()?}
     }))
 }
@@ -829,71 +760,6 @@ fn run(cli: Cli) -> Result<Value> {
             };
             keyframes::run(
                 &input, &output, &clip, &target, property, time, value, options,
-            )
-        }
-        Command::EmbedSpeech {
-            input,
-            output,
-            text,
-            lang,
-            voice,
-            asset_id,
-            time,
-            rate,
-            pitch,
-            synth,
-            engine,
-            piper_model,
-            raw,
-        } => {
-            let lang = lang
-                .or_else(|| {
-                    voice
-                        .as_ref()
-                        .map(|v| v.split('+').next().unwrap_or("en").to_owned())
-                })
-                .unwrap_or_else(|| "en-US".into());
-            let request = splinely_document::tts::SpeechRequest {
-                text,
-                lang,
-                voice,
-                rate,
-                pitch,
-                engine: synth.into(),
-                engine_path: engine,
-                piper_model,
-                polish: !raw,
-            };
-            offline_speech::run(&input, &output, &asset_id, time, request)
-        }
-        Command::SpeechEngines => offline_speech::engines(),
-        Command::Speak {
-            text,
-            lang,
-            voice,
-            rate,
-            pitch,
-            synth,
-            engine,
-            piper_model,
-            raw,
-            output,
-        } => {
-            let speech = splinely_document::tts::synthesize(&splinely_document::tts::SpeechRequest {
-                text,
-                lang,
-                voice,
-                rate,
-                pitch,
-                engine: synth.into(),
-                engine_path: engine,
-                piper_model,
-                polish: !raw,
-            })
-            .map_err(|e| failure("speech_engine_error", e))?;
-            atomic_write(&output, &speech.wav)?;
-            Ok(
-                json!({"ok": true, "output": output, "format": "wav", "engine": speech.engine, "seconds": (speech.seconds * 100.).round() / 100., "bytes": speech.wav.len()}),
             )
         }
         Command::RigDemo { output } => save_project(&bones::rig_demo()?, &output),
@@ -1003,7 +869,7 @@ fn run(cli: Cli) -> Result<Value> {
                 "bones":project_value(&project)?["bones"],
                 "clips":project.clips,"stateMachines":project.state_machines,
                 "variables":project.variables,"audioAssets":project.audio_assets.iter().map(|a| json!({"id":a.id,"name":a.name,"mimeType":a.mime_type,"base64Length":a.data_base64.len()})).collect::<Vec<_>>(),
-                "audioCues":project.audio_cues,"speechCues":project.speech_cues,
+                "audioCues":project.audio_cues,
                 "hasCustomJs":!project.custom_js.is_empty(),"hasRawSvg":!project.raw_svg.is_empty()}),
             )
         }
@@ -1011,7 +877,6 @@ fn run(cli: Cli) -> Result<Value> {
             input,
             output,
             trusted_js,
-            speech,
         } => {
             let project = load(&input)?;
             let svg = project
@@ -1019,7 +884,6 @@ fn run(cli: Cli) -> Result<Value> {
                     RUNTIME,
                     BrowserExportOptions {
                         trusted_js,
-                        speech,
                         audio_controls: true,
                     },
                 )

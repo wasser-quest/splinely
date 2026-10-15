@@ -18,8 +18,7 @@ output{color:#8ce0de;font-size:14px}section{border:1px solid #263b52;border-radi
 <section><h2>Runtime observation</h2><pre id="events">Waiting for instance…</pre></section>
 <p>SVG scripts require a script-capable browser context, not an img. Resources are local and relative.
 If file-origin restrictions prevent observation, serve this directory over localhost (for example <code>python3 -m http.server</code>).
-Speech is optional browser/system synthesis: voices, latency, audible output and offline availability are not guaranteed.
-The state cycle follows animation time, not speech completion.</p>
+The state cycle follows animation time.</p>
 <script>
 'use strict';
 const object=document.getElementById('scene'), status=document.getElementById('status'), log=document.getElementById('events');
@@ -29,7 +28,7 @@ function detach(){clearInterval(timer);for(const unsubscribe of off)unsubscribe(
 function refresh(){
   if(!splinely || splinely.destroyed)return;
   const states=data.stateMachines.map(m=>m.id+': '+splinely.machine(m.id).state).join(' · ');
-  status.textContent=(states || 'Water drop')+' · '+(splinely.timeline.playing?'playing':'paused')+' · '+splinely.timeline.time.toFixed(1)+'s · speech '+(splinely.speech.enabled?'enabled':'off');
+  status.textContent=(states || 'Water drop')+' · '+(splinely.timeline.playing?'playing':'paused')+' · '+splinely.timeline.time.toFixed(1)+'s';
   const notes=splinely.diagnostics.map(d=>d.message).filter(m=>m!=='customJs is preserved but not executed; attach trusted handlers explicitly');
   log.textContent=(lines.join('\n') || 'Mounted. Use Play to begin.')+(notes.length?'\nDiagnostics: '+notes.slice(-4).join(' | '):'');
 }

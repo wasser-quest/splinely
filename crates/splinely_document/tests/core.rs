@@ -1,5 +1,5 @@
-use splinely_document::*;
 use serde_json::json;
+use splinely_document::*;
 
 fn project() -> Project {
     Project {
@@ -97,15 +97,6 @@ fn roundtrip_preserves_all_data_and_enum_shape() {
         offset: 0.1,
         duration: Some(0.5),
         volume: 0.8,
-    });
-    p.speech_cues.push(SpeechCue {
-        id: "speech".into(),
-        time: 0.0,
-        text: "Hello".into(),
-        lang: "en".into(),
-        rate: 1.0,
-        pitch: 1.0,
-        volume: 1.0,
     });
     p.raw_svg = "<path unknown='value'/>".into();
     p.custom_js = "splinely.set('box', {opacity: 0.5});".into();
@@ -387,7 +378,7 @@ fn validates_state_references_and_typed_variables() {
     assert!(p.validate().is_err());
 }
 #[test]
-fn validates_audio_base64_and_speech() {
+fn validates_audio_base64() {
     let mut p = project();
     p.audio_assets.push(asset());
     assert!(p.validate().is_ok());
@@ -411,17 +402,23 @@ fn validates_audio_base64_and_speech() {
         volume: 2.0,
     });
     assert!(p.validate().is_err());
-    p.audio_cues[0].volume = 1.0;
-    p.speech_cues.push(SpeechCue {
-        id: "speech".into(),
-        time: 0.0,
-        text: "Hello".into(),
-        lang: "en".into(),
-        rate: 0.0,
-        pitch: 1.0,
-        volume: 1.0,
+}
+#[test]
+fn legacy_speech_data_is_dropped_on_load() {
+    let legacy = json!({
+        "speechCues": [{"id":"hi","time":0,"text":"Hallo","lang":"de-DE","rate":1,"pitch":1,"volume":1}],
+        "stateMachines": [{
+            "id": "m", "initial": "a",
+            "states": [{"id":"a","onEnter":[{"type":"speak","text":"Hi","lang":"en-US"}],"overrides":[]}],
+            "transitions": [{"from":"a","to":"a","event":{"name":"click","target":null},"guard":null,
+                "actions":[{"type":"speak","text":"Hi","lang":"en-US"},{"type":"emit","event":{"name":"done","target":null}}]}]
+        }]
     });
-    assert!(p.validate().is_err());
+    let p = Project::from_json(&legacy.to_string()).unwrap();
+    assert!(p.state_machines[0].states[0].on_enter.is_empty());
+    assert_eq!(p.state_machines[0].transitions[0].actions.len(), 1);
+    assert!(!p.to_json().unwrap().contains("speech"));
+    assert!(Project::from_json(r#"{"speechCues":[],"unknownField":1}"#).is_err());
 }
 #[test]
 fn history_snapshots_branching_and_failed_commands() {

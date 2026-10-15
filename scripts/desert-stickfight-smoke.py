@@ -65,7 +65,7 @@ def main():
     canonical=json.loads((ROOT/'examples/desert-stickfight.sply').read_text())
     assert len(p['bones'])==20 and sum(c['duration'] for c in p['clips'])==20
     assert p['clips']==canonical['clips'] and p['stateMachines']==canonical['stateMachines']
-    assert p['customJs']==canonical['customJs'] and not p['audioAssets'] and not p['speechCues']
+    assert p['customJs']==canonical['customJs'] and not p['audioAssets'] and 'speechCues' not in p
     for e in tree.iter():
         for key,value in e.attrib.items():
             if key.split('}')[-1] in ['href','src']: assert value.startswith(('#','data:'))

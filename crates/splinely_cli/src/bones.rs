@@ -1,7 +1,7 @@
 use crate::{failure, load, project_value, save_project, validated, Result};
 use clap::{Subcommand, ValueEnum};
-use splinely_document::{Node, Project};
 use serde_json::{json, Value};
+use splinely_document::{Node, Project};
 
 // Clap must not silently round integer tokens before model validation sees them.
 pub fn number(source: &str) -> std::result::Result<f64, String> {

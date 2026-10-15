@@ -147,7 +147,9 @@ mod tests {
         assert!(blocked.is_dir());
         fs::remove_dir(&blocked).unwrap();
         assert_eq!(fs::read_dir(root).unwrap().count(), 1);
-        assert!(project.save_file(root.join("missing/project.sply")).is_err());
+        assert!(project
+            .save_file(root.join("missing/project.sply"))
+            .is_err());
         project.width = -1.0;
         assert!(project.save_file(&path).is_err());
         assert_eq!(fs::read(&path).unwrap(), original);

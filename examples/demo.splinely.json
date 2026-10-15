@@ -173,7 +173,6 @@
   ],
   "rawSvg": "",
   "schemaVersion": 1,
-  "speechCues": [],
   "stateMachines": [
     {
       "id": "interaction",

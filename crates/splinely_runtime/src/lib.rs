@@ -1,9 +1,9 @@
 //! Browser-independent, host-driven Splinely model playback. No rendering or code execution.
 pub mod ffi;
 
-use splinely_document::*;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
+use splinely_document::*;
 use std::collections::{BTreeMap, VecDeque};
 
 pub const MAX_EVENTS: usize = 256;
@@ -41,9 +41,7 @@ struct Fade {
 pub enum HostAction {
     Event { event: Event },
     PlayAudio { asset_id: String },
-    Speak { text: String, lang: String },
     AudioCue { cue: AudioCue },
-    SpeechCue { cue: SpeechCue },
     Callback { id: String, data: Value },
 }
 #[derive(Clone, Debug, Serialize)]
@@ -144,7 +142,6 @@ pub struct Runtime {
     outputs: Vec<HostAction>,
     callbacks: Vec<Callback>,
     audio_fired: Vec<bool>,
-    speech_fired: Vec<bool>,
     events_processed: usize,
 }
 fn error(message: impl Into<String>) -> DocumentError {
@@ -193,7 +190,6 @@ impl Runtime {
                 })
                 .collect(),
             audio_fired: vec![false; project.audio_cues.len()],
-            speech_fired: vec![false; project.speech_cues.len()],
             project,
             machines,
             overrides: vec![],
@@ -418,7 +414,6 @@ impl Runtime {
                 }
                 self.output(HostAction::PlayAudio { asset_id })?;
             }
-            Action::Speak { text, lang } => self.output(HostAction::Speak { text, lang })?,
         }
         Ok(())
     }
@@ -472,9 +467,6 @@ impl Runtime {
                 for (fired, cue) in self.audio_fired.iter_mut().zip(&self.project.audio_cues) {
                     *fired = cue.time <= time;
                 }
-                for (fired, cue) in self.speech_fired.iter_mut().zip(&self.project.speech_cues) {
-                    *fired = cue.time <= time;
-                }
                 for cb in &mut self.callbacks {
                     cb.fired = cb.time <= time;
                 }
@@ -509,20 +501,12 @@ impl Runtime {
         Ok(())
     }
     fn global_boundary(&mut self) -> Result<()> {
-        // Equal-time order: audio, speech (document order), then registered callbacks.
+        // Equal-time order: audio (document order), then registered callbacks.
         for i in 0..self.audio_fired.len() {
             if !self.audio_fired[i] && self.project.audio_cues[i].time <= self.time {
                 self.audio_fired[i] = true;
                 self.output(HostAction::AudioCue {
                     cue: self.project.audio_cues[i].clone(),
-                })?;
-            }
-        }
-        for i in 0..self.speech_fired.len() {
-            if !self.speech_fired[i] && self.project.speech_cues[i].time <= self.time {
-                self.speech_fired[i] = true;
-                self.output(HostAction::SpeechCue {
-                    cue: self.project.speech_cues[i].clone(),
                 })?;
             }
         }
@@ -571,11 +555,6 @@ impl Runtime {
             if self.running {
                 for (i, cue) in self.project.audio_cues.iter().enumerate() {
                     if !self.audio_fired[i] {
-                        step = step.min((cue.time - self.time).max(0.0));
-                    }
-                }
-                for (i, cue) in self.project.speech_cues.iter().enumerate() {
-                    if !self.speech_fired[i] {
                         step = step.min((cue.time - self.time).max(0.0));
                     }
                 }

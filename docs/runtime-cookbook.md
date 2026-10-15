@@ -56,6 +56,6 @@ Zugriff aus dem HTML funktioniert nur, wenn die Browser-Isolation dies erlaubt. 
 
 ## Audio und Vertrauen
 
-Audio aus einer echten Nutzeraktion freigeben: `await splinely.audio.unlock()`. Der Export bietet dafür seinen Startknopf. Browser-Stimmen sind optional und nicht offline garantiert; lokal eingebettetes WAV benötigt keine Stimme. Kein automatisches Audio beim Laden versprechen.
+Audio aus einer echten Nutzeraktion freigeben: `await splinely.audio.unlock()`. Der Export bietet dafür seinen Startknopf. Kein automatisches Audio beim Laden versprechen.
 
-`customJs` bleibt ohne explizite Exportfreigabe Daten. Aktive fremde SVGs sind nicht vertrauenswürdig; weder Browser-Runtime noch Viewer sind eine Sandbox. Die native Rust-Runtime führt `customJs` nicht aus: Hosts zeichnen Nodes, liefern Eventziele und behandeln Audio-/Speech-Ausgaben selbst.
+`customJs` bleibt ohne explizite Exportfreigabe Daten. Aktive fremde SVGs sind nicht vertrauenswürdig; weder Browser-Runtime noch Viewer sind eine Sandbox. Die native Rust-Runtime führt `customJs` nicht aus: Hosts zeichnen Nodes, liefern Eventziele und behandeln Audio-Ausgaben selbst.

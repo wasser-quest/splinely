@@ -528,7 +528,6 @@ impl Project {
                 || self.state_machines.iter().any(|n| n.id == id)
                 || self.audio_assets.iter().any(|n| n.id == id)
                 || self.audio_cues.iter().any(|n| n.id == id)
-                || self.speech_cues.iter().any(|n| n.id == id)
                 || self.groups.iter().any(|g| g.id == id)
         };
         (1..)

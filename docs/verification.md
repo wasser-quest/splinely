@@ -14,9 +14,9 @@ Native optimized file sizes: approximately 1.4 MiB shared library, 1.5 MiB JSON-
 
 The Pen/anchor editor, staged state graph, local Snap10, bounded two-bone IK, optional native audio and CLI showcases are integrated. Current verification: **116 Rust tests + 44 Node tests passed**, workspace Clippy with warnings denied passed. One opt-in real `ffplay` test was also run explicitly and passed; this is not physical-speaker audibility proof. Stop during preparation keeps its single-worker slot until completion, preventing reload from accumulating project copies/decoders.
 
-Actual Firefox: shipped demo offline audio unlock/decode and state; four real-SVG pixel comparisons; every rig node matches Rust at four sample times; both HTML showcases pass a 35-second trusted-control/state/speech-request test. See [showcase-tests.md](showcase-tests.md). REA independently captured Chromium screenshots/DOM/network and the complete gallery cycle, but Chromium speech failed in this environment. GDB ran the current native demo exporter and the process exited normally. Native GUI was launched and screenshots showed Pen controls and an authored path layer; geometry/gesture correctness is primarily covered by deterministic tests, not a complete manual UI acceptance pass.
+Actual Firefox: shipped demo offline audio unlock/decode and state; four real-SVG pixel comparisons; every rig node matches Rust at four sample times; both HTML showcases pass a 35-second trusted-control/state test (rerun for 0.3.0). See [showcase-tests.md](showcase-tests.md). REA independently captured Chromium screenshots/DOM/network and the complete gallery cycle. GDB ran the current native demo exporter and the process exited normally. Native GUI was launched and screenshots showed Pen controls and an authored path layer; geometry/gesture correctness is primarily covered by deterministic tests, not a complete manual UI acceptance pass.
 
-Tool usage guide and remaining limits: [authoring.md](authoring.md). No claim of full Inkscape compatibility, arbitrary IK/skinning, plugin sandboxing or guaranteed offline speech.
+Tool usage guide and remaining limits: [authoring.md](authoring.md). No claim of full Inkscape compatibility, arbitrary IK/skinning or plugin sandboxing.
 
 ## Reproducible checks
 
@@ -50,4 +50,4 @@ The original debug executable is approximately 222 MiB. Removing debug symbols y
 
 ## Remaining limitations
 
-No full SVG importer, graphical Pen/Bézier point editor, IK/mesh skinning, native audio engine, arbitrary path morphing, full visual state graph or sandboxed untrusted scripting. Bones use rigid bindings; paths use bounds-based picking. Custom JS is explicit trust opt-in. Speech remains a prototyping tool with system-dependent voices. Plugins are trusted statically compiled Rust code. See README and PLAN for scope.
+No full SVG importer, graphical Pen/Bézier point editor, IK/mesh skinning, native audio engine, arbitrary path morphing, full visual state graph or sandboxed untrusted scripting. Bones use rigid bindings; paths use bounds-based picking. Custom JS is explicit trust opt-in. Plugins are trusted statically compiled Rust code. See README and PLAN for scope.

@@ -9,7 +9,7 @@ Click the scene or press Space to jump. HTML also provides Jump, Pause, Play and
 From the repository root:
 
 ```sh
-export TMPDIR=/home/user/svg_editor/.work-tmp
+export TMPDIR="$PWD/.work-tmp"
 mkdir -p "$TMPDIR"
 cargo build -p splinely-cli
 python3 scripts/generate-cactus-runner.py
@@ -18,7 +18,7 @@ python3 scripts/runner-smoke.py
 
 The generator supports `--cli PATH` and `--output DIR`. It constructs original SVG vectors, runs **import-svg → apply → validate → export → evaluate**, and checks that the compiled exporter preserved weighted clip fields and `blendClip` actions. Imported path geometry is retained in the authored nodes. The patch attaches local transforms, bone bindings, clips, machines and reviewed custom JavaScript. Temporary authoring inputs live under `TMPDIR`.
 
-Export deliberately passes **`--trusted-js`** because the small `customJs` controller handles click/Space, jump completion and transport controls. It does not animate geometry, use timers or access the network. Only use this option for reviewed code; a restrictive CSP can block its dynamic compilation. No speech option is used. `--author-only` writes draft JSON only and makes no export/verification claim.
+Export deliberately passes **`--trusted-js`** because the small `customJs` controller handles click/Space, jump completion and transport controls. It does not animate geometry, use timers or access the network. Only use this option for reviewed code; a restrictive CSP can block its dynamic compilation. `--author-only` writes draft JSON only and makes no export/verification claim.
 
 Generated artifacts:
 
@@ -62,4 +62,4 @@ Evidence from the passing run:
 
 The runtime emits one known construction advisory, `customJs is preserved but not executed; attach trusted handlers explicitly`, before the trusted export bootstrap executes the controller. The test retains that advisory in telemetry and rejects any other diagnostic; the observed click/fades demonstrate that the bootstrap actually ran.
 
-No runtime blocker remained in this Firefox run. Chromium was not installed/tested. This demo contains no audio or speech, and no audibility claim is made. Reruns overwrite evidence; exact wall-time sample values vary.
+No runtime blocker remained in this Firefox run. Chromium was not installed/tested. This demo contains no audio, and no audibility claim is made. Reruns overwrite evidence; exact wall-time sample values vary.

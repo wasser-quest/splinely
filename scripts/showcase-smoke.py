@@ -14,7 +14,7 @@ from urllib.parse import quote
 from firefox_harness import Firefox
 
 # Observe the actual exported instance; never drive its clock, emit transitions,
-# enable speech, or call Start from JS. Speech interception records requests only.
+# or call Start from JS.
 DOCUMENT = """
 const object=document.querySelector(arguments[0]);
 if(!object || !object.contentDocument) return null;
@@ -24,24 +24,19 @@ if(!f) return null;
 INSTALL = DOCUMENT + """
 const w=doc.defaultView, p=JSON.parse(doc.querySelector('#splinely-project').textContent);
 if(!w.__showcaseSmoke) {
- const t=w.__showcaseSmoke={states:[],speech:[],errors:[],clicks:[],installedAt:performance.now()};
+ const t=w.__showcaseSmoke={states:[],errors:[],clicks:[],installedAt:performance.now()};
  w.addEventListener('error',e=>t.errors.push({type:'error',message:e.message,source:e.filename,line:e.lineno}));
  w.addEventListener('unhandledrejection',e=>t.errors.push({type:'unhandledrejection',message:String(e.reason)}));
  w.addEventListener('click',e=>t.clicks.push({trusted:e.isTrusted,target:e.target.id,host:!!e.target.closest('[data-splinely-host-control]')}),true);
  f.on('click',e=>{if(e.event)t.clicks.push({trusted:e.event.isTrusted,target:e.target,host:false});});
  f.on('state.change',e=>t.states.push({at:f.timeline.time,...e}));
- if(!w.speechSynthesis || !w.SpeechSynthesisUtterance) throw Error('Web Speech API unavailable');
- const synth=w.speechSynthesis;
- // Intentionally suppress device synthesis: deterministic request evidence, not sound.
- synth.speak=function(u){t.speech.push({at:f.timeline.time,text:u.text,lang:u.lang,rate:u.rate,pitch:u.pitch,volume:u.volume});};
- t.intercepted=synth.speak.toString().includes('t.speech.push');
 }
-return {mounted:true,speechEnabled:f.speech.enabled,intercepted:w.__showcaseSmoke.intercepted,
+return {mounted:true,
  project:p,control:!!doc.querySelector('[data-splinely-host-control]')};
 """
 SNAPSHOT = DOCUMENT + """
 const p=JSON.parse(doc.querySelector('#splinely-project').textContent), t=doc.defaultView.__showcaseSmoke;
-return {time:f.timeline.time,playing:f.timeline.playing,speechEnabled:f.speech.enabled,
+return {time:f.timeline.time,playing:f.timeline.playing,
  machines:(p.stateMachines||p.machines||[]).map(m=>({id:m.id,state:f.machine(m.id).state})),
  attributes:p.nodes.map(n=>{const el=doc.getElementById(n.id);return {id:n.id,attrs:el?Object.fromEntries([...el.attributes].map(a=>[a.name,a.value])):null};}),
  telemetry:t,diagnostics:f.diagnostics.map(e=>({message:e.message||String(e),stack:e.stack||null})),control:!!doc.querySelector('[data-splinely-host-control]')};
@@ -87,8 +82,6 @@ def run_case(browser, url, kind, args, result):
     browser.command("WebDriver:Navigate", {"url": url})
     result["initial"] = wait_for(browser, INSTALL, args.object_selector, args.mount_timeout)
     initial = result["initial"]
-    if kind == "random" and (not initial["speechEnabled"] or not initial["intercepted"] or not initial["control"]):
-        raise AssertionError("Require exported speech opt-in, synthesis interception and SVG Start control")
     project = initial["project"]
     expected = {m["id"]: {s["id"] for s in m["states"]} for m in project.get("stateMachines", project.get("machines", []))}
     seen = {m["id"]: set() for m in project.get("stateMachines", project.get("machines", []))}
@@ -96,7 +89,7 @@ def run_case(browser, url, kind, args, result):
     result["before"] = browser.js(SNAPSHOT, [args.object_selector])
     for machine in result["before"]["machines"]:
         seen[machine["id"]].add(machine["state"])
-    result["click"] = click_start(browser, args.object_selector, "#start-control" if kind == "water" else "[data-splinely-host-control] rect")
+    result["click"] = click_start(browser, args.object_selector, "#start-control")
     samples = result["samples"] = []
     deadline = time.monotonic() + args.duration
     changed = False
@@ -120,18 +113,16 @@ def run_case(browser, url, kind, args, result):
             seen.setdefault(machine["id"], set()).add(machine["state"])
         # At least three wall-clock observations, no seeking or synthetic machine input.
         complete = kind == "water" or (bool(expected) and all(states <= seen[key] for key, states in expected.items()))
-        if len(samples) >= 3 and changed and complete and (kind == "water" or snapshot["telemetry"]["speech"]):
+        if len(samples) >= 3 and changed and complete:
             break
     last = samples[-1]
     result["observedStates"] = {key: sorted(value) for key, value in seen.items()}
     result["attributeChanges"] = changed
     checks = result["checks"] = {
         "mountedInHtmlObject": initial["mounted"],
-        "trustedStartClick": any(c["trusted"] and (kind == "water" or c["host"]) for c in last["telemetry"]["clicks"]),
+        "trustedStartClick": any(c["trusted"] for c in last["telemetry"]["clicks"]),
         "started": last["playing"] and last["time"] > result["before"]["time"] and not last["control"],
         "domAttributesChanged": changed,
-        "speechEnabledIfRequired": kind == "water" or last["speechEnabled"],
-        "sayRequestsRecordedIfRequired": kind == "water" or bool(last["telemetry"]["speech"]),
         # Runtime emits this advisory before the reviewed export host runs customJs.
         # Retain it in the JSON; fail every other diagnostic, including host errors.
         "noUnexpectedRuntimeDiagnostics": not any(d["message"] !=
@@ -161,7 +152,6 @@ def main():
     if args.duration <= 0 or args.interval <= 0 or args.mount_timeout <= 0:
         parser.error("timeouts and interval must be positive")
     report = {"passed": False, "cases": {}, "errors": [], "unproven": [
-        "Audible speech, voice availability, device output and speech timing (speak intercepted)",
         "Offline file:// mounting and non-Firefox browser compatibility",
         "Errors before telemetry attachment, unless retained by runtime diagnostics"],
         "screenshot": "/tmp/splinely-showcase.png", "screenshotCaptured": False}

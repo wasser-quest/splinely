@@ -23,7 +23,7 @@ def main():
         results = [runtime.initial] + [runtime.request(r) for r in requests]
         assert results[1]["frame"]["bones"][0]["x"] == 5
         assert results[2]["frame"]["states"]["main"] == "talking"
-        assert results[2]["hostActions"][1]["type"] == "speak"
+        assert results[2]["hostActions"][1] == {"type": "event", "event": {"name": "greeted", "target": None}}
         assert results[4]["frame"]["clips"][0]["weight"] == 0.5
         assert results[4]["frame"]["nodes"][0]["transform"]["x"] == 5
         assert results[4]["hostActions"] == [{"type": "callback", "id": "hostCustom", "data": {"message": "你好"}}]
@@ -49,7 +49,7 @@ def main():
     assert all(r["ok"] for r in responses), responses
     assert [r["result"] for r in responses] == results
     assert run.stderr == "", run.stderr
-    print("PASS: real ctypes library, ordered state/speech output, fades/bones, callback UTF-8, rollback, independent handles, JSON-lines parity")
+    print("PASS: real ctypes library, ordered state/event output, fades/bones, callback UTF-8, rollback, independent handles, JSON-lines parity")
 
 
 if __name__ == "__main__":

@@ -9,7 +9,7 @@
 
 Frühere Headless-Versuche endeten mit Timeout/`[GFX1-]: RenderCompositorSWGL failed mapping default framebuffer, no dt`. Mit frischem Profil und `MOZ_DISABLE_GPU_ACCEL=1` bestanden die späteren Läufe. Ein Timeout ist niemals ein Pass.
 
-**Noch nicht nachgewiesen:** hörbare Hardwareausgabe, genaue Audio-Latenz, weitere Codecs/Browser, systemabhängige Speech-Stimmen oder Offline-Sprachsynthese. Node-Audiotests verwenden Testdoubles. Der strukturelle Ressourcencheck ist kein allgemeiner JS-Sicherheitsbeweis oder Netzwerkmonitor.
+**Noch nicht nachgewiesen:** hörbare Hardwareausgabe, genaue Audio-Latenz oder weitere Codecs/Browser. Node-Audiotests verwenden Testdoubles. Der strukturelle Ressourcencheck ist kein allgemeiner JS-Sicherheitsbeweis oder Netzwerkmonitor.
 
 ## Reproduzieren
 
@@ -36,4 +36,3 @@ Der Screenshot muss **PASS** zeigen, nicht STATIC FALLBACK/FAIL. Der Python-Test
 6. Skripte deaktivieren/als `<img>` öffnen: statische Ausgangsgrafik bleibt sichtbar; keine Interaktion oder Audio. Firefox und Chromium vergleichen.
 7. Editor: Projekt laden, Keyframe ändern, speichern/neu laden/exportieren. Native Vorschau ist stumm. Trusted-JS-Freigabe ist sitzungsbezogen und wird beim Laden zurückgesetzt.
 
-Editor-Speech-Cues oder `Speak`-Aktionen erlauben Browser-Speech im Editorexport; CLI benötigt `--speech`, vertrauenswürdiger Host-Code kann `splinely.speech.enable()` aufrufen. Stimmen, Netzwerkbedarf und globale Speech-Cancellation bleiben systemabhängig. Eingebettete Aufnahmen sind die zuverlässigere Offline-Option.

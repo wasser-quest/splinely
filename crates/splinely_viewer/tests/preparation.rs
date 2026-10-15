@@ -72,7 +72,7 @@ fn project_custom_js_requires_explicit_trust() {
     assert!(!svg_in(&safe.html).contains("new Function('splinely'"));
     assert!(svg_in(&trusted.html).contains("new Function('splinely'"));
     assert!(svg_in(&safe.html).contains("splinely.audio.unlock()"));
-    assert!(svg_in(&safe.html).contains("const speech=false, controls=true;"));
+    assert!(svg_in(&safe.html).contains("const controls=true;"));
 }
 
 #[test]
@@ -105,7 +105,7 @@ fn frm_is_self_contained_and_matches_splinely_json() {
         splinely_document::Project::from_json(embedded).unwrap(),
         project
     );
-    assert!(svg.contains("const speech=false, controls=true;"));
+    assert!(svg.contains("const controls=true;"));
     assert!(svg.contains("splinely.audio.unlock()"));
     assert!(!svg.contains("new Function('splinely'"));
     // Preparation neither requires nor writes a sidecar SVG or any other file.
@@ -119,14 +119,13 @@ fn frm_is_self_contained_and_matches_splinely_json() {
 }
 
 #[test]
-fn frm_custom_js_requires_explicit_trust_even_with_speech() {
+fn sply_custom_js_requires_explicit_trust() {
     let input = Input::new(r#"{"customJs":"window.FRM_MARKER=123;"}"#, "SPLY");
     for trusted_js in [false, true] {
         let prepared = prepare(
             &input.0,
             ViewerOptions {
                 trusted_js,
-                speech: true,
                 ..Default::default()
             },
         )
@@ -136,7 +135,7 @@ fn frm_custom_js_requires_explicit_trust_even_with_speech() {
         let svg = svg_in(&prepared.html);
         assert!(svg.contains("window.FRM_MARKER=123;"));
         assert_eq!(svg.contains("new Function('splinely'"), trusted_js);
-        assert!(svg.contains("const speech=true, controls=true;"));
+        assert!(!svg.contains("speech"));
     }
 }
 
@@ -161,19 +160,18 @@ fn frm_rejects_noncanonical_or_invalid_project_schema() {
 }
 
 #[test]
-fn force_project_and_speech_options() {
+fn force_project_option() {
     let input = Input::new("{}", "txt");
     let prepared = prepare(
         &input.0,
         ViewerOptions {
             project: true,
-            speech: true,
             ..Default::default()
         },
     )
     .unwrap();
     assert!(!prepared.is_svg_input);
-    assert!(svg_in(&prepared.html).contains("const speech=true, controls=true;"));
+    assert!(svg_in(&prepared.html).contains("const controls=true;"));
 }
 
 #[test]

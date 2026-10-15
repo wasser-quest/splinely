@@ -12,11 +12,10 @@ presentation artifact, not an authored Project and not an input to `convert`.
 
 The Project stores geometry and styling, layers, transforms, animations and
 blend settings, states and actions, bones and bindings, variables, embedded
-base64 audio and cues, speech cues, `customJs`, and `rawSvg`. No adjacent JSON,
+base64 audio and cues, `customJs`, and `rawSvg`. No adjacent JSON,
 SVG or audio files are required to retain this authored data. This does **not**
 mean a `.sply` file renders or executes itself: a compatible host must load it,
-or the CLI must export an SVG for a script-capable browser host. Browser speech
-cues describe requests, not embedded speech voices or guaranteed offline speech.
+or the CLI must export an SVG for a script-capable browser host.
 Embedded audio playback still depends on host support and user gestures.
 
 Saving produces canonical pretty JSON with a trailing newline. Existing
@@ -24,8 +23,8 @@ omitted default fields are materialized; original whitespace, key order, number
 spelling and SVG source formatting are not guaranteed. Authored supported values
 are preserved. `rawSvg` remains metadata, not injected/rendered geometry.
 Loading and conversion do not execute `customJs`; its presence never grants
-trust. Browser export requires an explicit `--trusted-js` to run reviewed code;
-`--speech` is a separate opt-in. No native plugin is loaded from this format.
+trust. Browser export requires an explicit `--trusted-js` to run reviewed code.
+No native plugin is loaded from this format.
 
 ## Strictness and limits
 

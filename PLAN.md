@@ -79,7 +79,7 @@ fixtures/
 | TimelinePlugin | Tracks, Clips, Keyframes und Transport |
 | InteractionPlugin | Pointer, Touch, Tastatur, Fokus und Drag |
 | StateMachinePlugin | Zustände, Guards, Aktionen und Variablen |
-| AudioPlugin | Assets, Audio-Cues und Speech-Cues |
+| AudioPlugin | Assets und Audio-Cues |
 | CodePlugin | Codeansicht, Diagnostik und Runtime-API |
 | SvgPlugin | Import, Export und SVG-Quelltext |
 
@@ -98,7 +98,7 @@ Das Projekt enthält:
 - SVG-Definitionen und eingebettete Assets.
 - Animationsclips, Tracks und Keyframes.
 - State Machines, Variablen, Events und Aktionen.
-- Audio- und Speech-Cues.
+- Audio-Cues.
 - Nutzercode und erhaltene SVG-Quelltextbereiche.
 - Plugin-Daten mit Namensraum und Version.
 
@@ -150,21 +150,14 @@ Audio hängt nicht an einem bestimmten Grafikobjekt. Assets und Cues sind eigens
 - Optionaler Export mit externen Dateien, klar als nicht eigenständig gekennzeichnet.
 - Codec-Unterstützung wird für Zielbrowser geprüft; Dateigröße und Speicherlimits werden angezeigt.
 
-### Speech
-
-- Cue mit Text, Sprache, Rate, Tonhöhe und Lautstärke.
-- Browser-Sprachausgabe als zusätzliche Funktion.
-- Stimmen, Offlineverfügbarkeit und Startlatenz sind systemabhängig und nicht garantiert.
-- Präzise, offline reproduzierbare Sprache verwendet eingebettete Aufnahmen.
-
 ### Transportregeln
 
 - Zentrale Transportzeit für Grafik und Audio; Audio-Uhr für geplante Audiostarts.
 - Vorladen/Dekodieren vor dem Start und klare Ladefehler.
 - Pause stoppt Quellen und bewahrt Position; Fortsetzen plant neue Quellen.
 - Seek startet überlappende Audio-Cues am richtigen Offset, wenn Wiedergabe aktiv ist.
-- Scrubbing löst standardmäßig weder kurze Sounds noch Speech aus.
-- Loop plant Audio neu; Speech wird bei Seek/Pause gestoppt und nicht rückwirkend nachgeholt.
+- Scrubbing löst standardmäßig keine kurzen Sounds aus.
+- Loop plant Audio neu.
 - Cues werden beim Überschreiten ihres Zeitpunkts genau nach festgelegten Regeln ausgelöst, auch bei ausgelassenen Renderframes.
 - Audiofreigabe nach Nutzerinteraktion, gegebenenfalls über einen Start-Button. Keine Garantie absolut verzögerungsfreier Ausgabe.
 
@@ -179,7 +172,6 @@ splinely.on("button", "click", async () => {
 });
 
 splinely.timeline.at(1.5, () => splinely.audio.play("hello"));
-splinely.speech.say("Hallo!", { lang: "de-DE" });
 splinely.machine("main").send("OPEN");
 splinely.set("circle", { opacity: 0.5 });
 splinely.variable("speed").set(2);
@@ -250,7 +242,7 @@ SVG-Komplexitäts-, Ressourcen- und Dateigrößenlimits sowie klare Fehlermeldun
 
 ### Phase 4 — Audio
 
-- Audioassets, eingebetteter Export, Cue-Tracks und Speech.
+- Audioassets, eingebetteter Export und Cue-Tracks.
 - Laden, Freigabe, Pause, Seek und Loop.
 
 **Abnahme:** Eingebettete Aufnahme startet am geplanten Cue; Transporttests prüfen Offsets und vermeiden doppelte Auslösungen. Timing-Toleranzen werden im Browserprototyp gemessen und festgelegt.
@@ -273,7 +265,7 @@ SVG-Komplexitäts-, Ressourcen- und Dateigrößenlimits sowie klare Fehlermeldun
 
 ## 10. Erstes durchgängiges Beispiel
 
-Ein Kreis bewegt sich per Keyframes. Ein Klick aktiviert die State Machine und startet den Clip. Bei Sekunde 1,5 spielt eine eingebettete Sprachaufnahme. Ein optionales Codeskript verändert anschließend die Farbe. Das Projekt lässt sich speichern, erneut bearbeiten und als eine eigenständige SVG-Datei exportieren.
+Ein Kreis bewegt sich per Keyframes. Ein Klick aktiviert die State Machine und startet den Clip. Bei Sekunde 1,5 spielt ein eingebetteter Ton. Ein optionales Codeskript verändert anschließend die Farbe. Das Projekt lässt sich speichern, erneut bearbeiten und als eine eigenständige SVG-Datei exportieren.
 
 ## Nächster Umsetzungsschritt
 

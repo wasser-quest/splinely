@@ -100,9 +100,6 @@ fails, nothing is saved and the error names the step.
 - Look: `render F --time T --output x.png`, `render F --output x.gif [--clip ID]`.
 - Advanced JSON: `apply F --patch patch.json` (RFC 7396; arrays are REPLACED
   entirely), `schema` (format + examples), `capabilities` (full reference).
-- Speech: `speak --text … --lang de-DE --output probe.wav` to listen, then
-  `embed-speech F --text … --lang de-DE --asset-id voice --time 1` (local engine,
-  polished WAV, same sound in every browser). `speech-engines` lists engines.
 - Bones, blending, audio: see `capabilities` and CLI.md.
 
 ## Common mistakes

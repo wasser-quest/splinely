@@ -2254,7 +2254,7 @@
       ]
     }
   ],
-  "customJs": "\nconst svg = document.currentScript.ownerSVGElement;\nconst data = JSON.parse(svg.querySelector('[id=\"splinely-project\"]').textContent);\nconst machine = data.stateMachines.length ? splinely.machine('gallery') : null;\nconst status = svg.querySelector('[id=\"status\"]');\nlet paused = [], pauseRequested = false;\nfunction describe() {\n  status.textContent = (machine ? 'State: ' + machine.state : 'Water drop') +\n    ' · ' + (splinely.timeline.playing ? 'playing' : 'paused') +\n    ' · speech ' + (splinely.speech.enabled ? 'enabled' : 'off');\n}\nfunction start() {\n  pauseRequested = false;\n  const host = svg.querySelector('[data-splinely-host-control]');\n  if (host) host.remove(); // These generated scenes contain no audio assets to unlock.\n  if (machine && machine.state === 'idle') machine.send('START');\n  else for (const id of paused) splinely.clip(id).play();\n  paused = []; splinely.timeline.play(); describe();\n}\nfunction pause() {\n  pauseRequested = true;\n  if (splinely.timeline.playing) {\n    paused = data.clips.filter(c => splinely.clip(c.id).playing).map(c => c.id);\n    splinely.timeline.pause();\n  }\n  describe();\n}\nfor (const [id, fn] of [['start-control', start], ['pause-control', pause]]) {\n  const el = svg.querySelector('[id=\"' + id + '\"]');\n  el.setAttribute('role', 'button'); el.setAttribute('tabindex', '0');\n  el.setAttribute('aria-label', id === 'start-control' ? 'Play or resume animation' : 'Pause animation');\n  el.style.cursor = 'pointer';\n  const label = svg.querySelector('[id=\"' + id + '-label\"]');\n  label.style.pointerEvents = 'none';\n  splinely.on(id, 'click', fn);\n  const key = event => { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); fn(); } };\n  el.addEventListener('keydown', key);\n  splinely.onDestroy(() => el.removeEventListener('keydown', key));\n}\nconst host = svg.querySelector('[data-splinely-host-control]');\nif (host) {\n  const key = event => { if (event.key === 'Enter' || event.key === ' ') start(); };\n  host.addEventListener('click', start); host.addEventListener('keydown', key);\n  splinely.onDestroy(() => { host.removeEventListener('click', start); host.removeEventListener('keydown', key); });\n}\nsplinely.on('showcase.start', start);\nsplinely.on('showcase.pause', pause);\nsplinely.on('state.change', () => {\n  // Pausing synchronizes the wall clock. A queued clip.end may enter the next\n  // state after the Pause handler returns; hold that new clip, not the old one.\n  if (pauseRequested) {\n    paused = data.clips.filter(c => splinely.clip(c.id).playing).map(c => c.id);\n    splinely.timeline.pause();\n  }\n  describe();\n});\nsplinely.on('error', () => { status.textContent = 'Runtime error · inspect diagnostics'; });\ndescribe();\n",
+  "customJs": "\nconst svg = document.currentScript.ownerSVGElement;\nconst data = JSON.parse(svg.querySelector('[id=\"splinely-project\"]').textContent);\nconst machine = data.stateMachines.length ? splinely.machine('gallery') : null;\nconst status = svg.querySelector('[id=\"status\"]');\nlet paused = [], pauseRequested = false;\nfunction describe() {\n  status.textContent = (machine ? 'State: ' + machine.state : 'Water drop') +\n    ' · ' + (splinely.timeline.playing ? 'playing' : 'paused');\n}\nfunction start() {\n  pauseRequested = false;\n  const host = svg.querySelector('[data-splinely-host-control]');\n  if (host) host.remove(); // These generated scenes contain no audio assets to unlock.\n  if (machine && machine.state === 'idle') machine.send('START');\n  else for (const id of paused) splinely.clip(id).play();\n  paused = []; splinely.timeline.play(); describe();\n}\nfunction pause() {\n  pauseRequested = true;\n  if (splinely.timeline.playing) {\n    paused = data.clips.filter(c => splinely.clip(c.id).playing).map(c => c.id);\n    splinely.timeline.pause();\n  }\n  describe();\n}\nfor (const [id, fn] of [['start-control', start], ['pause-control', pause]]) {\n  const el = svg.querySelector('[id=\"' + id + '\"]');\n  el.setAttribute('role', 'button'); el.setAttribute('tabindex', '0');\n  el.setAttribute('aria-label', id === 'start-control' ? 'Play or resume animation' : 'Pause animation');\n  el.style.cursor = 'pointer';\n  const label = svg.querySelector('[id=\"' + id + '-label\"]');\n  label.style.pointerEvents = 'none';\n  splinely.on(id, 'click', fn);\n  const key = event => { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); fn(); } };\n  el.addEventListener('keydown', key);\n  splinely.onDestroy(() => el.removeEventListener('keydown', key));\n}\nconst host = svg.querySelector('[data-splinely-host-control]');\nif (host) {\n  const key = event => { if (event.key === 'Enter' || event.key === ' ') start(); };\n  host.addEventListener('click', start); host.addEventListener('keydown', key);\n  splinely.onDestroy(() => { host.removeEventListener('click', start); host.removeEventListener('keydown', key); });\n}\nsplinely.on('showcase.start', start);\nsplinely.on('showcase.pause', pause);\nsplinely.on('state.change', () => {\n  // Pausing synchronizes the wall clock. A queued clip.end may enter the next\n  // state after the Pause handler returns; hold that new clip, not the old one.\n  if (pauseRequested) {\n    paused = data.clips.filter(c => splinely.clip(c.id).playing).map(c => c.id);\n    splinely.timeline.pause();\n  }\n  describe();\n});\nsplinely.on('error', () => { status.textContent = 'Runtime error · inspect diagnostics'; });\ndescribe();\n",
   "height": 640.0,
   "name": "The shape conversation",
   "nodes": [
@@ -3061,7 +3061,6 @@
   ],
   "rawSvg": "",
   "schemaVersion": 1,
-  "speechCues": [],
   "stateMachines": [
     {
       "id": "gallery",
@@ -3078,11 +3077,6 @@
             {
               "clipId": "motion-0",
               "type": "playClip"
-            },
-            {
-              "lang": "en-US",
-              "text": "I am a soft square. Let's build something.",
-              "type": "speak"
             }
           ],
           "overrides": [
@@ -3110,11 +3104,6 @@
             {
               "clipId": "motion-1",
               "type": "playClip"
-            },
-            {
-              "lang": "en-US",
-              "text": "I am a soft square. Let's build something.",
-              "type": "speak"
             }
           ],
           "overrides": [
@@ -3142,11 +3131,6 @@
             {
               "clipId": "motion-2",
               "type": "playClip"
-            },
-            {
-              "lang": "en-US",
-              "text": "Hello! I am a curious circle.",
-              "type": "speak"
             }
           ],
           "overrides": [
@@ -3174,11 +3158,6 @@
             {
               "clipId": "motion-3",
               "type": "playClip"
-            },
-            {
-              "lang": "en-US",
-              "text": "Hello! I am a curious circle.",
-              "type": "speak"
             }
           ],
           "overrides": [
@@ -3206,11 +3185,6 @@
             {
               "clipId": "motion-4",
               "type": "playClip"
-            },
-            {
-              "lang": "en-US",
-              "text": "I am a bright polygon. Every corner has a story.",
-              "type": "speak"
             }
           ],
           "overrides": [
@@ -3238,11 +3212,6 @@
             {
               "clipId": "motion-5",
               "type": "playClip"
-            },
-            {
-              "lang": "en-US",
-              "text": "I am a bright polygon. Every corner has a story.",
-              "type": "speak"
             }
           ],
           "overrides": [

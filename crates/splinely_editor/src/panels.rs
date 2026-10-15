@@ -1106,7 +1106,7 @@ impl Editor {
                         machine.variables.insert(name.clone(), value.clone());
                     }
                 }
-                Action::PlayAudio { .. } | Action::Speak { .. } => {
+                Action::PlayAudio { .. } => {
                     self.status = "Audioaktion protokolliert · im Browser-Export anhören.".into()
                 }
             }
@@ -1114,12 +1114,13 @@ impl Editor {
     }
     pub(super) fn audio_ui(&mut self, ui: &mut egui::Ui) {
         self.native_audio_controls(ui);
-        ui.heading("Audio / Sprache");
+        ui.heading("Audio");
         if self.project.audio_assets.is_empty() {
-            ui.label("Noch kein Audio: lokalen Dateipfad unten eintragen und die Datei einbetten. Sprachtext lässt sich auch ohne Audiodatei hinzufügen; Sprache wird im Browser-Export abgespielt.");
+            ui.label("Noch kein Audio: lokalen Dateipfad unten eintragen und die Datei einbetten.");
         }
-        ui.small("Audiodateien werden eingebettet. Sprache läuft im Viewer/Browser.")
-            .on_hover_text("Native Audiovorschau oben einschalten. Browser-Audio muss gestartet werden; verfügbare Sprachstimmen hängen von Browser und Betriebssystem ab.");
+        ui.small("Audiodateien werden eingebettet.").on_hover_text(
+            "Native Audiovorschau oben einschalten. Browser-Audio muss gestartet werden.",
+        );
         ui.horizontal(|ui| {
             ui.label("Dateipfad:");
             ui.text_edit_singleline(&mut self.audio_path);
@@ -1196,99 +1197,6 @@ impl Editor {
             if let Some(i) = remove {
                 p.audio_cues.remove(i);
             }
-            ui.separator();
-            ui.horizontal(|ui| {
-                ui.text_edit_singleline(&mut self.speech_text);
-                egui::ComboBox::from_id_salt("speech_lang")
-                    .selected_text(self.speech_lang.as_str())
-                    .show_ui(ui, |ui| {
-                        for lang in SPEECH_LANGS {
-                            ui.selectable_value(&mut self.speech_lang, (*lang).to_owned(), *lang);
-                        }
-                    });
-            });
-            if ui.button("+ Spracheinsatz hier").clicked() {
-                p.speech_cues.push(SpeechCue {
-                    id: self.new_id("speech"),
-                    time: self.time,
-                    text: self.speech_text.clone(),
-                    lang: self.speech_lang.clone(),
-                    rate: 1.,
-                    pitch: 1.,
-                    volume: 1.,
-                });
-            }
-            ui.small("Browser-Sprache nutzt die Stimmen des Systems (unter Linux oft eSpeak). „Als Audio einbetten“ erzeugt lokal eine aufbereitete Aufnahme, die überall gleich klingt.");
-            let mut remove = None;
-            let mut preview = None;
-            let mut embed = None;
-            for (i, cue) in p.speech_cues.iter_mut().enumerate() {
-                ui.push_id(("speech", i), |ui| {
-                    ui.collapsing(format!("{}: {}", cue.id, cue.text), |ui| {
-                        number(ui, "Zeit", &mut cue.time);
-                        ui.text_edit_multiline(&mut cue.text);
-                        ui.horizontal(|ui| {
-                            ui.label("Sprache");
-                            egui::ComboBox::from_id_salt("cue_lang")
-                                .selected_text(cue.lang.as_str())
-                                .show_ui(ui, |ui| {
-                                    for lang in SPEECH_LANGS {
-                                        ui.selectable_value(&mut cue.lang, (*lang).to_owned(), *lang);
-                                    }
-                                });
-                        });
-                        ui.add(egui::Slider::new(&mut cue.rate, 0.5..=2.0).text("Tempo"));
-                        ui.add(egui::Slider::new(&mut cue.pitch, 0.5..=1.5).text("Tonhöhe"));
-                        ui.add(egui::Slider::new(&mut cue.volume, 0.0..=1.0).text("Lautstärke"));
-                        ui.horizontal(|ui| {
-                            if ui.button("▶ Probehören").on_hover_text("Lokal erzeugen und über ffplay abspielen").clicked() {
-                                preview = Some(i);
-                            }
-                            if ui
-                                .button("Als Audio einbetten")
-                                .on_hover_text("Lokal synthetisieren (Piper/Flite/eSpeak), aufbereiten und als Audioeinsatz zur selben Zeit speichern – klingt in jedem Browser gleich")
-                                .clicked()
-                            {
-                                embed = Some(i);
-                            }
-                            if ui.button("Löschen").clicked() {
-                                remove = Some(i);
-                            }
-                        });
-                    });
-                });
-            }
-            if let Some(i) = preview {
-                let cue = p.speech_cues[i].clone();
-                self.preview_speech(&cue);
-            }
-            if let Some(i) = embed {
-                let cue = p.speech_cues[i].clone();
-                match synthesize_cue(&cue) {
-                    Ok(speech) => {
-                        let id = self.new_id("speech-audio");
-                        p.audio_assets.push(splinely_document::AudioAsset {
-                            id: id.clone(),
-                            name: format!("Sprache: {}", cue.text.chars().take(40).collect::<String>()),
-                            mime_type: "audio/wav".into(),
-                            data_base64: splinely_document::tts::encode_base64(&speech.wav),
-                        });
-                        p.audio_cues.push(AudioCue {
-                            id: format!("{id}-cue"),
-                            asset_id: id,
-                            time: cue.time,
-                            offset: 0.,
-                            duration: None,
-                            volume: cue.volume,
-                        });
-                        p.speech_cues.remove(i);
-                        self.status = format!("Sprache eingebettet ({}, {:.1} s).", speech.engine, speech.seconds);
-                    }
-                    Err(error) => self.status = format!("Sprache nicht erzeugt: {error}"),
-                }
-            } else if let Some(i) = remove {
-                p.speech_cues.remove(i);
-            }
         });
         self.commit(p);
     }
@@ -1332,7 +1240,7 @@ impl Editor {
             }
         });
         if is_js {
-            ui.collapsing("API-Beispiel",|ui|{ui.code("splinely.on(\"circle\", \"click\", () => {\n  splinely.clip(\"intro\").play();\n  splinely.speech.enable().say(\"Hello\", {lang: \"en-US\"});\n});");});
+            ui.collapsing("API-Beispiel",|ui|{ui.code("splinely.on(\"circle\", \"click\", () => {\n  splinely.clip(\"intro\").play();\n});");});
         }
         let buffer = if is_js {
             &mut self.code_buffer
@@ -1385,64 +1293,6 @@ fn validate_xml(source: &str) -> Result<(), String> {
     }
     Ok(())
 }
-const SPEECH_LANGS: &[&str] = &[
-    "de-DE", "en-US", "en-GB", "fr-FR", "es-ES", "it-IT", "nl-NL", "pt-BR", "pl-PL", "ja-JP",
-];
-
-/// Local synthesis of a browser speech cue (same engines as `splinely-cli embed-speech`).
-fn synthesize_cue(cue: &SpeechCue) -> Result<splinely_document::tts::Speech, String> {
-    splinely_document::tts::synthesize(&splinely_document::tts::SpeechRequest {
-        text: cue.text.clone(),
-        lang: cue.lang.clone(),
-        rate: cue.rate.clamp(0.3, 3.),
-        pitch: cue.pitch.clamp(0.3, 2.),
-        ..Default::default()
-    })
-    .map_err(|e| e.to_string())
-}
-
-impl Editor {
-    /// Synthesize a cue and play it once through ffplay (replacing a running preview).
-    fn preview_speech(&mut self, cue: &SpeechCue) {
-        if let Some(mut child) = self.speech_preview.take() {
-            let _ = child.kill();
-            let _ = child.wait();
-        }
-        let speech = match synthesize_cue(cue) {
-            Ok(speech) => speech,
-            Err(error) => {
-                self.status = format!("Sprache nicht erzeugt: {error}");
-                return;
-            }
-        };
-        let path =
-            std::env::temp_dir().join(format!("splinely-speech-preview-{}.wav", std::process::id()));
-        if let Err(error) = std::fs::write(&path, &speech.wav) {
-            self.status = format!("Vorschau nicht geschrieben: {error}");
-            return;
-        }
-        match std::process::Command::new("ffplay")
-            .args(["-nodisp", "-autoexit", "-loglevel", "quiet"])
-            .arg(&path)
-            .stdin(std::process::Stdio::null())
-            .stdout(std::process::Stdio::null())
-            .stderr(std::process::Stdio::null())
-            .spawn()
-        {
-            Ok(child) => {
-                self.speech_preview = Some(child);
-                self.status = format!("Vorschau: {} ({:.1} s)", speech.engine, speech.seconds);
-            }
-            Err(error) => {
-                self.status = format!(
-                    "ffplay nicht gestartet ({error}); Datei: {}",
-                    path.display()
-                )
-            }
-        }
-    }
-}
-
 fn import_audio(path: &str, id: String) -> Result<AudioAsset, String> {
     let metadata = fs::metadata(path).map_err(|e| e.to_string())?;
     if metadata.len() > 32 * 1024 * 1024 {

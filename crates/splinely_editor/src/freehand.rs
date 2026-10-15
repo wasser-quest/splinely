@@ -246,7 +246,6 @@ impl FreehandTool {
                 && !project.state_machines.iter().any(|n| n.id == id)
                 && !project.audio_assets.iter().any(|n| n.id == id)
                 && !project.audio_cues.iter().any(|n| n.id == id)
-                && !project.speech_cues.iter().any(|n| n.id == id)
             {
                 break id;
             }

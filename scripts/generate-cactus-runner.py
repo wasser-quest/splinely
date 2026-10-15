@@ -201,7 +201,7 @@ def build():
                [transition(s,'ground','RESET') for s in ['ground','jumping']]}]
     return {'schemaVersion':1,'name':'Dune / Stride — original cactus runner','width':960,'height':540,
             'nodes':nodes,'bones':bones,'clips':clips,'stateMachines':machines,'variables':{},
-            'audioAssets':[],'audioCues':[],'speechCues':[],'customJs':CONTROLLER,'rawSvg':''}
+            'audioAssets':[],'audioCues':[],'customJs':CONTROLLER,'rawSvg':''}
 
 
 def main():

@@ -9,7 +9,7 @@
 //! `set_project` does bounded base64 decoding and disk I/O: run preparation off
 //! the GUI thread for large documents, then move the controller to the UI.
 //!
-//! Limits: only Project.audio_cues, not clip-local cues, action sounds or speech.
+//! Limits: only Project.audio_cues, not clip-local cues, or action sounds.
 //! Scheduling is frame-driven, not sample accurate. ffplay startup adds latency;
 //! very short cues can be missed. Unknown source lengths are bounded by a five
 //! minute preview window. Source duration/codec/device failures are reported by

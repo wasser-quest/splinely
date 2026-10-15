@@ -37,9 +37,6 @@ struct Args {
     /// Execute reviewed project customJs (arbitrary code, not sandboxed).
     #[arg(long)]
     trusted_js: bool,
-    /// Enable browser speech for project export.
-    #[arg(long)]
-    speech: bool,
     /// Validate and prepare without opening a GUI or executing JavaScript.
     #[arg(long)]
     check: bool,
@@ -55,7 +52,6 @@ fn run() -> ViewerResult<()> {
         ViewerOptions {
             project: args.project,
             trusted_js: args.trusted_js,
-            speech: args.speech,
         },
     )?;
     if prepared.is_svg_input {

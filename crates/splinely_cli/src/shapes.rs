@@ -3,10 +3,10 @@
 //! Arrangement uses the same `splinely_document` operations as the editor.
 use crate::{bones::number, failure, load, save_project, Result};
 use clap::{Subcommand, ValueEnum};
+use serde_json::{json, Value};
 use splinely_document::{
     AlignEdge, AlignTarget, Axis, BooleanOp, Color, Node, NodeKind, Project, Stack,
 };
-use serde_json::{json, Value};
 
 #[derive(Clone, Copy, Debug, ValueEnum)]
 pub enum Kind {
@@ -563,8 +563,12 @@ fn centre_pivot(project: &mut Project, index: usize) -> Result<()> {
     {
         for key in &mut track.keyframes {
             match (&track.property, &mut key.value) {
-                (splinely_document::Property::X, splinely_document::AnimValue::Number(v)) => *v += ox,
-                (splinely_document::Property::Y, splinely_document::AnimValue::Number(v)) => *v += oy,
+                (splinely_document::Property::X, splinely_document::AnimValue::Number(v)) => {
+                    *v += ox
+                }
+                (splinely_document::Property::Y, splinely_document::AnimValue::Number(v)) => {
+                    *v += oy
+                }
                 (splinely_document::Property::D, splinely_document::AnimValue::Path(d)) => {
                     *d = translate_d(d, -cx, -cy)?
                 }

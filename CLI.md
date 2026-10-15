@@ -86,18 +86,17 @@ for these codes except `stdout_error`.
 | `blend-clip INPUT --clip ID [--weight 0..1] [--mode weighted\|override] --output PATH` | Set existing clip's authored blend settings; defaults weighted/1; does not activate it |
 | `path-insert INPUT ID --segment N [--t 0.5] --output PATH` | Shape-preserving split of a zero-based L/Q/C segment (M/Z excluded) |
 | `path-handle INPUT ID --command-index N --handle control1\|control2\|anchor --x N --y N --output PATH` | Edit a normalized path command handle and recompute bounds |
-| `embed-speech INPUT --text TEXT --asset-id ID [--voice en] [--time 0] [--engine ABSOLUTE_PATH] --output PATH` | Synthesize with trusted installed local eSpeak and embed WAV/cue |
 | `new --output PATH [--demo]` | Valid empty/demo project saved to PATH; JSON acknowledgement |
 | `example [--output PATH]` | Complete demo Project JSON on stdout by default; optionally save `.sply`/JSON atomically |
 | `convert INPUT --output PATH` | Validate/canonicalize between `.sply`, `.splinely.json` and `.json`; no container conversion or SVG import |
 | `validate PATH` | Validates JSON, schema, references and numerical constraints; `{ "ok": true, "schemaVersion": 1 }` |
-| `inspect PATH` | Dimensions, nodes, clips, machines, variables, audio/speech summaries and code-presence flags |
+| `inspect PATH` | Dimensions, nodes, clips, machines, variables, audio summaries and code-presence flags |
 | `apply INPUT --patch PATCH --output PATH` | RFC 7396 merge patch, followed by full validation and atomic output |
-| `export INPUT --output SVG [--trusted-js] [--speech]` | Interactive SVG containing project metadata, runtime and embedded assets |
+| `export INPUT --output SVG [--trusted-js]` | Interactive SVG containing project metadata, runtime and embedded assets |
 | `evaluate INPUT [--time SECONDS] [--context JSON_PATH]` | Evaluate with optional states, ordered independent clip clocks, weights and final overrides; no side effects |
 | `rig-demo --output PATH` | Visible Pivot-style skeleton with bound vector shapes and a looping bone clip |
 | `water-drop --output PATH` | Deterministic polished blue-ball scene with looping drop squash/stretch, shadow and impact ripple |
-| `random-figures --output PATH [--seed U64] [--count 3..12]` | Seeded geometric gallery, speech actions and an automatic sequential state cycle (defaults: seed 42, count 6) |
+| `random-figures --output PATH [--seed U64] [--count 3..12]` | Seeded geometric gallery with captions and an automatic sequential state cycle (defaults: seed 42, count 6) |
 | `bone add INPUT --id ID --length N [--parent ID] [--x N --y N --rotation N] --output PATH` | Add a root or child bone |
 | `bone update INPUT --id ID [--parent ID \| --root] [--x N --y N --rotation N --length N] --output PATH` | Update only supplied fields |
 | `bone bind INPUT --node ID --bone ID --output PATH` | Bind without changing the node's authored local transform |
@@ -169,7 +168,7 @@ properties `x`/`y` animate transform translation rather than geometry position.
 The demo contains all three shape kinds, a looping motion clip, and a click
 state machine. Use its objects as templates. Schema version 1 is supported;
 `schema.model` covers every supported field/default, property, easing and action,
-including blending, bones, audio/speech and evaluation contexts. `capabilities`
+including blending, bones, audio and evaluation contexts. `capabilities`
 provides the same model with actual command metadata. See [LLM.md](LLM.md) and
 [prompts/splinely-author.md](prompts/splinely-author.md) for an authoring checklist and
 a copy-paste prompt for another LLM.
@@ -181,28 +180,27 @@ CLI=target/debug/splinely-cli
 "$CLI" water-drop --output water-drop.sply
 "$CLI" export water-drop.sply --output water-drop.svg --trusted-js
 "$CLI" random-figures --seed 42 --count 6 --output random-figures.sply
-"$CLI" export random-figures.sply --output random-figures.svg --trusted-js --speech
+"$CLI" export random-figures.sply --output random-figures.svg --trusted-js
 
 # Rebuild the checked-in JSON, SVG and HTML pairs via the real CLI.
 python3 scripts/generate-showcase.py
 # Optional: --output /tmp/splinely-showcase --seed 123 --count 8
-# Original anime character: CLI import-svg → apply → validate → export --speech
+# Original anime character: CLI import-svg → apply → validate → export
 python3 scripts/generate-anime-demo.py
-python3 scripts/anime-smoke.py # Firefox: trusted Hallo/replay, bone motion; speech requests only
+python3 scripts/anime-smoke.py # Firefox: trusted Hallo/replay, bone motion
 # Open examples/showcase.html (includes anime-hello.html).
 # If file-origin restrictions interfere, serve this checkout over localhost:
 python3 -m http.server 8000
 ```
 
 The new authoring commands only create **validated canonical schema-1 projects**;
-there is no hidden export, JS execution or speech opt-in. The generated controller
-is reviewable in `customJs` and runs only with `export --trusted-js`. Speech is an
-independent `--speech` opt-in. These SVG exports embed all scene data and runtime;
+there is no hidden export or JS execution. The generated controller
+is reviewable in `customJs` and runs only with `export --trusted-js`. These SVG exports embed all scene data and runtime;
 the HTML wrappers load the adjacent SVG via **`object`, never `img`**, using only
 local relative resources. Both the SVG and HTML offer keyboard-accessible Play /
 resume and Pause controls. HTML reads `object.contentDocument.documentElement.splinely`,
-observes `state.change`, and reports machine state, timeline time, speech enablement
-and diagnostics. It never drives frames or secretly enables speech. CSP or local
+observes `state.change`, and reports machine state, timeline time and
+diagnostics. It never drives frames. CSP or local
 file-origin restrictions may block scripting/observation; direct SVG or localhost
 are alternatives. Script-capable `object` is not a sandbox for untrusted projects.
 
@@ -218,11 +216,11 @@ are alternatives. Script-capable `object` is not a sandbox for untrusted project
   Palette/layout are curated rather than unrestricted. Identical seed/count
   produce identical JSON; count is bounded to 3..12. Seed is saved as a decimal
   string variable so the full u64 range remains exact in browser JavaScript.
-- The gallery begins in `idle` (no premature speech). A user Play gesture sends
+- The gallery begins in `idle`. A user Play gesture sends
   `START` through the existing machine API. Then the **sole playing nonloop clip**
   ends every 4.8 seconds and canonical untargeted `clip.end` transitions visit
   `figure-0 → figure-1 → … → figure-0`. Each transition stops the old clip and
-  the next state's entry plays its clip and requests a prototype phrase. This
+  the next state's entry plays its clip and reveals its caption. This
   is sequential reachability, not unchecked random state selection. Do not add
   concurrent nonloop clips without distinguishing their completion events:
   canonical event targets name nodes, not clip IDs.
@@ -230,11 +228,7 @@ are alternatives. Script-capable `object` is not a sandbox for untrusted project
   visibility patches mask later states. Pause holds the current sample and
   resume continues it, including a completion arriving at the pause boundary.
   An initial `START` is required once; subsequent cycling is automatic.
-- Narration never gates the visual clock. Browser speech may fail, lag, be
-  interrupted on pause/transition, or be unavailable; **offline speech availability
-  is not promised**. Pause cancels speech; resume does not replay the phrase.
-  Exporting without speech still cycles visually, with runtime opt-in diagnostics.
-  Without trusted JS, drop animation still works but authored controls do not;
+- Without trusted JS, drop animation still works but authored controls do not;
   the gallery stays idle until a trusted host sends `START` itself.
 
 Verification (Node is required for the additional runtime integration tests):
@@ -247,12 +241,10 @@ node --test crates/splinely_cli/tests/showcase-runtime.test.cjs
 
 Tests cover canonical round-trips, seed repeatability/variation, loop continuity,
 independent opt-ins, invalid-count atomicity, all-state automatic cycling and
-wraparound, speech failure, pause/resume and wall-clock completion boundaries.
+wraparound, pause/resume and wall-clock completion boundaries.
 The generated pairs were also checked in Firefox: object mounting, trusted Play
-and Pause, automatic visitation of all six gallery states and wraparound, seven
-intercepted speech requests, direct-file SVG host Start, and local-file wrapper
-observation. Speech requests were intercepted for that check: it does **not**
-prove audible speech or voice availability.
+and Pause, automatic visitation of all six gallery states and wraparound,
+direct-file SVG Start, and local-file wrapper observation.
 
 ## Patching and safety
 
@@ -284,15 +276,14 @@ prove audible speech or voice availability.
 
 Exports are fully embedded; the shared browser runtime is compiled into the
 binary. Open SVG directly or in a script-capable browser context (not `<img>`).
-CSP/browser restrictions may disable scripts; audio needs a user gesture and
-speech voice availability depends on the browser; enable it with `--speech`. `customJs` is preserved but
+CSP/browser restrictions may disable scripts; audio needs a user gesture. `customJs` is preserved but
 not executed by default. `--trusted-js` explicitly adds a host bootstrap that executes authored code with the instance-local `splinely` API. Only enable this for reviewed, trusted projects; dynamic compilation may be blocked by CSP. The bundled runtime needs no network. If a host enables
 arbitrary JavaScript, review it or use an isolated context; it may use a network.
 
 `rawSvg` is preserved metadata, not injected/rendered. Only rect/circle/text
 and path geometry is currently supported. Evaluation is the core's deterministic
-animation evaluator, not a browser: it does not execute custom JS, audio,
-speech or state-machine side effects. Time must be finite and nonnegative.
+animation evaluator, not a browser: it does not execute custom JS, audio
+or state-machine side effects. Time must be finite and nonnegative.
 The authored `.sply` Project (or compatible legacy JSON), not exported SVG, is
 the authoritative editable document.
 
@@ -418,61 +409,6 @@ fetch or automatically register generated code. Manual Cargo commands can run
 build scripts and tests; review dependencies too. Project JSON and browser
 JavaScript cannot request native plugin loading. See the generated README for
 registration, lifecycle and export limitations.
-
-## Offline embedded speech (`embed-speech`, `speak`, `speech-engines`)
-
-Generate speech entirely locally, polish it and embed the WAV as a base64
-`AudioAsset` plus an `AudioCue`. No network, downloads or browser voices.
-
-```sh
-splinely-cli speech-engines                      # installed engines, what `auto` picks
-splinely-cli speak --text "Hallo Welt!" --lang de-DE --output probe.wav     # listen first
-splinely-cli embed-speech project.sply --text "Hallo Welt!" --lang de-DE --asset-id hello --time 0
-splinely-cli embed-speech project.sply --text "Hello!" --lang en-US --asset-id hi --rate 0.95
-splinely-cli embed-speech project.sply --text "Hallo!" --lang de-DE --asset-id hallo \
-  --synth piper --piper-model /pfad/de_DE-thorsten-high.onnx      # neural, if installed
-```
-
-Engine choice (`--synth auto`): Piper when `--piper-model` is given, Flite's
-`slt` voice for English, otherwise eSpeak NG. Quality ranking: Piper (neural,
-natural) ≫ Flite slt (English) > eSpeak NG (robotic but intelligible, every
-language). eSpeak runs at 150 wpm with a small word gap instead of its rushed
-175 wpm default. Every result is polished unless `--raw`: 85 Hz high-pass,
-a little warmth at 220 Hz, a softened 3.2 kHz buzz band, 7 kHz low-pass,
-silence trimmed to short margins, 10 ms fades and loudness normalised to about
-−18 LUFS with a soft peak limit at −1 dBFS, so all clips play evenly loud.
-`--voice` selects an engine voice (`de+anika`, `de+klatt`, `en-us+f3`; Flite
-`slt`, `kal`, `awb`, `rms`), `--rate` (0.3..3) and `--pitch` (0.3..2) are
-relative to natural. The result reports the `engine` used and the `seconds`.
-
-Piper is not bundled: install it and a voice model yourself (both run fully
-offline afterwards). In the editor, speech cues offer **▶ Probehören** and
-**Als Audio einbetten** with the same engines.
-
-The exported SVG contains the full WAV; runtime playback requires a user gesture
-(the Start audio / animation control). No `export --speech` is needed.
-
-Browser speech (`speechCues`, `speak` actions, `export --speech`) uses the
-viewer's system voices; the runtime picks the most natural voice for the
-language (names with Natural/Neural/Online/Google rank first, eSpeak/MBROLA
-last), honours an explicit `voice` name in `splinely.speech.say(text, {voice})`,
-lists candidates with `splinely.speech.voices(lang)` and splits long text into
-sentences. On Linux browsers usually only offer eSpeak, so embed speech when
-the sound matters.
-
-Text must be nonempty UTF-8 without NUL and at most 4096 bytes; generated WAV
-output is limited to 8 MiB. Synthesis uses a unique private temporary directory,
-explicit executable arguments (no shell), and a 30-second deadline with kill/reap
-on failure. `--engine` must be an absolute path to a trusted local
-engine executable (eSpeak-compatible unless `--synth flite|piper`); it runs with
-your process privileges, not in a sandbox. Default engines are resolved from
-your trusted PATH.
-
-`--time` is finite, nonnegative seconds. The asset ID and generated cue ID
-(`<asset-id>-cue`) must be unused project IDs. Existing strict JSON/numeric
-guards and validation apply. Saving is atomic, including when input and output
-are the same path; errors leave the original destination unchanged. Temporary
-files are removed after completion or failure. `--output -` emits project JSON.
 
 ## Guided authoring: `guide`, `check`, `batch`, `clip`, `on`
 
@@ -610,7 +546,7 @@ x/y/rotation. Unknown fields, duplicate JSON keys and lossy integer conversions
 fail; malformed context types report `invalid_context`, invalid references/ranges
 report `evaluation_error`. `--context -` reads stdin, but cannot be combined with
 input `-`. Evaluation never writes or mutates the project and does not execute
-state entry actions, transitions, JS, speech, audio or fade ramps. To check a fade
+state entry actions, transitions, JS, audio or fade ramps. To check a fade
 midpoint supply its effective weight explicitly; this is a snapshot, not a
 browser playback simulation.
 

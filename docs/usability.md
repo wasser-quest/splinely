@@ -3,7 +3,7 @@
 ## Einstieg
 
 - **Gestalten** startet mit Zeichenfläche und Eigenschaften. Die Zeitleiste ist zunächst verborgen; der Schalter **Zeitleiste** bleibt in jedem Arbeitsbereich erreichbar.
-- **Animieren** öffnet die Zeitleiste und bietet Zeichenfläche, Skelett, Zustände und Audio/Sprache.
+- **Animieren** öffnet die Zeitleiste und bietet Zeichenfläche, Skelett, Zustände und Audio.
 - **Erweitert** enthält JavaScript und den bewahrten SVG-Quelltext. Quelltext ist kein Zeichenwerkzeug.
 - **Speichern**, **Abspielen/Pause**, **Vorschau** und **Splinely Viewer öffnen** sind direkt erreichbar. Das Sternchen bei Speichern zeigt ungespeicherte Dokumentänderungen an.
 - **Datei** bündelt Neu (Strg+N), Öffnen … (Strg+O), Zuletzt geöffnet, Speichern (Strg+S), Speichern unter … (Strg+Umschalt+S), SVG-Import und beide SVG-Exporte (Strg+E: interaktiv). Die Dialoge sind native System-Dateidialoge (XDG-Portal/GTK, `rfd`) und laufen in einem Hilfsthread, die Zeichenfläche bleibt bedienbar. **Pfade manuell eingeben** bleibt als Rückfallebene.
@@ -52,13 +52,6 @@ Datei › Einstellungen, Ansicht › Einstellungen oder die Befehlspalette öffn
 | Tastenkürzel | Jeder Befehl der Befehlspalette lässt sich belegen: Kürzel anklicken, neue Taste(nkombination) drücken (Esc bricht ab). Eine schon vergebene Kombination wird beim anderen Befehl entfernt (Hinweis in der Statuszeile). „Leeren“ entfernt, „Standard“ stellt die Vorgabe wieder her; Suchfeld zum Filtern. |
 
 Fest belegt bleiben Pfeiltasten, Entf/Rücktaste, Esc, Leertaste und Strg+C/X/V. Beides rendert wie der statische SVG-Export (ohne Skripte).
-
-## Sprache
-
-- **Spracheinsätze** (Animieren › Audio / Sprache): Text, Sprache (de-DE, en-US, …), Tempo, Tonhöhe, Lautstärke.
-- **▶ Probehören** erzeugt die Stimme lokal und spielt sie über ffplay ab.
-- **Als Audio einbetten** ersetzt den Browser-Spracheinsatz durch eine lokal erzeugte, aufbereitete Aufnahme zur selben Zeit (Piper, falls installiert; Flite für Englisch; sonst eSpeak NG). Die Aufnahme wird gefiltert, auf kurze Ränder geschnitten und auf gleiche Lautheit gebracht und klingt dann in jedem Browser gleich – Browser-Sprache nutzt dagegen die Systemstimmen (unter Linux meist eSpeak).
-- Im Browser wählt die Runtime automatisch die natürlichste verfügbare Stimme der Sprache.
 
 ## Text, Farben und neue Projekte
 
@@ -131,19 +124,19 @@ Die Ebenenliste zeigt oberste Ebenen zuerst mit Formsymbol, 👁 (sichtbar) und 
 - Dokumentgröße, Erweiterungen und technische Hinweise sind zugeklappt; Position und Drehung einer Auswahl sind zunächst geöffnet.
 - **Mehrere Clips & Überblendung** verbirgt zunächst parallele Wiedergabe, manuelle Rücksetzung und einzelne Ebenenaktionen. Aktive Ebenenzeiten/-gewichte bleiben außerhalb der Klappe sichtbar.
 - **Clip-Optionen & Mischgewicht** enthält Export-Wiederholung, Autostart, Ersetzen/Gewichtet und Gewicht. Clip-Anlegen, Zeitregler, Spuren und Schlüsselbilder bleiben erreichbar.
-- Skelett, Zustandsgraph/JSON, Variablen, Ereignisse, Audio, Sprache, Erweiterungen, Ebenen, Pfadkonvertierung und Quelltextbearbeitung bleiben vorhanden.
+- Skelett, Zustandsgraph/JSON, Variablen, Ereignisse, Audio, Erweiterungen, Ebenen, Pfadkonvertierung und Quelltextbearbeitung bleiben vorhanden.
 
 ## Dokument- und Vertrauensgrenzen
 
 Die Umordnung ersetzt weder Dokumentvalidierung noch Undo, Import/Export oder die Gestenimplementierungen. Werkzeugwechsel überschreiben keine vorgemerkten JavaScript-, SVG- oder Zustands-JSON-Entwürfe und ändern die explizite JavaScript-Freigabe nicht. Dokumentwechsel/Undo über `sync_buffers()` widerrufen diese Freigabe weiterhin.
 
-JavaScript läuft nur nach Freigabe im interaktiven Export/Viewer, nicht in der nativen Vorschau. Bewahrtes SVG wird als XML validiert und als Quelltext gespeichert, nicht in die Szene injiziert. Der native Viewer bleibt eine Momentaufnahme: zum Aktualisieren erneut öffnen. Sprache und zustandsgesteuertes Audio benötigen weiterhin Viewer/Browser; native Audiovorschau bleibt für globale Audioeinsätze verfügbar.
+JavaScript läuft nur nach Freigabe im interaktiven Export/Viewer, nicht in der nativen Vorschau. Bewahrtes SVG wird als XML validiert und als Quelltext gespeichert, nicht in die Szene injiziert. Der native Viewer bleibt eine Momentaufnahme: zum Aktualisieren erneut öffnen. Zustandsgesteuertes Audio benötigt weiterhin Viewer/Browser; native Audiovorschau bleibt für globale Audioeinsätze verfügbar.
 
 ## Prüfung und verbleibende Grenzen
 
 Neue Headless-egui-Tests in `crates/splinely_editor/src/app_ui_tests.rs` prüfen echte Werkzeug-/Vorschauknopf-Klicks, Datei-Menü und progressive Offenlegung, Pfad-Fertigstellen/Abbrechen, alle Werkzeugwechsel, Entwurfserhalt, Undo und JS-Freigabe sowie den Wechsel aus unabhängiger Ebenenwiedergabe/Überblendung.
 
-Prüfbefehle (mit `TMPDIR=/home/user/svg_editor/.work-tmp`):
+Prüfbefehle (mit `TMPDIR="$PWD/.work-tmp"`):
 
 ```sh
 cargo test -p splinely_editor

@@ -108,7 +108,7 @@ HTML = '''<!doctype html>
 <title>Brown owl</title>
 <style>body{font-family:system-ui,sans-serif;background:#f3ebdd;color:#4a2f1a;max-width:680px;margin:24px auto;padding:0 18px}h1{margin-bottom:8px}p{line-height:1.5}object{display:block;width:100%;aspect-ratio:1;border-radius:28px}a{color:#8a5a32}</style>
 </head><body><h1>Brown owl</h1>
-<p>A brown owl on a branch. Move the pointer over it and it perks up its ear tufts while its eyes follow you; click it and it closes its eyes contentedly and lifts its wings. No button, speech or audio needed.</p>
+<p>A brown owl on a branch. Move the pointer over it and it perks up its ear tufts while its eyes follow you; click it and it closes its eyes contentedly and lifts its wings. No button or audio needed.</p>
 <object id="scene" type="image/svg+xml" data="brown-owl.svg" aria-label="Interactive brown owl"><a href="brown-owl.svg">Open the interactive SVG</a></object>
 <p><a href="brown-owl-source.svg">Source SVG</a> · <a href="brown-owl.splinely.json">Project JSON</a> · <a href="../scripts/generate-owl-demo.py">Generator</a></p>
 <p>Hover follows a mouse/pointer; touch can click but has no persistent hover. The SVG starts by itself in a script-capable context (object or direct SVG), not an img. Restrictive CSP may block the trusted custom JavaScript. No external assets or network are required.</p>

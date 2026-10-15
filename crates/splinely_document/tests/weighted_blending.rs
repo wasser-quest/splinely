@@ -1,5 +1,5 @@
-use splinely_document::*;
 use serde_json::json;
+use splinely_document::*;
 
 fn track(id: &str, property: Property, value: AnimValue) -> Track {
     Track {

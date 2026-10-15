@@ -14,7 +14,6 @@ pub struct ViewerOptions {
     pub project: bool,
     /// Execute project customJs. Never needed to execute existing SVG scripts.
     pub trusted_js: bool,
-    pub speech: bool,
 }
 
 pub struct PreparedViewer {
@@ -45,7 +44,6 @@ pub fn prepare(path: &Path, options: ViewerOptions) -> ViewerResult<PreparedView
             RUNTIME,
             BrowserExportOptions {
                 trusted_js: options.trusted_js,
-                speech: options.speech,
                 audio_controls: true,
             },
         )?;

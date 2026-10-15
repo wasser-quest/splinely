@@ -5,9 +5,7 @@ use crate::{DocumentError, Project};
 pub struct BrowserExportOptions {
     /// Arbitrary code is not sandboxed. Only enable for reviewed projects.
     pub trusted_js: bool,
-    /// Browser speech voices and offline availability are system-dependent.
-    pub speech: bool,
-    /// Add a user-gesture start control for embedded audio or enabled speech.
+    /// Add a user-gesture start control for embedded audio.
     pub audio_controls: bool,
 }
 
@@ -19,17 +17,16 @@ impl Project {
     ) -> Result<String, DocumentError> {
         let mut script = runtime.to_owned();
         script.push_str(&format!(
-            "\n;(function(){{\nconst speech={}, controls={};\n",
-            options.speech, options.audio_controls
+            "\n;(function(){{\nconst controls={};\n",
+            options.audio_controls
         ));
         script.push_str(r#"
 const svg=document.currentScript && document.currentScript.ownerSVGElement;
 if(!svg || !svg.splinely)return;
 const splinely=svg.splinely;
 const data=JSON.parse(svg.querySelector('[id="splinely-project"]').textContent);
-if(speech && splinely.speech.enable)splinely.speech.enable();
 const report=error=>{if(splinely.destroyed)return;const e=new Error('Splinely host: '+String(error));if(splinely.reportError)splinely.reportError(e);else{splinely.diagnostics.push(e);if(splinely.diagnostics.length>100)splinely.diagnostics.shift();splinely.emit('error',{error:e});}console.error('Splinely host:',error);};
-if(controls && ((data.audioAssets || []).length || speech)) {
+if(controls && (data.audioAssets || []).length) {
   const resume=(data.clips || []).filter(c=>splinely.clip(c.id).playing).map(c=>c.id);
   splinely.timeline.pause();splinely.timeline.seek(0);
   const ns='http://www.w3.org/2000/svg', button=document.createElementNS(ns,'g');

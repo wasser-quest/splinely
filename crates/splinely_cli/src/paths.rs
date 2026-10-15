@@ -1,8 +1,8 @@
 //! Explicit path edits; never approximate unsupported SVG commands.
 use crate::{failure, load, save_project, Result};
 use clap::ValueEnum;
-use splinely_document::NodeKind;
 use serde_json::Value;
+use splinely_document::NodeKind;
 use svgtypes::{PathParser, PathSegment};
 
 type Point = [f64; 2];

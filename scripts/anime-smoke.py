@@ -22,8 +22,7 @@ try:
         assert browser.js("return !document.querySelector('#hello').disabled;"), 'Runtime not ready'
         browser.js("""
 const doc=document.querySelector('object').contentDocument,w=doc.defaultView;
-window.spoken=[];window.trusted=[];window.audioStarts=0;
-w.speechSynthesis.speak=u=>window.spoken.push({text:u.text,lang:u.lang});
+window.trusted=[];window.audioStarts=0;
 const start=w.AudioBufferSourceNode.prototype.start;
 w.AudioBufferSourceNode.prototype.start=function(...args){window.audioStarts++;return start.apply(this,args);};
 document.querySelector('#hello').addEventListener('click',e=>window.trusted.push(e.isTrusted));
@@ -35,11 +34,10 @@ document.querySelector('#hello').addEventListener('click',e=>window.trusted.push
         time.sleep(.7)
         result = browser.js("""
 const d=document.querySelector('object').contentDocument,f=d.documentElement.splinely;
-return {spoken:window.spoken,trusted:window.trusted,time:f.timeline.time,starts:window.audioStarts,ready:f.audio.ready,context:f.audio.context?.state,buffers:f.audio.buffers.size,
+return {trusted:window.trusted,time:f.timeline.time,starts:window.audioStarts,ready:f.audio.ready,context:f.audio.context?.state,buffers:f.audio.buffers.size,
  transform:d.querySelector('#wave-hand').getAttribute('transform'),status:document.querySelector('#status').textContent};
 """)
         assert result['trusted'] == [True], result
-        assert result['spoken'] == [], result
         assert result['starts'] >= 1 and result['ready'] and result['context'] == 'running' and result['buffers'] == 1, result
         assert result['time'] > .3 and result['transform'] != initial, result
         browser.command('WebDriver:ElementClick', {'id': identifier})
@@ -47,7 +45,7 @@ return {spoken:window.spoken,trusted:window.trusted,time:f.timeline.time,starts:
         assert browser.js('return window.audioStarts;') > result['starts'], 'Replay missing'
         screenshot = browser.command('WebDriver:TakeScreenshot', {'id': None, 'full': True, 'scroll': False})
         Path('/tmp/splinely-anime-hello.png').write_bytes(base64.b64decode(screenshot))
-        print('PASS: CLI anime SVG, trusted offline WAV decode/start/replay (no browser speech) and actual bone movement:', result)
+        print('PASS: CLI anime SVG, trusted offline WAV decode/start/replay and actual bone movement:', result)
 finally:
     server.shutdown()
     server.server_close()

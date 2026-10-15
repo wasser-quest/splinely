@@ -27,8 +27,7 @@ output{color:#8ce0de;font-size:14px}section{border:1px solid #263b52;border-radi
 <section><h2>Runtime observation</h2><pre id="events">Waiting for instance…</pre></section>
 <p>SVG scripts require a script-capable browser context, not an img. Resources are local and relative.
 If file-origin restrictions prevent observation, serve this directory over localhost (for example <code>python3 -m http.server</code>).
-Speech is optional browser/system synthesis: voices, latency, audible output and offline availability are not guaranteed.
-The state cycle follows animation time, not speech completion.</p>
+The state cycle follows animation time.</p>
 <script>
 'use strict';
 const object=document.getElementById('scene'), status=document.getElementById('status'), log=document.getElementById('events');
@@ -38,7 +37,7 @@ function detach(){clearInterval(timer);for(const unsubscribe of off)unsubscribe(
 function refresh(){
   if(!splinely || splinely.destroyed)return;
   const states=data.stateMachines.map(m=>m.id+': '+splinely.machine(m.id).state).join(' · ');
-  status.textContent=(states || 'Water drop')+' · '+(splinely.timeline.playing?'playing':'paused')+' · '+splinely.timeline.time.toFixed(1)+'s · speech '+(splinely.speech.enabled?'enabled':'off');
+  status.textContent=(states || 'Water drop')+' · '+(splinely.timeline.playing?'playing':'paused')+' · '+splinely.timeline.time.toFixed(1)+'s';
   const notes=splinely.diagnostics.map(d=>d.message).filter(m=>m!=='customJs is preserved but not executed; attach trusted handlers explicitly');
   log.textContent=(lines.join('\n') || 'Mounted. Use Play to begin.')+(notes.length?'\nDiagnostics: '+notes.slice(-4).join(' | '):'');
 }
@@ -78,7 +77,7 @@ def main():
     output.mkdir(parents=True, exist_ok=True)
     for stem, title, description in [
         ("water-drop", "A drop in the blue", "A softly lit blue sphere, a luminous drop, and a gentle impact ripple. Squash/stretch is authored with canonical numeric tracks, not unsupported path morphs."),
-        ("random-figures", "The shape conversation", "Seeded, warm-colored geometric characters introduce themselves. Press Play once; the machine then visits every figure in order and repeats without random state jumps."),
+        ("random-figures", "The shape conversation", "Seeded, warm-colored geometric characters take turns on stage. Press Play once; the machine then visits every figure in order and repeats without random state jumps."),
     ]:
         project = output / (stem + ".splinely.json")
         command = [str(cli), stem, "--output", str(project)]
@@ -86,10 +85,8 @@ def main():
             command += ["--seed", str(args.seed), "--count", str(args.count)]
         subprocess.run(command, check=True)
         subprocess.run([str(cli), "validate", str(project)], check=True)
-        # Explicitly reviewed controller JS; speech enabled only for the speaking gallery.
+        # Explicitly reviewed controller JS.
         export = [str(cli), "export", str(project), "--output", str(output / (stem + ".svg")), "--trusted-js"]
-        if stem == "random-figures":
-            export.append("--speech")
         subprocess.run(export, check=True)
         wrapper = TEMPLATE.replace("@@STEM@@", stem).replace("@@TITLE@@", html.escape(title)).replace("@@DESCRIPTION@@", html.escape(description))
         (output / (stem + ".html")).write_text(wrapper, encoding="utf-8")

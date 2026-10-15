@@ -62,7 +62,3 @@ test('play and resume do not include idle elapsed wall time',()=>{
  const {f}=mount({},env,{autoTick:true});wall=900;f.timeline.play();wall=1000;frame();assert.equal(f.timeline.time,0.1);
  wall=1100;f.timeline.pause();assert.equal(f.timeline.time,0.2);wall=1900;f.timeline.play();wall=2000;frame();assert.ok(Math.abs(f.timeline.time-0.3)<1e-12);f.destroy();
 });
-test('speech explicitly enables authored cues after mounting',()=>{
- const spoken=[];const env={speechSynthesis:{speak:u=>spoken.push(u.text),cancel(){}},SpeechSynthesisUtterance:class{constructor(text){this.text=text;}}};
- const {f}=mount({speechCues:[{time:0.5,text:'Hallo'}]},env);assert.equal(f.speech.enabled,false);f.speech.enable();f.timeline.play();f.tick(0.5);assert.deepEqual(spoken,['Hallo']);f.destroy();
-});

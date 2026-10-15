@@ -4,10 +4,20 @@ Splinely ist ein Rust-Desktopeditor mit **`.sply`-Projektdateien** und eingebett
 
 ## Start
 
-Voraussetzungen: Rust/Cargo mit den Workspace-Abhängigkeiten; für das Desktopfenster eine funktionierende Grafik-/Fensterumgebung. Beim ersten Build lädt Cargo Abhängigkeiten herunter. Node.js und Python 3 werden nur für die Prüfskripte benötigt.
+Voraussetzungen: Rust/Cargo; für das Desktopfenster eine funktionierende Grafik-/Fensterumgebung. Beim ersten Build lädt Cargo Abhängigkeiten herunter. Node.js und Python 3 werden nur für die Prüfskripte (`scripts/check.sh`) benötigt.
+
+Unter Linux braucht der Build von Editor und Viewer die GTK-/WebKit-, ALSA- und D-Bus-Entwicklerpakete:
 
 ```sh
-cd /home/user/svg_editor
+# Fedora
+sudo dnf install gtk3-devel webkit2gtk4.1-devel libsoup3-devel alsa-lib-devel dbus-devel libxkbcommon-devel
+# Debian/Ubuntu
+sudo apt install libgtk-3-dev libwebkit2gtk-4.1-dev libsoup-3.0-dev libasound2-dev libdbus-1-dev libxkbcommon-dev pkg-config
+```
+
+```sh
+git clone https://github.com/wasser-quest/splinely.git
+cd splinely
 cargo run -p splinely_editor --bin splinely
 # Export ohne Desktopfenster:
 cargo run -p splinely_editor --bin splinely -- --demo-export /tmp/splinely-demo.svg
@@ -17,7 +27,7 @@ Der Editor startet mit seiner eigenen Demo. Eine **`.sply`-Datei hereinziehen**,
 
 **Gestalten / Animieren / Erweitert** trennen Zeichnen, Animation und Code. Auswahl, Pen, Pfadpunkte und Freihand sind exklusive Werkzeuge; zusätzliche Optionen bleiben zugeklappt. **Vorschau**, **Abspielen** und **Splinely Viewer öffnen** sind direkt erreichbar. [Bedienung, Gesten und Grenzen](docs/usability.md).
 
-Eigenes JavaScript läuft nur nach ausdrücklicher, sitzungsbezogener Freigabe unter **Erweitert → JavaScript**, nie in der nativen Zeichenfläche. Unter **Animieren → Audio** lässt sich eine begrenzte `ffplay`-Vorschau globaler Audiocues aktivieren; Vorbereitung erfolgt im Hintergrund. Browser-Speech bleibt optional. `splinely-cli embed-speech` erzeugt lokal eingebettetes WAV; Wiedergabe benötigt dann keine installierte Stimme.
+Eigenes JavaScript läuft nur nach ausdrücklicher, sitzungsbezogener Freigabe unter **Erweitert → JavaScript**, nie in der nativen Zeichenfläche. Unter **Animieren → Audio** lässt sich eine begrenzte `ffplay`-Vorschau globaler Audiocues aktivieren; Vorbereitung erfolgt im Hintergrund.
 
 ## Eine Projektdatei: `.sply`
 
@@ -86,7 +96,7 @@ cargo run -p splinely-cli -- export /tmp/final.splinely.json --output /tmp/final
 
 - [examples/demo.splinely.json](examples/demo.splinely.json): editierbares Projekt mit Kreis, dreisekündiger Keyframe-Bewegung, Klick-Zustandswechsel und eingebettetem WAV-Cue bei **1,5 Sekunden globaler Transportzeit**.
 - [examples/demo.svg](examples/demo.svg): tatsächlicher CLI-Export mit explizit freigegebenem, kurzem `customJs`-Handler. Ein Kreis-Klick entsperrt Audio und startet die Bewegung samt Transport neu; beim ersten Klick wird der Kreis orange.
-- Der Ton ist **0,4 Sekunden synthetischer, silbenartiger Klang, keine gesprochenen Worte**. Er ersetzt nicht die in PLAN.md vorgesehene Sprachaufnahme. PCM-WAV, mono, 8 kHz, 16 Bit; keine externen Audiodateien und keine Sprachsynthese.
+- Der Ton ist **0,4 Sekunden synthetischer, silbenartiger Klang, keine gesprochenen Worte**. PCM-WAV, mono, 8 kHz, 16 Bit; keine externen Audiodateien und keine Sprachsynthese.
 
 ```sh
 # Reproduzierbar: CLI new --demo → apply → validate → export --trusted-js
@@ -97,7 +107,7 @@ cargo run -p splinely-cli -- export examples/demo.splinely.json --output /tmp/de
 cargo run -p splinely-cli -- export examples/demo.splinely.json --trusted-js --output /tmp/demo-trusted.svg
 ```
 
-`demo.svg` direkt im Browser als `file://` öffnen, **Start audio / animation** und anschließend den Kreis klicken. Nicht als `<img>` einbinden: dort werden SVG-Skripte nicht ausgeführt. Ohne Skriptausführung bleibt die statische Ausgangsgrafik sichtbar. Browser/CSP können Skripte oder dynamische Codekompilierung blockieren; Audio braucht eine echte Nutzerinteraktion und einen unterstützten Decoder. Sprachsynthese ist separat opt-in (`--speech`), mit systemabhängigen Stimmen und **ohne Offlinegarantie**.
+`demo.svg` direkt im Browser als `file://` öffnen, **Start audio / animation** und anschließend den Kreis klicken. Nicht als `<img>` einbinden: dort werden SVG-Skripte nicht ausgeführt. Ohne Skriptausführung bleibt die statische Ausgangsgrafik sichtbar. Browser/CSP können Skripte oder dynamische Codekompilierung blockieren; Audio braucht eine echte Nutzerinteraktion und einen unterstützten Decoder.
 
 Die mitgelieferte Runtime und die Beispieldatei brauchen keine nachgeladenen Bibliotheken oder Netzwerkressourcen. Das ist **keine Sandbox**: beliebiger freigegebener Nutzercode kann Netzwerkaufrufe und andere Browseraktionen ausführen. Standardmäßig bleibt `customJs` erhalten, wird aber nicht ausgeführt; `rawSvg` bleibt nur Metadaten. Unbekannte Projekte nicht mit `--trusted-js` exportieren/öffnen.
 
@@ -125,7 +135,7 @@ cargo run -p splinely-cli -- arrange align scene.sply --nodes node-1,node-2 --ed
 cargo run -p splinely-cli -- render scene.sply --output scene.png --width 800
 ```
 
-Weitere Form-, Anordnungs-, Bone-, Ebenen- und Konvertierungsbefehle: [CLI.md](CLI.md). `keyframe` fügt einzelne Node-/Bone-Keys ohne komplette Array-Patches hinzu; `embed-speech` erzeugt lokal WAV-Sprache und bindet sie atomar ein.
+Weitere Form-, Anordnungs-, Bone-, Ebenen- und Konvertierungsbefehle: [CLI.md](CLI.md). `keyframe` fügt einzelne Node-/Bone-Keys ohne komplette Array-Patches hinzu.
 
 ## Implementiert und noch offen
 
@@ -135,7 +145,7 @@ Weitere Form-, Anordnungs-, Bone-, Ebenen- und Konvertierungsbefehle: [CLI.md](C
 | Projekt laden/speichern, temporäre Datei + Umbenennung; Editor-Autosave für geänderte Projekte alle 30 s mit Wiederherstellungsdialog | Historische Schemamigrationen, vollständige Ressourcenquoten |
 | Timeline, Keyframes, Easing, unabhängige Clip-Uhren, parallele States, gewichtete Clips und zeitliche Crossfades (`blendClip`) | Additives Blending, visueller Blend-Tree/Blend-Space |
 | Zustandsmodell, Guards/Aktionen, editierbarer Zustandsgraph, JSON-Bearbeitung und native Zustandsvorschau | Freie Drag-Verbindungen, automatisches Graph-Layout |
-| Browser-Events, Clip-/Transport-API, eingebettete Audioassets/Cues, optionale Speech | Native JS/Speech-Ausführung, garantierte Audio-Latenz oder Offline-Stimmen; native Audiovorschau nur globale Cues via ffplay |
+| Browser-Events, Clip-/Transport-API, eingebettete Audioassets/Cues | Native JS-Ausführung oder garantierte Audio-Latenz; native Audiovorschau nur globale Cues via ffplay |
 | Statischer/interaktiver SVG-Export, begrenzter SVG-Vektorimport, JS-/Raw-SVG-Quelltextfelder | **Kein vollständiger Importer für beliebige SVGs**; Text/Images/Gradienten/Filter werden beim Import abgelehnt; Raw-SVG allein bleibt Metadaten |
 | Bevy-ECS-Projektion, registrierbare statische Plugins, Bones und starre Bindungen | Dynamische native Plugins, Mesh-Skinning, allgemeine IK-Ketten, automatische Übersetzung beliebiger Bevy-Systeme in Browsercode, isolierte untrusted Vorschau |
 
@@ -157,11 +167,11 @@ Das Skript führt Workspace-Tests, Node-Runtime-Tests, echte CLI-Demoerzeugung/-
 - [Cactus Runner](examples/cactus-runner.html): laufende Bone-Figur, scrollende Kakteen und Klick-Sprung mit echter Walk/Jump-Gewichtsmischung; unabhängige Lauf- und Sprung-States. [Details/Prüfung](docs/cactus-runner.md).
 - [Cinder / Flux – Stickfight](examples/stickfight.html): eigener achtsekündiger animierter Kampf zweier Bone-Rigs, Ausweichen/Gegenangriff, Schatten/Funken und Play/Pause/Neustart; keine kopierten Drunkenstick-Figuren. `python3 scripts/generate-stickfight.py`, Prüfung: `python3 scripts/stickfight-smoke.py`.
 - [Braune Eule](examples/brown-owl.html): Eule auf einem Ast mit direkten Klick-/Hover-States – beim Darüberfahren folgen die Augen dem Zeiger und die Federohren stellen sich auf, ein Klick schließt zufrieden die Augen und hebt die Flügel. Prüfung: `python3 scripts/owl-smoke.py`.
-- [Aoi sagt Hallo](examples/anime-hello.html): eigene Anime-inspirierte Figur mit Bone-Hand. **Lokal erzeugtes WAV ist im SVG eingebettet**; keine Browser-Stimme oder Internetverbindung nötig. Klick gibt Audio frei. Reproduktion: `python3 scripts/generate-anime-demo.py` (lokales `espeak-ng`/`espeak` nötig); Browserprüfung: `python3 scripts/anime-smoke.py`.
+- [Aoi sagt Hallo](examples/anime-hello.html): eigene Anime-inspirierte Figur mit Bone-Hand. **Lokal erzeugtes WAV ist im SVG eingebettet**; keine Internetverbindung nötig. Klick gibt Audio frei. Reproduktion: `python3 scripts/generate-anime-demo.py` (lokales `espeak-ng`/`espeak` nötig); Browserprüfung: `python3 scripts/anime-smoke.py`.
 
 - [Wassertropfen auf blauer Kugel](examples/water-drop.html): eigenständige SVG-Szene mit Squash/Stretch, Glanz und Ripple; Play/Pause.
-- [Sprechende Zufallsfiguren](examples/random-figures.html): reproduzierbar per Seed, automatische Zustandsfolge und browserseitige Sprachsynthese. **Start audio / animation** anklicken. Zustandswechsel folgen Clip-Enden, nicht dem Ende der gesprochenen Sätze.
-- Beide HTML-Dateien betten die benachbarte SVG per `object` ein; keine Server-API. Testserver ist nur ein lokaler Browser-Testhelfer. Sprachstimmen sind systemabhängig; Chromium meldete in dieser Umgebung `synthesis-failed`.
+- [Zufallsfiguren](examples/random-figures.html): reproduzierbar per Seed, automatische Zustandsfolge mit Bildunterschriften. **Play** anklicken. Zustandswechsel folgen Clip-Enden.
+- Beide HTML-Dateien betten die benachbarte SVG per `object` ein; keine Server-API. Testserver ist nur ein lokaler Browser-Testhelfer.
 - Erzeugen: `splinely-cli water-drop --help`, `splinely-cli random-figures --help`; vollständige Beispiele in [CLI.md](CLI.md). Browserprüfung: `python3 scripts/showcase-smoke.py --duration 35`.
 
 ## Logo

@@ -236,7 +236,7 @@ fn schema_templates_and_discovery_cover_supported_features() {
     let schema = success(&["schema"]);
     let capabilities = success(&["capabilities"]);
     assert_eq!(schema["model"], capabilities["model"]);
-    assert_eq!(schema["model"]["actions"].as_array().unwrap().len(), 8);
+    assert_eq!(schema["model"]["actions"].as_array().unwrap().len(), 7);
     let dir = tempfile::tempdir().unwrap();
     let path = dir.path().join("project.json");
     let path = path.to_str().unwrap();

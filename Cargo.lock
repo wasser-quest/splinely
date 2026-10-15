@@ -3936,7 +3936,7 @@ dependencies = [
 
 [[package]]
 name = "splinely-cli"
-version = "0.2.0"
+version = "0.3.0"
 dependencies = [
  "clap",
  "serde",
@@ -3948,7 +3948,7 @@ dependencies = [
 
 [[package]]
 name = "splinely_document"
-version = "0.2.0"
+version = "0.3.0"
 dependencies = [
  "gif",
  "resvg",
@@ -3961,7 +3961,7 @@ dependencies = [
 
 [[package]]
 name = "splinely_editor"
-version = "0.2.0"
+version = "0.3.0"
 dependencies = [
  "base64",
  "bevy_ecs",
@@ -3976,7 +3976,7 @@ dependencies = [
 
 [[package]]
 name = "splinely_runtime"
-version = "0.2.0"
+version = "0.3.0"
 dependencies = [
  "serde",
  "serde_json",
@@ -3985,7 +3985,7 @@ dependencies = [
 
 [[package]]
 name = "splinely_viewer"
-version = "0.2.0"
+version = "0.3.0"
 dependencies = [
  "base64",
  "clap",

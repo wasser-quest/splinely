@@ -2,7 +2,7 @@
 
 `src/splinely.js` is a plain self-contained script: no build step, packages, imports, network calls, or external asset URLs. It runs in script-enabled SVG browser documents (`file://` works), inline SVG and script-enabled `<object>` contexts. `<img>` and most image viewers do not run scripts. Export a meaningful static drawing first.
 
-See [`../RUNTIME_API.md`](../RUNTIME_API.md) for the authoritative runtime/export contract and [`../CORE_API.md`](../CORE_API.md) for the Rust schema. The runtime supports its schema v1, including tagged values/easing, transform composition, state overrides/actions, and **global** audio/speech cue time. No Rust/editor files are owned by this component.
+See [`../RUNTIME_API.md`](../RUNTIME_API.md) for the authoritative runtime/export contract and [`../CORE_API.md`](../CORE_API.md) for the Rust schema. The runtime supports its schema v1, including tagged values/easing, transform composition, state overrides/actions, and **global** audio cue time. No Rust/editor files are owned by this component.
 
 ## Embed / use
 
@@ -23,7 +23,7 @@ splinely.set('circle', { opacity: 0.5 });
 // Later: unsubscribe(); splinely.set('circle', null); splinely.destroy();
 ```
 
-`window.splinely` is only a convenience alias for a single instance and is removed when another mounts. Never rely on it in a multi-SVG page. `SplinelyRuntime.createRuntime(svg, project?, {autoTick:false, speech:false})` supports explicit mounting/tests; don't mount a root twice. For explicit options on an exported root, omit the automatic source script's containing SVG association (e.g. load the runtime in the HTML host), or destroy the auto-mounted instance before creating a replacement. CommonJS `require('./src/splinely.js')` exposes `createRuntime`, `readProject`, `normalize`, `evaluateTrack`, `interpolate`, `easing` without auto-mounting.
+`window.splinely` is only a convenience alias for a single instance and is removed when another mounts. Never rely on it in a multi-SVG page. `SplinelyRuntime.createRuntime(svg, project?, {autoTick:false})` supports explicit mounting/tests; don't mount a root twice. For explicit options on an exported root, omit the automatic source script's containing SVG association (e.g. load the runtime in the HTML host), or destroy the auto-mounted instance before creating a replacement. CommonJS `require('./src/splinely.js')` exposes `createRuntime`, `readProject`, `normalize`, `evaluateTrack`, `interpolate`, `easing` without auto-mounting.
 
 ## Bones
 
@@ -35,7 +35,7 @@ All times are finite seconds. Clip duration must be positive. Keyframes are sort
 
 - `clip.play()` is idempotent while playing; a finished nonloop restarts at zero. `pause()` holds time. Nonloop `seek(t)` clamps to `[0,duration]`; loop seeks wrap nonnegative time modulo duration. Local negative seeks clamp to zero. `stop()` pauses, resets and deactivates the clip.
 - Global timeline starts implicitly with any clip play; pausing the last playing clip also pauses this implicit timeline. `timeline.play()` explicitly starts an independent global clock, even without clips. Stopping a clip does not stop an explicitly started timeline. Natural clip completion leaves the global clock running for later global cues. `timeline.pause()` pauses all clips. `timeline.seek(t)` requires nonnegative time, sets global time, and silently synchronizes activated clips (modulo/clamped as appropriate). It does not activate previously untouched clips. Clip-local seek does not alter global time.
-- `timeline.at(t,fn)` observes global time. `{clip:'intro'}` selects local clip time and repeats with that clip's loops. Crossings are `(old,new]`, with zero on play from zero and each loop. Duration fires before zero of the following loop. A backward seek rearms crossings; forward seek skips them. Pause/seek do not call callbacks or speak cues. Callback removals take effect immediately; subscriptions added during a crossing begin with future crossings.
+- `timeline.at(t,fn)` observes global time. `{clip:'intro'}` selects local clip time and repeats with that clip's loops. Crossings are `(old,new]`, with zero on play from zero and each loop. Duration fires before zero of the following loop. A backward seek rearms crossings; forward seek skips them. Pause/seek do not call callbacks. Callback removals take effect immediately; subscriptions added during a crossing begin with future crossings.
 - Skipped render frames process each boundary in chronological segments. Starting clip B at A's 0.5 callback during a one-second tick advances B only 0.5, irrespective of clip storage order. Equal-time order: global then clips in document order, then callbacks in insertion order. Callbacks may pause/seek/play; revision checks prevent stale crossings after mutation. Reentrant `tick()` calls are rejected and async callback rejections enter diagnostics. At most 10,000 segments per tick, then playback pauses with a diagnostic. Nonloop `clip.end` fires once at completion, targeted to the clip ID.
 - Audio timeline time follows a running AudioContext clock after unlock. RAF and a 25ms timer use a shared time anchor; manual `tick` should only be used with automatic stepping disabled. Clock-domain changes re-anchor instead of introducing a timestamp jump.
 
@@ -47,9 +47,9 @@ DOM events: `click`, `dblclick`, `pointerenter`, `pointerleave`, `pointerdown`, 
 
 `pointerdown` starts capture and emits `dragstart`; moves emit `drag` with root-space `dx,dy` relative to the press; up/cancel/lost capture emits `dragend` and cleans capture. Multi-pointer records are independent. Drag does not change node properties automatically; subscribe and call `set` if desired. Pointer capture is released on destroy. No geometry hit-testing or synthetic accessibility framework is supplied.
 
-Core action names are documented in the root contract. Adapter aliases: `set` (target/properties), `clip.play/pause/stop/seek` (clip/time), `variable.set` (variable/value), `machine.send` (machine/event), `audio.play` (asset), `speech.say` (text/options). Adapter `interactions[]` may bind `{target,event,actions}`. Timers use `timeline.at()` plus `emit()`; arbitrary timer guard strings are not evaluated.
+Core action names are documented in the root contract. Adapter aliases: `set` (target/properties), `clip.play/pause/stop/seek` (clip/time), `variable.set` (variable/value), `machine.send` (machine/event), `audio.play` (asset). Adapter `interactions[]` may bind `{target,event,actions}`. Timers use `timeline.at()` plus `emit()`; arbitrary timer guard strings are not evaluated.
 
-## Audio and speech
+## Audio
 
 `await audio.unlock()` creates/resumes the instance's AudioContext and decodes every embedded asset; concurrent unlocks share work. Errors reject and enter `diagnostics`; retry is possible. Assets must be base64 JSON, never external URLs. Limit: 64 MiB encoded text **per asset** (not a full decoded-document quota). Codec support, browser user-activation policy and real audio output remain platform-dependent. A rejected unlock may retain successfully decoded earlier assets for a retry; destroy frees them.
 
@@ -57,7 +57,6 @@ Core action names are documented in the root contract. Adapter aliases: `set` (t
 
 Cue sources are scheduled ahead against `AudioContext.currentTime`, not emitted from render crossings. Pause stops sources; resume recreates overlapping cues at `asset offset + elapsed cue time`. Active seek recreates overlaps and future sources; paused seek is silent. Completed cues are not replayed. Sources are keyed per cue/cycle to prevent duplicate scheduling. Loop-local audio uses a native loop of a padded buffer (silence around each cue) so gaps/skipped RAF frames do not omit audio laps. This costs memory: total cached loop padding is capped at 128 MiB per runtime; invalid/oversized cues are diagnosed once, not repeatedly allocated. Changing playback mode/seek stops and recreates sources. No additive audio effects, external streaming or automated latency calibration.
 
-Speech is **optional opt-in**, `createRuntime(...,{speech:true})` or `splinely.speech.enable()` (`speech.enabled` reports the choice). CLI `--speech` and editor-authored speech cues/actions opt in through the export host. `speech.say(text,{lang,rate,pitch,volume})` uses system synthesis, not assets. It is not reproducibly timed or guaranteed offline. Pause/seek do not replay skipped speech and attempt cancellation of owned speech. The Web Speech API only offers **window-global** cancel, so speech isolation cannot be guaranteed; cancellation is suppressed when multiple Splinely instances exist and may then leave speech playing. A single Splinely instance can still share the window with unrelated host speech. Use embedded recordings instead for strict instance scoping and deterministic offline output. Bare auto-mounted runtime therefore leaves synthesis disabled by default. The editor/CLI export host adds a user-gesture start control for audio/speech; no user JS is needed for embedded audio.
 
 ## Safety / errors / limits
 
@@ -74,7 +73,7 @@ node --check runtime/src/splinely.js
 node --test runtime/tests/*.test.cjs
 ```
 
-Tests cover bone hierarchy/parent tips, attached transforms, numeric rotations/easing, patch composition, invalid rigs/overflow/depth, old documents, interpolation, canonical rendering/priority, precise loops/seeks/end callbacks, cross-clip event timing, global timeline, machine initialization/guards/order/cycle limits, DOM interaction/drag, cleanup, aliases and independent instances, fake Web Audio scheduling/offsets/native loops/memory failure, optional speech, clock switching, error handling and plain-script auto-mount. Fake audio does **not** verify audible latency, codecs, browser unlock policy or device behavior.
+Tests cover bone hierarchy/parent tips, attached transforms, numeric rotations/easing, patch composition, invalid rigs/overflow/depth, old documents, interpolation, canonical rendering/priority, precise loops/seeks/end callbacks, cross-clip event timing, global timeline, machine initialization/guards/order/cycle limits, DOM interaction/drag, cleanup, aliases and independent instances, fake Web Audio scheduling/offsets/native loops/memory failure, clock switching, error handling and plain-script auto-mount. Fake audio does **not** verify audible latency, codecs, browser unlock policy or device behavior.
 
 Generate a genuinely offline XML SVG with runtime embedded, and open directly in a browser:
 
@@ -89,4 +88,4 @@ firefox --headless --no-remote \
   "file://$PWD/runtime/tests/.generated/browser-smoke.svg"
 ```
 
-Verified green **PASS** in direct-file Firefox 151.0.1: XML-safe JSON containing `</script> & ]]>`, script auto-mount, core transform sampling, bone hierarchy/attachment/numeric rotation, loop crossings, silent seek, DOM click → machine entry, nested duplicate-ID scoping, alias lifecycle and destroy. This smoke is visual/manual, not a Node assertion of browser output. Script-disabled display says STATIC FALLBACK. Browser matrix beyond Firefox, real codecs/unlock, sound hardware, CSP-restricted hosts and speech remain manual acceptance work.
+Verified green **PASS** in direct-file Firefox 151.0.1: XML-safe JSON containing `</script> & ]]>`, script auto-mount, core transform sampling, bone hierarchy/attachment/numeric rotation, loop crossings, silent seek, DOM click → machine entry, nested duplicate-ID scoping, alias lifecycle and destroy. This smoke is visual/manual, not a Node assertion of browser output. Script-disabled display says STATIC FALLBACK. Browser matrix beyond Firefox, real codecs/unlock, sound hardware, and CSP-restricted hosts remain manual acceptance work.

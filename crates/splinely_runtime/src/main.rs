@@ -1,6 +1,6 @@
-use splinely_runtime::{Request, Runtime};
 use serde::Deserialize;
 use serde_json::{json, Value};
+use splinely_runtime::{Request, Runtime};
 use std::io::{self, BufRead, Write};
 use std::panic::{catch_unwind, AssertUnwindSafe};
 

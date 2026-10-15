@@ -5,8 +5,8 @@ mod layers;
 #[path = "../src/vector.rs"]
 mod vector;
 
-use splinely_document::*;
 use layers::{apply_layer_command, LayerCommand};
+use splinely_document::*;
 use vector::{apply_vector_command, VectorCommand};
 
 fn scene() -> Project {

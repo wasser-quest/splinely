@@ -8,7 +8,7 @@ otherwise return the exact commands/files for me to run and say they are unteste
 ## 1. Get oriented (always first)
 
 ```sh
-export TMPDIR=/home/user/svg_editor/.work-tmp; mkdir -p "$TMPDIR"
+export TMPDIR="$PWD/.work-tmp"; mkdir -p "$TMPDIR"
 cargo build --offline --locked -p splinely-cli      # only if target/debug/splinely-cli is missing/stale
 CLI=target/debug/splinely-cli
 "$CLI" guide                                     # workflow, recipes, coordinates, pitfalls
@@ -16,7 +16,7 @@ CLI=target/debug/splinely-cli
 ```
 
 Use `schema`/`capabilities` only when you need a field the commands do not
-cover (bones, blending, audio, speech, guards/variables). No downloads, remote
+cover (bones, blending, audio, guards/variables). No downloads, remote
 installers or new dependencies; on missing cached crates report the blocker.
 
 ## 2. Build with commands, not hand-written JSON
@@ -53,20 +53,19 @@ installers or new dependencies; on missing cached crates report the blocker.
 ## Rules that stay non-negotiable
 
 - `customJs` runs only with `export --trusted-js` after I explicitly approve
-  reviewed code; `rawSvg` is preserved, never rendered. Browser speech needs
-  `export --speech` and system voices; `embed-speech` uses a trusted local
-  eSpeak only. Audio playback needs a user gesture – never fake one.
+  reviewed code; `rawSvg` is preserved, never rendered. Audio playback needs a
+  user gesture – never fake one.
 - `plugin new` writes editor-only native source; never build/run it without my
   approval.
 - Unsupported: images, filters, masks, clipping, arbitrary SVG appearance,
   runtime IK fields. Say so and offer an approximation with shapes/paths.
-- Do not claim browser playback, audio or speech worked from CLI output alone.
+- Do not claim browser playback or audio worked from CLI output alone.
 
 Return: the commands you ran (or for me to run), output paths, `check` result,
-which preview images you inspected, unsupported requests and any trust/speech
+which preview images you inspected, unsupported requests and any trust
 decision. Ask only for genuinely missing requirements.
 
 ## My scene/task requirements
 
 [Replace this line with the scene, size, animation, interactions, output paths
-and any explicit trust/speech choices.]
+and any explicit trust choices.]

@@ -30,8 +30,7 @@ A `.sply` is a strict canonical `splinely_document::Project` JSON document, iden
 in contents to `.splinely.json`, **not a ZIP archive**. Geometry, states, animations,
 audio assets and code are embedded in that one file. The viewer generates SVG
 in memory and opens it through the same genuine WebView as SVG input; no sidecar
-SVG, extraction step or external asset files are needed. `--speech` enables system browser speech for project
-export (voices/offline availability depend on the platform).
+SVG, extraction step or external asset files are needed.
 
 ```sh
 # No display initialization, JavaScript execution, or audio playback:
@@ -58,7 +57,7 @@ Project JSON is validated by `splinely_document`. Export embeds
 State machines, hover/click handlers, clips and embedded audio use the same
 runtime as browser exports. Project `customJs` is preserved as data but **not
 executed unless `--trusted-js` is supplied**. Projects with audio get the runtime
-host's user-gesture Start audio / animation control. Speech is opt-in.
+host's user-gesture Start audio / animation control.
 
 An existing SVG is inherently active content: its scripts and handlers can run
 without `--trusted-js`. That flag only controls project export; it is **not** an
@@ -107,7 +106,7 @@ pub fn launch(path: &std::path::Path, options: ViewerOptions) -> ViewerResult<()
 pub fn launch_prepared(prepared: PreparedViewer) -> ViewerResult<()>;
 ```
 
-`ViewerOptions { project: bool, trusted_js: bool, speech: bool }` defaults all
+`ViewerOptions { project: bool, trusted_js: bool }` defaults all
 flags to false. `PreparedViewer` exposes `html: String`, `title: String`,
 `is_svg_input: bool`, and `custom_js_disabled: bool`. Preparation is GUI-free.
 Launch must run on the main thread and owns a native event loop until the window
@@ -118,11 +117,11 @@ do not start a second Tao event loop inside the editor or a background thread.
 
 For editor/main integration, save with the existing `Project::to_json()` and
 launch `splinely-viewer /path/to/project.sply` (no `--project` flag required).
-Add `--trusted-js` only with explicit consent for reviewed `customJs`, and
-`--speech` only with explicit speech opt-in. Neither flag is implied by `.sply`.
+Add `--trusted-js` only with explicit consent for reviewed `customJs`; it is
+never implied by `.sply`.
 For a standalone main-thread host, use
 `launch(path: &std::path::Path, options: ViewerOptions) -> ViewerResult<()>`
-with `ViewerOptions { project: false, trusted_js: consent, speech: speech_opt_in }`.
+with `ViewerOptions { project: false, trusted_js: consent }`.
 The viewer calls the existing
 `Project::from_json(json: &str) -> Result<Self, DocumentError>` and
 `Project::to_svg_with_options(&self, runtime: &str, options: BrowserExportOptions) -> Result<String, DocumentError>`;
@@ -134,8 +133,8 @@ executing anything, but its resulting HTML remains active playback content.
 
 ```sh
 cargo test -p splinely_viewer
-TMPDIR=/home/user/svg_editor/.work-tmp cargo test -p splinely_viewer --no-default-features
-TMPDIR=/home/user/svg_editor/.work-tmp cargo clippy -p splinely_viewer --all-targets --no-default-features -- -D warnings
+TMPDIR="$PWD/.work-tmp" cargo test -p splinely_viewer --no-default-features
+TMPDIR="$PWD/.work-tmp" cargo clippy -p splinely_viewer --all-targets --no-default-features -- -D warnings
 cargo build -p splinely_viewer
 # Opt-in X11 smoke; requires xdotool, ImageMagick import, Python Pillow:
 python3 crates/splinely_viewer/tests/native_smoke.py
@@ -153,9 +152,9 @@ fixture and launches the resulting standalone SVG rather than project JSON.
 
 Headless preparation tests also cover single-file `.sply` opening with embedded
 geometry/states/animation/audio/code, strict schema rejection, explicit code
-trust, speech opt-in, identical `.splinely.json` playback and no sidecar SVG.
+trust, identical `.splinely.json` playback and no sidecar SVG.
 
 Prior native verification (before `.sply` detection was added): Wry 0.57.0, Tao 0.37.1, GTK 3.24.52, WebKitGTK
 2.52.5. Native compilation passed; all **11 Rust tests** passed with default
 features and with `--no-default-features`. All three native smoke modes passed.
-Windows/macOS builds and speech voice playback were not tested here.
+Windows/macOS builds were not tested here.

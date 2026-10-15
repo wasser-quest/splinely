@@ -23,7 +23,7 @@ Why results stay good:
 From this installed repository:
 
 ```sh
-export TMPDIR=/home/user/svg_editor/.work-tmp
+export TMPDIR="$PWD/.work-tmp"
 mkdir -p "$TMPDIR"
 # Use the existing binary; rebuild locally if absent or stale.
 cargo build --offline --locked -p splinely-cli
@@ -65,8 +65,7 @@ Schema. All canonical document fields are writable as JSON or with `apply`.
 | Override/weighted clips and blendClip actions | `blend-clip`, JSON/`apply`; independent sampling via context |
 | Parallel state machines, states, guards, overrides, events, every action | `on` for events/actions/states; guards, overrides and other actions via JSON/`apply` |
 | Scalar typed variables | JSON/`apply` |
-| Embedded audio assets/cues/playAudio | JSON/`apply`, installed local `embed-speech` |
-| Browser speech cues/speak | JSON/`apply`; separate export `--speech` opt-in |
+| Embedded audio assets/cues/playAudio | JSON/`apply` |
 | customJs/rawSvg | Preserved JSON; rawSvg inert; JS runs only with explicit trusted export |
 | Trusted native plugin source | `plugin new`; source-only, editor-only, not a project field |
 | Seeded/deterministic starter scenes | `random-figures`, `water-drop`, `rig-demo`, `new --demo` |
@@ -84,10 +83,10 @@ Schema. All canonical document fields are writable as JSON or with `apply`.
    then `evaluate` representative times and contexts. Explicit context
    states/clip times/weights are snapshots; transitions/actions/fades are not run.
 4. Export without trust flags first. Review authored JavaScript before explicitly
-   choosing `--trusted-js`; choose `--speech` independently only when wanted.
+   choosing `--trusted-js`.
 5. Browser-test interactive SVG directly or via `<object>`, not `<img>`. Audio
-   requires a user gesture; browser voices/offline speech are not guaranteed.
-   Core evaluation cannot establish browser playback, audible speech or trust.
+   requires a user gesture.
+   Core evaluation cannot establish browser playback, audible output or trust.
 
 ```sh
 "$CLI" apply "$TMPDIR/project.json" --patch authored.patch.json --output "$TMPDIR/project.json"
@@ -96,7 +95,7 @@ Schema. All canonical document fields are writable as JSON or with `apply`.
 "$CLI" evaluate "$TMPDIR/project.json" --time 0.5
 # Optional context JSON uses states, clips:[{clipId,time}], clipWeights, overrides.
 "$CLI" export "$TMPDIR/project.json" --output "$TMPDIR/project.svg"
-TMPDIR=/home/user/svg_editor/.work-tmp cargo test --offline --locked -p splinely-cli
+TMPDIR="$PWD/.work-tmp" cargo test --offline --locked -p splinely-cli
 ```
 
 Outputs are JSON (help/version excepted); errors are JSON stderr with nonzero

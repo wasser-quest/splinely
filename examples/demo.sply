@@ -222,7 +222,6 @@
       "volume": 0.6
     }
   ],
-  "speechCues": [],
   "customJs": "// Trusted example only: unlock embedded audio on a real user gesture.\nsplinely.on('ball', 'click', async () => {\n  try {\n    await splinely.audio.unlock();\n    splinely.clip('travel').stop();\n    splinely.timeline.seek(0);\n    splinely.clip('travel').play();\n  } catch (error) {\n    console.error('Splinely demo audio failed', error);\n  }\n});\n",
   "rawSvg": ""
 }

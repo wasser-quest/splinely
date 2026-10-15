@@ -19,7 +19,6 @@ mod render;
 mod svg;
 mod svg_import;
 mod text_outline;
-pub mod tts;
 mod validation;
 mod values;
 
@@ -68,8 +67,40 @@ impl Project {
         Ok(serde_json::to_string_pretty(self)?)
     }
     pub fn from_json(json: &str) -> Result<Self, DocumentError> {
-        let project: Self = from_json_strict(json)?;
+        let mut input = json_loading::load_value(json)?;
+        drop_legacy_speech(&mut input);
+        let project: Self = serde_json::from_value(input.clone())?;
+        json_loading::check_preserved(&input, &serde_json::to_value(&project)?, "")?;
         project.validate()?;
         Ok(project)
+    }
+}
+
+/// Speech was removed in 0.3; older projects still load without their
+/// `speechCues` and `speak` actions.
+fn drop_legacy_speech(project: &mut serde_json::Value) {
+    let Some(root) = project.as_object_mut() else {
+        return;
+    };
+    root.remove("speechCues");
+    let Some(machines) = root.get_mut("stateMachines").and_then(|m| m.as_array_mut()) else {
+        return;
+    };
+    let is_speak = |a: &serde_json::Value| a.get("type").and_then(|t| t.as_str()) == Some("speak");
+    for machine in machines {
+        let states = machine.get_mut("states").and_then(|s| s.as_array_mut());
+        for state in states.into_iter().flatten() {
+            if let Some(actions) = state.get_mut("onEnter").and_then(|a| a.as_array_mut()) {
+                actions.retain(|a| !is_speak(a));
+            }
+        }
+        let transitions = machine
+            .get_mut("transitions")
+            .and_then(|t| t.as_array_mut());
+        for transition in transitions.into_iter().flatten() {
+            if let Some(actions) = transition.get_mut("actions").and_then(|a| a.as_array_mut()) {
+                actions.retain(|a| !is_speak(a));
+            }
+        }
     }
 }

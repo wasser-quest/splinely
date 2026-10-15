@@ -90,7 +90,6 @@ with tempfile.TemporaryDirectory(prefix='splinely-anime-') as temp:
         'clips': [{'id': 'greeting', 'name': 'Hallo – winken', 'duration': 3.2, 'looping': False, 'autoplay': True,
                    'tracks': [{'nodeId': 'wave-joint', 'property': 'rotation',
                                'keyframes': [key(t, v) for t, v in [(0, -12), (.4, 14), (.8, -16), (1.2, 14), (1.6, -16), (2, 12), (2.4, -8), (3.2, 0)]]}]}],
-        'speechCues': [],
         'audioAssets': [{'id': 'hello-offline', 'name': 'Hallo! · lokale deutsche Stimme', 'mimeType': 'audio/wav', 'dataBase64': base64.b64encode(wav.read_bytes()).decode('ascii')}],
         'audioCues': [{'id': 'hello', 'assetId': 'hello-offline', 'time': .18, 'offset': 0, 'duration': None, 'volume': 1}],
     }

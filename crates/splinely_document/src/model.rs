@@ -17,7 +17,6 @@ pub struct Project {
     pub variables: BTreeMap<String, serde_json::Value>,
     pub audio_assets: Vec<AudioAsset>,
     pub audio_cues: Vec<AudioCue>,
-    pub speech_cues: Vec<SpeechCue>,
     pub custom_js: String,
     pub raw_svg: String,
     /// Nested shape groups; nodes reference their direct group via `Node::group`.
@@ -61,7 +60,6 @@ impl Default for Project {
             variables: BTreeMap::new(),
             audio_assets: vec![],
             audio_cues: vec![],
-            speech_cues: vec![],
             custom_js: String::new(),
             raw_svg: String::new(),
             groups: vec![],
@@ -495,10 +493,6 @@ pub enum Action {
     PlayAudio {
         asset_id: String,
     },
-    Speak {
-        text: String,
-        lang: String,
-    },
 }
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -516,16 +510,5 @@ pub struct AudioCue {
     pub time: f64,
     pub offset: f64,
     pub duration: Option<f64>,
-    pub volume: f64,
-}
-#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
-#[serde(rename_all = "camelCase")]
-pub struct SpeechCue {
-    pub id: String,
-    pub time: f64,
-    pub text: String,
-    pub lang: String,
-    pub rate: f64,
-    pub pitch: f64,
     pub volume: f64,
 }

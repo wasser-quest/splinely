@@ -1,7 +1,7 @@
 //! Deterministic authoring helpers; all generated data passes the normal validator.
 use crate::{failure, project_value, validated, Result};
-use splinely_document::{path_bounds, Color, Node, NodeKind, Project};
 use serde_json::{json, Value};
+use splinely_document::{path_bounds, Color, Node, NodeKind, Project};
 
 fn painted(mut node: Node, color: [u8; 3]) -> Node {
     node.style.fill = Color::rgb(color[0], color[1], color[2]);
@@ -84,7 +84,7 @@ fn track(id: &str, property: &str, keys: &[(f64, f64)]) -> Value {
     })).collect::<Vec<_>>()})
 }
 
-// No timers, random state selection, private runtime fields, or implicit speech enable.
+// No timers, random state selection or private runtime fields.
 const CONTROLS: &str = r#"
 const svg = document.currentScript.ownerSVGElement;
 const data = JSON.parse(svg.querySelector('[id="splinely-project"]').textContent);
@@ -93,8 +93,7 @@ const status = svg.querySelector('[id="status"]');
 let paused = [], pauseRequested = false;
 function describe() {
   status.textContent = (machine ? 'State: ' + machine.state : 'Water drop') +
-    ' · ' + (splinely.timeline.playing ? 'playing' : 'paused') +
-    ' · speech ' + (splinely.speech.enabled ? 'enabled' : 'off');
+    ' · ' + (splinely.timeline.playing ? 'playing' : 'paused');
 }
 function start() {
   pauseRequested = false;
@@ -384,8 +383,7 @@ pub fn random_figures(seed: u64, count: usize) -> Result<Project> {
             ]}),
         );
         states.push(json!({"id":format!("figure-{i}"),"onEnter":[
-            {"type":"playClip","clipId":motion},
-            {"type":"speak","text":phrases[kind],"lang":"en-US"}
+            {"type":"playClip","clipId":motion}
         ],"overrides":[
             {"nodeId":id,"property":"opacity","value":{"type":"number","value":1.}},
             {"nodeId":label,"property":"opacity","value":{"type":"number","value":1.}}

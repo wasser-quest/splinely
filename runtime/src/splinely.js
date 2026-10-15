@@ -149,13 +149,13 @@
       return {...m,states};
     }),'machine');
     for(const source of [project,...clips]) {
-      for(const cue of [...(source.audioCues || []),...(source.speechCues || [])]) {
+      for(const cue of source.audioCues || []) {
         if(finite(cue.time,'Cue time')<0)throw new Error('Cue time must be nonnegative');
         for(const k of ['offset','volume','duration'])if(cue[k]!=null && (finite(cue[k],'Cue '+k)<0 || (k==='duration' && cue[k]===0)))throw new Error('Invalid cue '+k);
       }
     }
     const nodes=unique(list(project.nodes),'node'), bones=unique(list(project.bones),'bone'), assets=unique(list(project.audioAssets || project.assets),'asset');
-    unique([...nodes,...bones,...clips,...machines,...assets,...(project.audioCues || []),...(project.speechCues || []),...clips.flatMap(c=>[...(c.audioCues || []),...(c.speechCues || [])])].filter(x=>x.id!=null),'global');
+    unique([...nodes,...bones,...clips,...machines,...assets,...(project.audioCues || []),...clips.flatMap(c=>c.audioCues || [])].filter(x=>x.id!=null),'global');
     const boneIds=new Set(bones.map(b=>b.id));
     for(const b of bones) if(b.parentId!=null && (typeof b.parentId!=='string' || !boneIds.has(b.parentId))) throw new Error('Missing bone parent: '+b.parentId);
     solveBones(bones);
@@ -403,7 +403,6 @@
             case 'emit': emit(typeof a.event === 'object'?a.event.name:a.event,detail,typeof a.event==='object'?a.event.target:undefined);break;
             case 'machine.send': send(a.machine,a.event,detail);break;
             case 'playAudio': case 'audio.play': audio.play(a.assetId || a.asset);break;
-            case 'speak': case 'speech.say': speech.say(a.text,a);break;
             default: throw new Error('Unsupported action: '+a.type);
           }
         } catch(e) {report(e);}
@@ -442,22 +441,19 @@
     const callbacks=new Set();
     for(const [index,c] of project.clips.entries()) clips.set(c.id,{...c,index,priority:c.priority || 0,time:0,playing:false,active:false,cycle:0,revision:0,ramp:null,sources:new Map()});
     const first=project.clips[0] && project.clips[0].id;
-    const transport={id:'@timeline',duration:Infinity,time:0,playing:false,manual:false,loop:false,cycle:0,revision:0,sources:new Map(),audioCues:project.audioCues || [],speechCues:project.speechCues || []};
+    const transport={id:'@timeline',duration:Infinity,time:0,playing:false,manual:false,loop:false,cycle:0,revision:0,sources:new Map(),audioCues:project.audioCues || []};
     const cueList=c => c.audioCues || [];
-    const speechList=c => c.speechCues || [];
     function transportPlay(){if(!transport.playing){transport.playing=true;transport.revision++;if(transport.time===0)crossing(transport,0,0,true);schedule(transport);}}
-    function transportPause(){transport.playing=false;transport.revision++;stopSources(transport);speech.cancel();}
+    function transportPause(){transport.playing=false;transport.revision++;stopSources(transport);}
     function getClip(id) {ensure();const c=clips.get(id);if(!c)throw new Error('Unknown clip: '+id);return c;}
     function stopSources(c) {for(const source of c.sources.values()) source.stop(); c.sources.clear();}
     function crossing(c,from,to,zero) {
       const rev=c.revision;
-      const items=[...callbacks].filter(cb=>cb.clip===c.id).map(cb=>({...cb,type:'callback'}));
-      for(const cue of speechList(c)) items.push({time:cue.time,type:'speech',cue});
+      const items=[...callbacks].filter(cb=>cb.clip===c.id);
       items.sort((a,b)=>a.time-b.time);
       for(const item of items) if((item.time>from && item.time<=to) || (zero && item.time===0)) {
         if(c.revision!==rev || dead) return false;
-        if(item.type==='callback') {if(callbacks.has(item.ref)) try{const result=item.fn({clip:c.id,time:item.time,cycle:c.cycle},api);if(result && typeof result.catch==='function')result.catch(report);}catch(e){report(e);}}
-        else speech.say(item.cue.text,item.cue);
+        if(callbacks.has(item.ref)) try{const result=item.fn({clip:c.id,time:item.time,cycle:c.cycle},api);if(result && typeof result.catch==='function')result.catch(report);}catch(e){report(e);}
       }
       return c.revision===rev && !dead;
     }
@@ -494,8 +490,8 @@
         fadeTo(weight,seconds){ensure();weightValue(weight);fadeDuration(seconds);if(c.blendMode!=='weighted')throw new Error('Weight controls require a weighted clip');syncClock();c.ramp=seconds===0?null:{from:c.weight,to:weight,duration:seconds,elapsed:0};if(seconds===0)c.weight=weight;render();return this;},
         set loop(v){ensure();c.loop=!!v;if(c.loop)c.time%=c.duration;c.revision++;stopSources(c);render();schedule(c);},
         play(){ensure();syncClock();if(c.playing)return this;if(c.time>=c.duration){c.time=0;c.cycle=0;}c.active=true;c.playing=true;c.revision++;const revision=c.revision;transportPlay();if(dead || c.revision!==revision || !c.playing)return this;render();if(c.time===0)crossing(c,0,0,true);schedule(c);return this;},
-        pause(){ensure();syncClock();c.playing=false;c.revision++;stopSources(c);speech.cancel();if(!transport.manual && ![...clips.values()].some(c=>c.playing))transportPause();return this;},
-        seek(time){ensure();syncClock();finite(time,'Seek time');c.time=c.loop?Math.max(0,time)%c.duration:clamp(time,0,c.duration);c.cycle=0;c.active=true;c.revision++;stopSources(c);speech.cancel();render();schedule(c);return this;},
+        pause(){ensure();syncClock();c.playing=false;c.revision++;stopSources(c);if(!transport.manual && ![...clips.values()].some(c=>c.playing))transportPause();return this;},
+        seek(time){ensure();syncClock();finite(time,'Seek time');c.time=c.loop?Math.max(0,time)%c.duration:clamp(time,0,c.duration);c.cycle=0;c.active=true;c.revision++;stopSources(c);render();schedule(c);return this;},
         stop(){this.pause();c.ramp=null;c.time=0;c.cycle=0;c.active=false;render();return this;}
       };
     }
@@ -515,7 +511,6 @@
         for(const c of active) {
           step=Math.min(step,c.duration-c.time);
           for(const cb of callbacks)if(cb.clip===c.id && cb.time>c.time)step=Math.min(step,cb.time-c.time);
-          for(const cue of speechList(c))if(cue.time>c.time)step=Math.min(step,cue.time-c.time);
         }
         const snapshots=active.map(c=>({c,from:c.time,revision:c.revision}));
         for(const c of active)c.time+=step;
@@ -543,49 +538,6 @@
       const cb={clip:id,time,fn};cb.ref=cb;callbacks.add(cb);return()=>callbacks.delete(cb);
     }
     let context=null, unlocking=null,loopBytes=0;const buffers=new Map(),independent=new Set(),loopBuffers=new Map();
-    const speechOwned=new Set();
-    function listVoices(){try{return (env.speechSynthesis && env.speechSynthesis.getVoices && env.speechSynthesis.getVoices()) || [];}catch(_){return [];}}
-    // Higher is better; -1 = wrong language.
-    function voiceScore(v,lang){
-      const want=String(lang || '').toLowerCase().replace('_','-'),have=String(v.lang || '').toLowerCase().replace('_','-'),name=String(v.name || '').toLowerCase();let s=0;
-      if(want){if(have===want)s+=100;else if(have.split('-')[0]===want.split('-')[0])s+=60;else return -1;}
-      if(/natural|neural|online|premium|enhanced|wavenet|studio|siri/.test(name))s+=40;
-      if(/google/.test(name))s+=25;if(/microsoft/.test(name))s+=10;
-      if(/espeak|mbrola|robot|festival|pico|flite/.test(name))s-=50;
-      if(v.localService===false)s+=5;if(v.default)s+=2;return s;
-    }
-    function pickVoice(lang,name){
-      const all=listVoices();if(!all.length)return null;
-      if(name){const exact=all.find(v=>v.name===name);if(exact)return exact;}
-      let best=null,score=-1;for(const v of all){const s=voiceScore(v,lang);if(s>score){best=v;score=s;}}
-      return best;
-    }
-    function sentences(text){
-      const parts=text.match(/[^.!?…;:\n]+[.!?…;:]*\s*|\n+/g) || [text],out=[];let current='';
-      for(const p of parts){if((current+p).length>180 && current.trim()){out.push(current.trim());current='';}current+=p;}
-      if(current.trim())out.push(current.trim());return out.length?out:[text];
-    }
-    const speech={
-      enable(){ensure();options.speech=true;listVoices();return this;},
-      get enabled(){return !!options.speech;},
-      say(text,opts){ensure();if(!options.speech){report('Speech is opt-in: createRuntime with {speech:true}; browser speech cancellation is global');return null;}if(!env.speechSynthesis || !env.SpeechSynthesisUtterance){report('Speech synthesis unavailable');return null;}
-        // Pick the most natural installed voice for the language; split long text
-        // into sentences because some engines cut off long utterances.
-        const voice=pickVoice(opts && opts.lang,opts && opts.voice);let first=null;
-        for(const part of sentences(String(text))){
-          const u=new env.SpeechSynthesisUtterance(part);for(const k of ['lang','rate','pitch','volume'])if(opts && opts[k]!=null)u[k]=opts[k];
-          if(voice)u.voice=voice;
-          speechOwned.add(u);u.onend=()=>speechOwned.delete(u);u.onerror=e=>{speechOwned.delete(u);if(e.error!=='interrupted' && e.error!=='canceled')report('Speech error: '+e.error);};env.speechSynthesis.speak(u);first=first||u;
-        }
-        return first;
-      },
-      voices(lang){return listVoices().filter(v=>voiceScore(v,lang)>=0).sort((a,b)=>voiceScore(b,lang)-voiceScore(a,lang)).map(v=>({name:v.name,lang:v.lang,local:v.localService!==false}));},
-      cancel(){if(speechOwned.size && env.speechSynthesis){
-        const registry=env[registryKey];if(registry && registry.instances.size>1){report('Cannot isolate browser speech cancellation across instances');return;}
-        env.speechSynthesis.cancel();speechOwned.clear();}}
-    };
-    // Browsers load their voice list lazily; ask early so it is ready when needed.
-    if(options.speech)listVoices();
     const audio={
       ready:false,buffers,get context(){return context;},
       loopBuffer(c,index,cue){
@@ -669,10 +621,10 @@
         clips:[...clips.values()].map(c=>({id:c.id,time:c.time,duration:c.duration,active:c.active,playing:c.playing,weight:c.weight,fading:!!c.ramp})),
         states:Object.fromEntries([...machines].map(([id,m])=>[id,m.state])),
         audio:{ready:audio.ready,state:context?context.state:'locked',embeddedAssets:project.assets.length},
-        speech:{enabled:!!options.speech},diagnostics:diagnostics.map(e=>e.message)};
+        diagnostics:diagnostics.map(e=>e.message)};
     }
-    api={version:1,snapshot,reportError(error){ensure();return report(error);},diagnostics,on,emit,bones(){ensure();return bonePoses.map(p=>({...p}));},onDestroy(fn){ensure();if(typeof fn!=='function')throw new Error('Disposer must be a function');cleanup.push(fn);},get destroyed(){return dead;}, clip,machine,set,variable,timeline:{at,get time(){return transport.time;},get playing(){return transport.playing;},play(){ensure();syncClock();transport.manual=true;transportPlay();return this;},pause(){ensure();transport.manual=false;for(const c of clips.values())clip(c.id).pause();transportPause();return this;},seek(time){ensure();syncClock();finite(time,'Timeline seek time');if(time<0)throw new Error('Timeline seek must be nonnegative');transport.time=time;transport.revision++;stopSources(transport);for(const c of clips.values())if(c.active)clip(c.id).seek(c.loop?time%c.duration:Math.min(time,c.duration));speech.cancel();schedule(transport);return this;}},audio,speech,tick,
-      destroy(){if(dead)return;dead=true;if(raf!=null && env.cancelAnimationFrame)env.cancelAnimationFrame(raf);for(const fn of cleanup)try{fn();}catch(error){report(error);}for(const c of [transport,...clips.values()])stopSources(c);audio.pause();speech.cancel();loopBuffers.clear();buffers.clear();if(context && context.close)Promise.resolve(context.close()).catch(()=>{});subscriptions.clear();callbacks.clear();for(const [id,start] of pointerStarts)try{if(start.el.releasePointerCapture)start.el.releasePointerCapture(id);}catch(_){}pointerStarts.clear();if(svg.splinely===api)delete svg.splinely;unregister(env,api);}
+    api={version:1,snapshot,reportError(error){ensure();return report(error);},diagnostics,on,emit,bones(){ensure();return bonePoses.map(p=>({...p}));},onDestroy(fn){ensure();if(typeof fn!=='function')throw new Error('Disposer must be a function');cleanup.push(fn);},get destroyed(){return dead;}, clip,machine,set,variable,timeline:{at,get time(){return transport.time;},get playing(){return transport.playing;},play(){ensure();syncClock();transport.manual=true;transportPlay();return this;},pause(){ensure();transport.manual=false;for(const c of clips.values())clip(c.id).pause();transportPause();return this;},seek(time){ensure();syncClock();finite(time,'Timeline seek time');if(time<0)throw new Error('Timeline seek must be nonnegative');transport.time=time;transport.revision++;stopSources(transport);for(const c of clips.values())if(c.active)clip(c.id).seek(c.loop?time%c.duration:Math.min(time,c.duration));schedule(transport);return this;}},audio,tick,
+      destroy(){if(dead)return;dead=true;if(raf!=null && env.cancelAnimationFrame)env.cancelAnimationFrame(raf);for(const fn of cleanup)try{fn();}catch(error){report(error);}for(const c of [transport,...clips.values()])stopSources(c);audio.pause();loopBuffers.clear();buffers.clear();if(context && context.close)Promise.resolve(context.close()).catch(()=>{});subscriptions.clear();callbacks.clear();for(const [id,start] of pointerStarts)try{if(start.el.releasePointerCapture)start.el.releasePointerCapture(id);}catch(_){}pointerStarts.clear();if(svg.splinely===api)delete svg.splinely;unregister(env,api);}
     };
     svg.splinely=api;register(env,api);
     try {
