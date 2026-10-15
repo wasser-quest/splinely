@@ -1472,70 +1472,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "forma-cli"
-version = "0.1.0"
-dependencies = [
- "clap",
- "forma_document",
- "serde",
- "serde_json",
- "svgtypes",
- "tempfile",
-]
-
-[[package]]
-name = "forma_document"
-version = "0.1.0"
-dependencies = [
- "gif",
- "resvg",
- "roxmltree",
- "serde",
- "serde_json",
- "svgtypes",
- "usvg",
-]
-
-[[package]]
-name = "forma_editor"
-version = "0.1.0"
-dependencies = [
- "base64",
- "bevy_ecs",
- "eframe",
- "forma_document",
- "resvg",
- "rfd",
- "roxmltree",
- "serde",
- "serde_json",
-]
-
-[[package]]
-name = "forma_runtime"
-version = "0.1.0"
-dependencies = [
- "forma_document",
- "serde",
- "serde_json",
-]
-
-[[package]]
-name = "forma_viewer"
-version = "0.1.0"
-dependencies = [
- "base64",
- "clap",
- "forma_document",
- "roxmltree",
- "same-file",
- "tao",
- "tempfile",
- "webkit2gtk",
- "wry",
-]
-
-[[package]]
 name = "futures-channel"
 version = "0.3.34"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -3996,6 +3932,70 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "eda41003dc44290527a59b13432d4a0379379fa074b70174882adfbdfd917844"
 dependencies = [
  "bitflags 2.13.2",
+]
+
+[[package]]
+name = "splinely-cli"
+version = "0.1.0"
+dependencies = [
+ "clap",
+ "serde",
+ "serde_json",
+ "splinely_document",
+ "svgtypes",
+ "tempfile",
+]
+
+[[package]]
+name = "splinely_document"
+version = "0.1.0"
+dependencies = [
+ "gif",
+ "resvg",
+ "roxmltree",
+ "serde",
+ "serde_json",
+ "svgtypes",
+ "usvg",
+]
+
+[[package]]
+name = "splinely_editor"
+version = "0.1.0"
+dependencies = [
+ "base64",
+ "bevy_ecs",
+ "eframe",
+ "resvg",
+ "rfd",
+ "roxmltree",
+ "serde",
+ "serde_json",
+ "splinely_document",
+]
+
+[[package]]
+name = "splinely_runtime"
+version = "0.1.0"
+dependencies = [
+ "serde",
+ "serde_json",
+ "splinely_document",
+]
+
+[[package]]
+name = "splinely_viewer"
+version = "0.1.0"
+dependencies = [
+ "base64",
+ "clap",
+ "roxmltree",
+ "same-file",
+ "splinely_document",
+ "tao",
+ "tempfile",
+ "webkit2gtk",
+ "wry",
 ]
 
 [[package]]

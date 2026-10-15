@@ -1,7 +1,7 @@
 'use strict';
 const {test}=require('node:test');
 const assert=require('node:assert/strict');
-const {createRuntime,evaluateTrack}=require('../src/forma.js');
+const {createRuntime,evaluateTrack}=require('../src/splinely.js');
 function mount(extra={},env={},opts={}) {
  const attrs=new Map(); const n={id:'n',tagName:'circle',getAttribute:k=>attrs.get(k)||null,setAttribute:(k,v)=>attrs.set(k,String(v)),removeAttribute:k=>attrs.delete(k)};
  const svg={id:'root',ownerDocument:{defaultView:env},querySelectorAll:()=>[n],addEventListener(){},removeEventListener(){}};
@@ -10,9 +10,9 @@ function mount(extra={},env={},opts={}) {
  return {f:createRuntime(svg,project,{autoTick:false,...opts}),attrs};
 }
 test('preserving customJs is not an error and does not execute it',()=>{
- delete globalThis.__formaPreservedScriptRan;
- const {f}=mount({customJs:'globalThis.__formaPreservedScriptRan=true;'});
- assert.equal(globalThis.__formaPreservedScriptRan,undefined);assert.deepEqual(f.diagnostics,[]);f.destroy();
+ delete globalThis.__splinelyPreservedScriptRan;
+ const {f}=mount({customJs:'globalThis.__splinelyPreservedScriptRan=true;'});
+ assert.equal(globalThis.__splinelyPreservedScriptRan,undefined);assert.deepEqual(f.diagnostics,[]);f.destroy();
 });
 test('snapshot is observational, detached and available after destroy',()=>{
  const {f}=mount();f.clip('a').play();f.tick(0.5);

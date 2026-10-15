@@ -1,7 +1,7 @@
-# Author Forma with another LLM
+# Author Splinely with another LLM
 
-Copy [prompts/forma-author.md](prompts/forma-author.md) into another LLM and add
-your scene requirements. The prompt sends the model to `forma-cli guide` first:
+Copy [prompts/splinely-author.md](prompts/splinely-author.md) into another LLM and add
+your scene requirements. The prompt sends the model to `splinely-cli guide` first:
 a short workflow with tested recipes, coordinate rules and the usual mistakes.
 Agents then build with commands (not hand-written JSON), run `check` (lint with
 runnable fixes), look at `render` previews and export. An LLM without terminal
@@ -26,16 +26,16 @@ From this installed repository:
 export TMPDIR=/home/user/svg_editor/.work-tmp
 mkdir -p "$TMPDIR"
 # Use the existing binary; rebuild locally if absent or stale.
-cargo build --offline --locked -p forma-cli
-CLI=target/debug/forma-cli
+cargo build --offline --locked -p splinely-cli
+CLI=target/debug/splinely-cli
 "$CLI" guide
 "$CLI" --help
-"$CLI" schema > "$TMPDIR/forma-schema.json"
-"$CLI" capabilities > "$TMPDIR/forma-capabilities.json"
-"$CLI" new --output "$TMPDIR/project.frm" --width 800 --height 450 --background white
+"$CLI" schema > "$TMPDIR/splinely-schema.json"
+"$CLI" capabilities > "$TMPDIR/splinely-capabilities.json"
+"$CLI" new --output "$TMPDIR/project.sply" --width 800 --height 450 --background white
 ```
 
-Use an already installed `forma-cli` on trusted PATH instead if appropriate;
+Use an already installed `splinely-cli` on trusted PATH instead if appropriate;
 check its help/schema because installed versions may differ. Do not invent a
 release URL, fetch code or install dependencies as an authoring step. Builds/tests
 use `--offline --locked`; if cached dependencies are missing, report the blocker
@@ -96,7 +96,7 @@ Schema. All canonical document fields are writable as JSON or with `apply`.
 "$CLI" evaluate "$TMPDIR/project.json" --time 0.5
 # Optional context JSON uses states, clips:[{clipId,time}], clipWeights, overrides.
 "$CLI" export "$TMPDIR/project.json" --output "$TMPDIR/project.svg"
-TMPDIR=/home/user/svg_editor/.work-tmp cargo test --offline --locked -p forma-cli
+TMPDIR=/home/user/svg_editor/.work-tmp cargo test --offline --locked -p splinely-cli
 ```
 
 Outputs are JSON (help/version excepted); errors are JSON stderr with nonzero

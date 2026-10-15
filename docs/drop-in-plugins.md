@@ -9,17 +9,17 @@ there is no enable step, code compilation, or live reload.
 
 The first nonempty environment setting wins:
 
-1. `FORMA_PLUGIN_DIR` (the plugin root itself)
-2. `$XDG_CONFIG_HOME/forma/plugins`
-3. `$HOME/.config/forma/plugins`
+1. `SPLINELY_PLUGIN_DIR` (the plugin root itself)
+2. `$XDG_CONFIG_HOME/splinely/plugins`
+3. `$HOME/.config/splinely/plugins`
 
 Paths are used literally (no shell expansion). Each immediate child directory must
-contain `forma-plugin.json`, for example:
+contain `splinely-plugin.json`, for example:
 
 ```text
-~/.config/forma/plugins/
-  colors/forma-plugin.json
-  basic-shapes/forma-plugin.json
+~/.config/splinely/plugins/
+  colors/splinely-plugin.json
+  basic-shapes/splinely-plugin.json
 ```
 
 Copy the child directories from `examples/plugins/` into that root. Do not copy the
@@ -109,8 +109,8 @@ transparent use `"#00000000"`, not `null`. `strokeWidth` is a finite number in
 Each palette entry requires `id`, `title`, and `style`, and behaves exactly like
 `setStyle`. It can change several style properties atomically. Style operations
 preserve geometry, transforms, bone bindings, names, visibility and locks.
-See `examples/plugins/colors/forma-plugin.json` for a complete color palette and
-`examples/plugins/basic-shapes/forma-plugin.json` for all three template shapes.
+See `examples/plugins/colors/splinely-plugin.json` for a complete color palette and
+`examples/plugins/basic-shapes/splinely-plugin.json` for all three template shapes.
 
 ## Safety and bounds
 

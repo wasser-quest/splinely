@@ -1,10 +1,10 @@
-# Forma — Implementierungsplan
+# Splinely — Implementierungsplan
 
 ## Ziel
 
-Forma ist ein einfacher Rust-Desktopeditor für SVG-Grafiken mit Keyframe-Animationen, State Machines, programmierbaren Interaktionen und Audio. Der interaktive Export soll als einzelne SVG-Datei offline ohne Server, API oder nachgeladene Bibliotheken funktionieren.
+Splinely ist ein einfacher Rust-Desktopeditor für SVG-Grafiken mit Keyframe-Animationen, State Machines, programmierbaren Interaktionen und Audio. Der interaktive Export soll als einzelne SVG-Datei offline ohne Server, API oder nachgeladene Bibliotheken funktionieren.
 
-Dieser Plan beschreibt die Umsetzung; die Implementierung beginnt anschließend schrittweise. Der Name der App ist **Forma**.
+Dieser Plan beschreibt die Umsetzung; die Implementierung beginnt anschließend schrittweise. Der Name der App ist **Splinely**.
 
 ## Leitlinien und Grenzen
 
@@ -53,13 +53,13 @@ Das gespeicherte Dokument ist die einzige autoritative Quelle. ECS-Entitäten si
 
 ```text
 crates/
-  forma_document/    # Schema, IDs, Validierung, Migrationen
-  forma_core/        # Commands, History, Geometrie
-  forma_animation/   # Tracks, Interpolation, Transport
-  forma_behavior/    # State Machines, Events, Variablen
-  forma_audio/       # Assets, Cues, Transportregeln
-  forma_svg/         # Import, Export, Quelltexterhaltung
-  forma_editor/      # Desktopapp, ECS-Plugins, egui
+  splinely_document/    # Schema, IDs, Validierung, Migrationen
+  splinely_core/        # Commands, History, Geometrie
+  splinely_animation/   # Tracks, Interpolation, Transport
+  splinely_behavior/    # State Machines, Events, Variablen
+  splinely_audio/       # Assets, Cues, Transportregeln
+  splinely_svg/         # Import, Export, Quelltexterhaltung
+  splinely_editor/      # Desktopapp, ECS-Plugins, egui
 runtime/
   src/               # eingebettete Browser-Runtime und öffentliche API
   tests/             # Browser- und Konformitätstests
@@ -173,16 +173,16 @@ Audio hängt nicht an einem bestimmten Grafikobjekt. Assets und Cues sind eigens
 ### Geplante öffentliche JavaScript-API
 
 ```js
-forma.on("button", "click", async () => {
-  await forma.audio.unlock();
-  forma.clip("intro").play();
+splinely.on("button", "click", async () => {
+  await splinely.audio.unlock();
+  splinely.clip("intro").play();
 });
 
-forma.timeline.at(1.5, () => forma.audio.play("hello"));
-forma.speech.say("Hallo!", { lang: "de-DE" });
-forma.machine("main").send("OPEN");
-forma.set("circle", { opacity: 0.5 });
-forma.variable("speed").set(2);
+splinely.timeline.at(1.5, () => splinely.audio.play("hello"));
+splinely.speech.say("Hallo!", { lang: "de-DE" });
+splinely.machine("main").send("OPEN");
+splinely.set("circle", { opacity: 0.5 });
+splinely.variable("speed").set(2);
 ```
 
 Die API wird versioniert und dokumentiert. Eventabonnements und Zeit-Callbacks besitzen Abmeldefunktionen und definierte Regeln bei Seek und Loop.

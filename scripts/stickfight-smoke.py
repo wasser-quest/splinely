@@ -19,7 +19,7 @@ SVG = ROOT/'examples/stickfight.svg'
 
 def sample(browser):
     return browser.js("""
-const d=document.querySelector('#scene').contentDocument,f=d.documentElement.forma;
+const d=document.querySelector('#scene').contentDocument,f=d.documentElement.splinely;
 return {time:f.clip('duel').time,playing:f.timeline.playing,bones:f.bones(),
  nodes:['cinder-arm-front-shape','flux-arm-front-shape','cinder-head','flux-head','cinder-shadow'].map(id=>d.getElementById(id).getAttribute('transform')),
  diagnostics:f.diagnostics};
@@ -79,7 +79,7 @@ def main():
         recoil = sample(browser)
         assert recoil['time'] > 3.5 and recoil['bones'] != restarted['bones'] and not recoil['diagnostics'], recoil
         screenshot = browser.command('WebDriver:TakeScreenshot', {'id':None,'full':True,'scroll':False})
-        Path('/tmp/forma-stickfight.png').write_bytes(base64.b64decode(screenshot))
+        Path('/tmp/splinely-stickfight.png').write_bytes(base64.b64decode(screenshot))
         # A real full wall-clock loop: no seek/tick standing in for playback.
         time.sleep(4.5)
         wrapped = sample(browser)
@@ -87,11 +87,11 @@ def main():
         # The SVG itself is standalone: no HTML host is needed for motion.
         browser.command('WebDriver:Navigate', {'url':SVG.as_uri()})
         time.sleep(.5)
-        direct = browser.js('return {time:document.documentElement.forma.clip("duel").time,bones:document.documentElement.forma.bones()};')
+        direct = browser.js('return {time:document.documentElement.splinely.clip("duel").time,bones:document.documentElement.splinely.bones()};')
         time.sleep(.5)
-        later = browser.js('return {time:document.documentElement.forma.clip("duel").time,bones:document.documentElement.forma.bones()};')
+        later = browser.js('return {time:document.documentElement.splinely.clip("duel").time,bones:document.documentElement.splinely.bones()};')
         assert later['time'] > direct['time']+.2 and later['bones'] != direct['bones']
-    print('PASS: XML/local resources; Firefox file:// bone FK + scene wall-time movement, pause/resume/restart, 8s wrap, standalone SVG. Screenshot: /tmp/forma-stickfight.png')
+    print('PASS: XML/local resources; Firefox file:// bone FK + scene wall-time movement, pause/resume/restart, 8s wrap, standalone SVG. Screenshot: /tmp/splinely-stickfight.png')
 
 
 if __name__ == '__main__':

@@ -1,33 +1,33 @@
-# Forma standalone SVG runtime
+# Splinely standalone SVG runtime
 
-`src/forma.js` is a plain self-contained script: no build step, packages, imports, network calls, or external asset URLs. It runs in script-enabled SVG browser documents (`file://` works), inline SVG and script-enabled `<object>` contexts. `<img>` and most image viewers do not run scripts. Export a meaningful static drawing first.
+`src/splinely.js` is a plain self-contained script: no build step, packages, imports, network calls, or external asset URLs. It runs in script-enabled SVG browser documents (`file://` works), inline SVG and script-enabled `<object>` contexts. `<img>` and most image viewers do not run scripts. Export a meaningful static drawing first.
 
 See [`../RUNTIME_API.md`](../RUNTIME_API.md) for the authoritative runtime/export contract and [`../CORE_API.md`](../CORE_API.md) for the Rust schema. The runtime supports its schema v1, including tagged values/easing, transform composition, state overrides/actions, and **global** audio/speech cue time. No Rust/editor files are owned by this component.
 
 ## Embed / use
 
-Embed SVG node elements, then XML-escaped JSON metadata with ID `forma-project`, then the entire source in an SVG script. The script auto-mounts its owning root:
+Embed SVG node elements, then XML-escaped JSON metadata with ID `splinely-project`, then the entire source in an SVG script. The script auto-mounts its owning root:
 
 ```js
 const svg = document.currentScript.ownerSVGElement;
-const forma = svg.forma; // canonical scoped API
-const unsubscribe = forma.on('button', 'click', async () => {
-  await forma.audio.unlock(); // trusted user activation required by browsers
-  forma.timeline.seek(0);
-  forma.clip('intro').seek(0).play();
+const splinely = svg.splinely; // canonical scoped API
+const unsubscribe = splinely.on('button', 'click', async () => {
+  await splinely.audio.unlock(); // trusted user activation required by browsers
+  splinely.timeline.seek(0);
+  splinely.clip('intro').seek(0).play();
 });
-forma.timeline.at(1.5, () => forma.audio.play('hello'));
-forma.machine('main').send('OPEN');
-forma.variable('speed').set(2);
-forma.set('circle', { opacity: 0.5 });
-// Later: unsubscribe(); forma.set('circle', null); forma.destroy();
+splinely.timeline.at(1.5, () => splinely.audio.play('hello'));
+splinely.machine('main').send('OPEN');
+splinely.variable('speed').set(2);
+splinely.set('circle', { opacity: 0.5 });
+// Later: unsubscribe(); splinely.set('circle', null); splinely.destroy();
 ```
 
-`window.forma` is only a convenience alias for a single instance and is removed when another mounts. Never rely on it in a multi-SVG page. `FormaRuntime.createRuntime(svg, project?, {autoTick:false, speech:false})` supports explicit mounting/tests; don't mount a root twice. For explicit options on an exported root, omit the automatic source script's containing SVG association (e.g. load the runtime in the HTML host), or destroy the auto-mounted instance before creating a replacement. CommonJS `require('./src/forma.js')` exposes `createRuntime`, `readProject`, `normalize`, `evaluateTrack`, `interpolate`, `easing` without auto-mounting.
+`window.splinely` is only a convenience alias for a single instance and is removed when another mounts. Never rely on it in a multi-SVG page. `SplinelyRuntime.createRuntime(svg, project?, {autoTick:false, speech:false})` supports explicit mounting/tests; don't mount a root twice. For explicit options on an exported root, omit the automatic source script's containing SVG association (e.g. load the runtime in the HTML host), or destroy the auto-mounted instance before creating a replacement. CommonJS `require('./src/splinely.js')` exposes `createRuntime`, `readProject`, `normalize`, `evaluateTrack`, `interpolate`, `easing` without auto-mounting.
 
 ## Bones
 
-Optional `bones[]` and node `boneId` work without changing old no-bones documents. Child offsets start at the parent's tip; attached node transforms start at the bone root. State overrides, clips and `forma.set('bone-id',{x:10,y:20,rotation:45})` compose before FK. Bone patches accept only finite numeric x/y/rotation; `set('bone-id',null)` clears explicit patches. `forma.bones()` returns copied world poses, including tips. Numeric rotation interpolation uses existing easing, not shortest-arc interpolation. `locked` and `originalKind` remain inert node metadata. See the root contract for validation limits and export-local-transform requirements.
+Optional `bones[]` and node `boneId` work without changing old no-bones documents. Child offsets start at the parent's tip; attached node transforms start at the bone root. State overrides, clips and `splinely.set('bone-id',{x:10,y:20,rotation:45})` compose before FK. Bone patches accept only finite numeric x/y/rotation; `set('bone-id',null)` clears explicit patches. `splinely.bones()` returns copied world poses, including tips. Numeric rotation interpolation uses existing easing, not shortest-arc interpolation. `locked` and `originalKind` remain inert node metadata. See the root contract for validation limits and export-local-transform requirements.
 
 ## Transport semantics
 
@@ -41,7 +41,7 @@ All times are finite seconds. Clip duration must be positive. Keyframes are sort
 
 ## Events / behavior
 
-`on(id,event,fn)` and `on(event,fn)` return idempotent unsubscribe functions. Handlers get `(detail,forma)`; async rejections and synchronous exceptions are diagnosed. `emit(name,detail,target?)` broadcasts to subscribers then machines; nested broadcasts/sends queue, not recurse. Machines share this instance's variables. State entries initialize exactly once before initial emitted events are drained. Guards compare JSON values structurally; canonical scalar variable assignments preserve declared types. The first matching local transition, then machine transition, wins. Exit actions precede transition actions and destination entry actions. At most 256 items per immediate event drain prevents cycles.
+`on(id,event,fn)` and `on(event,fn)` return idempotent unsubscribe functions. Handlers get `(detail,splinely)`; async rejections and synchronous exceptions are diagnosed. `emit(name,detail,target?)` broadcasts to subscribers then machines; nested broadcasts/sends queue, not recurse. Machines share this instance's variables. State entries initialize exactly once before initial emitted events are drained. Guards compare JSON values structurally; canonical scalar variable assignments preserve declared types. The first matching local transition, then machine transition, wins. Exit actions precede transition actions and destination entry actions. At most 256 items per immediate event drain prevents cycles.
 
 DOM events: `click`, `dblclick`, `pointerenter`, `pointerleave`, `pointerdown`, `pointermove`, `pointerup`, `pointercancel`, `lostpointercapture`, `wheel`, `keydown`, `keyup`, `focus`, `blur`. Detail includes original `event`, target ID, key, pointer ID/buttons, and root SVG-space x/y (inverse screen CTM). Degenerate coordinate conversion reports an error and uses client coordinates. Events in nested SVG roots are ignored by the outer runtime. Keyboard handling is not document-global: give exported controls `tabindex="0"` and accessible labels as appropriate.
 
@@ -57,7 +57,7 @@ Core action names are documented in the root contract. Adapter aliases: `set` (t
 
 Cue sources are scheduled ahead against `AudioContext.currentTime`, not emitted from render crossings. Pause stops sources; resume recreates overlapping cues at `asset offset + elapsed cue time`. Active seek recreates overlaps and future sources; paused seek is silent. Completed cues are not replayed. Sources are keyed per cue/cycle to prevent duplicate scheduling. Loop-local audio uses a native loop of a padded buffer (silence around each cue) so gaps/skipped RAF frames do not omit audio laps. This costs memory: total cached loop padding is capped at 128 MiB per runtime; invalid/oversized cues are diagnosed once, not repeatedly allocated. Changing playback mode/seek stops and recreates sources. No additive audio effects, external streaming or automated latency calibration.
 
-Speech is **optional opt-in**, `createRuntime(...,{speech:true})` or `forma.speech.enable()` (`speech.enabled` reports the choice). CLI `--speech` and editor-authored speech cues/actions opt in through the export host. `speech.say(text,{lang,rate,pitch,volume})` uses system synthesis, not assets. It is not reproducibly timed or guaranteed offline. Pause/seek do not replay skipped speech and attempt cancellation of owned speech. The Web Speech API only offers **window-global** cancel, so speech isolation cannot be guaranteed; cancellation is suppressed when multiple Forma instances exist and may then leave speech playing. A single Forma instance can still share the window with unrelated host speech. Use embedded recordings instead for strict instance scoping and deterministic offline output. Bare auto-mounted runtime therefore leaves synthesis disabled by default. The editor/CLI export host adds a user-gesture start control for audio/speech; no user JS is needed for embedded audio.
+Speech is **optional opt-in**, `createRuntime(...,{speech:true})` or `splinely.speech.enable()` (`speech.enabled` reports the choice). CLI `--speech` and editor-authored speech cues/actions opt in through the export host. `speech.say(text,{lang,rate,pitch,volume})` uses system synthesis, not assets. It is not reproducibly timed or guaranteed offline. Pause/seek do not replay skipped speech and attempt cancellation of owned speech. The Web Speech API only offers **window-global** cancel, so speech isolation cannot be guaranteed; cancellation is suppressed when multiple Splinely instances exist and may then leave speech playing. A single Splinely instance can still share the window with unrelated host speech. Use embedded recordings instead for strict instance scoping and deterministic offline output. Bare auto-mounted runtime therefore leaves synthesis disabled by default. The editor/CLI export host adds a user-gesture start control for audio/speech; no user JS is needed for embedded audio.
 
 ## Safety / errors / limits
 
@@ -70,7 +70,7 @@ No arbitrary path morphing, additive clip blending, automatic plugin translation
 Requires Node 18+ (verified with Node 22.22.2), no npm install:
 
 ```sh
-node --check runtime/src/forma.js
+node --check runtime/src/splinely.js
 node --test runtime/tests/*.test.cjs
 ```
 

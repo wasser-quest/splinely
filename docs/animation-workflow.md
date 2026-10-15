@@ -43,6 +43,6 @@ These tools author model shapes/bones, not arbitrary elements in raw SVG source.
 `panels.rs` includes `animation_assistant.rs` as a private child module. The controls are already wired into the inspector (guided controls in Animieren, compact key shortcut elsewhere), existing timeline and states panel; **no `app.rs` module declaration or Editor fields are needed**. No dependency, schema or runtime changes are required. Pure candidate tests live in `animation_assistant.rs`; panel tests cover undo and preservation of staged JSON/source/trust.
 
 ```sh
-TMPDIR=/home/user/svg_editor/.work-tmp cargo test -p forma_editor --bin forma app::panels
-TMPDIR=/home/user/svg_editor/.work-tmp cargo clippy -p forma_editor --bin forma --tests -- -D warnings
+TMPDIR=/home/user/svg_editor/.work-tmp cargo test -p splinely_editor --bin splinely app::panels
+TMPDIR=/home/user/svg_editor/.work-tmp cargo clippy -p splinely_editor --bin splinely --tests -- -D warnings
 ```

@@ -18,16 +18,16 @@ from firefox_harness import Firefox
 DOCUMENT = """
 const object=document.querySelector(arguments[0]);
 if(!object || !object.contentDocument) return null;
-const doc=object.contentDocument, root=doc.documentElement, f=root.forma;
+const doc=object.contentDocument, root=doc.documentElement, f=root.splinely;
 if(!f) return null;
 """
 INSTALL = DOCUMENT + """
-const w=doc.defaultView, p=JSON.parse(doc.querySelector('#forma-project').textContent);
+const w=doc.defaultView, p=JSON.parse(doc.querySelector('#splinely-project').textContent);
 if(!w.__showcaseSmoke) {
  const t=w.__showcaseSmoke={states:[],speech:[],errors:[],clicks:[],installedAt:performance.now()};
  w.addEventListener('error',e=>t.errors.push({type:'error',message:e.message,source:e.filename,line:e.lineno}));
  w.addEventListener('unhandledrejection',e=>t.errors.push({type:'unhandledrejection',message:String(e.reason)}));
- w.addEventListener('click',e=>t.clicks.push({trusted:e.isTrusted,target:e.target.id,host:!!e.target.closest('[data-forma-host-control]')}),true);
+ w.addEventListener('click',e=>t.clicks.push({trusted:e.isTrusted,target:e.target.id,host:!!e.target.closest('[data-splinely-host-control]')}),true);
  f.on('click',e=>{if(e.event)t.clicks.push({trusted:e.event.isTrusted,target:e.target,host:false});});
  f.on('state.change',e=>t.states.push({at:f.timeline.time,...e}));
  if(!w.speechSynthesis || !w.SpeechSynthesisUtterance) throw Error('Web Speech API unavailable');
@@ -37,14 +37,14 @@ if(!w.__showcaseSmoke) {
  t.intercepted=synth.speak.toString().includes('t.speech.push');
 }
 return {mounted:true,speechEnabled:f.speech.enabled,intercepted:w.__showcaseSmoke.intercepted,
- project:p,control:!!doc.querySelector('[data-forma-host-control]')};
+ project:p,control:!!doc.querySelector('[data-splinely-host-control]')};
 """
 SNAPSHOT = DOCUMENT + """
-const p=JSON.parse(doc.querySelector('#forma-project').textContent), t=doc.defaultView.__showcaseSmoke;
+const p=JSON.parse(doc.querySelector('#splinely-project').textContent), t=doc.defaultView.__showcaseSmoke;
 return {time:f.timeline.time,playing:f.timeline.playing,speechEnabled:f.speech.enabled,
  machines:(p.stateMachines||p.machines||[]).map(m=>({id:m.id,state:f.machine(m.id).state})),
  attributes:p.nodes.map(n=>{const el=doc.getElementById(n.id);return {id:n.id,attrs:el?Object.fromEntries([...el.attributes].map(a=>[a.name,a.value])):null};}),
- telemetry:t,diagnostics:f.diagnostics.map(e=>({message:e.message||String(e),stack:e.stack||null})),control:!!doc.querySelector('[data-forma-host-control]')};
+ telemetry:t,diagnostics:f.diagnostics.map(e=>({message:e.message||String(e),stack:e.stack||null})),control:!!doc.querySelector('[data-splinely-host-control]')};
 """
 
 
@@ -96,7 +96,7 @@ def run_case(browser, url, kind, args, result):
     result["before"] = browser.js(SNAPSHOT, [args.object_selector])
     for machine in result["before"]["machines"]:
         seen[machine["id"]].add(machine["state"])
-    result["click"] = click_start(browser, args.object_selector, "#start-control" if kind == "water" else "[data-forma-host-control] rect")
+    result["click"] = click_start(browser, args.object_selector, "#start-control" if kind == "water" else "[data-splinely-host-control] rect")
     samples = result["samples"] = []
     deadline = time.monotonic() + args.duration
     changed = False
@@ -164,7 +164,7 @@ def main():
         "Audible speech, voice availability, device output and speech timing (speak intercepted)",
         "Offline file:// mounting and non-Firefox browser compatibility",
         "Errors before telemetry attachment, unless retained by runtime diagnostics"],
-        "screenshot": "/tmp/forma-showcase.png", "screenshotCaptured": False}
+        "screenshot": "/tmp/splinely-showcase.png", "screenshotCaptured": False}
     server = None
     browser = None
     try:
@@ -210,8 +210,8 @@ def main():
             server.shutdown()
             server.server_close()
             thread.join(timeout=5)
-        Path("/tmp/forma-showcase-results.json").write_text(json.dumps(report, indent=2) + "\n")
-    print(("PASS" if report["passed"] else "FAIL") + ": /tmp/forma-showcase-results.json; /tmp/forma-showcase.png")
+        Path("/tmp/splinely-showcase-results.json").write_text(json.dumps(report, indent=2) + "\n")
+    print(("PASS" if report["passed"] else "FAIL") + ": /tmp/splinely-showcase-results.json; /tmp/splinely-showcase.png")
     return 0 if report["passed"] else 1
 
 

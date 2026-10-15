@@ -1,7 +1,7 @@
 //! Trusted, statically linked, editor-only preview decoration.
 //! This code is not a sandbox and does not persist changes into JSON or SVG.
 use bevy_ecs::prelude::*;
-use forma_editor::ecs::{DocumentSceneEntity, EditorPlugin, Phase, Projection, SceneNode};
+use splinely_editor::ecs::{DocumentSceneEntity, EditorPlugin, Phase, Projection, SceneNode};
 
 #[derive(Resource, Default)]
 pub struct Settings {

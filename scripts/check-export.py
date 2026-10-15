@@ -14,8 +14,8 @@ project = json.loads(project_path.read_text(encoding='utf-8'))
 root = ET.parse(svg_path).getroot()
 ns = '{http://www.w3.org/2000/svg}'
 assert root.tag == ns + 'svg'
-assert root.attrib['data-forma-version'] == '1'
-metadata = root.find(f"{ns}metadata[@id='forma-project']")
+assert root.attrib['data-splinely-version'] == '1'
+metadata = root.find(f"{ns}metadata[@id='splinely-project']")
 assert metadata is not None
 assert json.loads(metadata.text) == project, 'Project metadata changed'
 scripts = root.findall(ns + 'script')

@@ -19,7 +19,7 @@ These are gesture-time linking operations, **not automatic tangent modes stored 
 
 ## APIs
 
-In `crates/forma_editor/src/vector_tools.rs`:
+In `crates/splinely_editor/src/vector_tools.rs`:
 
 - `EditablePath::insert_nearest(screen, &CanvasMap, max_distance)` returns `Result<Option<EditablePath>, String>`: a validated staged path, a bounded miss/endpoint, or an error. It never mutates the source.
 - `EditablePath::split_segment(index, t)` returns a staged split for an interior parameter `0 < t < 1`.

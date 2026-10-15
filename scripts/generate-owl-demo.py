@@ -6,7 +6,7 @@ import subprocess
 import tempfile
 
 ROOT = Path(__file__).resolve().parents[1]
-CLI = ROOT / 'target/debug/forma-cli'
+CLI = ROOT / 'target/debug/splinely-cli'
 OUT = ROOT / 'examples'
 STEM = 'brown-owl'
 
@@ -62,45 +62,45 @@ SVG=f'''<svg xmlns="http://www.w3.org/2000/svg" width="640" height="640" viewBox
 
 CUSTOM_JS = r"""
 // Reviewed, instance-local controller. All state changes go through the machine.
-const machine = forma.machine('owl-mood');
+const machine = splinely.machine('owl-mood');
 const pupils = ['owl-pupil-left', 'owl-pupil-right', 'owl-glint-left', 'owl-glint-right'];
 let settle = null;
 function isOwl(element) {
   return !!(element && element.id && element.id.startsWith('owl-') && element.localName !== 'svg');
 }
-function resetEyes() { for (const id of pupils) forma.set(id, null); }
+function resetEyes() { for (const id of pupils) splinely.set(id, null); }
 function track(detail) {
   // Runtime detail.x/y are already viewBox coordinates. The radial limit keeps
   // pupil and glint inside each iris, even at the figure's edges.
   for (const [side, cx] of [['left', 272], ['right', 370]]) {
     const dx = detail.x - cx, dy = detail.y - 260;
     const length = Math.hypot(dx, dy), factor = length ? Math.min(12, length / 7) / length : 0;
-    for (const part of ['pupil', 'glint']) forma.set('owl-' + part + '-' + side, {x: dx * factor, y: dy * factor});
+    for (const part of ['pupil', 'glint']) splinely.set('owl-' + part + '-' + side, {x: dx * factor, y: dy * factor});
   }
 }
-forma.on('pointermove', detail => {
+splinely.on('pointermove', detail => {
   if (isOwl(detail.event.target)) {
     if (machine.state === 'idle') machine.send('owl.hover');
     if (machine.state === 'attentive') track(detail);
   } else if (machine.state !== 'idle') machine.send('owl.leave');
 });
-forma.on('pointerenter', detail => {
+splinely.on('pointerenter', detail => {
   if (isOwl(detail.event.target) && machine.state === 'idle') machine.send('owl.hover');
 });
-forma.on('pointerleave', detail => {
+splinely.on('pointerleave', detail => {
   // Ignore moving from one owl piece to another.
   if (!isOwl(detail.event.relatedTarget)) machine.send('owl.leave');
 });
-forma.on('click', detail => {
+splinely.on('click', detail => {
   if (isOwl(detail.event.target)) machine.send('owl.click');
 });
-forma.on('state.change', detail => {
+splinely.on('state.change', detail => {
   if (detail.machine !== 'owl-mood') return;
   clearTimeout(settle);
   if (detail.to !== 'attentive') resetEyes();
   if (detail.to === 'content') settle = setTimeout(() => machine.send('owl.settled'), 1400);
 });
-forma.onDestroy(() => clearTimeout(settle));
+splinely.onDestroy(() => clearTimeout(settle));
 """
 
 HTML = '''<!doctype html>
@@ -110,7 +110,7 @@ HTML = '''<!doctype html>
 </head><body><h1>Brown owl</h1>
 <p>A brown owl on a branch. Move the pointer over it and it perks up its ear tufts while its eyes follow you; click it and it closes its eyes contentedly and lifts its wings. No button, speech or audio needed.</p>
 <object id="scene" type="image/svg+xml" data="brown-owl.svg" aria-label="Interactive brown owl"><a href="brown-owl.svg">Open the interactive SVG</a></object>
-<p><a href="brown-owl-source.svg">Source SVG</a> · <a href="brown-owl.forma.json">Project JSON</a> · <a href="../scripts/generate-owl-demo.py">Generator</a></p>
+<p><a href="brown-owl-source.svg">Source SVG</a> · <a href="brown-owl.splinely.json">Project JSON</a> · <a href="../scripts/generate-owl-demo.py">Generator</a></p>
 <p>Hover follows a mouse/pointer; touch can click but has no persistent hover. The SVG starts by itself in a script-capable context (object or direct SVG), not an img. Restrictive CSP may block the trusted custom JavaScript. No external assets or network are required.</p>
 </body></html>
 '''
@@ -157,7 +157,7 @@ def main():
         ('content', 'idle', 'owl.leave'),
     ]:
         transitions.append({'from': start, 'to': end, 'event': {'name': event}, 'actions': []})
-    with tempfile.TemporaryDirectory(prefix='forma-owl-') as directory:
+    with tempfile.TemporaryDirectory(prefix='splinely-owl-') as directory:
         directory = Path(directory)
         imported = directory / 'imported.json'
         patch = directory / 'patch.json'
@@ -170,13 +170,13 @@ def main():
             'stateMachines': [{'id': 'owl-mood', 'initial': 'idle', 'states': states, 'transitions': transitions}],
             'customJs': CUSTOM_JS,
         }, ensure_ascii=False), encoding='utf-8')
-        project_path = OUT / (STEM + '.forma.json')
+        project_path = OUT / (STEM + '.splinely.json')
         cli('apply', imported, '--patch', patch, '--output', project_path)
         cli('validate', project_path)
-        cli('convert', project_path, '--output', OUT / (STEM + '.frm'))
+        cli('convert', project_path, '--output', OUT / (STEM + '.sply'))
         cli('export', project_path, '--output', OUT / (STEM + '.svg'), '--trusted-js')
     (OUT / (STEM + '.html')).write_text(HTML, encoding='utf-8')
-    print('Created examples/brown-owl{,-source}.svg, .forma.json, .frm and .html')
+    print('Created examples/brown-owl{,-source}.svg, .splinely.json, .sply and .html')
 
 
 if __name__ == '__main__':

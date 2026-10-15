@@ -1,16 +1,16 @@
-# Forma CLI — autonomous project creation
+# Splinely CLI — autonomous project creation
 
-`forma-cli` is a local, provider-independent interface for AI tools. It uses the
-same `forma_document` model and validation as the editor. No API key, network,
+`splinely-cli` is a local, provider-independent interface for AI tools. It uses the
+same `splinely_document` model and validation as the editor. No API key, network,
 GUI or JavaScript execution is needed to create/edit projects or export SVG.
 
 ```sh
-cargo build --offline --locked -p forma-cli
-# executable: target/debug/forma-cli
-cargo test --offline --locked -p forma-cli
+cargo build --offline --locked -p splinely-cli
+# executable: target/debug/splinely-cli
+cargo test --offline --locked -p splinely-cli
 ```
 
-**Start here (people and LLM agents):** `forma-cli guide` prints a short
+**Start here (people and LLM agents):** `splinely-cli guide` prints a short
 workflow with copy-paste recipes (scene, animation, interaction, batch) and
 the common mistakes. Its recipes are executed verbatim by the test suite.
 
@@ -28,27 +28,27 @@ the common mistakes. Its recipes are executed verbatim by the test suite.
 
 ## Single-file authored projects
 
-Use **`.frm`** for the self-contained authored Project: geometry, animations,
+Use **`.sply`** for the self-contained authored Project: geometry, animations,
 states, bones, code, SVG-source metadata and embedded audio all live in one file.
 It is strict UTF-8 canonical Project JSON, not ZIP or a binary container.
-Legacy `.forma.json` and `.json` remain supported with the same schema and strict
+Legacy `.splinely.json` and `.json` remain supported with the same schema and strict
 unknown-field, duplicate-member and integer rules. No sidecar SVG is needed for
-authoring; `.frm` needs a compatible host to render, or an explicit SVG export.
+authoring; `.sply` needs a compatible host to render, or an explicit SVG export.
 Loading/saving/conversion never executes authored JavaScript or grants trust.
 Editor/viewer dialogs and startup loading are not changed by this CLI/core work.
-See [docs/frm-format.md](docs/frm-format.md) for format, limits and shared APIs.
+See [docs/sply-format.md](docs/sply-format.md) for format, limits and shared APIs.
 
 ```sh
-forma-cli new --demo --output scene.frm
-forma-cli example --output example.frm
-forma-cli import-svg drawing.svg --output drawing.frm
-forma-cli validate scene.frm
-forma-cli convert legacy.forma.json --output scene.frm
-forma-cli convert scene.frm --output interoperable.json
-forma-cli export scene.frm --output scene.svg
+splinely-cli new --demo --output scene.sply
+splinely-cli example --output example.sply
+splinely-cli import-svg drawing.svg --output drawing.sply
+splinely-cli validate scene.sply
+splinely-cli convert legacy.splinely.json --output scene.sply
+splinely-cli convert scene.sply --output interoperable.json
+splinely-cli export scene.sply --output scene.svg
 ```
 
-Every project authoring operation accepts `.frm` input/output paths, including
+Every project authoring operation accepts `.sply` input/output paths, including
 atomic in-place edits. `convert` validates and canonicalizes Projects, not
 exported SVG; it preserves supported authored values, not original JSON text.
 Input `-` and `--output -` keep the JSON streaming protocol. Outputs remain
@@ -88,8 +88,8 @@ for these codes except `stdout_error`.
 | `path-handle INPUT ID --command-index N --handle control1\|control2\|anchor --x N --y N --output PATH` | Edit a normalized path command handle and recompute bounds |
 | `embed-speech INPUT --text TEXT --asset-id ID [--voice en] [--time 0] [--engine ABSOLUTE_PATH] --output PATH` | Synthesize with trusted installed local eSpeak and embed WAV/cue |
 | `new --output PATH [--demo]` | Valid empty/demo project saved to PATH; JSON acknowledgement |
-| `example [--output PATH]` | Complete demo Project JSON on stdout by default; optionally save `.frm`/JSON atomically |
-| `convert INPUT --output PATH` | Validate/canonicalize between `.frm`, `.forma.json` and `.json`; no container conversion or SVG import |
+| `example [--output PATH]` | Complete demo Project JSON on stdout by default; optionally save `.sply`/JSON atomically |
+| `convert INPUT --output PATH` | Validate/canonicalize between `.sply`, `.splinely.json` and `.json`; no container conversion or SVG import |
 | `validate PATH` | Validates JSON, schema, references and numerical constraints; `{ "ok": true, "schemaVersion": 1 }` |
 | `inspect PATH` | Dimensions, nodes, clips, machines, variables, audio/speech summaries and code-presence flags |
 | `apply INPUT --patch PATCH --output PATH` | RFC 7396 merge patch, followed by full validation and atomic output |
@@ -141,24 +141,24 @@ changes, inspect/evaluate the result, and export. Treat any nonzero exit as a
 failure; read stderr diagnostics and correct the proposal before retrying.
 
 ```sh
-CLI=target/debug/forma-cli
+CLI=target/debug/splinely-cli
 "$CLI" schema > format-guide.json
-"$CLI" example > draft.frm
-"$CLI" validate draft.frm
-"$CLI" inspect draft.frm
-"$CLI" evaluate draft.frm --time 0.5
+"$CLI" example > draft.sply
+"$CLI" validate draft.sply
+"$CLI" inspect draft.sply
+"$CLI" evaluate draft.sply --time 0.5
 
 # An AI writes this patch, with no SDK or provider dependency.
 printf '%s\n' '{"name":"AI animation","variables":{"author":"agent"}}' > patch.json
-"$CLI" apply draft.frm --patch patch.json --output final.frm
-"$CLI" validate final.frm
-"$CLI" export final.frm --output final.svg
+"$CLI" apply draft.sply --patch patch.json --output final.sply
+"$CLI" validate final.sply
+"$CLI" export final.sply --output final.svg
 
 # stdin authoring and in-place editing are also supported.
 printf '%s\n' '{"schemaVersion":1,"name":"Minimal","width":640,"height":360,"nodes":[]}' |
   "$CLI" validate -
 printf '%s\n' '{"name":"Revised"}' |
-  "$CLI" apply final.frm --patch - --output final.frm
+  "$CLI" apply final.sply --patch - --output final.sply
 ```
 
 `schema` emits a usable format guide plus fully validated examples, **not** a
@@ -171,21 +171,21 @@ state machine. Use its objects as templates. Schema version 1 is supported;
 `schema.model` covers every supported field/default, property, easing and action,
 including blending, bones, audio/speech and evaluation contexts. `capabilities`
 provides the same model with actual command metadata. See [LLM.md](LLM.md) and
-[prompts/forma-author.md](prompts/forma-author.md) for an authoring checklist and
+[prompts/splinely-author.md](prompts/splinely-author.md) for an authoring checklist and
 a copy-paste prompt for another LLM.
 
 ## Autonomous animation showcases
 
 ```sh
-CLI=target/debug/forma-cli
-"$CLI" water-drop --output water-drop.frm
-"$CLI" export water-drop.frm --output water-drop.svg --trusted-js
-"$CLI" random-figures --seed 42 --count 6 --output random-figures.frm
-"$CLI" export random-figures.frm --output random-figures.svg --trusted-js --speech
+CLI=target/debug/splinely-cli
+"$CLI" water-drop --output water-drop.sply
+"$CLI" export water-drop.sply --output water-drop.svg --trusted-js
+"$CLI" random-figures --seed 42 --count 6 --output random-figures.sply
+"$CLI" export random-figures.sply --output random-figures.svg --trusted-js --speech
 
 # Rebuild the checked-in JSON, SVG and HTML pairs via the real CLI.
 python3 scripts/generate-showcase.py
-# Optional: --output /tmp/forma-showcase --seed 123 --count 8
+# Optional: --output /tmp/splinely-showcase --seed 123 --count 8
 # Original anime character: CLI import-svg → apply → validate → export --speech
 python3 scripts/generate-anime-demo.py
 python3 scripts/anime-smoke.py # Firefox: trusted Hallo/replay, bone motion; speech requests only
@@ -200,7 +200,7 @@ is reviewable in `customJs` and runs only with `export --trusted-js`. Speech is 
 independent `--speech` opt-in. These SVG exports embed all scene data and runtime;
 the HTML wrappers load the adjacent SVG via **`object`, never `img`**, using only
 local relative resources. Both the SVG and HTML offer keyboard-accessible Play /
-resume and Pause controls. HTML reads `object.contentDocument.documentElement.forma`,
+resume and Pause controls. HTML reads `object.contentDocument.documentElement.splinely`,
 observes `state.change`, and reports machine state, timeline time, speech enablement
 and diagnostics. It never drives frames or secretly enables speech. CSP or local
 file-origin restrictions may block scripting/observation; direct SVG or localhost
@@ -240,9 +240,9 @@ are alternatives. Script-capable `object` is not a sandbox for untrusted project
 Verification (Node is required for the additional runtime integration tests):
 
 ```sh
-cargo test --offline --locked -p forma-cli
-cargo build --offline --locked -p forma-cli
-node --test crates/forma_cli/tests/showcase-runtime.test.cjs
+cargo test --offline --locked -p splinely-cli
+cargo build --offline --locked -p splinely-cli
+node --test crates/splinely_cli/tests/showcase-runtime.test.cjs
 ```
 
 Tests cover canonical round-trips, seed repeatability/variation, loop continuity,
@@ -286,19 +286,19 @@ Exports are fully embedded; the shared browser runtime is compiled into the
 binary. Open SVG directly or in a script-capable browser context (not `<img>`).
 CSP/browser restrictions may disable scripts; audio needs a user gesture and
 speech voice availability depends on the browser; enable it with `--speech`. `customJs` is preserved but
-not executed by default. `--trusted-js` explicitly adds a host bootstrap that executes authored code with the instance-local `forma` API. Only enable this for reviewed, trusted projects; dynamic compilation may be blocked by CSP. The bundled runtime needs no network. If a host enables
+not executed by default. `--trusted-js` explicitly adds a host bootstrap that executes authored code with the instance-local `splinely` API. Only enable this for reviewed, trusted projects; dynamic compilation may be blocked by CSP. The bundled runtime needs no network. If a host enables
 arbitrary JavaScript, review it or use an isolated context; it may use a network.
 
 `rawSvg` is preserved metadata, not injected/rendered. Only rect/circle/text
 and path geometry is currently supported. Evaluation is the core's deterministic
 animation evaluator, not a browser: it does not execute custom JS, audio,
 speech or state-machine side effects. Time must be finite and nonnegative.
-The authored `.frm` Project (or compatible legacy JSON), not exported SVG, is
+The authored `.sply` Project (or compatible legacy JSON), not exported SVG, is
 the authoritative editable document.
 
 ## Shapes, arrangement and PNG previews
 
-`node` and `arrange` reuse the editor's document operations (`forma_document`),
+`node` and `arrange` reuse the editor's document operations (`splinely_document`),
 so CLI and editor give identical results. Arrangement works on the **authored
 pose** (time 0, no clips or state overrides) and edits base transforms. Locked
 nodes are rejected. Every command validates and saves atomically; on error the
@@ -317,16 +317,16 @@ Colours accept `#RRGGBB`, `#RRGGBBAA`, CSS names (`tomato`) and `rgb()/rgba()`;
 `--stroke none` removes the stroke, `--group ""` leaves a group.
 
 ```sh
-CLI=target/debug/forma-cli
-"$CLI" new --output poster.frm
-"$CLI" node add poster.frm --kind rect --x 40 --y 40 --width 200 --height 120 --fill tomato --output poster.frm
-"$CLI" node add poster.frm --kind circle --id sun --x 600 --y 120 --radius 60 --fill gold --output poster.frm
-"$CLI" node add poster.frm --kind text --text "Hallo" --font-size 48 --x 300 --y 400 --output poster.frm
-"$CLI" arrange align poster.frm --nodes node-1,sun --edge top --output poster.frm
-"$CLI" arrange align poster.frm --nodes node-2 --edge hcenter --output poster.frm   # centre on the canvas
-"$CLI" arrange group poster.frm --nodes node-1,sun --name Kopf --output poster.frm
-"$CLI" node list poster.frm
-"$CLI" render poster.frm --output poster.png --width 800
+CLI=target/debug/splinely-cli
+"$CLI" new --output poster.sply
+"$CLI" node add poster.sply --kind rect --x 40 --y 40 --width 200 --height 120 --fill tomato --output poster.sply
+"$CLI" node add poster.sply --kind circle --id sun --x 600 --y 120 --radius 60 --fill gold --output poster.sply
+"$CLI" node add poster.sply --kind text --text "Hallo" --font-size 48 --x 300 --y 400 --output poster.sply
+"$CLI" arrange align poster.sply --nodes node-1,sun --edge top --output poster.sply
+"$CLI" arrange align poster.sply --nodes node-2 --edge hcenter --output poster.sply   # centre on the canvas
+"$CLI" arrange group poster.sply --nodes node-1,sun --name Kopf --output poster.sply
+"$CLI" node list poster.sply
+"$CLI" render poster.sply --output poster.png --width 800
 ```
 
 Boolean operations keep curves: outlines are split at their exact (subdivision)
@@ -365,15 +365,15 @@ by time; replacing an existing time uses linear easing. CLI numeric bone
 arguments reject nonfinite or lossy integer values.
 
 ```sh
-forma-cli rig-demo --output rig.frm
-forma-cli bone update rig.frm --id right-forearm --rotation -45 --output rig.frm
-forma-cli bone keyframe rig.frm --bone right-forearm --clip wave \
-  --time 1 --value -90 --output rig.frm
-forma-cli convert-to-path rig.frm --node torso-shape --output rig.frm
-forma-cli convert-back rig.frm --node torso-shape --output rig.frm
-forma-cli layer reorder rig.frm --node head --index 11 --output rig.frm
-forma-cli layer hide rig.frm --node background --output rig.frm
-forma-cli layer lock rig.frm --node torso-shape --output rig.frm
+splinely-cli rig-demo --output rig.sply
+splinely-cli bone update rig.sply --id right-forearm --rotation -45 --output rig.sply
+splinely-cli bone keyframe rig.sply --bone right-forearm --clip wave \
+  --time 1 --value -90 --output rig.sply
+splinely-cli convert-to-path rig.sply --node torso-shape --output rig.sply
+splinely-cli convert-back rig.sply --node torso-shape --output rig.sply
+splinely-cli layer reorder rig.sply --node head --index 11 --output rig.sply
+splinely-cli layer hide rig.sply --node background --output rig.sply
+splinely-cli layer lock rig.sply --node torso-shape --output rig.sply
 ```
 
 Conversion retains `originalKind` (default `null`) and preserves IDs, transforms,
@@ -392,7 +392,7 @@ can still edit locked nodes. Hide/lock preserve every other field.
 ## Trusted static plugin scaffolds
 
 ```sh
-forma-cli plugin new --name preview-decoration --output ./preview-decoration
+splinely-cli plugin new --name preview-decoration --output ./preview-decoration
 # Only after reviewing all generated source and dependencies:
 cargo test --manifest-path ./preview-decoration/Cargo.toml
 ```
@@ -401,12 +401,12 @@ cargo test --manifest-path ./preview-decoration/Cargo.toml
 directory. The parent must already exist; existing destinations are never
 replaced. Names start with a lowercase ASCII letter and use only lowercase
 letters, digits, hyphens or underscores. `--editor-path` points at a local
-`forma_editor` crate and defaults to this checkout; the generated manifest stores
+`splinely_editor` crate and defaults to this checkout; the generated manifest stores
 its absolute path and is an independent Cargo workspace. The acknowledgement uses
 `format: "rust-editor-plugin"`, `editorOnly: true`, and `executed: false`.
 
 The source implements the public `EditorPlugin` trait and exposes
-`register(&mut forma_editor::ecs::Projection) -> Result<(), String>`, which calls
+`register(&mut splinely_editor::ecs::Projection) -> Result<(), String>`, which calls
 `Projection::add_plugin`. A trusted native host must explicitly link the source
 crate and call registration. Duplicate plugin types are rejected. The example
 uses a disabled-by-default `Settings` resource and `Phase::Decorate`; it only
@@ -425,11 +425,11 @@ Generate speech entirely locally, polish it and embed the WAV as a base64
 `AudioAsset` plus an `AudioCue`. No network, downloads or browser voices.
 
 ```sh
-forma-cli speech-engines                      # installed engines, what `auto` picks
-forma-cli speak --text "Hallo Welt!" --lang de-DE --output probe.wav     # listen first
-forma-cli embed-speech project.frm --text "Hallo Welt!" --lang de-DE --asset-id hello --time 0
-forma-cli embed-speech project.frm --text "Hello!" --lang en-US --asset-id hi --rate 0.95
-forma-cli embed-speech project.frm --text "Hallo!" --lang de-DE --asset-id hallo \
+splinely-cli speech-engines                      # installed engines, what `auto` picks
+splinely-cli speak --text "Hallo Welt!" --lang de-DE --output probe.wav     # listen first
+splinely-cli embed-speech project.sply --text "Hallo Welt!" --lang de-DE --asset-id hello --time 0
+splinely-cli embed-speech project.sply --text "Hello!" --lang en-US --asset-id hi --rate 0.95
+splinely-cli embed-speech project.sply --text "Hallo!" --lang de-DE --asset-id hallo \
   --synth piper --piper-model /pfad/de_DE-thorsten-high.onnx      # neural, if installed
 ```
 
@@ -455,8 +455,8 @@ The exported SVG contains the full WAV; runtime playback requires a user gesture
 Browser speech (`speechCues`, `speak` actions, `export --speech`) uses the
 viewer's system voices; the runtime picks the most natural voice for the
 language (names with Natural/Neural/Online/Google rank first, eSpeak/MBROLA
-last), honours an explicit `voice` name in `forma.speech.say(text, {voice})`,
-lists candidates with `forma.speech.voices(lang)` and splits long text into
+last), honours an explicit `voice` name in `splinely.speech.say(text, {voice})`,
+lists candidates with `splinely.speech.voices(lang)` and splits long text into
 sentences. On Linux browsers usually only offer eSpeak, so embed speech when
 the sound matters.
 
@@ -477,15 +477,15 @@ files are removed after completion or failure. `--output -` emits project JSON.
 ## Guided authoring: `guide`, `check`, `batch`, `clip`, `on`
 
 ```sh
-forma-cli guide                       # Markdown; --json wraps it
-forma-cli check scene.frm             # {"warnings":N,"findings":[{level,code,message,fix}],"summary":…}
-forma-cli batch scene.frm --steps steps.txt [--output other.frm]
-forma-cli clip list scene.frm         # duration, autoplay, loop, tracks with key times, startedBy
-forma-cli clip add scene.frm --id pulse --duration 0.6 [--autoplay] [--loop]
-forma-cli clip update scene.frm --id pulse --autoplay --loop false --easing ease-out
-forma-cli clip delete scene.frm --id pulse   # refuses while actions still use it
-forma-cli on scene.frm --event click --target sun --play pulse --set sun.fill=red
-forma-cli on scene.frm --event click --target lamp --from off --to on --set lamp.opacity=1
+splinely-cli guide                       # Markdown; --json wraps it
+splinely-cli check scene.sply             # {"warnings":N,"findings":[{level,code,message,fix}],"summary":…}
+splinely-cli batch scene.sply --steps steps.txt [--output other.sply]
+splinely-cli clip list scene.sply         # duration, autoplay, loop, tracks with key times, startedBy
+splinely-cli clip add scene.sply --id pulse --duration 0.6 [--autoplay] [--loop]
+splinely-cli clip update scene.sply --id pulse --autoplay --loop false --easing ease-out
+splinely-cli clip delete scene.sply --id pulse   # refuses while actions still use it
+splinely-cli on scene.sply --event click --target sun --play pulse --set sun.fill=red
+splinely-cli on scene.sply --event click --target lamp --from off --to on --set lamp.opacity=1
 ```
 
 `batch` steps are one command per line (or a JSON array of strings or argument
@@ -515,10 +515,10 @@ and `--id` for node IDs; `node update FILE ID` also takes the ID positionally.
 ## Keyframes (`keyframe`)
 
 ```sh
-forma-cli keyframe project.frm --clip motion --target ball --property x --time 0.5 --value 120
-forma-cli keyframe project.frm --clip motion --target ball --property y --time 1 --by -80 --easing ease-out --autoplay --loop
-forma-cli keyframe project.frm --clip motion --target ball --property fill --time 1 --color "#ff8800"
-forma-cli keyframe rig.frm --output rig.frm --clip pose --target upper-arm --property rotation --time 1 --value -30
+splinely-cli keyframe project.sply --clip motion --target ball --property x --time 0.5 --value 120
+splinely-cli keyframe project.sply --clip motion --target ball --property y --time 1 --by -80 --easing ease-out --autoplay --loop
+splinely-cli keyframe project.sply --clip motion --target ball --property fill --time 1 --color "#ff8800"
+splinely-cli keyframe rig.sply --output rig.sply --clip pose --target upper-arm --property rotation --time 1 --value -30
 ```
 
 Value flags: `--value` (numbers), `--by` (number relative to the target's
@@ -559,14 +559,14 @@ order, with linear easing for new keys unless `--easing` is given. At an
 existing equal time (including signed zero), it replaces the value and keeps
 the key's easing unless `--easing` is given.
 It never appends duplicate keys or property tracks. JSON keyframe values use
-`{"type":"number","value":120}`; `forma-cli schema` and `keyframe --help`
+`{"type":"number","value":120}`; `splinely-cli schema` and `keyframe --help`
 describe the supported properties and edit behavior.
 
 ## Weighted clips and independent evaluation clocks
 
 ```sh
-CLI=target/debug/forma-cli
-"$CLI" blend-clip project.frm --clip walk --mode weighted --weight 0.75 --output project.frm
+CLI=target/debug/splinely-cli
+"$CLI" blend-clip project.sply --clip walk --mode weighted --weight 0.75 --output project.sply
 # Author actions through apply: {"type":"blendClip","clipId":"walk","weight":0,"duration":0.25}
 ```
 

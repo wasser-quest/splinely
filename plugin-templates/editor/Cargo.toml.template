@@ -8,5 +8,5 @@ publish = false
 [workspace]
 
 [dependencies]
-forma_editor = { path = {{EDITOR_PATH}} }
+splinely_editor = { path = {{EDITOR_PATH}} }
 bevy_ecs = "=0.17.3"

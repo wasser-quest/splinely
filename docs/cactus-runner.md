@@ -11,7 +11,7 @@ From the repository root:
 ```sh
 export TMPDIR=/home/user/svg_editor/.work-tmp
 mkdir -p "$TMPDIR"
-cargo build -p forma-cli
+cargo build -p splinely-cli
 python3 scripts/generate-cactus-runner.py
 python3 scripts/runner-smoke.py
 ```
@@ -22,7 +22,7 @@ Export deliberately passes **`--trusted-js`** because the small `customJs` contr
 
 Generated artifacts:
 
-- `examples/cactus-runner.forma.json`: editable schema-1 project.
+- `examples/cactus-runner.splinely.json`: editable schema-1 project.
 - `examples/cactus-runner.svg`: standalone interactive export.
 - `examples/cactus-runner.html`: self-contained presentation with inline exported SVG and controls.
 

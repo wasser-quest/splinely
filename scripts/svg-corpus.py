@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Real installed SVG corpus, no copied artwork. Requires Mint-X/Adwaita packages.
 Missing fixtures fail explicitly. Records SHA256/provenance, tests all-or-nothing CLI import.
-Run: python3 scripts/svg-corpus.py [output-directory] [forma-cli-path]
+Run: python3 scripts/svg-corpus.py [output-directory] [splinely-cli-path]
 """
 import hashlib
 import json
@@ -9,8 +9,8 @@ from pathlib import Path
 import subprocess
 import sys
 
-out = Path(sys.argv[1] if len(sys.argv) > 1 else '/tmp/forma-svg-corpus')
-cli = str(Path(sys.argv[2] if len(sys.argv) > 2 else 'target/debug/forma-cli').resolve())
+out = Path(sys.argv[1] if len(sys.argv) > 1 else '/tmp/splinely-svg-corpus')
+cli = str(Path(sys.argv[2] if len(sys.argv) > 2 else 'target/debug/splinely-cli').resolve())
 out.mkdir(parents=True, exist_ok=True)
 cases = [
  ('/usr/share/icons/Mint-X/status/scalable/network-cellular-signal-good-symbolic.svg', True, 'Mint-X GPL-3+, linuxmint/mint-x-icons'),

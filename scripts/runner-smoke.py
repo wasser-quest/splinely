@@ -19,7 +19,7 @@ SAMPLES=[]
 
 def sample(browser):
     result=browser.js("""
-const d=document.querySelector('#scene') || document.documentElement,f=d.forma;
+const d=document.querySelector('#scene') || document.documentElement,f=d.splinely;
 const walk=f.clip('walk').weight,jump=f.clip('jump').weight;
 return {walk,jump,scene:f.machine('scene').state,state:f.machine('runner').state,
  scroll:f.clip('scroll').time,terrain:f.clip('terrain').time,walkTime:f.clip('walk').time,jumpTime:f.clip('jump').time,
@@ -109,8 +109,8 @@ def cactus_pose(s,project):
 
 def main():
     tree=ET.parse(SVG)
-    project=json.loads(tree.find("{http://www.w3.org/2000/svg}metadata[@id='forma-project']").text)
-    canonical=json.loads((ROOT/'examples/cactus-runner.forma.json').read_text())
+    project=json.loads(tree.find("{http://www.w3.org/2000/svg}metadata[@id='splinely-project']").text)
+    canonical=json.loads((ROOT/'examples/cactus-runner.splinely.json').read_text())
     assert len(project['bones'])==10 and not project['audioAssets']
     for index in [3,4]:
         assert project['clips'][index]['blendMode']=='weighted'
@@ -212,9 +212,9 @@ def main():
         agent=browser.js('return navigator.userAgent;')
         browser.command('WebDriver:Navigate',{'url':SVG.as_uri()})
         time.sleep(.4)
-        before=browser.js("return document.documentElement.forma.clip('scroll').time;")
+        before=browser.js("return document.documentElement.splinely.clip('scroll').time;")
         time.sleep(.3)
-        after=browser.js("return document.documentElement.forma.clip('scroll').time;")
+        after=browser.js("return document.documentElement.splinely.clip('scroll').time;")
         assert after>before+.15,'Standalone SVG did not autoplay'
         click(browser,'sky')
         standalone_overlap=wait_for(browser,lambda s:s['state']=='jumping' and .05<s['walk']<.95 and .05<s['jump']<.95)

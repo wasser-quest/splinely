@@ -1,6 +1,6 @@
 # Optional canvas rulers (egui 0.31)
 
-`crates/forma_editor/src/rulers.rs` is a standalone module using the existing
+`crates/splinely_editor/src/rulers.rs` is a standalone module using the existing
 `eframe::egui` dependency. It is deliberately **not wired into the app or library**.
 The main integrator owns the enabled switch, `mod rulers;`, canvas layout, origin,
 and input routing. No dependencies or manifests need to change.
@@ -121,7 +121,7 @@ huge finite coordinates, zoom endpoints, monotonic finite ticks and the combined
 512-tick limit. Once the integrator declares the module, run:
 
 ```sh
-TMPDIR=/home/user/svg_editor/.work-tmp cargo test -p forma_editor rulers::tests
+TMPDIR=/home/user/svg_editor/.work-tmp cargo test -p splinely_editor rulers::tests
 ```
 
 Before integration, the same tests can run via `rustc --test` against an existing
@@ -130,7 +130,7 @@ eframe 0.31 build (no module registration or manifest edits):
 ```sh
 # EFRAME_RLIB must point to the existing eframe 0.31 .rlib in target/debug/deps.
 TMPDIR=/home/user/svg_editor/.work-tmp rustc --edition 2021 --test \
-  crates/forma_editor/src/rulers.rs --extern eframe="$EFRAME_RLIB" \
+  crates/splinely_editor/src/rulers.rs --extern eframe="$EFRAME_RLIB" \
   -L dependency=target/debug/deps -o .work-tmp/rulers-tests
 .work-tmp/rulers-tests
 ```

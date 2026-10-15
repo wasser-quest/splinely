@@ -32,7 +32,7 @@ TMPDIR="$PWD/.work-tmp" python3 scripts/generate-desert-stickfight.py
 TMPDIR="$PWD/.work-tmp" python3 scripts/desert-stickfight-smoke.py
 ```
 
-Generator options: `--cli PATH`, `--output DIRECTORY`. The generator writes only `desert-stickfight*` examples and temporary authoring data under project `.work-tmp`. It uses real CLI `import-svg → apply → validate → export --trusted-js`, producing original source SVG, editable Forma JSON, self-contained runtime SVG, and embedded-SVG HTML. No runtime modifications or new dependencies.
+Generator options: `--cli PATH`, `--output DIRECTORY`. The generator writes only `desert-stickfight*` examples and temporary authoring data under project `.work-tmp`. It uses real CLI `import-svg → apply → validate → export --trusted-js`, producing original source SVG, editable Splinely JSON, self-contained runtime SVG, and embedded-SVG HTML. No runtime modifications or new dependencies.
 
 ## Bounded evidence
 

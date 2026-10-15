@@ -22,7 +22,7 @@ PHASES=['approach','punches','sweep','impact','accord','finished']
 
 def sample(browser):
     s=browser.js("""
-const d=document.querySelector('#scene')||document.documentElement,f=d.forma;
+const d=document.querySelector('#scene')||document.documentElement,f=d.splinely;
 return {state:f.machine('story').state,playing:f.timeline.playing,clock:f.timeline.time,
  clips:['approach','punches','sweep','impact','accord'].map(id=>({id,time:f.clip(id).time})),
  bones:f.bones(),nodes:['reed-arm-front-ink','clay-arm-front-ink','reed-head','clay-head','cactus-2','dust-7-1','spark-0'].map(id=>({id,transform:d.getElementById(id).getAttribute('transform'),opacity:d.getElementById(id).getAttribute('opacity')})),
@@ -61,8 +61,8 @@ def changed_both(a,b):
 
 def main():
     svg=ROOT/'examples/desert-stickfight.svg'; html=ROOT/'examples/desert-stickfight.html'
-    tree=ET.parse(svg); p=json.loads(tree.find("{http://www.w3.org/2000/svg}metadata[@id='forma-project']").text)
-    canonical=json.loads((ROOT/'examples/desert-stickfight.frm').read_text())
+    tree=ET.parse(svg); p=json.loads(tree.find("{http://www.w3.org/2000/svg}metadata[@id='splinely-project']").text)
+    canonical=json.loads((ROOT/'examples/desert-stickfight.sply').read_text())
     assert len(p['bones'])==20 and sum(c['duration'] for c in p['clips'])==20
     assert p['clips']==canonical['clips'] and p['stateMachines']==canonical['stateMachines']
     assert p['customJs']==canonical['customJs'] and not p['audioAssets'] and not p['speechCues']
@@ -74,7 +74,7 @@ def main():
     assert '<svg id="scene"' in text and '<img' not in text and '<object' not in text
     assert not re.search(r'(?:src|href|data)=["\'](?:https?:|//)',text)
     embedded=ET.fromstring(text[text.index('<svg '):text.index('</svg>')+6])
-    assert json.loads(embedded.find("{http://www.w3.org/2000/svg}metadata[@id='forma-project']").text)==p
+    assert json.loads(embedded.find("{http://www.w3.org/2000/svg}metadata[@id='splinely-project']").text)==p
     checkpoints={}
     with Firefox() as browser:
         browser.command('WebDriver:Navigate',{'url':html.as_uri()})

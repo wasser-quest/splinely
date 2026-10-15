@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Reproduce an original anime-inspired Forma showcase using the real CLI."""
+"""Reproduce an original anime-inspired Splinely showcase using the real CLI."""
 import base64
 import json
 import shutil
@@ -8,7 +8,7 @@ import subprocess
 import tempfile
 
 ROOT = Path(__file__).resolve().parents[1]
-CLI = ROOT / 'target/debug/forma-cli'
+CLI = ROOT / 'target/debug/splinely-cli'
 OUT = ROOT / 'examples'
 SVG = '''<svg xmlns="http://www.w3.org/2000/svg" width="640" height="640" viewBox="0 0 640 640">
 <rect id="background" width="640" height="640" fill="#111b32"/>
@@ -69,7 +69,7 @@ def key(time, value):
     return {'time': time, 'value': {'type': 'number', 'value': value}, 'easing': {'type': 'linear'}}
 
 OUT.mkdir(exist_ok=True)
-with tempfile.TemporaryDirectory(prefix='forma-anime-') as temp:
+with tempfile.TemporaryDirectory(prefix='splinely-anime-') as temp:
     temp = Path(temp)
     source = temp / 'source.svg'
     source.write_text(SVG)
@@ -85,7 +85,7 @@ with tempfile.TemporaryDirectory(prefix='forma-anime-') as temp:
     wav = temp / 'hallo.wav'
     subprocess.run([engine, '-v', 'de', '-s', '145', '-p', '60', '-w', str(wav), 'Hallo!'], check=True, timeout=20)
     patch = {
-        'name': 'Forma · Aoi sagt Hallo', 'nodes': project['nodes'],
+        'name': 'Splinely · Aoi sagt Hallo', 'nodes': project['nodes'],
         'bones': [{'id': 'wave-joint', 'parentId': None, 'x': 424, 'y': 363, 'rotation': 0, 'length': 85}],
         'clips': [{'id': 'greeting', 'name': 'Hallo – winken', 'duration': 3.2, 'looping': False, 'autoplay': True,
                    'tracks': [{'nodeId': 'wave-joint', 'property': 'rotation',
@@ -96,8 +96,8 @@ with tempfile.TemporaryDirectory(prefix='forma-anime-') as temp:
     }
     patch_file = temp / 'patch.json'
     patch_file.write_text(json.dumps(patch, ensure_ascii=False))
-    authored = OUT / 'anime-hello.forma.json'
+    authored = OUT / 'anime-hello.splinely.json'
     cli('apply', imported, '--patch', patch_file, '--output', authored)
     cli('validate', authored)
     cli('export', authored, '--output', OUT / 'anime-hello.svg')
-print('Created examples/anime-hello.forma.json and examples/anime-hello.svg')
+print('Created examples/anime-hello.splinely.json and examples/anime-hello.svg')

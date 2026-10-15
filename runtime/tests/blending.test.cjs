@@ -1,7 +1,7 @@
 'use strict';
 const {test}=require('node:test');
 const assert=require('node:assert/strict');
-const {createRuntime,normalize}=require('../src/forma.js');
+const {createRuntime,normalize}=require('../src/splinely.js');
 const num=value=>({type:'number',value});
 const rgba=(r,g,b,a)=>({type:'color',value:{r,g,b,a}});
 const track=(nodeId,property,value)=>({nodeId,property,keyframes:[{time:0,value}]});

@@ -1,4 +1,4 @@
-# Verification of the extended Forma prototype
+# Verification of the extended Splinely prototype
 
 ## Latest integrated verification
 
@@ -24,7 +24,7 @@ Tool usage guide and remaining limits: [authoring.md](authoring.md). No claim of
 bash scripts/check.sh
 cargo clippy --workspace --all-targets -- -D warnings
 python3 scripts/svg-corpus.py
-python3 scripts/browser-smoke.py examples/demo.svg /tmp/forma-svg-corpus/manifest.json examples/rig.forma.json
+python3 scripts/browser-smoke.py examples/demo.svg /tmp/splinely-svg-corpus/manifest.json examples/rig.splinely.json
 ```
 
 Earlier local run: **78 Rust tests, 43 Node tests, no failures; Clippy clean**. Corpus: eight installed real SVG fixtures, four imports and four intentional atomic rejections. Requires the installed Mint-X/Adwaita files listed in the generated manifest; not a portable bundled corpus.
@@ -33,18 +33,18 @@ Real offline Firefox checks passed: scene ownership/property guards, nested fore
 
 ## Native GUI
 
-Launched the current debug executable under X11; captured 1200×800 and 840×640 windows. Narrow window retained wrapped toolbars, canvas, layers and timeline. Canvas visibly rendered circle/text. Screenshots are local evidence at `/tmp/forma-final-gui.png` and `/tmp/forma-final-gui-narrow.png`, not shipped assets. Window activation through `_NET_ACTIVE_WINDOW` was unsupported by this window manager; capture and resize nevertheless succeeded. No claim of a comprehensive automated GUI acceptance suite.
+Launched the current debug executable under X11; captured 1200×800 and 840×640 windows. Narrow window retained wrapped toolbars, canvas, layers and timeline. Canvas visibly rendered circle/text. Screenshots are local evidence at `/tmp/splinely-final-gui.png` and `/tmp/splinely-final-gui-narrow.png`, not shipped assets. Window activation through `_NET_ACTIVE_WINDOW` was unsupported by this window manager; capture and resize nevertheless succeeded. No claim of a comprehensive automated GUI acceptance suite.
 
-GDB export run exited normally. A separate real GUI run stopped at the editor update method, `crates/forma_editor/src/app.rs:665`, through eframe/egui's native rendering stack. The debugger deliberately terminated that inferior after the backtrace; this was not a crash. Logs: `/tmp/forma-final-gdb.log`, `/tmp/forma-final-gdb-ui.log`. GDB warned about a missing Rust auto-load script; breakpoint/backtrace still worked.
+GDB export run exited normally. A separate real GUI run stopped at the editor update method, `crates/splinely_editor/src/app.rs:665`, through eframe/egui's native rendering stack. The debugger deliberately terminated that inferior after the backtrace; this was not a crash. Logs: `/tmp/splinely-final-gdb.log`, `/tmp/splinely-final-gdb-ui.log`. GDB warned about a missing Rust auto-load script; breakpoint/backtrace still worked.
 
 ## REA artifact evidence
 
 REA inspected a **stripped copy**, not the working executable:
 
-- File: `/tmp/forma-final-rea-stripped`, ELF x86_64, 29,504,984 bytes.
+- File: `/tmp/splinely-final-rea-stripped`, ELF x86_64, 29,504,984 bytes.
 - SHA-256: `e675974b5e7aefae5005ed437f8f77cdd299a2c65a6cdd2abbfa3171bba904ca`.
 - Evidence: `ev_cb0f92d4710f2fa58467c6acefd15c9e0dcfc66ac8a46aea87b2807bbd839798`.
-- Result: `/tmp/forma-final-rea-layout.json`.
+- Result: `/tmp/splinely-final-rea-layout.json`.
 
 The original debug executable is approximately 222 MiB. Removing debug symbols yielded a roughly 29 MiB copy, motivating the workspace release profile's symbol stripping. **This is not a measured optimized release build or a speed benchmark.** REA artifact inspection and GDB/native screenshots complement source reviews; they do not establish absence of bugs. The earlier REA GUI process scenario only established process lifetime, not visual correctness.
 

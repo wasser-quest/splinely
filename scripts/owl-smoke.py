@@ -24,10 +24,10 @@ def wait_for(browser, script, description):
 def run_scene(browser, url, wrapper):
     browser.command('WebDriver:Navigate', {'url': url})
     document = "document.querySelector('object').contentDocument" if wrapper else 'document'
-    wait_for(browser, f"const d={document}; return !!(d && d.documentElement.forma);", 'Runtime did not self-start')
+    wait_for(browser, f"const d={document}; return !!(d && d.documentElement.splinely);", 'Runtime did not self-start')
     browser.js(f"""
 window.owlDocument = {document};
-window.owlApi = owlDocument.documentElement.forma;
+window.owlApi = owlDocument.documentElement.splinely;
 window.owlTrusted = []; window.owlChanges = [];
 for (const event of ['click', 'pointermove']) owlApi.on(event, detail => {{
   if (detail.event) owlTrusted.push({{type:event, trusted:detail.event.isTrusted, target:detail.target}});
@@ -136,7 +136,7 @@ def main():
             run_scene(browser, base + '.svg', False)
             run_scene(browser, base + '.html', True)
             screenshot = browser.command('WebDriver:TakeScreenshot', {'id': None, 'full': True, 'scroll': False})
-            Path('/tmp/forma-brown-owl.png').write_bytes(base64.b64decode(screenshot))
+            Path('/tmp/splinely-brown-owl.png').write_bytes(base64.b64decode(screenshot))
     finally:
         server.shutdown()
         server.server_close()

@@ -17,7 +17,7 @@ import time
 
 svg = Path(sys.argv[1] if len(sys.argv) > 1 else "examples/demo.svg").resolve()
 assert svg.is_file(), svg
-with tempfile.TemporaryDirectory(prefix="forma-firefox-") as profile:
+with tempfile.TemporaryDirectory(prefix="splinely-firefox-") as profile:
     with socket.socket() as reservation:
         reservation.bind(("127.0.0.1", 0))
         port = reservation.getsockname()[1]
@@ -79,34 +79,34 @@ with tempfile.TemporaryDirectory(prefix="forma-firefox-") as profile:
                 return result.get("value", result) if isinstance(result, dict) else result
             command("WebDriver:NewSession", {"capabilities": {"alwaysMatch": {"browserName": "firefox"}}})
             command("WebDriver:Navigate", {"url": svg.as_uri()})
-            initial = js("const f=document.documentElement.forma;return {mounted:!!f,playing:f.timeline.playing,controls:document.querySelectorAll('g[role=button]').length};")
+            initial = js("const f=document.documentElement.splinely;return {mounted:!!f,playing:f.timeline.playing,controls:document.querySelectorAll('g[role=button]').length};")
             assert initial == {"mounted": True, "playing": False, "controls": 1}, initial
             element = command("WebDriver:FindElement", {"using": "css selector", "value": "g[role=button] rect"})
             element = element.get("value", element)
             identifier = element.get("element-6066-11e4-a52e-4f735466cecf", element.get("ELEMENT"))
             command("WebDriver:ElementClick", {"id": identifier})
             time.sleep(0.5)
-            after = js("const f=document.documentElement.forma;return {playing:f.timeline.playing,ready:f.audio.ready,state:f.audio.context.state,time:f.timeline.time,buffers:f.audio.buffers.size,controls:document.querySelectorAll('g[role=button]').length};")
+            after = js("const f=document.documentElement.splinely;return {playing:f.timeline.playing,ready:f.audio.ready,state:f.audio.context.state,time:f.timeline.time,buffers:f.audio.buffers.size,controls:document.querySelectorAll('g[role=button]').length};")
             assert after["playing"] and after["ready"] and after["state"] == "running", after
             assert after["buffers"] >= 1 and after["time"] > 0.1 and after["controls"] == 0, after
             circle = command("WebDriver:FindElement", {"using": "css selector", "value": "#ball"})
             circle = circle.get("value", circle)
             command("WebDriver:ElementClick", {"id": circle.get("element-6066-11e4-a52e-4f735466cecf", circle.get("ELEMENT"))})
             time.sleep(0.15)
-            result = js("const f=document.documentElement.forma;return {fill:document.getElementById('ball').getAttribute('fill'),machines:JSON.parse(document.getElementById('forma-project').textContent).stateMachines.map(m=>f.machine(m.id).state)};")
+            result = js("const f=document.documentElement.splinely;return {fill:document.getElementById('ball').getAttribute('fill'),machines:JSON.parse(document.getElementById('splinely-project').textContent).stateMachines.map(m=>f.machine(m.id).state)};")
             assert "clicked" in result["machines"] and result["fill"] == "rgb(255,102,51)", result
             security = js("""
-const root=document.documentElement, f=root.forma, ns='http://www.w3.org/2000/svg';
+const root=document.documentElement, f=root.splinely, ns='http://www.w3.org/2000/svg';
 f.set('ball',{fill:'u'+String.fromCharCode(92)+'72l(http://127.0.0.1:1/paint.svg)',srcset:'http://127.0.0.1:1/image 1x',constructor:1});
 const nested=document.createElementNS(ns,'svg'), fo=document.createElementNS(ns,'foreignObject');
-const div=document.createElementNS('http://www.w3.org/1999/xhtml','div');div.id='ball';div.setAttribute('data-forma-project','');div.textContent='invalid JSON';
+const div=document.createElementNS('http://www.w3.org/1999/xhtml','div');div.id='ball';div.setAttribute('data-splinely-project','');div.textContent='invalid JSON';
 fo.append(div);nested.append(fo);root.append(nested);f.set('ball',{opacity:.75});
 const isolated=div.getAttribute('opacity')===null, safe=!root.querySelector('#ball').getAttribute('fill').includes('127.0.0.1')&&!root.querySelector('#ball').hasAttribute('srcset');
-f.destroy();const controls=root.querySelectorAll('[data-forma-host-control]').length;
-const retry=window.FormaRuntime.createRuntime(root,JSON.parse(root.querySelector('[id="forma-project"]').textContent),{autoTick:false});
+f.destroy();const controls=root.querySelectorAll('[data-splinely-host-control]').length;
+const retry=window.SplinelyRuntime.createRuntime(root,JSON.parse(root.querySelector('[id="splinely-project"]').textContent),{autoTick:false});
 let drag=false;retry.on('dragstart',()=>drag=true);retry.on('pointerdown',()=>retry.destroy());
 root.querySelector('#ball').dispatchEvent(new PointerEvent('pointerdown',{bubbles:true,pointerId:7}));
-nested.remove();return {isolated,safe,controls,destroyed:!root.forma,drag};
+nested.remove();return {isolated,safe,controls,destroyed:!root.splinely,drag};
 """)
             assert security == {"isolated": True, "safe": True, "controls": 0, "destroyed": True, "drag": False}, security
             print("PASS: real DOM property filters, nested foreignObject isolation, destroy/remount and pointer lifecycle")
@@ -126,14 +126,14 @@ Promise.all(sources.map(source=>new Promise((resolve,reject)=>{
                     comparison = reply.get('value', reply)
                     assert 'error' not in comparison and comparison['mean'] < 1 and comparison['changed'] < .05, (fixture['source'], comparison)
                     comparisons.append({'source': fixture['source'], **comparison})
-                Path('/tmp/forma-svg-browser-comparisons.json').write_text(json.dumps(comparisons, indent=2))
+                Path('/tmp/splinely-svg-browser-comparisons.json').write_text(json.dumps(comparisons, indent=2))
                 print('PASS: Firefox pixel comparisons of original vs imported/exported real SVGs:', json.dumps(comparisons))
             if len(sys.argv) > 3:
                 rig = Path(sys.argv[3]).resolve()
-                command('WebDriver:Navigate', {'url': rig.with_name(rig.name.removesuffix('.forma.json').removesuffix('.json') + '.svg').as_uri()})
+                command('WebDriver:Navigate', {'url': rig.with_name(rig.name.removesuffix('.splinely.json').removesuffix('.json') + '.svg').as_uri()})
                 for time_value in [0., .5, 1.5, 2.5]:
-                    expected = json.loads(subprocess.check_output(['target/debug/forma-cli', 'evaluate', str(rig), '--time', str(time_value)], text=True))['nodes']
-                    actual = js(f"const f=document.documentElement.forma;f.timeline.pause();f.timeline.seek({time_value});return JSON.parse(document.getElementById('forma-project').textContent).nodes.map(n=>({{id:n.id,transform:document.getElementById(n.id).getAttribute('transform')}}));")
+                    expected = json.loads(subprocess.check_output(['target/debug/splinely-cli', 'evaluate', str(rig), '--time', str(time_value)], text=True))['nodes']
+                    actual = js(f"const f=document.documentElement.splinely;f.timeline.pause();f.timeline.seek({time_value});return JSON.parse(document.getElementById('splinely-project').textContent).nodes.map(n=>({{id:n.id,transform:document.getElementById(n.id).getAttribute('transform')}}));")
                     by_id = {n['id']: n['transform'] for n in actual}
                     for node in expected:
                         t = node['transform']
@@ -141,7 +141,7 @@ Promise.all(sources.map(source=>new Promise((resolve,reject)=>{
                         want = [t['x'], t['y'], t['rotation'], t['scaleX'], t['scaleY']]
                         assert len(values) == 5 and max(abs(a-b) for a,b in zip(values,want)) < 1e-7, (time_value,node['id'],values,want)
                 screenshot = command('WebDriver:TakeScreenshot', {'full': False})
-                Path('/tmp/forma-rig-browser.png').write_bytes(base64.b64decode(screenshot.get('value', screenshot)))
+                Path('/tmp/splinely-rig-browser.png').write_bytes(base64.b64decode(screenshot.get('value', screenshot)))
                 print('PASS: actual rig export matches Rust FK/animation for every node at 0, .5, 1.5, 2.5 seconds')
             command("Marionette:Quit", {"flags": ["eForceQuit"]})
         finally:

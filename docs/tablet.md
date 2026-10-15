@@ -1,6 +1,6 @@
 # Freehand and tablet input
 
-`crates/forma_editor/src/freehand.rs` is a reusable, staged canvas tool. It is
+`crates/splinely_editor/src/freehand.rs` is a reusable, staged canvas tool. It is
 not wired into main yet. No dependency, manifest, history, or toolbar changes are
 required by this module. Its egui APIs work with 0.33 (also tested with the
 repository's current 0.31 dependency).
@@ -18,20 +18,20 @@ pub fn handle(
     response: &egui::Response,
     origin: egui::Pos2,
     zoom: f64,
-    project: &forma_document::Project,
+    project: &splinely_document::Project,
     enabled: bool,
-) -> Result<Option<(forma_document::Project, String)>, String>;
+) -> Result<Option<(splinely_document::Project, String)>, String>;
 
 pub fn cancel(&mut self);
 pub fn is_drawing(&self) -> bool;
 pub fn samples(&self) -> &[Sample];
 
 pub fn stroke_candidate(
-    project: &forma_document::Project,
+    project: &splinely_document::Project,
     id: &str,
     samples: &[Sample],
     options: FreehandOptions,
-) -> Result<forma_document::Project, String>;
+) -> Result<splinely_document::Project, String>;
 ```
 
 Call `handle` **once per canvas frame**, after drawing the existing scene, using
@@ -140,8 +140,8 @@ compile them directly against egui 0.33:
 export TMPDIR="$PWD/.work-tmp"
 harness="$TMPDIR/freehand-test"
 mkdir -p "$harness/src"
-printf '[package]\nname="forma_freehand_test"\nversion="0.1.0"\nedition="2021"\n[workspace]\n[dependencies]\negui="0.33"\nforma_document={path="%s/crates/forma_document"}\n' "$PWD" > "$harness/Cargo.toml"
-printf 'extern crate self as eframe;\npub use egui;\n#[path="%s/crates/forma_editor/src/freehand.rs"]\npub mod freehand;\n' "$PWD" > "$harness/src/lib.rs"
+printf '[package]\nname="splinely_freehand_test"\nversion="0.1.0"\nedition="2021"\n[workspace]\n[dependencies]\negui="0.33"\nsplinely_document={path="%s/crates/splinely_document"}\n' "$PWD" > "$harness/Cargo.toml"
+printf 'extern crate self as eframe;\npub use egui;\n#[path="%s/crates/splinely_editor/src/freehand.rs"]\npub mod freehand;\n' "$PWD" > "$harness/src/lib.rs"
 cargo test --manifest-path "$harness/Cargo.toml"
 ```
 

@@ -20,4 +20,4 @@ Im Audio-Tab **Enable / reload native audio**: eingebettete Assets werden außer
 
 ## CLI-Showcases
 
-`forma-cli water-drop --help` und `forma-cli random-figures --help` erklären die Generatoren. Die ausgelieferten HTML-Wrappers brauchen ihre benachbarte SVG. Zufallsfiguren sind per Seed reproduzierbar; `clip.end` führt automatisch zur nächsten Figur und deren Speak-Aktion. Eine echte Startinteraktion entsperrt Audio/Speech. Zustandsdauer richtet sich nach dem Clip, nicht nach Sprachende. Sprachsynthese hängt vom System ab und ist nicht garantiert offline.
+`splinely-cli water-drop --help` und `splinely-cli random-figures --help` erklären die Generatoren. Die ausgelieferten HTML-Wrappers brauchen ihre benachbarte SVG. Zufallsfiguren sind per Seed reproduzierbar; `clip.end` führt automatisch zur nächsten Figur und deren Speak-Aktion. Eine echte Startinteraktion entsperrt Audio/Speech. Zustandsdauer richtet sich nach dem Clip, nicht nach Sprachende. Sprachsynthese hängt vom System ab und ist nicht garantiert offline.

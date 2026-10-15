@@ -1,5 +1,5 @@
 [workspace]
-members = ["crates/forma_document", "crates/forma_editor", "crates/forma_cli", "crates/forma_viewer", "crates/forma_runtime"]
+members = ["crates/splinely_document", "crates/splinely_editor", "crates/splinely_cli", "crates/splinely_viewer", "crates/splinely_runtime"]
 resolver = "2"
 
 [workspace.package]
@@ -10,7 +10,7 @@ license = "MIT"
 [workspace.dependencies]
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
-forma_document = { path = "crates/forma_document" }
+splinely_document = { path = "crates/splinely_document" }
 
 [profile.release]
 strip = "symbols"

@@ -1,0 +1,19 @@
+[package]
+name = "splinely_editor"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+splinely_document = { path = "../splinely_document" }
+eframe = { version = "0.31", default-features = false, features = ["default_fonts", "glow", "x11", "wayland"] }
+bevy_ecs = "0.17.3"
+serde_json = "1"
+serde.workspace = true
+base64 = "0.22"
+roxmltree = "0.20"
+resvg = { version = "0.45", default-features = false, features = ["text", "system-fonts"] }
+rfd = "0.17.2"
+
+[[bin]]
+name = "splinely"
+path = "src/main.rs"

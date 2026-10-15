@@ -2,7 +2,7 @@
 
 ## Ist das SVG wirklich eigenständig?
 
-**Interactive SVG** bzw. `forma-cli export` bettet Projekt und JavaScript-Runtime in dieselbe SVG-Datei ein. Die Runtime ist für Keyframes, Zustandsmaschinen und Event-Handler nötig, wird aber nicht als zweite Datei geladen. Die mitgelieferten Szenen benötigen keinen Server/API und keine nachgeladenen Bibliotheken. HTML-Dateien im Showcase sind nur optionale Präsentationshüllen.
+**Interactive SVG** bzw. `splinely-cli export` bettet Projekt und JavaScript-Runtime in dieselbe SVG-Datei ein. Die Runtime ist für Keyframes, Zustandsmaschinen und Event-Handler nötig, wird aber nicht als zweite Datei geladen. Die mitgelieferten Szenen benötigen keinen Server/API und keine nachgeladenen Bibliotheken. HTML-Dateien im Showcase sind nur optionale Präsentationshüllen.
 
 - SVG direkt im Browser oder in einem HTML-`<object>` öffnen: Skripte und direkte Figur-Events können laufen (abhängig von Browser/CSP).
 - Als `<img>`, CSS-Hintergrund oder in einem Skripte unterdrückenden Viewer: nur die Grafik; keine interaktive Runtime.
@@ -12,7 +12,7 @@
 
 ## Zuverlässige Offline-Sprache als eingebettetes Audio
 
-`forma-cli embed-speech project.json --output narrated.json --text "Hallo!" --voice de --asset-id hello --time 0.18` erzeugt lokal mit eSpeak eine WAV-Aufnahme und bettet sie als AudioAsset/Cue ins Projekt ein. Anschließend `forma-cli export narrated.json --output narrated.svg`: Der Export enthält WAV und Runtime in einer Datei. Beim Abspielen wird eSpeak nicht mehr benötigt. Der Audio-Start verlangt einen Benutzer-Klick. Eigene WAV-Aufnahmen können ebenfalls eingebettet werden; Stimmenqualität und tatsächliche Lautsprecher sind unabhängig vom Dateiformat.
+`splinely-cli embed-speech project.json --output narrated.json --text "Hallo!" --voice de --asset-id hello --time 0.18` erzeugt lokal mit eSpeak eine WAV-Aufnahme und bettet sie als AudioAsset/Cue ins Projekt ein. Anschließend `splinely-cli export narrated.json --output narrated.svg`: Der Export enthält WAV und Runtime in einer Datei. Beim Abspielen wird eSpeak nicht mehr benötigt. Der Audio-Start verlangt einen Benutzer-Klick. Eigene WAV-Aufnahmen können ebenfalls eingebettet werden; Stimmenqualität und tatsächliche Lautsprecher sind unabhängig vom Dateiformat.
 
 Die [Aoi-Demo](../examples/anime-hello.html) nutzt diese Art von eingebettetem Offline-Audio, nicht mehr Browser-Speech.
 

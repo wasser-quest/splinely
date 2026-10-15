@@ -31,9 +31,9 @@ Der Screenshot muss **PASS** zeigen, nicht STATIC FALLBACK/FAIL. Der Python-Test
 1. Demo-Projekt und `customJs` prüfen. `demo.svg` enthält ausdrücklich freigegebenen Code (`--trusted-js`). Keine unbekannten Projekte damit öffnen.
 2. Netzwerk abschalten oder Browser offline stellen; `examples/demo.svg` direkt öffnen, nicht als `<img>` oder in einem Bildbetrachter. Browser/OS/Startkontext protokollieren und Netzwerkanzeige prüfen.
 3. **Start audio / animation** klicken: Audio wird entsperrt und die globale Timeline startet. Kreis klicken: orange, Bewegung über drei Sekunden; im Trusted-Demo startet der Handler die Timeline erneut. Der 0,4-s-Ton soll ungefähr **1,5 s** später beginnen. Er enthält **keine Worte**. Timing separat messen, nicht als exakt garantiert betrachten.
-4. Kreis erneut klicken: Bewegung/Ton starten neu. Konsole und `document.documentElement.forma.diagnostics` auf Audio/CSP/JS-Fehler prüfen.
+4. Kreis erneut klicken: Bewegung/Ton starten neu. Konsole und `document.documentElement.splinely.diagnostics` auf Audio/CSP/JS-Fehler prüfen.
 5. Standardexport ohne `--trusted-js` öffnen: Start-Control entsperrt Audio **ohne Nutzercode**; die deklarative State Machine reagiert auf den ersten Kreis-Klick. Wiederholter Neustart aus dem individuellen JS-Handler fehlt erwartungsgemäß. `customJs` bleibt Metadaten.
 6. Skripte deaktivieren/als `<img>` öffnen: statische Ausgangsgrafik bleibt sichtbar; keine Interaktion oder Audio. Firefox und Chromium vergleichen.
 7. Editor: Projekt laden, Keyframe ändern, speichern/neu laden/exportieren. Native Vorschau ist stumm. Trusted-JS-Freigabe ist sitzungsbezogen und wird beim Laden zurückgesetzt.
 
-Editor-Speech-Cues oder `Speak`-Aktionen erlauben Browser-Speech im Editorexport; CLI benötigt `--speech`, vertrauenswürdiger Host-Code kann `forma.speech.enable()` aufrufen. Stimmen, Netzwerkbedarf und globale Speech-Cancellation bleiben systemabhängig. Eingebettete Aufnahmen sind die zuverlässigere Offline-Option.
+Editor-Speech-Cues oder `Speak`-Aktionen erlauben Browser-Speech im Editorexport; CLI benötigt `--speech`, vertrauenswürdiger Host-Code kann `splinely.speech.enable()` aufrufen. Stimmen, Netzwerkbedarf und globale Speech-Cancellation bleiben systemabhängig. Eingebettete Aufnahmen sind die zuverlässigere Offline-Option.

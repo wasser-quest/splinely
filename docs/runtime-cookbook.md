@@ -4,10 +4,10 @@ Die Browser-Runtime bleibt kompatibel. Eine Animation besteht aus **Clips**, Sta
 
 ## Einen Clip bedienen
 
-In einem direkt geöffneten Forma-SVG ist die Instanz `document.documentElement.forma`; in eigenen Handlern wird `forma` übergeben. Bei mehreren SVGs immer die Instanz der jeweiligen SVG verwenden, nicht die globale Komfort-Aliasvariable.
+In einem direkt geöffneten Splinely-SVG ist die Instanz `document.documentElement.splinely`; in eigenen Handlern wird `splinely` übergeben. Bei mehreren SVGs immer die Instanz der jeweiligen SVG verwenden, nicht die globale Komfort-Aliasvariable.
 
 ```js
-const clip = forma.clip('duel'); // vorhandene Clip-ID aus dem Projekt
+const clip = splinely.clip('duel'); // vorhandene Clip-ID aus dem Projekt
 clip.play();                   // Start bzw. Fortsetzen
 clip.pause();                  // Pose behalten
 clip.seek(0).play();            // Clip von vorn, kein vollständiger Szenenreset
@@ -19,10 +19,10 @@ clip.stop();                   // Beitrag entfernen und Clipzeit zurücksetzen
 ## Was läuft gerade?
 
 ```js
-const state = forma.snapshot();
+const state = splinely.snapshot();
 console.log(state.time, state.playing, state.clips, state.states);
 console.log(state.audio, state.diagnostics);
-forma.on('error', ({error}) => console.warn(error.message));
+splinely.on('error', ({error}) => console.warn(error.message));
 ```
 
 `snapshot()` liefert neue, JSON-kompatible Daten ohne DOM-/Audiohandles. Es verändert keine Uhr und löst keine Callbacks aus; die Werte sind die zuletzt ausgewerteten Runtime-Werte. Auch nach `destroy()` bleibt eine Diagnose mit `destroyed: true` möglich. `reportError(error)` meldet eigene Hostfehler über denselben Error-Kanal und die auf 100 Einträge begrenzte Historie. Export-Hostfehler benutzen diesen Kanal; Audio-Unlock-Fehler werden nicht nochmals dupliziert.
@@ -33,7 +33,7 @@ Ein SVG mit Runtime als echte SVG-Dokumentinstanz einbetten, **nicht als `<img>`
 
 ```html
 <object id="movie" type="image/svg+xml" data="../examples/stickfight.svg">
-  SVG nicht verfügbar — bitte die SVG direkt oder im Forma Viewer öffnen.
+  SVG nicht verfügbar — bitte die SVG direkt oder im Splinely Viewer öffnen.
 </object>
 <p id="status">Animation wird geladen …</p>
 <script>
@@ -41,12 +41,12 @@ const movie = document.getElementById('movie');
 const status = document.getElementById('status');
 movie.addEventListener('load', () => {
   try {
-    const f = movie.contentDocument?.documentElement?.forma;
+    const f = movie.contentDocument?.documentElement?.splinely;
     if (!f) throw new Error('Runtime nicht verfügbar');
     status.textContent = 'Bereit';
     f.on('error', ({error}) => { status.textContent = error.message; });
   } catch (_) {
-    status.textContent = 'SVG direkt oder im Forma Viewer öffnen; Scripting/CSP und Same-Origin-Zugriff prüfen.';
+    status.textContent = 'SVG direkt oder im Splinely Viewer öffnen; Scripting/CSP und Same-Origin-Zugriff prüfen.';
   }
 });
 </script>
@@ -56,6 +56,6 @@ Zugriff aus dem HTML funktioniert nur, wenn die Browser-Isolation dies erlaubt. 
 
 ## Audio und Vertrauen
 
-Audio aus einer echten Nutzeraktion freigeben: `await forma.audio.unlock()`. Der Export bietet dafür seinen Startknopf. Browser-Stimmen sind optional und nicht offline garantiert; lokal eingebettetes WAV benötigt keine Stimme. Kein automatisches Audio beim Laden versprechen.
+Audio aus einer echten Nutzeraktion freigeben: `await splinely.audio.unlock()`. Der Export bietet dafür seinen Startknopf. Browser-Stimmen sind optional und nicht offline garantiert; lokal eingebettetes WAV benötigt keine Stimme. Kein automatisches Audio beim Laden versprechen.
 
 `customJs` bleibt ohne explizite Exportfreigabe Daten. Aktive fremde SVGs sind nicht vertrauenswürdig; weder Browser-Runtime noch Viewer sind eine Sandbox. Die native Rust-Runtime führt `customJs` nicht aus: Hosts zeichnen Nodes, liefern Eventziele und behandeln Audio-/Speech-Ausgaben selbst.

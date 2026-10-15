@@ -3,7 +3,7 @@ const {test}=require('node:test');
 const assert=require('node:assert/strict');
 const fs=require('node:fs');
 const vm=require('node:vm');
-const {createRuntime,normalize}=require('../src/forma.js');
+const {createRuntime,normalize}=require('../src/splinely.js');
 const number=value=>({type:'number',value});
 const bone=(id,extra={})=>({id,x:0,y:0,rotation:0,length:10,...extra});
 const node=(extra={})=>({id:'limb',kind:{type:'rect',width:5,height:2},transform:{x:1,y:2,rotation:15,scaleX:2,scaleY:3},style:{opacity:1},...extra});
@@ -17,7 +17,7 @@ function element(id,tagName='rect') {
 function root(env={}) {
   const svg=element('scene','svg'), limb=element('limb');limb.parentNode=svg;limb.ownerSVGElement=svg;
   svg.children=[limb];svg.ownerDocument={defaultView:env};
-  svg.querySelectorAll=selector=>selector==='[id]'?svg.children:svg.children.filter(n=>n.id==='forma-project');
+  svg.querySelectorAll=selector=>selector==='[id]'?svg.children:svg.children.filter(n=>n.id==='splinely-project');
   return svg;
 }
 function mount(p=rig(),env={}) {const svg=root(env);return {svg,limb:svg.children[0],f:createRuntime(svg,p,{autoTick:false})};}
@@ -82,7 +82,7 @@ test('malformed rigs fail before mount: IDs, parents, attachments, cycles, finit
     [rig({bones:[bone('rootBone',{length:Infinity})]}),/finite/],
     [rig({bones:[bone('rootBone',{x:1e308,length:1e308})]}),/finite/]
   ];
-  for(const [p,error] of cases) {const svg=root();assert.throws(()=>createRuntime(svg,p,{autoTick:false}),error);assert.equal(svg.forma,undefined);}
+  for(const [p,error] of cases) {const svg=root();assert.throws(()=>createRuntime(svg,p,{autoTick:false}),error);assert.equal(svg.splinely,undefined);}
   for(const reverse of [false,true]) {
     const bones=Array.from({length:128},(_,i)=>bone('b'+i,{parentId:i?'b'+(i-1):null}));
     assert.equal(normalize({bones:reverse?[...bones].reverse():bones}).bones.length,128);
@@ -117,15 +117,15 @@ test('nested SVG IDs stay scoped and destroying from an error stops rendering',(
   const svg=root(),nested=root(),other=nested.children[0];nested.parentNode=svg;svg.children.push(other);
   const f=createRuntime(svg,rig(),{autoTick:false});assert.equal(other.getAttribute('transform'),null);
   const limb=svg.children[0],before=limb.getAttribute('opacity');f.on('error',()=>f.destroy());
-  f.set('limb',{scaleX:Infinity,opacity:0.25});assert.equal(f.destroyed,true);assert.equal(limb.getAttribute('opacity'),before);assert.equal(svg.forma,undefined);
+  f.set('limb',{scaleX:Infinity,opacity:0.25});assert.equal(f.destroyed,true);assert.equal(limb.getAttribute('opacity'),before);assert.equal(svg.splinely,undefined);
   assert.ok([...svg.listeners.values()].every(s=>s.size===0));assert.throws(()=>f.bones(),/destroyed/);assert.throws(()=>f.set('rootBone',{x:0}),/destroyed/);f.destroy();
 });
 
 test('old no-bones documents still render and invalid auto-mounted rigs retain static fallback',()=>{
   const {f,limb}=mount({schemaVersion:1,nodes:[node()],clips:[]});assert.deepEqual(f.bones(),[]);transform(limb,[1,2,15,2,3]);f.destroy();
-  const errors=[],env={console:{error:e=>errors.push(e)}},svg=root(env),metadata=element('forma-project','metadata');metadata.parentNode=svg;
+  const errors=[],env={console:{error:e=>errors.push(e)}},svg=root(env),metadata=element('splinely-project','metadata');metadata.parentNode=svg;
   metadata.textContent=JSON.stringify(rig({bones:[bone('rootBone',{parentId:'missing'})]}));svg.children.push(metadata);svg.children[0].setAttribute('transform','translate(42 0)');
   env.document={currentScript:{ownerSVGElement:svg}};env.window=env;
-  vm.runInNewContext(fs.readFileSync(require.resolve('../src/forma.js'),'utf8'),env);
-  assert.equal(svg.forma,undefined);assert.equal(svg.children[0].getAttribute('transform'),'translate(42 0)');assert.equal(errors.length,1);
+  vm.runInNewContext(fs.readFileSync(require.resolve('../src/splinely.js'),'utf8'),env);
+  assert.equal(svg.splinely,undefined);assert.equal(svg.children[0].getAttribute('transform'),'translate(42 0)');assert.equal(errors.length,1);
 });

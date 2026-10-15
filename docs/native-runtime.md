@@ -1,8 +1,8 @@
-# Native Forma model runtime
+# Native Splinely model runtime
 
-`crates/forma_runtime` is a browser-independent Rust library (`rlib` and `cdylib`)
-and a `forma-runtime` JSON-lines executable. It loads canonical schema-1 Forma
-JSON through `forma_document`, advances host-supplied clocks, processes machines,
+`crates/splinely_runtime` is a browser-independent Rust library (`rlib` and `cdylib`)
+and a `splinely-runtime` JSON-lines executable. It loads canonical schema-1 Splinely
+JSON through `splinely_document`, advances host-supplied clocks, processes machines,
 and returns evaluated nodes/bones plus host action requests.
 
 **This is not a renderer, audio engine, JavaScript interpreter or general SVG
@@ -26,17 +26,17 @@ No GTK/WebKit dependency is required for this crate. From the repository root:
 
 ```sh
 export TMPDIR=/home/user/svg_editor/.work-tmp
-cargo test -p forma_runtime
+cargo test -p splinely_runtime
 cargo test --workspace
-cargo build -p forma_runtime
+cargo build -p splinely_runtime
 python3 examples/native-runtime/smoke.py \
-  --library target/debug/libforma_runtime.so \
-  --binary target/debug/forma-runtime
-python3 examples/native-runtime/ctypes_runtime.py target/debug/libforma_runtime.so
+  --library target/debug/libsplinely_runtime.so \
+  --binary target/debug/splinely-runtime
+python3 examples/native-runtime/ctypes_runtime.py target/debug/libsplinely_runtime.so
 ```
 
-Use `libforma_runtime.dylib` on macOS or `forma_runtime.dll` on Windows (and
-`forma-runtime.exe` for the binary). Paths may differ with a custom Cargo target
+Use `libsplinely_runtime.dylib` on macOS or `splinely_runtime.dll` on Windows (and
+`splinely-runtime.exe` for the binary). Paths may differ with a custom Cargo target
 folder. The Python example has no third-party dependencies. Other languages can
 use their FFI mechanism or a JSON-lines subprocess.
 
@@ -50,12 +50,12 @@ rendered image, Windows or macOS ABI run was tested.
 ## Rust API
 
 ```rust,no_run
-use forma_runtime::{Runtime, Request};
+use splinely_runtime::{Runtime, Request};
 let mut runtime = Runtime::from_json("{}")?;
 let initial = runtime.execute(Request::Evaluate)?; // drains initial host actions
 let output = runtime.tick(0.5)?;
 let frame = runtime.evaluate()?; // immutable, does not drain output
-# Ok::<(), forma_document::DocumentError>(())
+# Ok::<(), splinely_document::DocumentError>(())
 ```
 
 Public entry points:
@@ -70,7 +70,7 @@ Public entry points:
 - `Runtime::request_json(&mut self, json: &str) -> Result<String>` accepts one
   serialized `Request` and returns a serialized `Response` (not an ABI envelope).
 
-`Result<T>` uses `forma_document::DocumentError`. `Response` contains `frame` and
+`Result<T>` uses `splinely_document::DocumentError`. `Response` contains `frame` and
 `hostActions`. `Frame` contains `time`, `running`, `states`, `variables`, `clips`,
 `nodes`, `bones`; each clip reports `id`, `time`, `active`, `playing`, `weight`.
 Private fade state is not serialized. Successful execute/event/tick calls drain
@@ -181,15 +181,15 @@ These are execution bounds, **not** full document/resource quotas. Rust typed
 loading has no new global asset-size limit. C inputs and JSON-lines records are
 limited to 64 MiB each; overlong lines are discarded with one error response.
 
-Include [`forma_runtime.h`](../crates/forma_runtime/include/forma_runtime.h):
+Include [`splinely_runtime.h`](../crates/splinely_runtime/include/splinely_runtime.h):
 
 ```c
-char *forma_runtime_create(const uint8_t *data, size_t length,
-                          FormaRuntimeHandle **out);
-char *forma_runtime_request(FormaRuntimeHandle *handle,
+char *splinely_runtime_create(const uint8_t *data, size_t length,
+                          SplinelyRuntimeHandle **out);
+char *splinely_runtime_request(SplinelyRuntimeHandle *handle,
                            const uint8_t *data, size_t length);
-void forma_runtime_destroy(FormaRuntimeHandle *handle);
-void forma_runtime_result_free(char *result);
+void splinely_runtime_destroy(SplinelyRuntimeHandle *handle);
+void splinely_runtime_result_free(char *result);
 ```
 
 Inputs are byte-length UTF-8 JSON, not necessarily NUL terminated. Returned

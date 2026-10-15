@@ -1,14 +1,14 @@
-# Forma: eine ruhigere Werkstatt
+# Splinely: eine ruhigere Werkstatt
 
 ## Einstieg
 
 - **Gestalten** startet mit Zeichenfläche und Eigenschaften. Die Zeitleiste ist zunächst verborgen; der Schalter **Zeitleiste** bleibt in jedem Arbeitsbereich erreichbar.
 - **Animieren** öffnet die Zeitleiste und bietet Zeichenfläche, Skelett, Zustände und Audio/Sprache.
 - **Erweitert** enthält JavaScript und den bewahrten SVG-Quelltext. Quelltext ist kein Zeichenwerkzeug.
-- **Speichern**, **Abspielen/Pause**, **Vorschau** und **Forma Viewer öffnen** sind direkt erreichbar. Das Sternchen bei Speichern zeigt ungespeicherte Dokumentänderungen an.
+- **Speichern**, **Abspielen/Pause**, **Vorschau** und **Splinely Viewer öffnen** sind direkt erreichbar. Das Sternchen bei Speichern zeigt ungespeicherte Dokumentänderungen an.
 - **Datei** bündelt Neu (Strg+N), Öffnen … (Strg+O), Zuletzt geöffnet, Speichern (Strg+S), Speichern unter … (Strg+Umschalt+S), SVG-Import und beide SVG-Exporte (Strg+E: interaktiv). Die Dialoge sind native System-Dateidialoge (XDG-Portal/GTK, `rfd`) und laufen in einem Hilfsthread, die Zeichenfläche bleibt bedienbar. **Pfade manuell eingeben** bleibt als Rückfallebene.
-- Ein nie gespeichertes Projekt („Unbenannt“) fragt beim Speichern nach dem Ziel, statt still ins Arbeitsverzeichnis zu schreiben. Sein Autosave liegt unter `~/.local/share/forma/autosave/`. Zuletzt geöffnete Dateien stehen in `~/.config/forma/recent.txt`.
-- Fenstertitel: `• datei.frm — Forma` bei ungespeicherten Änderungen. Beim Schließen mit ungespeicherten Änderungen: **Speichern / Nicht speichern / Abbrechen**.
+- Ein nie gespeichertes Projekt („Unbenannt“) fragt beim Speichern nach dem Ziel, statt still ins Arbeitsverzeichnis zu schreiben. Sein Autosave liegt unter `~/.local/share/splinely/autosave/`. Zuletzt geöffnete Dateien stehen in `~/.config/splinely/recent.txt`.
+- Fenstertitel: `• datei.sply — Splinely` bei ungespeicherten Änderungen. Beim Schließen mit ungespeicherten Änderungen: **Speichern / Nicht speichern / Abbrechen**.
 
 Leere Zeichenflächen und fehlende Auswahl geben einen kurzen nächsten Schritt statt einer Anleitung in Absatzlänge. Werkzeughinweise stehen direkt beim Arbeiten; Details und Tastenkürzel sind in Hover-Hilfen. Ein dunkles Theme mit dezentem Petrol-Akzent und etwas größeren Abständen kommt ohne neue Abhängigkeiten aus.
 
@@ -40,7 +40,7 @@ Die bestehenden Pfadaktionen bleiben in **Pfadaktionen · schließen / fertig / 
 
 ## Einstellungen (Strg+,)
 
-Datei › Einstellungen, Ansicht › Einstellungen oder die Befehlspalette öffnen ein Fenster mit sechs Bereichen. Änderungen gelten sofort und werden in `~/.config/forma/settings.json` (bzw. `$XDG_CONFIG_HOME/forma`) gespeichert; „Alles zurücksetzen“ stellt die Standardwerte wieder her.
+Datei › Einstellungen, Ansicht › Einstellungen oder die Befehlspalette öffnen ein Fenster mit sechs Bereichen. Änderungen gelten sofort und werden in `~/.config/splinely/settings.json` (bzw. `$XDG_CONFIG_HOME/splinely`) gespeichert; „Alles zurücksetzen“ stellt die Standardwerte wieder her.
 
 | Bereich | Optionen |
 | --- | --- |
@@ -83,7 +83,7 @@ Standardbelegung; alles außer Pfeiltasten, Entf, Esc, Leertaste und Zwischenabl
 | I | Pipette: nächster Klick überträgt Stil der angeklickten Form auf die Auswahl |
 | Umschalt+2 | Auf Auswahl zoomen |
 | Rechtsklick | Kontextmenü (Ausschneiden … Stil kopieren/einfügen, Anordnen, Sperren, Ausblenden) |
-| Strg+C / Strg+X / Strg+V | Kopieren / Ausschneiden / Einfügen; die Form liegt als JSON in der Systemzwischenablage und lässt sich auch zwischen Forma-Fenstern einfügen |
+| Strg+C / Strg+X / Strg+V | Kopieren / Ausschneiden / Einfügen; die Form liegt als JSON in der Systemzwischenablage und lässt sich auch zwischen Splinely-Fenstern einfügen |
 | Pfeiltasten (Shift) | Auswahl um 1 (10) Einheiten verschieben, je ein Rückgängig-Schritt |
 | Escape | Auswahl aufheben |
 | Strg+Z · Strg+Umschalt+Z / Strg+Y | Rückgängig · Wiederholen |
@@ -106,13 +106,13 @@ Gesperrte Ebenen werden von Löschen, Verschieben und Duplizieren nicht verände
 - **Griffe auf der Zeichenfläche:** Acht Skaliergriffe und ein Drehknopf um die Auswahl. Umschalt hält die Proportionen bzw. rastet die Drehung in 15°-Schritten ein, Alt skaliert von der Mitte aus. Über den Anker hinaus ziehen spiegelt. Ist eine Form schräg gedreht, gibt es nur proportionale Eckgriffe (ungleichmäßiges Skalieren würde sie scheren). Ein Griff-Zug ist ein Rückgängig-Schritt.
 - **Boolesche Operationen** (Anordnen-Panel, ab zwei Formen): Vereinigen, Abziehen (unterste minus die anderen), Schnittmenge, Ausschluss. Ergebnis ist ein Pfad mit dem Stil der untersten Form; Kurven bleiben Kurven. Text kann nicht kombiniert werden. Bewusst ohne Tastenkürzel, damit Strg++/Strg+- weiter zoomen.
 - **+ Mehr** legt Sechseck, Dreieck, Stern oder Linie als bearbeitbaren Pfad an.
-- **Morph** (Anordnen-Panel oder Rechtsklick, genau zwei Formen): Die zuerst gewählte Form verwandelt sich in 1 s in die zweite. Forma gleicht beide Umrisse an (gleiche Segmentzahl, passender Startpunkt und Umlaufsinn), legt einen Clip an und blendet die Zielform aus. Weitere Zwischenformen lassen sich als Schlüsselbilder der Eigenschaft „Pfadform (Morph)“ hinzufügen, solange sie dieselbe Struktur haben.
+- **Morph** (Anordnen-Panel oder Rechtsklick, genau zwei Formen): Die zuerst gewählte Form verwandelt sich in 1 s in die zweite. Splinely gleicht beide Umrisse an (gleiche Segmentzahl, passender Startpunkt und Umlaufsinn), legt einen Clip an und blendet die Zielform aus. Weitere Zwischenformen lassen sich als Schlüsselbilder der Eigenschaft „Pfadform (Morph)“ hinzufügen, solange sie dieselbe Struktur haben.
 - **Verläufe animieren:** In der Zeitleiste die Eigenschaft „Verlauf“ wählen und „◼ Aktuellen Wert merken“; Richtung, Positionen und Farben der Stopps werden zwischen Schlüsselbildern interpoliert. Art (linear/radial) und Anzahl der Stopps bleiben gleich.
 - **Intelligente Hilfslinien** (Ansicht, standardmäßig an): Beim Ziehen rasten linke/mittlere/rechte und obere/mittlere/untere Kante der Auswahl an denselben Linien anderer sichtbarer Formen und der Zeichenfläche ein (6 Bildschirmpixel); magentafarbene Linien zeigen das Einrasten. Der Zug wird immer vom Start aus berechnet, Rückgängig nimmt ihn als Ganzes zurück.
 - **Manuelle Hilfslinien:** vom oberen Lineal (waagerecht) oder linken Lineal (senkrecht) auf die Zeichenfläche ziehen; vorhandene Linien lassen sich verschieben und durch Zurückziehen aufs Lineal löschen (Ansicht › Hilfslinien löschen entfernt alle). Formen rasten auch an ihnen ein. Sie werden im Projekt gespeichert (`guides`) und sind rückgängig machbar.
 - **Exakte Maße:** Im Panel Anordnen (bei Mehrfachauswahl offen) X, Y, Breite und Höhe der Auswahl eintippen oder ziehen; „Proportional“ koppelt Breite und Höhe.
 - **Verläufe:** Unter Darstellung › Füllung zwischen Farbe, linearem Verlauf (Richtung in Grad) und radialem Verlauf wählen; 2–16 Farbstopps mit Position. Verläufe stehen als `gradient` im Projekt, werden exportiert und von der Runtime nicht überschrieben (Füllfarb-Animationen wirken dann nicht).
-- **Wiederherstellung:** Ist beim Öffnen (oder beim Start ohne Datei) eine automatische Sicherung neuer als die Datei, bietet Forma „Wiederherstellen“ oder „Verwerfen“ an. Speichern entfernt die Sicherung.
+- **Wiederherstellung:** Ist beim Öffnen (oder beim Start ohne Datei) eine automatische Sicherung neuer als die Datei, bietet Splinely „Wiederherstellen“ oder „Verwerfen“ an. Speichern entfernt die Sicherung.
 - Mehrfachauswahlen zeigen einen gestrichelten Gesamtrahmen. Der Inspektor bearbeitet weiterhin die zuerst angeklickte Form.
 - Öffnen oder ein neues Projekt leeren den Rückgängig-Verlauf; man kann nicht versehentlich in die vorherige Datei zurückspringen.
 
@@ -141,13 +141,13 @@ JavaScript läuft nur nach Freigabe im interaktiven Export/Viewer, nicht in der 
 
 ## Prüfung und verbleibende Grenzen
 
-Neue Headless-egui-Tests in `crates/forma_editor/src/app_ui_tests.rs` prüfen echte Werkzeug-/Vorschauknopf-Klicks, Datei-Menü und progressive Offenlegung, Pfad-Fertigstellen/Abbrechen, alle Werkzeugwechsel, Entwurfserhalt, Undo und JS-Freigabe sowie den Wechsel aus unabhängiger Ebenenwiedergabe/Überblendung.
+Neue Headless-egui-Tests in `crates/splinely_editor/src/app_ui_tests.rs` prüfen echte Werkzeug-/Vorschauknopf-Klicks, Datei-Menü und progressive Offenlegung, Pfad-Fertigstellen/Abbrechen, alle Werkzeugwechsel, Entwurfserhalt, Undo und JS-Freigabe sowie den Wechsel aus unabhängiger Ebenenwiedergabe/Überblendung.
 
 Prüfbefehle (mit `TMPDIR=/home/user/svg_editor/.work-tmp`):
 
 ```sh
-cargo test -p forma_editor
-cargo clippy -p forma_editor --all-targets -- -D warnings
+cargo test -p splinely_editor
+cargo clippy -p splinely_editor --all-targets -- -D warnings
 ```
 
 Oberfläche, Statusmeldungen und Fehlermeldungen der Werkzeuge sind deutsch. Technische Validierungsmeldungen des Dokumentkerns und Manifestfehler von Drop-in-Plugins bleiben englisch, weil CLI und Skripte sie maschinenlesbar auswerten. Diese Module liegen außerhalb dieses UI-Änderungsbereichs; die Arbeitsbereichsnavigation ist konsistent deutsch. Die Headless-Tests ersetzen keinen visuellen Desktop-Test, keinen echten Tablet-/Drucktest und keinen WebView- oder Audio-Hardwaretest. Ein vorhandener ffplay/SDL-Integrationstest ist standardmäßig ignoriert.

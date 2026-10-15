@@ -35,51 +35,51 @@ def transition(start, end, event, actions=None):
 CONTROLLER = r"""
 // Reviewed trusted code. No geometry animation, timers, globals or network.
 // Scene motion is canonical looping tracks; all locomotion mixing is blendClip.
-const scene = forma.machine('scene'), runner = forma.machine('runner');
+const scene = splinely.machine('scene'), runner = splinely.machine('runner');
 const scrollIds = ['scroll', 'terrain', 'distance'];
 let heldFade = null;
 function jump() {
   if (scene.state === 'running' && runner.state === 'ground') runner.send('JUMP');
 }
-forma.on('click', jump);
-forma.on('keydown', detail => {
+splinely.on('click', jump);
+splinely.on('keydown', detail => {
   if (detail.event.code === 'Space') { detail.event.preventDefault(); jump(); }
 });
-forma.on('clip.end', detail => {
+splinely.on('clip.end', detail => {
   if (detail.clip === 'jump') runner.send('LAND');
 });
-forma.on('runner.jump', jump);
-forma.on('runner.pause', () => {
-  forma.timeline.pause();
-  const walk = forma.clip('walk').weight, jump = forma.clip('jump').weight;
+splinely.on('runner.jump', jump);
+splinely.on('runner.pause', () => {
+  splinely.timeline.pause();
+  const walk = splinely.clip('walk').weight, jump = splinely.clip('jump').weight;
   heldFade = {walk, jump, seconds:.24 * (runner.state === 'jumping' ? walk : jump)};
   // Runtime ramps intentionally tick even on paused clips. Freeze this demo's
   // two ramps explicitly, then resume their remaining duration below.
-  forma.clip('walk').setWeight(walk); forma.clip('jump').setWeight(jump);
+  splinely.clip('walk').setWeight(walk); splinely.clip('jump').setWeight(jump);
   scene.send('PAUSE');
 });
-forma.on('runner.play', () => {
+splinely.on('runner.play', () => {
   if (scene.state !== 'paused') return;
   scene.send('RESUME');
-  for (const id of [...scrollIds, 'walk']) forma.clip(id).play();
-  if (runner.state === 'jumping') forma.clip('jump').play();
+  for (const id of [...scrollIds, 'walk']) splinely.clip(id).play();
+  if (runner.state === 'jumping') splinely.clip('jump').play();
   if (heldFade) {
     const airborne = runner.state === 'jumping';
-    forma.clip('walk').fadeTo(airborne ? 0 : 1, heldFade.seconds);
-    forma.clip('jump').fadeTo(airborne ? 1 : 0, heldFade.seconds);
+    splinely.clip('walk').fadeTo(airborne ? 0 : 1, heldFade.seconds);
+    splinely.clip('jump').fadeTo(airborne ? 1 : 0, heldFade.seconds);
     heldFade = null;
   }
-  forma.timeline.play();
+  splinely.timeline.play();
 });
-forma.on('runner.restart', () => {
+splinely.on('runner.restart', () => {
   heldFade = null;
-  forma.timeline.pause();
-  for (const id of [...scrollIds, 'walk', 'jump']) forma.clip(id).stop().seek(0);
-  forma.clip('walk').setWeight(1); forma.clip('jump').setWeight(0);
+  splinely.timeline.pause();
+  for (const id of [...scrollIds, 'walk', 'jump']) splinely.clip(id).stop().seek(0);
+  splinely.clip('walk').setWeight(1); splinely.clip('jump').setWeight(0);
   runner.send('RESET'); scene.send('RESET');
-  forma.timeline.seek(0);
-  for (const id of [...scrollIds, 'walk']) forma.clip(id).play();
-  forma.timeline.play();
+  splinely.timeline.seek(0);
+  for (const id of [...scrollIds, 'walk']) splinely.clip(id).play();
+  splinely.timeline.play();
 });
 """
 
@@ -88,14 +88,14 @@ HTML = '''<!doctype html>
 <title>Dune / Stride — cactus runner</title>
 <style>
 *{box-sizing:border-box}body{margin:0;background:#13292b;color:#f8eed6;font:16px system-ui}main{max-width:1100px;margin:5vh auto;padding:24px}.eyebrow{font-size:12px;color:#e8b979;letter-spacing:.28em;text-transform:uppercase}h1{font-size:clamp(36px,7vw,74px);letter-spacing:-.06em;margin:12px 0}h1 span{color:#e8b979}p{color:#b7c8bc;line-height:1.6}.frame{border-radius:22px;overflow:hidden;border:1px solid #46605a;box-shadow:0 25px 75px #0004}#scene{display:block;width:100%;height:auto;aspect-ratio:16/9;background:#eedbb4}.controls{display:flex;gap:10px;flex-wrap:wrap;padding:18px;background:#203b3b}button{font:inherit;color:#f8eed6;background:#2d504d;border:1px solid #668279;border-radius:9px;padding:10px 17px;cursor:pointer}button:disabled{opacity:.4}button:focus-visible{outline:3px solid #e8b979}#jump{background:#e8b979;color:#13292b}output{margin-left:auto;font:12px ui-monospace,monospace;align-self:center}footer{font-size:13px;margin-top:22px;color:#b7c8bc}a{color:#e8b979}
-</style><main><div class="eyebrow">Forma / motion field notes 009</div><h1>Dune <span>/ Stride</span></h1>
+</style><main><div class="eyebrow">Splinely / motion field notes 009</div><h1>Dune <span>/ Stride</span></h1>
 <p>A copper-scarfed wanderer, a quiet desert, an endless trail.<br>Click the scene or press Space to jump. The world never waits for your feet.</p>
 <section class="frame">__EMBEDDED_SVG__
 <div class="controls"><button id="play" disabled>Play</button><button id="pause" disabled>Pause</button><button id="restart" disabled>Restart</button><button id="jump" disabled>Jump / Space</button><output id="status">Loading trusted runtime…</output></div></section>
-<footer>Weighted bone poses, independent scene layers, seeded cactus loop. No collision penalty: this is a motion study, not a survival game.<br><a href="cactus-runner.forma.json">Editable project</a> · <a href="cactus-runner.svg">Offline SVG</a> · <a href="../docs/cactus-runner.md">Technical notes</a><br>Reviewed custom JavaScript requires an explicit trusted export. No external assets, libraries, audio or network.</footer></main>
+<footer>Weighted bone poses, independent scene layers, seeded cactus loop. No collision penalty: this is a motion study, not a survival game.<br><a href="cactus-runner.splinely.json">Editable project</a> · <a href="cactus-runner.svg">Offline SVG</a> · <a href="../docs/cactus-runner.md">Technical notes</a><br>Reviewed custom JavaScript requires an explicit trusted export. No external assets, libraries, audio or network.</footer></main>
 <script>
 const scene=document.querySelector('#scene');let f;
-function ready(){if(f)return;f=scene?.forma;if(!f)return;
+function ready(){if(f)return;f=scene?.splinely;if(!f)return;
 for(const id of ['play','pause','restart','jump']){const b=document.getElementById(id);b.disabled=false;b.onclick=()=>f.emit('runner.'+id)}
 scene.setAttribute('tabindex','0');
 document.addEventListener('keydown',e=>{if(e.code==='Space'){e.preventDefault();if(!e.repeat)f.emit('runner.jump')}});
@@ -206,13 +206,13 @@ def build():
 
 def main():
     p=argparse.ArgumentParser(description=__doc__)
-    p.add_argument('--cli',type=Path,default=ROOT/'target/debug/forma-cli')
+    p.add_argument('--cli',type=Path,default=ROOT/'target/debug/splinely-cli')
     p.add_argument('--output',type=Path,default=ROOT/'examples')
     p.add_argument('--author-only',action='store_true',help='Write draft JSON only, without CLI validation or SVG/HTML export')
     args=p.parse_args()
     args.output.mkdir(parents=True,exist_ok=True)
     project=build()
-    filename=args.output/'cactus-runner.forma.json'
+    filename=args.output/'cactus-runner.splinely.json'
     filename.write_text(json.dumps(project,ensure_ascii=False,indent=2)+'\n')
     if args.author_only:
         print('AUTHORED only: cactus-runner JSON; SVG/HTML export not attempted.')
@@ -243,7 +243,7 @@ def main():
     svg=args.output/'cactus-runner.svg'
     cli('export',filename,'--output',svg,'--trusted-js')
     tree=ET.parse(svg)
-    exported=json.loads(tree.find("{http://www.w3.org/2000/svg}metadata[@id='forma-project']").text)
+    exported=json.loads(tree.find("{http://www.w3.org/2000/svg}metadata[@id='splinely-project']").text)
     assert exported['clips'][3]['blendMode']=='weighted' and exported['clips'][4]['weight']==0, 'Old CLI dropped weighted schema; rebuild before export'
     assert exported['stateMachines'][1]['states'][1]['onEnter'][1]['type']=='blendClip'
     embedded=svg.read_text().replace('<svg ', '<svg id="scene" role="img" aria-label="Walking stickfigure; click to jump" ', 1)

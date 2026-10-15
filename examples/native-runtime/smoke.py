@@ -11,7 +11,7 @@ def main():
     parser.add_argument("--library", required=True)
     parser.add_argument("--binary", required=True)
     args = parser.parse_args()
-    project = json.loads(Path(__file__).with_name("demo.forma.json").read_text(encoding="utf-8"))
+    project = json.loads(Path(__file__).with_name("demo.splinely.json").read_text(encoding="utf-8"))
     requests = [
         {"type": "tick", "delta": 0.5},
         {"type": "event", "event": {"name": "click", "target": "box"}},
@@ -36,7 +36,7 @@ def main():
         assert runtime.request({"type": "evaluate"}) == results[5]
         # Exercise invalid UTF-8 on the actual C ABI, not a mocked adapter.
         try:
-            runtime._result(runtime.lib.forma_runtime_request(runtime.handle, b"\xff", 1))
+            runtime._result(runtime.lib.splinely_runtime_request(runtime.handle, b"\xff", 1))
             raise AssertionError("invalid UTF-8 accepted")
         except RuntimeError as exc:
             assert "UTF-8" in str(exc)

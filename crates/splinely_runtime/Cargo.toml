@@ -1,0 +1,17 @@
+[package]
+name = "splinely_runtime"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[lib]
+crate-type = ["rlib", "cdylib"]
+
+[[bin]]
+name = "splinely-runtime"
+path = "src/main.rs"
+
+[dependencies]
+splinely_document.workspace = true
+serde.workspace = true
+serde_json = { workspace = true, features = ["raw_value"] }

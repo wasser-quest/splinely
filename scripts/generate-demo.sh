@@ -7,8 +7,8 @@ mkdir -p "$output"
 output=$(cd "$output" && pwd)
 work=$(mktemp -d)
 trap 'rm -rf "$work"' EXIT
-cargo run --quiet -p forma-cli -- new --demo --output "$work/base.forma.json"
-python3 - "$work/base.forma.json" "$work/patch.json" <<'PY'
+cargo run --quiet -p splinely-cli -- new --demo --output "$work/base.splinely.json"
+python3 - "$work/base.splinely.json" "$work/patch.json" <<'PY'
 import base64, io, json, math, struct, sys, wave
 project = json.load(open(sys.argv[1], encoding='utf-8'))
 # A small synthetic, syllable-shaped tone, NOT recorded or synthesized words.
@@ -35,7 +35,7 @@ project['nodes'][2]['kind']['text'] = 'Kreis klicken: Bewegung + Ton bei 1,5 s'
 transition = project['stateMachines'][0]['transitions'][0]
 transition['actions'].append({'type': 'playClip', 'clipId': 'travel'})
 patch = {
-    'name': 'Forma: Klick, Keyframes und eingebetteter Ton',
+    'name': 'Splinely: Klick, Keyframes und eingebetteter Ton',
     'nodes': project['nodes'], 'clips': [clip],
     'stateMachines': project['stateMachines'],
     'audioAssets': [{'id': 'tone', 'name': 'Silbenartiger Ton (keine Worte)',
@@ -44,14 +44,14 @@ patch = {
     'audioCues': [{'id': 'tone-cue', 'assetId': 'tone', 'time': 1.5,
                    'offset': 0.0, 'duration': None, 'volume': 0.6}],
     'customJs': """// Trusted example only: unlock embedded audio on a real user gesture.
-forma.on('ball', 'click', async () => {
+splinely.on('ball', 'click', async () => {
   try {
-    await forma.audio.unlock();
-    forma.clip('travel').stop();
-    forma.timeline.seek(0);
-    forma.clip('travel').play();
+    await splinely.audio.unlock();
+    splinely.clip('travel').stop();
+    splinely.timeline.seek(0);
+    splinely.clip('travel').play();
   } catch (error) {
-    console.error('Forma demo audio failed', error);
+    console.error('Splinely demo audio failed', error);
   }
 });
 """
@@ -59,7 +59,7 @@ forma.on('ball', 'click', async () => {
 with open(sys.argv[2], 'w', encoding='utf-8') as out:
     json.dump(patch, out, ensure_ascii=False, indent=2)
 PY
-cargo run --quiet -p forma-cli -- apply "$work/base.forma.json" --patch "$work/patch.json" --output "$output/demo.forma.json"
-cargo run --quiet -p forma-cli -- validate "$output/demo.forma.json"
+cargo run --quiet -p splinely-cli -- apply "$work/base.splinely.json" --patch "$work/patch.json" --output "$output/demo.splinely.json"
+cargo run --quiet -p splinely-cli -- validate "$output/demo.splinely.json"
 # Explicit opt-in for the short, reviewable gesture handler above.
-cargo run --quiet -p forma-cli -- export "$output/demo.forma.json" --trusted-js --output "$output/demo.svg"
+cargo run --quiet -p splinely-cli -- export "$output/demo.splinely.json" --trusted-js --output "$output/demo.svg"

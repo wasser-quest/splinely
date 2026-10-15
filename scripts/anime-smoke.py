@@ -34,7 +34,7 @@ document.querySelector('#hello').addEventListener('click',e=>window.trusted.push
         browser.command('WebDriver:ElementClick', {'id': identifier})
         time.sleep(.7)
         result = browser.js("""
-const d=document.querySelector('object').contentDocument,f=d.documentElement.forma;
+const d=document.querySelector('object').contentDocument,f=d.documentElement.splinely;
 return {spoken:window.spoken,trusted:window.trusted,time:f.timeline.time,starts:window.audioStarts,ready:f.audio.ready,context:f.audio.context?.state,buffers:f.audio.buffers.size,
  transform:d.querySelector('#wave-hand').getAttribute('transform'),status:document.querySelector('#status').textContent};
 """)
@@ -46,7 +46,7 @@ return {spoken:window.spoken,trusted:window.trusted,time:f.timeline.time,starts:
         time.sleep(.5)
         assert browser.js('return window.audioStarts;') > result['starts'], 'Replay missing'
         screenshot = browser.command('WebDriver:TakeScreenshot', {'id': None, 'full': True, 'scroll': False})
-        Path('/tmp/forma-anime-hello.png').write_bytes(base64.b64decode(screenshot))
+        Path('/tmp/splinely-anime-hello.png').write_bytes(base64.b64decode(screenshot))
         print('PASS: CLI anime SVG, trusted offline WAV decode/start/replay (no browser speech) and actual bone movement:', result)
 finally:
     server.shutdown()

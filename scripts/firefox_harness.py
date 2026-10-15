@@ -10,7 +10,7 @@ import time
 
 class Firefox:
     def __enter__(self):
-        self.profile = tempfile.TemporaryDirectory(prefix="forma-showcase-firefox-")
+        self.profile = tempfile.TemporaryDirectory(prefix="splinely-showcase-firefox-")
         self.log = tempfile.TemporaryFile()
         self.connection = None
         self.sequence = 0
