@@ -6,11 +6,12 @@
 
 ![Splinely logo](assets/splinely-logo.svg)
 
-<p align="center"><img src="assets/elemental-stickfight.gif" width="640" alt="Three stick fighters, water, thunder and fire, trade a water wave, a lightning strike and a fireball, then collide in one elemental blast"></p>
+<p align="center"><img src="assets/blaze-vs-volt.gif" width="640" alt="BLAZE vs VOLT: a fire stick fighter and a lightning stick fighter clash fists, trade a face punch and a kick, then fire beam meets lightning in an explosion and Blaze wins by K.O."></p>
 
-<p align="center"><b>Water vs Thunder vs Fire</b>: a six-second loop authored entirely with <code>splinely-cli</code> from one prompt:<br>
-<i>“create a cool stickfight gif that is fast paced and with water vs thunder vs fire 3 sticks fight”</i><br>
-<a href="examples/elemental-stickfight.svg">Interactive SVG</a> · <a href="examples/elemental-stickfight.sply">editable <code>.sply</code></a> · <a href="scripts/generate-elemental-stickfight.py">generator</a></p>
+<p align="center"><b>BLAZE vs VOLT</b>: a 7.8-second stickfight in nine camera shots, built entirely with <code>splinely-cli batch</code> from one prompt:<br>
+<i>„kannst du ein sehr schnellen stickfight machen mit mehreren perspektiv wechsel und super power. mit splinecli“</i><br>
+(“can you make a very fast stickfight with multiple perspective changes and super power, with splinecli”)<br>
+<a href="examples/blaze-vs-volt.svg">Interactive SVG</a> · <a href="examples/blaze-vs-volt.sply">editable <code>.sply</code></a> · <a href="scripts/generate-blaze-vs-volt.py">generator</a></p>
 
 Splinely is a vector animation editor written in Rust. Projects live in **`.sply` files**: shapes and paths, keyframes, bones, state machines, pointer following and audio – everything in one file. The **Splinely Runtime** plays `.sply` projects with all their behaviour: in the browser, natively (Rust/C) or in the Splinely Viewer. **Current state: a working prototype, not the full scope of [PLAN.md](PLAN.md).**
 
@@ -221,7 +222,7 @@ The script runs workspace tests, Node runtime tests, real CLI demo generation/ev
 
 [Showcase overview](examples/showcase.html) · [Interactive SVGs, direct events and invisible states](docs/interactive-svg.md)
 
-- **[Tide / Volt / Ember – Water vs Thunder vs Fire](examples/elemental-stickfight.svg)** ([editable `.sply`](examples/elemental-stickfight.sply), [GIF](assets/elemental-stickfight.gif)): a fast six-second loop with three bone fighters. Water throws a wave, Thunder jumps it and strikes Fire with lightning, Fire's fireball steams against Water's block, then all three beams collide in one blast. Made from the prompt shown in the GIF, using only `splinely-cli` (`import-svg` → `apply` → `validate` → `evaluate` → `export` → `render`). Regenerate project, SVG and GIF: `python3 scripts/generate-elemental-stickfight.py --cli "$(command -v splinely-cli)"`.
+- **[BLAZE vs VOLT](examples/blaze-vs-volt.svg)** ([editable `.sply`](examples/blaze-vs-volt.sply), [GIF](assets/blaze-vs-volt.gif)): a very fast 7.8-second fire-vs-lightning stickfight with nine camera shots: sprint and fist clash, close-up face hit, top-down exchange, reverse-angle kick, Blaze charging up, the beam from Volt's point of view, fire beam against lightning, explosion and K.O. Every shot hangs on its own camera bone (hard cuts, tilted cameras, shake). Generated from the prompt shown in the GIF as about 2,600 `splinely-cli batch` steps; regenerate project, SVG and GIF with `python3 scripts/generate-blaze-vs-volt.py` (needs `splinely-cli` on `PATH`).
 - **[Sand / Accord](examples/desert-stickfight.html)** ([editable `.sply`](examples/desert-stickfight.sply)): an original 20-second short with two bone figures in the warm Cactus Runner desert style, five fight phases and a friendly ending; starts by itself, a click after the ending replays. [Project, generation and real Firefox check](docs/desert-stickfight.md).
 - [Cactus Runner](examples/cactus-runner.html): running bone figure, scrolling cacti and a click/Space jump (no buttons) with real walk/jump weight blending; independent run and jump states. [Details/check](docs/cactus-runner.md).
 - [Cinder / Flux – Stickfight](examples/stickfight.html): an original eight-second animated fight between two bone rigs with dodges/counters, shadows/sparks; loops by itself, no buttons. `python3 scripts/generate-stickfight.py`, check: `python3 scripts/stickfight-smoke.py`.
