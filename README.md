@@ -6,6 +6,12 @@
 
 ![Splinely logo](assets/splinely-logo.svg)
 
+<p align="center"><img src="assets/elemental-stickfight.gif" width="640" alt="Three stick fighters, water, thunder and fire, trade a water wave, a lightning strike and a fireball, then collide in one elemental blast"></p>
+
+<p align="center"><b>Water vs Thunder vs Fire</b>: a six-second loop authored entirely with <code>splinely-cli</code> from one prompt:<br>
+<i>“create a cool stickfight gif that is fast paced and with water vs thunder vs fire 3 sticks fight”</i><br>
+<a href="examples/elemental-stickfight.svg">Interactive SVG</a> · <a href="examples/elemental-stickfight.sply">editable <code>.sply</code></a> · <a href="scripts/generate-elemental-stickfight.py">generator</a></p>
+
 Splinely is a vector animation editor written in Rust. Projects live in **`.sply` files**: shapes and paths, keyframes, bones, state machines, pointer following and audio – everything in one file. The **Splinely Runtime** plays `.sply` projects with all their behaviour: in the browser, natively (Rust/C) or in the Splinely Viewer. **Current state: a working prototype, not the full scope of [PLAN.md](PLAN.md).**
 
 The editor speaks **English, German, Spanish, French, Japanese and Simplified Chinese**. It follows the system language and can be switched under **Settings › General › Language**. Japanese and Chinese need an installed CJK font (e.g. Noto Sans CJK). The detailed documents in `docs/` are written in German.
@@ -215,6 +221,7 @@ The script runs workspace tests, Node runtime tests, real CLI demo generation/ev
 
 [Showcase overview](examples/showcase.html) · [Interactive SVGs, direct events and invisible states](docs/interactive-svg.md)
 
+- **[Tide / Volt / Ember – Water vs Thunder vs Fire](examples/elemental-stickfight.svg)** ([editable `.sply`](examples/elemental-stickfight.sply), [GIF](assets/elemental-stickfight.gif)): a fast six-second loop with three bone fighters. Water throws a wave, Thunder jumps it and strikes Fire with lightning, Fire's fireball steams against Water's block, then all three beams collide in one blast. Made from the prompt shown in the GIF, using only `splinely-cli` (`import-svg` → `apply` → `validate` → `evaluate` → `export` → `render`). Regenerate project, SVG and GIF: `python3 scripts/generate-elemental-stickfight.py --cli "$(command -v splinely-cli)"`.
 - **[Sand / Accord](examples/desert-stickfight.html)** ([editable `.sply`](examples/desert-stickfight.sply)): an original 20-second short with two bone figures in the warm Cactus Runner desert style, five fight phases and a friendly ending; starts by itself, a click after the ending replays. [Project, generation and real Firefox check](docs/desert-stickfight.md).
 - [Cactus Runner](examples/cactus-runner.html): running bone figure, scrolling cacti and a click/Space jump (no buttons) with real walk/jump weight blending; independent run and jump states. [Details/check](docs/cactus-runner.md).
 - [Cinder / Flux – Stickfight](examples/stickfight.html): an original eight-second animated fight between two bone rigs with dodges/counters, shadows/sparks; loops by itself, no buttons. `python3 scripts/generate-stickfight.py`, check: `python3 scripts/stickfight-smoke.py`.
