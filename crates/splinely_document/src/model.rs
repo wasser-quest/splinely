@@ -118,6 +118,22 @@ pub struct Group {
     /// Enclosing group; none for a top-level group.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub parent_id: Option<String>,
+    /// Bones that move and turn the whole group, created the first time the
+    /// group itself is animated (see `Project::rig_group`).
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub rig: Option<GroupRig>,
+}
+
+/// Hidden bone chain that animates a group as one piece. At rest it changes
+/// nothing. `move_bone` x/y are offsets from where the group was drawn;
+/// `turn_bone` rotation turns the group around the centre of its bounds.
+/// Every shape of the group is bound to `attach_bone`.
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct GroupRig {
+    pub move_bone: String,
+    pub turn_bone: String,
+    pub attach_bone: String,
 }
 
 /// A straight editor guide: vertical at `x = position` or horizontal at `y = position`.

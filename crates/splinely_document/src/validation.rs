@@ -124,6 +124,23 @@ impl Project {
                 g.name.len() <= 200,
                 format!("group {}: name too long", g.id),
             )?;
+            if let Some(rig) = &g.rig {
+                let parent = |id: &str| {
+                    self.bones
+                        .iter()
+                        .find(|b| b.id == id)
+                        .map(|b| b.parent_id.as_deref())
+                };
+                require(
+                    parent(&rig.move_bone).is_some()
+                        && parent(&rig.turn_bone) == Some(Some(rig.move_bone.as_str()))
+                        && parent(&rig.attach_bone) == Some(Some(rig.turn_bone.as_str())),
+                    format!(
+                        "group {}: rig needs bones {} → {} → {} chained in that order",
+                        g.id, rig.move_bone, rig.turn_bone, rig.attach_bone
+                    ),
+                )?;
+            }
             // Walk up: parents must exist, no cycles, bounded depth.
             let mut current = g;
             for depth in 0.. {

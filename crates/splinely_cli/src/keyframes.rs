@@ -84,17 +84,24 @@ pub fn run(
             "Time must be finite and nonnegative; value must be finite",
         ));
     }
+    // A group animates as one piece through its rig bones (created on first use).
+    let group = project.is_group(target).then(|| target.to_owned());
+    let resolved = project
+        .animation_target(target, property)
+        .map_err(|e| failure("invalid_target", e))?;
+    let target = resolved.as_str();
     if !project.nodes.iter().any(|node| node.id == target)
         && !project.bones.iter().any(|bone| bone.id == target)
     {
         return Err(crate::assist::not_found(
-            "node or bone",
+            "node, bone or group",
             target,
             project
                 .nodes
                 .iter()
                 .map(|n| n.id.as_str())
-                .chain(project.bones.iter().map(|b| b.id.as_str())),
+                .chain(project.bones.iter().map(|b| b.id.as_str()))
+                .chain(project.groups.iter().map(|g| g.id.as_str())),
         ));
     }
     let base = base_value(&project, target, property);
@@ -193,6 +200,16 @@ pub fn run(
     let mut result = save_project(&project, output)?;
     if output != "-" {
         let mut hints = vec![];
+        if let Some(group) = &group {
+            let meaning = if property == Property::Rotation {
+                "rotation turns the group around the centre of its bounds"
+            } else {
+                "x/y are offsets from where the group was drawn"
+            };
+            hints.push(format!(
+                "Group {group} animates through its rig bone {target}: {meaning}."
+            ));
+        }
         if started {
             hints.push(format!("Added a starting keyframe at 0 s with the current {} (use --no-start-key to skip).", name(property)));
         }

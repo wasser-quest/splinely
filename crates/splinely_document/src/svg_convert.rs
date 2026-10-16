@@ -1025,6 +1025,7 @@ impl Walk<'_> {
                             id: id.clone(),
                             name: g.id().to_owned(),
                             parent_id: parent_group.clone(),
+                            rig: None,
                         });
                         self.ctx.report.push(
                             ImportStatus::Imported,
@@ -1431,6 +1432,7 @@ impl Walk<'_> {
                     id: gid.clone(),
                     name: wanted,
                     parent_id: parent_group.clone(),
+                    rig: None,
                 });
                 let place = move |nw: f64, nh: f64| -> Ts {
                     let (iw, ih) = (w.unwrap_or(nw), h.unwrap_or(nh));

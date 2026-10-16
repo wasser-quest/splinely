@@ -531,6 +531,24 @@ impl Runtime {
                 property,
                 value,
             } => {
+                // A rigged group is set through its rig bones (x/y move, rotation turns).
+                let node_id = match self.project.groups.iter().find(|g| g.id == node_id) {
+                    Some(group) => {
+                        let rig = group.rig.as_ref().ok_or_else(|| {
+                            DocumentError(format!(
+                                "group {node_id} has no rig; animate the group once (e.g. splinely-cli keyframe --target {node_id}) to create one"
+                            ))
+                        })?;
+                        group_rig_bone(rig, property)
+                            .ok_or_else(|| {
+                                DocumentError(format!(
+                                    "group {node_id}: groups animate x, y and rotation, not {property:?}"
+                                ))
+                            })?
+                            .to_owned()
+                    }
+                    None => node_id,
+                };
                 let patch = PropertyOverride {
                     node_id,
                     property,

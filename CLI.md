@@ -114,7 +114,7 @@ never happens automatically.
 | `random-figures --output PATH [--seed U64] [--count 3..12]` | Seeded geometric gallery with captions and an automatic sequential state cycle (defaults: seed 42, count 6) |
 | `bone add INPUT --id ID --length N [--parent ID] [--x N --y N --rotation N] --output PATH` | Add a root or child bone |
 | `bone update INPUT --id ID [--parent ID \| --root] [--x N --y N --rotation N --length N] --output PATH` | Update only supplied fields |
-| `bone bind INPUT --node ID --bone ID --output PATH` | Bind without changing the node's authored local transform |
+| `bone bind INPUT --node ID --bone ID --output PATH` | Bind without changing the node's authored local transform. The node's transform becomes relative to the bone, so a bone at (x, y) shifts the shape by (x, y); create bones at 0,0 when the shapes should stay where they are |
 | `bone keyframe INPUT --bone ID --clip ID [--property x\|y\|rotation] --time N --value N --output PATH` | Insert/replace a numeric keyframe in an existing clip (default property: rotation) |
 | `convert-to-path INPUT --node ID --output PATH` | Convert rect/circle geometry to a path, retaining the original primitive |
 | `convert-back INPUT --node ID --output PATH` | Restore an unmodified converted path to its original primitive |
@@ -351,7 +351,8 @@ and winding); `keyframe --property d --path D` adds further keys of that
 structure. Both also run in the exported browser runtime. Text cannot take part (convert it in an external tool first).
 The result is a normal path that every editor tool, export and runtime supports.
 
-Groups live in `project.groups` (`id`, `name`, `parentId`) and nodes reference
+Groups live in `project.groups` (`id`, `name`, `parentId`, optional `rig`, see
+[Animating a whole group](#animating-a-whole-group)) and nodes reference
 their direct group via `group`. `node list` also returns `groupPath` (outermost
 first) and all groups; exports wrap members in nested `<g id="…">` elements.
 `import-svg` keeps `<g id="…">` as groups, imports `<text>` as text nodes and
@@ -501,6 +502,29 @@ splinely-cli keyframe project.sply --clip motion --target ball --property y --ti
 splinely-cli keyframe project.sply --clip motion --target ball --property fill --time 1 --color "#ff8800"
 splinely-cli keyframe rig.sply --output rig.sply --clip pose --target upper-arm --property rotation --time 1 --value -30
 ```
+
+### Animating a whole group
+
+`--target` also accepts a group ID for `x`, `y` and `rotation`:
+
+```sh
+splinely-cli arrange group mascot.sply --nodes body,wing,eye        # prints the group id, e.g. group-1
+splinely-cli keyframe mascot.sply --clip hover --target group-1 --property y --time 1 --by -12 --autoplay --loop
+splinely-cli keyframe mascot.sply --clip spin --target group-1 --property rotation --time 1 --value 360
+splinely-cli on mascot.sply --event click --target body --machine m --to up --state group-1.y=-30
+splinely-cli follow mascot.sply --target group-1 --mode rotate --max 10
+```
+
+The first group animation adds a hidden rig: bones `GROUP-move` → `GROUP-turn` →
+`GROUP-attach` (stored in `groups[].rig`) and binds every shape of the group to
+the attach bone. At rest the rig changes nothing, and existing shape animations
+keep working. `x`/`y` are offsets from where the group was drawn (`--value 0` =
+rest), `rotation` turns the group around the centre of its bounds. Tracks, state
+overrides, `--set` actions and followers on a group are stored on the rig bones.
+Other properties (opacity, scale, colours …) still go on the shapes. Shapes that
+are already bound to bones or motion paths cannot join a rig; the command says
+which shape blocks it. In the web runtime, `splinely.set('group-1', {x, y, rotation})`
+drives the same rig.
 
 Value flags: `--value` (numbers), `--by` (number relative to the target's
 current static value), `--color` (fill/stroke), `--gradient` (gradient) and

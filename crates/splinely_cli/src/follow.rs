@@ -18,7 +18,18 @@ pub struct Options {
 }
 
 pub fn run(input: &str, output: &str, o: Options) -> Result<Value> {
-    let project = load(input)?;
+    let mut project = load(input)?;
+    let mut o = o;
+    if project.is_group(&o.target) && !o.remove {
+        // Groups follow through their rig: offset moves it, rotate turns it.
+        let property = match o.mode.to_ascii_lowercase().as_str() {
+            "rotate" | "turn" => splinely_document::Property::Rotation,
+            _ => splinely_document::Property::X,
+        };
+        o.target = project
+            .animation_target(&o.target, property)
+            .map_err(|e| failure("invalid_target", e))?;
+    }
     let exists = project.nodes.iter().any(|n| n.id == o.target)
         || project.bones.iter().any(|b| b.id == o.target);
     if !exists && !o.remove {

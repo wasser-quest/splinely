@@ -152,6 +152,10 @@ fails, nothing is saved and the error names the step.
 - Background added last covers everything → `arrange order F --nodes background --to back`.
 - Animating `x` to an absolute position: values are transform offsets; use `--by`.
 - Spinning/pulsing around a corner instead of the centre → `--pivot center`.
+- Moving several shapes together: group them (`arrange group`) and keyframe the
+  group ID (x, y, rotation); a hidden rig moves it, rotation turns around its centre.
+- `bone bind` keeps the shape's local transform, so a bone at (x, y) shifts the
+  shape by (x, y). Add bones at 0,0 unless you want that offset.
 - Clip never plays → add `--autoplay` or an `on … --play` interaction.
 - `fill` keyframes on a shape with a gradient do nothing → animate `gradient` instead.
 - Text colour equal to the background → `check` reports `low_contrast`.

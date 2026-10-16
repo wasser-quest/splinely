@@ -104,6 +104,7 @@ impl Project {
                 .map(str::to_owned)
                 .unwrap_or_else(|| self.unused_group_name()),
             parent_id: common.last().cloned(),
+            rig: None,
         });
         for (node, path) in ids.iter().zip(&paths) {
             match path.get(depth) {
@@ -248,6 +249,7 @@ impl Project {
                             id: new.clone(),
                             name,
                             parent_id: parent.clone(),
+                            rig: None,
                         });
                         mapping.insert(old, new.clone());
                         new
@@ -257,6 +259,143 @@ impl Project {
             }
             node.group = parent;
         }
+    }
+}
+
+/// Bone of a group rig that carries `property`, if groups can animate it.
+pub fn group_rig_bone(rig: &GroupRig, property: Property) -> Option<&str> {
+    match property {
+        Property::X | Property::Y => Some(&rig.move_bone),
+        Property::Rotation => Some(&rig.turn_bone),
+        _ => None,
+    }
+}
+
+impl Project {
+    /// Whether `id` is a group.
+    pub fn is_group(&self, id: &str) -> bool {
+        self.group(id).is_some()
+    }
+
+    /// Make group `id` animatable as one piece and return its rig.
+    ///
+    /// Adds three bones (move → turn → attach) and binds every shape of the
+    /// group to the attach bone. The chain is the identity at rest, so nothing
+    /// moves and existing shape animations keep working. Calling it again
+    /// returns the existing rig. Shapes that are already bound to bones or to
+    /// motion paths cannot join a rig.
+    pub fn rig_group(&mut self, id: &str) -> Result<GroupRig, DocumentError> {
+        let group = self
+            .group(id)
+            .ok_or_else(|| DocumentError(format!("missing group {id}")))?;
+        if let Some(rig) = &group.rig {
+            return Ok(rig.clone());
+        }
+        let members = self.nodes_in_group(id);
+        if members.is_empty() {
+            return Err(DocumentError(format!(
+                "group {id} has no shapes to animate"
+            )));
+        }
+        for node in self.nodes.iter().filter(|n| members.contains(&n.id)) {
+            if let Some(bone) = &node.bone_id {
+                return Err(DocumentError(format!(
+                    "group {id}: shape {} is already bound to bone {bone}; animate that bone, or unbind the shape to animate the group as a whole",
+                    node.id
+                )));
+            }
+            if node.motion_path.is_some() {
+                return Err(DocumentError(format!(
+                    "group {id}: shape {} follows a motion path; remove it to animate the group as a whole",
+                    node.id
+                )));
+            }
+        }
+        let [x, y, w, h] = self.bounds_of(&members)?;
+        let (cx, cy) = (x + w / 2.0, y + h / 2.0);
+
+        let mut next = self.clone();
+        let fresh = |suffix: &str, taken: &[String]| {
+            let base = format!("{id}-{suffix}");
+            if next.id_in_use(&base) || taken.contains(&base) {
+                next.unused_ids(&base, taken.len() + 1)
+                    .into_iter()
+                    .find(|candidate| !taken.contains(candidate))
+                    .expect("unused_ids returns enough IDs")
+            } else {
+                base
+            }
+        };
+        let mut ids = Vec::new();
+        for suffix in ["move", "turn", "attach"] {
+            let next_id = fresh(suffix, &ids);
+            ids.push(next_id);
+        }
+        let rig = GroupRig {
+            move_bone: ids[0].clone(),
+            turn_bone: ids[1].clone(),
+            attach_bone: ids[2].clone(),
+        };
+        // Child offsets start at the parent tip; every bone is 1 unit long.
+        // turn sits on the centre; attach returns to the scene origin, so the
+        // whole chain is the identity until move/turn are animated.
+        next.bones.push(Bone {
+            id: rig.move_bone.clone(),
+            parent_id: None,
+            x: 0.0,
+            y: 0.0,
+            rotation: 0.0,
+            length: 1.0,
+        });
+        next.bones.push(Bone {
+            id: rig.turn_bone.clone(),
+            parent_id: Some(rig.move_bone.clone()),
+            x: cx - 1.0,
+            y: cy,
+            rotation: 0.0,
+            length: 1.0,
+        });
+        next.bones.push(Bone {
+            id: rig.attach_bone.clone(),
+            parent_id: Some(rig.turn_bone.clone()),
+            x: -cx - 1.0,
+            y: -cy,
+            rotation: 0.0,
+            length: 1.0,
+        });
+        for node in next.nodes.iter_mut().filter(|n| members.contains(&n.id)) {
+            node.bone_id = Some(rig.attach_bone.clone());
+        }
+        next.groups
+            .iter_mut()
+            .find(|g| g.id == id)
+            .expect("group checked above")
+            .rig = Some(rig.clone());
+        next.validate()?;
+        *self = next;
+        Ok(rig)
+    }
+
+    /// Resolve an animation target: a group becomes the rig bone that carries
+    /// `property` (creating the rig on first use); anything else is returned
+    /// unchanged.
+    pub fn animation_target(
+        &mut self,
+        target: &str,
+        property: Property,
+    ) -> Result<String, DocumentError> {
+        if !self.is_group(target) {
+            return Ok(target.to_owned());
+        }
+        if !matches!(property, Property::X | Property::Y | Property::Rotation) {
+            return Err(DocumentError(format!(
+                "group {target}: groups animate x, y and rotation; animate {property:?} on the shapes inside the group"
+            )));
+        }
+        let rig = self.rig_group(target)?;
+        Ok(group_rig_bone(&rig, property)
+            .expect("property checked above")
+            .to_owned())
     }
 }
 
@@ -281,6 +420,121 @@ mod tests {
 
     fn order(p: &Project) -> Vec<&str> {
         p.nodes.iter().map(|n| n.id.as_str()).collect()
+    }
+
+    fn rigged() -> (Project, GroupRig) {
+        let mut p = scene();
+        let group = p.group_nodes(&ids(&["a", "b"]), None).unwrap();
+        let rig = p.rig_group(&group).unwrap();
+        (p, rig)
+    }
+
+    fn pose(p: &Project, id: &str) -> Transform {
+        p.evaluate(0.)
+            .unwrap()
+            .into_iter()
+            .find(|n| n.id == id)
+            .unwrap()
+            .transform
+    }
+
+    fn close(actual: f64, expected: f64) {
+        assert!((actual - expected).abs() < 1e-9, "{actual} != {expected}");
+    }
+
+    #[test]
+    fn group_rig_is_identity_at_rest_and_turns_around_the_centre() {
+        let before = scene().evaluate(0.).unwrap();
+        let (mut p, rig) = rigged();
+        for node in &before {
+            assert_eq!(pose(&p, &node.id), node.transform, "{}", node.id);
+        }
+        assert!(p
+            .nodes
+            .iter()
+            .filter(|n| n.id == "a" || n.id == "b")
+            .all(|n| n.bone_id.as_deref() == Some(rig.attach_bone.as_str())));
+        // a and b span x 0..30, y 0..10: centre (15, 5). Turning a quarter
+        // moves a's origin (0, 0) to (20, -10).
+        p.bones
+            .iter_mut()
+            .find(|b| b.id == rig.turn_bone)
+            .unwrap()
+            .rotation = 90.;
+        let a = pose(&p, "a");
+        close(a.x, 20.);
+        close(a.y, -10.);
+        close(a.rotation, 90.);
+        p.bones
+            .iter_mut()
+            .find(|b| b.id == rig.move_bone)
+            .unwrap()
+            .y = 7.;
+        close(pose(&p, "a").y, -3.);
+    }
+
+    #[test]
+    fn group_rig_is_reused_and_avoids_taken_ids() {
+        let mut p = scene();
+        p.nodes.push(Node::rect("group-1-move", 200., 0., 5., 5.));
+        let group = p.group_nodes(&ids(&["a", "b"]), None).unwrap();
+        let rig = p.rig_group(&group).unwrap();
+        assert_eq!(rig.move_bone, "group-1-move-1");
+        assert_eq!(rig.turn_bone, "group-1-turn");
+        let bones = p.bones.len();
+        assert_eq!(p.rig_group(&group).unwrap(), rig);
+        assert_eq!(p.bones.len(), bones);
+    }
+
+    #[test]
+    fn group_rig_refuses_bone_bound_shapes_and_changes_nothing() {
+        let mut p = scene();
+        p.bones.push(Bone {
+            id: "arm".into(),
+            parent_id: None,
+            x: 0.,
+            y: 0.,
+            rotation: 0.,
+            length: 1.,
+        });
+        p.nodes[0].bone_id = Some("arm".into());
+        let group = p.group_nodes(&ids(&["a", "b"]), None).unwrap();
+        let before = p.clone();
+        let error = p.rig_group(&group).unwrap_err();
+        assert!(error.0.contains("bound to bone arm"), "{error:?}");
+        assert_eq!(p, before);
+    }
+
+    #[test]
+    fn animation_targets_map_groups_to_rig_bones() {
+        let (mut p, rig) = rigged();
+        assert_eq!(
+            p.animation_target("group-1", Property::X).unwrap(),
+            rig.move_bone
+        );
+        assert_eq!(
+            p.animation_target("group-1", Property::Y).unwrap(),
+            rig.move_bone
+        );
+        assert_eq!(
+            p.animation_target("group-1", Property::Rotation).unwrap(),
+            rig.turn_bone
+        );
+        assert!(p.animation_target("group-1", Property::Opacity).is_err());
+        assert_eq!(p.animation_target("c", Property::Opacity).unwrap(), "c");
+        assert_eq!(group_rig_bone(&rig, Property::ScaleX), None);
+    }
+
+    #[test]
+    fn broken_group_rigs_fail_validation() {
+        let (mut p, rig) = rigged();
+        p.bones.retain(|b| b.id != rig.turn_bone);
+        p.bones
+            .iter_mut()
+            .find(|b| b.id == rig.attach_bone)
+            .unwrap()
+            .parent_id = Some(rig.move_bone.clone());
+        assert!(p.validate().unwrap_err().0.contains("rig needs bones"));
     }
 
     #[test]
@@ -355,11 +609,13 @@ mod tests {
                 id: "g1".into(),
                 name: String::new(),
                 parent_id: Some("g2".into()),
+                rig: None,
             },
             Group {
                 id: "g2".into(),
                 name: String::new(),
                 parent_id: Some("g1".into()),
+                rig: None,
             },
         ];
         assert!(cyclic.validate().is_err());
@@ -368,6 +624,7 @@ mod tests {
             id: "a".into(),
             name: String::new(),
             parent_id: None,
+            rig: None,
         }];
         assert!(
             clash.validate().is_err(),

@@ -533,29 +533,35 @@ impl Project {
         self.unused_id_excluding(prefix, &[])
     }
 
+    /// Whether `id` is taken anywhere in the shared ID namespace.
+    pub(crate) fn id_in_use(&self, id: &str) -> bool {
+        self.unused_id_excluding_check(id, &[])
+    }
+
     fn unused_id_excluding(&self, prefix: &str, reserved: &[String]) -> String {
-        let used = |id: &str| {
-            id == "splinely-project"
-                || reserved.iter().any(|r| r == id)
-                || self.nodes.iter().any(|n| n.id == id)
-                || self.bones.iter().any(|n| n.id == id)
-                || self.clips.iter().any(|n| n.id == id)
-                || self.state_machines.iter().any(|n| n.id == id)
-                || self.audio_assets.iter().any(|n| n.id == id)
-                || self.audio_cues.iter().any(|n| n.id == id)
-                || self
-                    .clips
-                    .iter()
-                    .flat_map(|c| &c.audio_cues)
-                    .any(|n| n.id == id)
-                || self.followers.iter().any(|n| n.id == id)
-                || self.groups.iter().any(|g| g.id == id)
-                || self.blend_spaces.iter().any(|s| s.id == id)
-        };
         (1..)
             .map(|i| format!("{prefix}-{i}"))
-            .find(|id| !used(id))
+            .find(|id| !self.unused_id_excluding_check(id, reserved))
             .unwrap()
+    }
+
+    fn unused_id_excluding_check(&self, id: &str, reserved: &[String]) -> bool {
+        id == "splinely-project"
+            || reserved.iter().any(|r| r == id)
+            || self.nodes.iter().any(|n| n.id == id)
+            || self.bones.iter().any(|n| n.id == id)
+            || self.clips.iter().any(|n| n.id == id)
+            || self.state_machines.iter().any(|n| n.id == id)
+            || self.audio_assets.iter().any(|n| n.id == id)
+            || self.audio_cues.iter().any(|n| n.id == id)
+            || self
+                .clips
+                .iter()
+                .flat_map(|c| &c.audio_cues)
+                .any(|n| n.id == id)
+            || self.followers.iter().any(|n| n.id == id)
+            || self.groups.iter().any(|g| g.id == id)
+            || self.blend_spaces.iter().any(|s| s.id == id)
     }
 }
 

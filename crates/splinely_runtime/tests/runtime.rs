@@ -580,3 +580,51 @@ fn timers_fire_on_time_and_exit_actions_run_first() {
     )
     .is_err());
 }
+
+#[test]
+fn rigged_groups_are_set_through_their_rig_bones() {
+    let mut p = Project::default();
+    p.nodes.push(Node::rect("a", 0.0, 0.0, 10.0, 10.0));
+    p.nodes.push(Node::rect("b", 20.0, 0.0, 10.0, 10.0));
+    p.nodes.push(Node::rect("c", 50.0, 0.0, 10.0, 10.0));
+    let group = p
+        .group_nodes(&["a".to_string(), "b".to_string()], None)
+        .unwrap();
+    p.rig_group(&group).unwrap();
+    // An outer group around the rigged one and c has no rig of its own.
+    let plain = p
+        .group_nodes(&["c".to_string(), "a".to_string()], None)
+        .unwrap();
+    let mut r = Runtime::new(p).unwrap();
+    let set = |r: &mut Runtime, id: &str, property, value| {
+        r.execute(Request::Action {
+            action: Action::SetProperty {
+                node_id: id.into(),
+                property,
+                value: AnimValue::Number(value),
+            },
+        })
+    };
+    // Centre (15, 5): a quarter turn moves a's origin to (20, -10), then 7 down.
+    set(&mut r, &group, Property::Rotation, 90.0).unwrap();
+    set(&mut r, &group, Property::Y, 7.0).unwrap();
+    let a = r
+        .evaluate()
+        .unwrap()
+        .nodes
+        .into_iter()
+        .find(|n| n.id == "a")
+        .unwrap()
+        .transform;
+    near(a.x, 20.0);
+    near(a.y, -3.0);
+    near(a.rotation, 90.0);
+    assert!(set(&mut r, &group, Property::Opacity, 0.5)
+        .unwrap_err()
+        .0
+        .contains("groups animate x, y and rotation"));
+    assert!(set(&mut r, &plain, Property::X, 1.0)
+        .unwrap_err()
+        .0
+        .contains("has no rig"));
+}

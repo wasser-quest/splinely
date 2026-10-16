@@ -650,6 +650,12 @@
     for(const b of bones) if(b.parentId!=null && (typeof b.parentId!=='string' || !boneIds.has(b.parentId))) throw new Error('Missing bone parent: '+b.parentId);
     solveBones(bones);
     for(const n of nodes) if(n.boneId!=null && !boneIds.has(n.boneId)) throw new Error('Missing node bone: '+n.boneId);
+    // Group rigs (move → turn → attach bones) let a whole group be animated; see Project::rig_group.
+    for(const g of list(project.groups)) if(g && g.rig!=null) {
+      const r=g.rig, parent=id=>bones.find(b=>b.id===id);
+      if(!r || typeof r!=='object' || ![r.moveBone,r.turnBone,r.attachBone].every(id=>typeof id==='string' && boneIds.has(id)))throw new Error('Group '+g.id+': rig needs existing moveBone, turnBone and attachBone');
+      if(parent(r.turnBone).parentId!==r.moveBone || parent(r.attachBone).parentId!==r.turnBone)throw new Error('Group '+g.id+': rig bones must be chained move → turn → attach');
+    }
     for(const n of nodes) if(n.motionPath!=null) {
       const b=n.motionPath,source=nodes.find(p=>p.id===b.path);
       if(!source || source===n || !source.kind || source.kind.type!=='path')throw new Error('Unknown or invalid motion path source');
@@ -735,6 +741,8 @@
     const env=options.window || (svg.ownerDocument && svg.ownerDocument.defaultView) || host;
     const diagnostics=[], subscriptions=new Map(), cleanup=[], explicit=new Map(), nodes=new Map(), clips=new Map(), machines=new Map();
     const bones=new Map(project.bones.map(b=>[b.id,b]));
+    const groupRigs=new Map((project.groups || []).filter(g=>g && g.rig).map(g=>[g.id,g.rig]));
+    const groupIds=new Set((project.groups || []).filter(g=>g).map(g=>g.id));
     let bonePoses=[];
     const variables=new Map(Object.entries(project.variables || {}).map(([k,v]) => [k,v]));
     let dead=false, raf=null, last=null, api, processing=false, ticking=false, liveRegion=null, afterRender=null, frameHooks=null;
@@ -1150,7 +1158,19 @@
         node.lastReports=reportSink.length>mark?reportSink.slice(mark):null;
       }
     }
-    function set(id,props) {ensure();if(props && own(props,'motionProgress')) {if(!project.nodes.some(n=>n.id===id && n.motionPath))throw new Error('motionProgress requires a motionPath binding');weightValue(unwrap(props.motionProgress));}if(!bones.has(id))getNode(id); if(props===null) explicit.delete(id); else {if(!props || typeof props!=='object' || Array.isArray(props)) throw new Error('Properties must be an object or null');explicit.set(id,{...explicit.get(id),...(bones.has(id)?bonePatch(props):props)});}dirty=true;render();}
+    // A group is set through its rig: x/y offset the move bone, rotation turns the turn bone.
+    function setGroup(id,props) {
+      const rig=groupRigs.get(id);
+      if(!rig)throw new Error('Group '+id+' has no rig; animate the group once (e.g. splinely-cli keyframe --target '+id+') to create one');
+      if(props===null){explicit.delete(rig.moveBone);explicit.delete(rig.turnBone);dirty=true;render();return;}
+      if(!props || typeof props!=='object' || Array.isArray(props)) throw new Error('Properties must be an object or null');
+      const patch=bonePatch(props), move={}, turn={};
+      for(const k of Object.keys(patch))(k==='rotation'?turn:move)[k]=patch[k];
+      if(Object.keys(move).length)explicit.set(rig.moveBone,{...explicit.get(rig.moveBone),...move});
+      if(Object.keys(turn).length)explicit.set(rig.turnBone,{...explicit.get(rig.turnBone),...turn});
+      dirty=true;render();
+    }
+    function set(id,props) {ensure();if(!bones.has(id) && !nodes.has(id) && groupIds.has(id))return setGroup(id,props);if(props && own(props,'motionProgress')) {if(!project.nodes.some(n=>n.id===id && n.motionPath))throw new Error('motionProgress requires a motionPath binding');weightValue(unwrap(props.motionProgress));}if(!bones.has(id))getNode(id); if(props===null) explicit.delete(id); else {if(!props || typeof props!=='object' || Array.isArray(props)) throw new Error('Properties must be an object or null');explicit.set(id,{...explicit.get(id),...(bones.has(id)?bonePatch(props):props)});}dirty=true;render();}
     function variable(id) {ensure();if(!variables.has(id)) throw new Error('Unknown variable: '+id);return {get:()=>variables.get(id),set:v=>{ensure();const old=variables.get(id);if((old===null?v!==null:typeof old!==typeof v) || Array.isArray(old)!==Array.isArray(v))throw new Error('Variable type mismatch: '+id);if(v===undefined || typeof v==='function' || (typeof v==='number' && !Number.isFinite(v)))throw new Error('Variable must be a JSON value');if(project.blendSpaces.some(s=>s.parameters.includes(id)))blendParameter(v);variables.set(id,v);dirty=true;render();emit('variable.change',{id,value:v});}};}
     function actions(items,detail) {
       for(const a of items || []) {

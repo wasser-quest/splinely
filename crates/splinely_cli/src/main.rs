@@ -307,7 +307,7 @@ enum Command {
         /// Existing clip ID, or a new globally unique ID (creates an inactive clip).
         #[arg(long)]
         clip: String,
-        /// Existing node or bone ID. Bones support only x, y and rotation.
+        /// Existing node, bone or group ID. Bones and groups support only x, y and rotation.
         #[arg(long)]
         target: String,
         /// Property: x, y, rotation, scaleX, scaleY, opacity, width, height, radius,
@@ -896,7 +896,7 @@ fn schema() -> Result<Value> {
         "bindingExample":{"boneId":"upper-arm","transform":{"x":0.0,"y":0.0,"rotation":0.0,"scaleX":1.0,"scaleY":1.0}},
         "boneTrackExample":{"nodeId":"upper-arm","property":"rotation","keyframes":[{"time":0.0,"value":{"type":"number","value":30.0},"easing":{"type":"linear"}}]},
         "boneProperties":["x","y","rotation"],
-        "keyframeCommand":{"numericProperties":["motionProgress","x","y","rotation","scaleX","scaleY","opacity","width","height","radius","fontSize"],"target":"Existing node or bone ID; bones support only x/y/rotation; width/height require rect, radius circle, fontSize text","time":"Finite nonnegative seconds; duration grows to max(existing duration, time, 0.001)","replacement":"Same target/property/time replaces only value, retaining easing; insertion is sorted and linear","newClip":"Name equals ID; looping and autoplay false; blendMode override, weight 1; ID must be globally unique","locking":"Explicit document edit; locked editor metadata does not prevent writing"},
+        "keyframeCommand":{"numericProperties":["motionProgress","x","y","rotation","scaleX","scaleY","opacity","width","height","radius","fontSize"],"target":"Existing node, bone or group ID; bones and groups support only x/y/rotation (a group animates through its rig bones: x/y offset from where it was drawn, rotation around its centre); width/height require rect, radius circle, fontSize text","time":"Finite nonnegative seconds; duration grows to max(existing duration, time, 0.001)","replacement":"Same target/property/time replaces only value, retaining easing; insertion is sorted and linear","newClip":"Name equals ID; looping and autoplay false; blendMode override, weight 1; ID must be globally unique","locking":"Explicit document edit; locked editor metadata does not prevent writing"},
         "boneCoordinates":"Root x/y are scene coordinates. Child x/y offset from parent tip; child rotation is relative in degrees. Bound node transform is local to bone root. Bone IDs share the global ID namespace.",
         "properties":["motionProgress","x","y","rotation","scaleX","scaleY","opacity","fill","stroke","width","height","radius","fontSize"],
         "easingExamples":[{"type":"linear"},{"type":"step"},{"type":"cubicBezier","x1":0.42,"y1":0.0,"x2":0.58,"y2":1.0}],

@@ -50,6 +50,7 @@ pub use binary::{
 pub use boolean::BooleanOp;
 pub use browser_host::BrowserExportOptions;
 pub use follow::{blend_values, smooth_toward, StateFade};
+pub use groups::group_rig_bone;
 pub use history::*;
 pub use model::*;
 pub use morph::morph_paths;

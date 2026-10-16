@@ -226,3 +226,131 @@ fn help_and_schema_describe_numeric_editing() {
         11
     );
 }
+
+#[test]
+fn groups_animate_states_and_follow_through_their_rig() {
+    let dir = std::env::temp_dir().join(format!("splinely-group-rig-{}", std::process::id()));
+    std::fs::create_dir_all(&dir).unwrap();
+    let file = dir.join("group.json");
+    let f = file.to_str().unwrap();
+    success(&["new", "--output", f, "--width", "400", "--height", "300"]);
+    success(&[
+        "node", "add", f, "--kind", "rect", "--id", "a", "--x", "150", "--y", "100", "--width",
+        "60", "--height", "40",
+    ]);
+    success(&[
+        "node", "add", f, "--kind", "circle", "--id", "b", "--x", "240", "--y", "160", "--radius",
+        "20",
+    ]);
+    let group = success(&["arrange", "group", f, "--nodes", "a,b"]);
+    let group = group["id"].as_str().unwrap().to_owned();
+
+    let result = success(&[
+        "keyframe",
+        f,
+        "--clip",
+        "spin",
+        "--target",
+        &group,
+        "--property",
+        "rotation",
+        "--time",
+        "1",
+        "--value",
+        "90",
+        "--autoplay",
+    ]);
+    assert!(result["hints"].to_string().contains("rig bone"), "{result}");
+    success(&[
+        "keyframe",
+        f,
+        "--clip",
+        "spin",
+        "--target",
+        &group,
+        "--property",
+        "y",
+        "--time",
+        "1",
+        "--by",
+        "-50",
+    ]);
+    success(&[
+        "on",
+        f,
+        "--event",
+        "click",
+        "--target",
+        "a",
+        "--machine",
+        "m",
+        "--to",
+        "up",
+        "--state",
+        &format!("{group}.x=30"),
+        "--set",
+        &format!("{group}.rotation=10"),
+    ]);
+    success(&[
+        "follow", f, "--target", &group, "--mode", "rotate", "--max", "10",
+    ]);
+
+    let project = read(f);
+    let rig = &project["groups"][0]["rig"];
+    let (moving, turning) = (rig["moveBone"].clone(), rig["turnBone"].clone());
+    let tracks = &project["clips"][0]["tracks"];
+    assert_eq!(tracks[0]["nodeId"], turning);
+    assert_eq!(tracks[1]["nodeId"], moving);
+    assert_eq!(tracks[1]["keyframes"][1]["value"]["value"], json!(-50.0));
+    let machine = &project["stateMachines"][0];
+    let up = machine["states"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .find(|s| s["id"] == "up")
+        .unwrap();
+    assert_eq!(up["overrides"][0]["nodeId"], moving);
+    assert_eq!(machine["transitions"][0]["actions"][0]["nodeId"], turning);
+    assert_eq!(project["followers"][0]["target"], turning);
+    assert!(project["nodes"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .filter(|n| n["id"] == "a" || n["id"] == "b")
+        .all(|n| n["boneId"] == rig["attachBone"]));
+
+    // Group centre (205, 140): after 1 s the rect's origin (0, 0) turned a
+    // quarter around it and moved 50 up.
+    let at = success(&["evaluate", f, "--time", "1"]);
+    let a = at["nodes"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .find(|n| n["id"] == "a")
+        .unwrap();
+    let close = |v: &Value, e: f64| assert!((v.as_f64().unwrap() - e).abs() < 1e-6, "{v} != {e}");
+    close(&a["transform"]["x"], 345.0);
+    close(&a["transform"]["y"], -115.0);
+    close(&a["transform"]["rotation"], 90.0);
+
+    let error = invoke(&[
+        "keyframe",
+        f,
+        "--clip",
+        "spin",
+        "--target",
+        &group,
+        "--property",
+        "opacity",
+        "--time",
+        "1",
+        "--value",
+        "0.5",
+    ]);
+    assert!(!error.status.success());
+    assert!(
+        String::from_utf8_lossy(&error.stdout).contains("groups animate x, y and rotation")
+            || String::from_utf8_lossy(&error.stderr).contains("groups animate x, y and rotation")
+    );
+    std::fs::remove_dir_all(&dir).unwrap();
+}

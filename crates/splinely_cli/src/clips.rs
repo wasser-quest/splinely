@@ -301,19 +301,35 @@ pub const EVENTS: &[&str] = &[
     "clip.end",
 ];
 
-/// One `--set NODE.PROPERTY=VALUE` assignment as a setProperty action.
-fn set_action(project: &Project, spec: &str) -> Result<Value> {
+/// One `--set NODE.PROPERTY=VALUE` assignment as a setProperty action. A
+/// group target (x, y, rotation) is redirected to its rig bone.
+fn set_action(project: &mut Project, spec: &str) -> Result<Value> {
     let usage = || {
         failure("invalid_arguments", format!("Bad --set {spec:?}"))
             .hint("Use NODE.PROPERTY=VALUE, e.g. ball.fill=red, ball.opacity=0.5 or ball.x=120")
     };
     let (target, value) = spec.split_once('=').ok_or_else(usage)?;
     let (node, property) = target.rsplit_once('.').ok_or_else(usage)?;
-    if !project.nodes.iter().any(|n| n.id == node) {
+    let resolved;
+    let node = if project.is_group(node) {
+        let parsed =
+            crate::keyframes::property(property).map_err(|e| failure("invalid_arguments", e))?;
+        resolved = project
+            .animation_target(node, parsed)
+            .map_err(|e| failure("invalid_target", e))?;
+        resolved.as_str()
+    } else {
+        node
+    };
+    if !project.nodes.iter().any(|n| n.id == node) && !project.bones.iter().any(|b| b.id == node) {
         return Err(crate::assist::not_found(
-            "node",
+            "node or group",
             node,
-            project.nodes.iter().map(|n| n.id.as_str()),
+            project
+                .nodes
+                .iter()
+                .map(|n| n.id.as_str())
+                .chain(project.groups.iter().map(|g| g.id.as_str())),
         ));
     }
     let value = match property {
@@ -346,7 +362,7 @@ pub fn on(
     blend: f64,
     after: Option<f64>,
 ) -> Result<Value> {
-    let project = load(input)?;
+    let mut project = load(input)?;
     if !state_set.is_empty() && to.is_none() {
         return Err(failure("invalid_arguments", "--state needs --to").hint(
             "Name the state that should look like this, e.g. --to happy --state face.fill=gold",
@@ -371,8 +387,13 @@ pub fn on(
         actions.push(json!({"type": "stopClip", "clipId": clip}));
     }
     for spec in &set {
-        actions.push(set_action(&project, spec)?);
+        actions.push(set_action(&mut project, spec)?);
     }
+    // Resolve state values now: a group target may add rig bones to the project.
+    let state_actions = state_set
+        .iter()
+        .map(|spec| set_action(&mut project, spec))
+        .collect::<Result<Vec<_>>>()?;
     if actions.is_empty() && from == to && state_set.is_empty() {
         return Err(
             failure("invalid_arguments", "Nothing happens on this event")
@@ -400,8 +421,7 @@ pub fn on(
             states.push(json!({"id": state}));
         }
     }
-    for spec in &state_set {
-        let action = set_action(&project, spec)?;
+    for action in state_actions {
         let states = m["states"].as_array_mut().expect("array");
         let state = states
             .iter_mut()
