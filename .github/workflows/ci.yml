@@ -28,7 +28,7 @@ jobs:
       - run: bash scripts/check.sh
 
   # Real-browser matrix (docs/browser-tests.md, PLAN.md item 9). Separate job so that `check` stays untouched.
-  # NOTE: this job has not been executed on GitHub yet; it was developed and run locally (see docs/browser-tests.md).
+  # First GitHub run (128e093): chromium and webkit green; firefox failed its audio gates until PulseAudio was started first.
   browser-matrix:
     runs-on: ubuntu-24.04
     timeout-minutes: 45
@@ -55,19 +55,24 @@ jobs:
           npm install --prefix "$RUNNER_TEMP/pw" --no-audit --no-fund "playwright@${PLAYWRIGHT_VERSION}"
           "$RUNNER_TEMP/pw/node_modules/.bin/playwright" install --with-deps chromium firefox webkit
           echo "PLAYWRIGHT_MODULE=$RUNNER_TEMP/pw/node_modules/playwright" >> "$GITHUB_ENV"
+      # Hosted runners have no sound card and no audio server. Without one, Firefox cannot open an audio stream,
+      # so AudioContext.resume() never leaves "suspended" and the gate scenarios (demo-gate-and-state,
+      # anime-hello-gate) fail. A PulseAudio daemon with a null sink as default output must run BEFORE the matrix.
+      # ffmpeg is only needed by the non-blocking audio leg below.
+      - name: Install and start PulseAudio (null sink)
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends pulseaudio pulseaudio-utils ffmpeg
+          pulseaudio --start --exit-idle-time=-1 --log-target=stderr
+          pactl load-module module-null-sink sink_name=ci_null_sink
+          pactl set-default-sink ci_null_sink
+          pactl info
       # Blocking leg: all smoke scenarios in all three engines + cross-browser numeric comparison.
       # Exit code 3 ("incomplete", something was skipped) fails the job on purpose: a skip is not a pass.
       - name: Browser matrix (chromium + firefox + webkit)
         run: bash scripts/browser-matrix.sh --audio none --out-dir "$MATRIX_OUT"
-      # Non-blocking leg: audible output + latency through a PulseAudio null sink. Hosted runners have no sound
-      # card, so a failure here is reported (artifact + log) but does not fail the job.
-      - name: Install PulseAudio and ffmpeg for the audio leg
-        continue-on-error: true
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y --no-install-recommends pulseaudio pulseaudio-utils ffmpeg
-          pulseaudio --start --exit-idle-time=-1 --log-target=stderr || true
-          pactl info
+      # Non-blocking leg: audible output + latency through a PulseAudio null sink (null sink != real hardware),
+      # so a failure here is reported (artifact + log) but does not fail the job.
       - name: Audible output and latency (null sink, chromium + firefox)
         continue-on-error: true
         run: |
