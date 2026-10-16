@@ -221,6 +221,9 @@ scenario('demo-gate-and-state', 'demo.svg: audio gate click, WebAudio decode, ti
   const initial = await page.evaluate(() => { const f = document.documentElement.splinely; return {mounted: !!f, playing: f.timeline.playing, controls: document.querySelectorAll('g[role=button]').length}; });
   ctx.check('mounted, paused, one start control', initial.mounted && !initial.playing && initial.controls === 1, initial);
   await page.click('g[role=button] rect');
+  // The first audio stream of a cold browser (e.g. Firefox -> PulseAudio on a CI runner) can take well over 500 ms
+  // to open; wait for the unlock (bounded, a timeout still fails the checks below), then let the timeline run.
+  await page.waitForFunction(() => document.documentElement.splinely.audio.ready, null, {timeout: 10000}).catch(() => {});
   await sleep(500);
   const after = await page.evaluate(() => { const f = document.documentElement.splinely; return {playing: f.timeline.playing, ready: f.audio.ready, state: f.audio.context && f.audio.context.state, time: f.timeline.time, buffers: f.audio.buffers.size, controls: document.querySelectorAll('g[role=button]').length}; });
   ctx.check('real click starts timeline', after.playing && after.time > 0.1 && after.controls === 0, after);
@@ -269,6 +272,8 @@ scenario('anime-hello-gate', 'anime-hello.html: gate click, trusted WAV decode/s
   const initial = await page.evaluate(() => document.querySelector('object').contentDocument.querySelector('#wave-hand').getAttribute('transform'));
   ctx.check('audio gate present before click', await page.evaluate(() => document.querySelector('object').contentDocument.querySelectorAll('[data-splinely-host-control]').length) === 1);
   await clickElement(page, '[data-splinely-host-control] rect', sel);
+  // Same cold-audio allowance as demo-gate-and-state: wait (bounded) for the unlock, then let the greeting run.
+  await page.waitForFunction(() => document.querySelector('object').contentDocument.documentElement.splinely.audio.ready, null, {timeout: 10000}).catch(() => {});
   await sleep(900);
   const result = await page.evaluate(() => {
     const d = document.querySelector('object').contentDocument, f = d.documentElement.splinely;
