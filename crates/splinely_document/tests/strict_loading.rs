@@ -43,3 +43,17 @@ fn from_value_strict_matches_from_json_and_reports_stable_codes() {
     invalid["width"] = serde_json::json!(-5.0);
     assert_eq!(code_of(invalid), "validation_error");
 }
+
+#[test]
+fn unknown_fields_suggest_updating_splinely() {
+    let mut value = serde_json::to_value(splinely_document::Project::default()).unwrap();
+    value["futureFeature"] = serde_json::json!(true);
+    let err = splinely_document::Project::from_json(&value.to_string()).unwrap_err();
+    assert!(
+        err.0.contains("Unsupported field at /futureFeature"),
+        "{}",
+        err.0
+    );
+    assert!(err.0.contains("newer Splinely"), "{}", err.0);
+    assert!(err.0.contains(env!("CARGO_PKG_VERSION")), "{}", err.0);
+}

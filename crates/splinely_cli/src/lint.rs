@@ -58,12 +58,23 @@ fn findings(project: &Project, file: &str) -> Vec<Finding> {
         );
     }
     let bounds = project.authored_bounds().unwrap_or_default();
+    // Clips, state overrides and setProperty actions all change a node at run time.
     let animated = |id: &str, property: Option<Property>| {
-        project.clips.iter().any(|c| {
-            c.tracks
-                .iter()
-                .any(|t| t.node_id == id && property.is_none_or(|p| t.property == p))
-        })
+        let hits = |node_id: &str, p: Property| node_id == id && property.is_none_or(|q| q == p);
+        let action_hits = |a: &splinely_document::Action| matches!(a, splinely_document::Action::SetProperty { node_id, property: p, .. } if hits(node_id, *p));
+        project
+            .clips
+            .iter()
+            .any(|c| c.tracks.iter().any(|t| hits(&t.node_id, t.property)))
+            || project.state_machines.iter().any(|m| {
+                m.states.iter().any(|s| {
+                    s.overrides.iter().any(|o| hits(&o.node_id, o.property))
+                        || s.on_enter.iter().chain(&s.on_exit).any(action_hits)
+                }) || m
+                    .transitions
+                    .iter()
+                    .any(|t| t.actions.iter().any(action_hits))
+            })
     };
     let canvas: Bounds = [0., 0., project.width, project.height];
     let users = crate::clips::clip_users(project);
@@ -96,7 +107,7 @@ fn findings(project: &Project, file: &str) -> Vec<Finding> {
                 "info",
                 "invisible",
                 format!(
-                    "'{}' has opacity 0 and no opacity animation, so it never shows.",
+                    "'{}' has opacity 0 and no clip, state or action changes its opacity, so it never shows.",
                     node.id
                 ),
                 format!(

@@ -16,11 +16,12 @@ Splinely ist ein Vektor-Animationseditor in Rust. Projekte stehen in **`.sply`-D
 - Kein Netzwerk für die mitgelieferte Runtime. Eigener Code läuft nur nach ausdrücklicher Freigabe und ist keine Sandbox.
 - Der Editor startet leer und ist in sechs Sprachen verfügbar (de, en, es, fr, ja, zh).
 
-## Stand: Version 0.5.1
+## Stand: Version 0.5.2
 
 | Bereich | Umgesetzt |
 | --- | --- |
 | Dokument & Bearbeitung | Rechteck, Kreis, Text, Pfade, Polygon/Stern/Linie, Gruppen, Ebenen, Undo/Redo-Verlauf, Autosave mit Wiederherstellung, Hilfslinien, Raster/Snapping, boolesche Operationen, Text in Pfad, SVG-Vektorimport (begrenzt) |
+| Prüfungen & Kompatibilität (0.5.2) | `check` zählt State-Overrides und `setProperty`-Aktionen als Animation (keine falschen „nie sichtbar“-Hinweise mehr); unbekannte Felder melden, dass die Datei aus einer neueren Splinely-Version stammen kann |
 | Gruppen-Animation (0.5.1) | `keyframe`, `on --state/--set` und `follow` animieren Gruppen direkt (x, y, Drehung um die Mitte) über ein verstecktes Bone-Rig (`groups[].rig`); Browser- und native Runtime unterstützen `set` auf Gruppen |
 | Bewegungspfade | Optionale `motionPath`-Bindung an einen Pfad, animierbarer `motionProgress` 0–1, optionale Tangentenausrichtung; gemeinsamer Rust-Kern, Browser-Runtime, Inspektor/Zeitleiste/Auto-Key, CLI `motion-path` und Übersetzungen in allen sechs UI-Sprachen |
 | Animation | Clips, Tracks, Keyframes (einfügen, verschieben, **kopieren/einfügen**, löschen), Easing, Zwiebelhaut, Auto-Key, Pfad-Morphing, animierte Verläufe, gewichtete und additive Clips mit Fades, 2D-Blend-Spaces, Knochen mit Zwei-Bone-IK |

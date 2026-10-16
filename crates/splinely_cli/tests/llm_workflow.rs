@@ -415,3 +415,73 @@ fn check_fixes_are_runnable_commands() {
         .unwrap();
     assert_eq!(lost["bounds"], serde_json::json!([90.0, 40.0, 20.0, 20.0]));
 }
+
+#[test]
+fn check_counts_states_and_actions_as_animation() {
+    let dir = tempfile::tempdir().unwrap();
+    let d = dir.path();
+    ok(d, &["new", "--output", "b.sply"]);
+    for id in ["shut", "flash", "hidden"] {
+        ok(
+            d,
+            &[
+                "node",
+                "add",
+                "b.sply",
+                "--kind",
+                "circle",
+                "--id",
+                id,
+                "--x",
+                "100",
+                "--y",
+                "100",
+                "--radius",
+                "10",
+                "--opacity",
+                "0",
+            ],
+        );
+    }
+    // A blink state shows `shut`; a click action shows `flash`; `hidden` never shows.
+    ok(
+        d,
+        &[
+            "on",
+            "b.sply",
+            "--machine",
+            "blink",
+            "--from",
+            "open",
+            "--to",
+            "closed",
+            "--after",
+            "3",
+            "--state",
+            "shut.opacity=1",
+        ],
+    );
+    ok(
+        d,
+        &[
+            "on",
+            "b.sply",
+            "--event",
+            "click",
+            "--target",
+            "hidden",
+            "--set",
+            "flash.opacity=1",
+        ],
+    );
+    let check = ok(d, &["check", "b.sply"]);
+    let invisible: Vec<&str> = check["findings"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .filter(|f| f["code"] == "invisible")
+        .map(|f| f["message"].as_str().unwrap())
+        .collect();
+    assert_eq!(invisible.len(), 1, "{invisible:?}");
+    assert!(invisible[0].starts_with("'hidden'"), "{invisible:?}");
+}

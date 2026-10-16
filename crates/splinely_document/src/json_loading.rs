@@ -213,7 +213,11 @@ fn preserved(
                 let other = b.get(key).ok_or_else(|| {
                     coded(
                         "unknown_field",
-                        format!("Unsupported field at {}", render(base, Some(&location))),
+                        format!(
+                            "Unsupported field at {}. If the file was made with a newer Splinely, update Splinely (this is {}).",
+                            render(base, Some(&location)),
+                            env!("CARGO_PKG_VERSION")
+                        ),
                     )
                 })?;
                 preserved(value, other, base, Some(&location))?;
