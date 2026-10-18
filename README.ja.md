@@ -89,7 +89,7 @@ splinely-viewer examples/desert-stickfight.sply --trusted-js
 
 ## ランタイムの使い方
 
-[ランタイム・クックブック](docs/runtime-cookbook.md): 再生/一時停止/再起動、クリップとグローバルの時計、HTML への埋め込み、オーディオ、トラブルシューティング。`splinely.snapshot()` はランタイムの状態を JSON データのコピーとして返し、`splinely.reportError(error)` は履歴付きの共通エラーチャネルを使います。
+ランタイムの場所と組み込み方法（SVG・HTML・Node・ネイティブ）: [runtime/README.md](runtime/README.md#where-the-runtime-is-and-how-to-include-it)。[ランタイム・クックブック](docs/runtime-cookbook.md): 再生/一時停止/再起動、クリップとグローバルの時計、HTML への埋め込み、オーディオ、トラブルシューティング。`splinely.snapshot()` はランタイムの状態を JSON データのコピーとして返し、`splinely.reportError(error)` は履歴付きの共通エラーチャネルを使います。
 
 ## ブラウザーに依存しないランタイム
 

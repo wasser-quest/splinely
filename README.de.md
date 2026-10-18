@@ -95,7 +95,7 @@ SVG-Exporte enthalten **Created with Splinely**, Anwendungs-/Schemaversion und m
 
 ## Runtime verständlich bedienen
 
-[Runtime-Kochbuch](docs/runtime-cookbook.md): Play/Pause/Neustart, Clip- und globale Uhr, HTML-Einbettung, Audio und Fehlersuche. `splinely.snapshot()` zeigt Laufzeitstatus als kopierte JSON-Daten; `splinely.reportError(error)` nutzt den einheitlichen Error-Kanal mit begrenzter Historie.
+Wo die Runtime liegt und wie man sie einbindet (SVG, HTML, Node, nativ): [runtime/README.md](runtime/README.md#where-the-runtime-is-and-how-to-include-it). [Runtime-Kochbuch](docs/runtime-cookbook.md): Play/Pause/Neustart, Clip- und globale Uhr, HTML-Einbettung, Audio und Fehlersuche. `splinely.snapshot()` zeigt Laufzeitstatus als kopierte JSON-Daten; `splinely.reportError(error)` nutzt den einheitlichen Error-Kanal mit begrenzter Historie.
 
 ## Browserunabhängige Runtime
 

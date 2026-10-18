@@ -89,7 +89,7 @@ Las exportaciones SVG incluyen **Created with Splinely**, la versión de la apli
 
 ## Usar el runtime
 
-[Recetario del runtime](docs/runtime-cookbook.md): reproducir/pausar/reiniciar, reloj de clip y global, incrustación en HTML, audio y solución de problemas. `splinely.snapshot()` devuelve el estado del runtime como datos JSON copiados; `splinely.reportError(error)` usa el canal de errores común con historial limitado.
+Dónde está el runtime y cómo incluirlo (SVG, HTML, Node, nativo): [runtime/README.md](runtime/README.md#where-the-runtime-is-and-how-to-include-it). [Recetario del runtime](docs/runtime-cookbook.md): reproducir/pausar/reiniciar, reloj de clip y global, incrustación en HTML, audio y solución de problemas. `splinely.snapshot()` devuelve el estado del runtime como datos JSON copiados; `splinely.reportError(error)` usa el canal de errores común con historial limitado.
 
 ## Runtime independiente del navegador
 

@@ -110,7 +110,7 @@ SVG exports contain **Created with Splinely**, the application/schema version an
 
 ## Using the runtime
 
-[Runtime cookbook](docs/runtime-cookbook.md): play/pause/restart, clip and global clock, HTML embedding, audio and troubleshooting. `splinely.snapshot()` returns the runtime state as copied JSON data; `splinely.reportError(error)` uses the shared error channel with a bounded history.
+Where the runtime lives and how to include it (SVG, HTML, Node, native): [runtime/README.md](runtime/README.md#where-the-runtime-is-and-how-to-include-it). [Runtime cookbook](docs/runtime-cookbook.md): play/pause/restart, clip and global clock, HTML embedding, audio and troubleshooting. `splinely.snapshot()` returns the runtime state as copied JSON data; `splinely.reportError(error)` uses the shared error channel with a bounded history.
 
 ## Browser-independent runtime
 

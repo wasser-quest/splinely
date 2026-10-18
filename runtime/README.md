@@ -4,6 +4,59 @@
 
 See [`../RUNTIME_API.md`](../RUNTIME_API.md) for the authoritative runtime/export contract and [`../CORE_API.md`](../CORE_API.md) for the Rust schema. The runtime supports its schema v1, including tagged values/easing, transform composition, state overrides/actions, and **global** audio cue time. No Rust/editor files are owned by this component.
 
+## Where the runtime is and how to include it
+
+| What | Where | Use it when |
+|---|---|---|
+| Browser runtime | `runtime/src/splinely.js` (one plain script, about 114 KB) | Animations in any browser, offline |
+| `.sply` decoder | `runtime/src/sply_decode.js` (copied into `splinely.js` between markers) | Reading binary `.sply` in the browser |
+| Native runtime | `crates/splinely_runtime` (`libsplinely_runtime.so`, `splinely-runtime` JSON-lines process) | Hosts without a browser |
+| Desktop viewer | `crates/splinely_viewer` | Opening a project in a native WebView |
+
+**Do not edit `src/splinely.js` by hand.** The decoder section is generated from `sply_decode.js`; after a change run `node scripts/sync-runtime-decoder.cjs` (use `--check` in CI).
+
+### 1. Get a runtime-enabled SVG
+
+The runtime is not loaded from a separate URL. The exporter writes it into the SVG:
+
+```sh
+splinely-cli export animation.sply --output animation.svg
+```
+
+Open `animation.svg` directly in a browser, or embed it (step 2). The file needs no network access and no second file.
+
+### 2. Embed it in an HTML page
+
+Use an `<object>` element. An `<img>` tag does not run scripts and therefore shows only the still picture:
+
+```html
+<object id="movie" type="image/svg+xml" data="animation.svg">Animation not available.</object>
+<script>
+const movie = document.getElementById('movie');
+movie.addEventListener('load', () => {
+  const splinely = movie.contentDocument?.documentElement?.splinely;
+  if (!splinely) return; // scripts blocked, or the file is not a runtime export
+  splinely.clip('intro').play();
+});
+</script>
+```
+
+Same-origin rules apply: `file://` depends on the browser, so serve the files over HTTP(S) when you control the host. Full pattern and troubleshooting: [Runtime cookbook](../docs/runtime-cookbook.md#im-html-anzeigen).
+
+### 3. Use it from Node (no browser)
+
+`src/splinely.js` also loads as CommonJS. Requiring it does not mount anything:
+
+```js
+const { createRuntime, readProject } = require('./src/splinely.js');
+```
+
+Use `createRuntime(svg, project, { autoTick: false })` in tests and when you drive time yourself. The test suite runs without `npm install`: `node --test runtime/tests/*.test.cjs`.
+
+### 4. Native hosts
+
+Link `libsplinely_runtime.so` through the C ABI, or run the `splinely-runtime` process and exchange JSON lines. Build with `cargo build -p splinely_runtime`; the Python smoke test is `examples/native-runtime/smoke.py`. Details: [native runtime](../docs/native-runtime.md).
+
 ## Embed / use
 
 Embed SVG node elements, then XML-escaped JSON metadata with ID `splinely-project`, then the entire source in an SVG script. The script auto-mounts its owning root:

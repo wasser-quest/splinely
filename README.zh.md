@@ -89,7 +89,7 @@ splinely-viewer examples/desert-stickfight.sply --trusted-js
 
 ## 使用运行时
 
-[运行时手册](docs/runtime-cookbook.md):播放/暂停/重新开始、片段时钟与全局时钟、HTML 嵌入、音频与故障排查。`splinely.snapshot()` 以复制的 JSON 数据返回运行时状态;`splinely.reportError(error)` 使用带有限历史的统一错误通道。
+运行时位置及引入方法（SVG、HTML、Node、原生）：[runtime/README.md](runtime/README.md#where-the-runtime-is-and-how-to-include-it)。[运行时手册](docs/runtime-cookbook.md):播放/暂停/重新开始、片段时钟与全局时钟、HTML 嵌入、音频与故障排查。`splinely.snapshot()` 以复制的 JSON 数据返回运行时状态;`splinely.reportError(error)` 使用带有限历史的统一错误通道。
 
 ## 独立于浏览器的运行时
 
