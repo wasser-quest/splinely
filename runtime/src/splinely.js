@@ -1487,6 +1487,8 @@
       }
       function showRing(el) {
         hideRing();
+        // A host that draws its own focus can switch the ring off: createRuntime(svg, project, { focusRing: false }).
+        if(options.focusRing===false)return;
         if(!doc || typeof doc.createElementNS!=='function' || !el.parentNode || !el.parentNode.insertBefore)return;
         const f=forced(),shape=(stroke,width)=>make('rect',{fill:'none',stroke,'stroke-width':width,'vector-effect':'non-scaling-stroke',rx:'3'});
         ring=make('g',{'data-splinely-focus-ring':'','pointer-events':'none','aria-hidden':'true'});

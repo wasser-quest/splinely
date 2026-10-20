@@ -62,7 +62,7 @@ fetch('animation.svg')
 </script>
 ```
 
-`mount` removes the scripts of the file (the host runs the graphic) and returns `{ svg, runtime, error, destroy() }`. A graphic that cannot start stays visible as its static drawing, and `error` says why. The same API as `createRuntime` applies to `runtime`. `scripts/inline-mount-smoke.cjs` checks this in Chromium.
+`mount` removes the scripts of the file (the host runs the graphic) and returns `{ svg, runtime, error, destroy() }`. A graphic that cannot start stays visible as its static drawing, and `error` says why. The same API as `createRuntime` applies to `runtime`, and so do its options: `mount(container, source, { focusRing: false })` hides the focus ring the runtime draws around a focused node. A host that draws its own focus, or shows the graphic without keyboard use, switches it off. `scripts/inline-mount-smoke.cjs` checks this in Chromium.
 
 ### 3. Use it from Node (no browser)
 
