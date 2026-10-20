@@ -43,6 +43,27 @@ movie.addEventListener('load', () => {
 
 Same-origin rules apply: `file://` depends on the browser, so serve the files over HTTP(S) when you control the host. Full pattern and troubleshooting: [Runtime cookbook](../docs/runtime-cookbook.md#im-html-anzeigen).
 
+### 2b. Mount it inline, without a frame
+
+`<object>` runs the graphic in a frame of its own. Where that is a problem (some browsers on Android close the whole browser while an animation runs in a frame), mount the graphic inline instead, the way Rive artboards are used: the host loads `splinely.js` and `splinely-mount.js`, and the graphic becomes ordinary SVG in the page:
+
+```html
+<div id="stage" style="width: 320px"></div>
+<script src="splinely.js"></script>
+<script src="splinely-mount.js"></script>
+<script>
+fetch('animation.svg')
+  .then((response) => response.text())
+  .then((svgText) => {
+    const graphic = SplinelyMount.mount(document.getElementById('stage'), svgText);
+    if (graphic.runtime) graphic.runtime.clip('intro').play();
+    // graphic.destroy() stops it and removes it from the page.
+  });
+</script>
+```
+
+`mount` removes the scripts of the file (the host runs the graphic) and returns `{ svg, runtime, error, destroy() }`. A graphic that cannot start stays visible as its static drawing, and `error` says why. The same API as `createRuntime` applies to `runtime`. `scripts/inline-mount-smoke.cjs` checks this in Chromium.
+
 ### 3. Use it from Node (no browser)
 
 `src/splinely.js` also loads as CommonJS. Requiring it does not mount anything:
