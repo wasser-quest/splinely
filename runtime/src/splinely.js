@@ -797,11 +797,11 @@
       const core=!!node.kind;
       const base=core ? {x:0,y:0,rotation:0,scaleX:1,scaleY:1,opacity:1,fill:{r:80/255,g:140/255,b:240/255,a:1},...node.transform,...node.style} : {...node.properties};
       if(core) { for(const k of ['width','height','radius','fontSize','d']) if(node.kind[k]!=null) base[k]=node.kind[k]; if(node.gradient) base.gradient=node.gradient; if(node.motionPath) base.motionProgress=node.motionPath.progress===undefined?0:node.motionPath.progress; }
-      nodes.set(node.id,{id:node.id,el,base,core,visible:node.visible!==false,boneId:node.boneId,gradient:!!(core && node.gradient),original:new Map(),lastKeys:new Set(),written:new Map(),lastProps:null,lastReports:null,atRest:false,restPoses:null});
+      nodes.set(node.id,{id:node.id,el,base,core,visible:node.visible!==false,boneId:node.boneId,gradient:!!(core && node.gradient),original:new Map(),lastKeys:new Set(),written:new Map(),lastProps:null,lastReports:null,atRest:false,restPoses:null,natMode:0,natStyle:null});
     }
     // Adapter allows exported elements without a corresponding node descriptor.
     function getNode(id) {
-      if(!nodes.has(id) && elements.has(id)) nodes.set(id,{id,el:elements.get(id),base:{},core:false,original:new Map(),lastKeys:new Set(),written:new Map(),lastProps:null,lastReports:null,atRest:false,restPoses:null});
+      if(!nodes.has(id) && elements.has(id)) nodes.set(id,{id,el:elements.get(id),base:{},core:false,original:new Map(),lastKeys:new Set(),written:new Map(),lastProps:null,lastReports:null,atRest:false,restPoses:null,natMode:0,natStyle:null});
       if(!nodes.has(id)) throw new Error('Unknown node: '+id); return nodes.get(id);
     }
     function attr(node,name,value) {
@@ -912,8 +912,11 @@
     }
     // Frame cache: render() recomputes only after something that feeds a frame changed
     // (dirty); an unchanged frame replays the diagnostics the last full render produced.
+    // Native offload state (see nativeCheck); pendingDelta/armInterval are set by the auto-tick loop.
+    const nat={on:false,hidden:false,sig:null,anims:new Map(),boneNative:false,clockMs:()=>null};
+    let explicitRev=0, shadowing=false, pendingDelta=()=>0, armInterval=()=>{};
     let followMoving=true, creditTick=false, dirty=true, renderDepth=0, reentered=false, renderReports=[], reportSink=renderReports, boneCache=null;
-    const rr=x=>{reportSink.push(x);report(x);};
+    const rr=x=>{if(shadowing)return;reportSink.push(x);report(x);};
     const emptyMap=new Map(), noPoses=[], noEntries=[], stateEntries=new WeakMap();
     const transformKeys=new Set(['x','y','rotation','scaleX','scaleY']);
     const motionNodes=project.nodes.filter(n=>n.motionPath);
@@ -951,6 +954,9 @@
     }
     function render() {
       if(dead) return;
+      // Native animations are re-planned and re-synced once clip times are final: not during a tick's
+      // intermediate segment renders (the tick checks again when it ends).
+      if(nat.on && renderDepth===0 && !ticking)nativeCheck();
       if(renderDepth>0)reentered=true;
       if(!dirty) {
         const again=renderReports;
@@ -980,7 +986,7 @@
       const saved=[values,boneValues,boneWork];values=new Map();freshBones();
       try{computeFrame();}finally{values=saved[0];boneValues=saved[1];boneWork=saved[2];}
     }
-    function computeFrame() {
+    function computeFrame(shadow) {
       for(let i=0;i<boneList.length;i++){const b=boneList[i],w=boneWork[i];w.x=b.x;w.y=b.y;w.rotation=b.rotation;}
       const merge=(id,props) => { try {
         if(bones.has(id)) Object.assign(boneValues.get(id),bonePatch(props));
@@ -1095,12 +1101,14 @@
           }
         } else if(mode==='additive') {
           for(let i=0;i<table.length;i++) {
-            const t=table[i], value=t.ct?evalCompiled(t.ct,time):evaluateTrack(t.track,time);if(value===undefined)continue;
+            const t=table[i];if(t.nat && !shadow)continue;
+            const value=t.ct?evalCompiled(t.ct,time):evaluateTrack(t.track,time);if(value===undefined)continue;
             try{additive(t.target,t.property,value,c.weight);}catch(e){rr(e);}
           }
         } else {
           for(let i=0;i<table.length;i++) {
-            const t=table[i], value=t.ct?evalCompiled(t.ct,time):evaluateTrack(t.track,time);if(value===undefined)continue;
+            const t=table[i];if(t.nat && !shadow)continue;
+            const value=t.ct?evalCompiled(t.ct,time):evaluateTrack(t.track,time);if(value===undefined)continue;
             mergeOne(t.target,t.property,value);
           }
         }
@@ -1139,6 +1147,7 @@
         }
       }
       catch(e) {rr(e);return;} // Keep the last valid frame on FK overflow.
+      if(shadow)return;
       for(const node of nodes.values()) {
         if(dead) return;
         let props=values.get(node.id);
@@ -1154,7 +1163,7 @@
           props={...node.base};
         }
         node.atRest=false;
-        if(binding!=null) {
+        if(binding!=null && node.natMode!==1 && node.natMode!==3) {
           try {
             const pose=poses.get(binding), angle=(pose.rotation%360)*Math.PI/180, c=Math.cos(angle), s=Math.sin(angle);
             const x=finite(unwrap(props.x==null?0:props.x),'Transform x'), y=finite(unwrap(props.y==null?0:props.y),'Transform y');
@@ -1176,7 +1185,9 @@
         if(composed) {
           try {
             const component=(key,fallback)=>finite(props[key]==null?fallback:unwrap(props[key]),'Transform '+key);
-            attr(node,'transform',`translate(${component('x',0)} ${component('y',0)}) rotate(${component('rotation',0)}) scale(${component('scaleX',1)} ${component('scaleY',1)})`);
+            // natMode 2: the pose is carried by the CSS translate/rotate/scale (and native animations of them).
+            if(node.natMode===2)attr(node,'transform','translate(0 0) rotate(0) scale(1 1)');
+            else attr(node,'transform',`translate(${component('x',0)} ${component('y',0)}) rotate(${component('rotation',0)}) scale(${component('scaleX',1)} ${component('scaleY',1)})`);
           } catch(error){rr(error);} keys.add('transform');
         }
         const propKeys=Object.keys(props);
@@ -1217,6 +1228,7 @@
     function setGroup(id,props) {
       const rig=groupRigs.get(id);
       if(!rig)throw new Error('Group '+id+' has no rig; animate the group once (e.g. splinely-cli keyframe --target '+id+') to create one');
+      explicitRev++;
       if(props===null){explicit.delete(rig.moveBone);explicit.delete(rig.turnBone);dirty=true;render();return;}
       if(!props || typeof props!=='object' || Array.isArray(props)) throw new Error('Properties must be an object or null');
       const patch=bonePatch(props), move={}, turn={};
@@ -1225,7 +1237,7 @@
       if(Object.keys(turn).length)explicit.set(rig.turnBone,{...explicit.get(rig.turnBone),...turn});
       dirty=true;render();
     }
-    function set(id,props) {ensure();if(!bones.has(id) && !nodes.has(id) && groupIds.has(id))return setGroup(id,props);if(props && own(props,'motionProgress')) {if(!project.nodes.some(n=>n.id===id && n.motionPath))throw new Error('motionProgress requires a motionPath binding');weightValue(unwrap(props.motionProgress));}if(!bones.has(id))getNode(id); if(props===null) explicit.delete(id); else {if(!props || typeof props!=='object' || Array.isArray(props)) throw new Error('Properties must be an object or null');explicit.set(id,{...explicit.get(id),...(bones.has(id)?bonePatch(props):props)});}dirty=true;render();}
+    function set(id,props) {ensure();explicitRev++;if(!bones.has(id) && !nodes.has(id) && groupIds.has(id))return setGroup(id,props);if(props && own(props,'motionProgress')) {if(!project.nodes.some(n=>n.id===id && n.motionPath))throw new Error('motionProgress requires a motionPath binding');weightValue(unwrap(props.motionProgress));}if(!bones.has(id))getNode(id); if(props===null) explicit.delete(id); else {if(!props || typeof props!=='object' || Array.isArray(props)) throw new Error('Properties must be an object or null');explicit.set(id,{...explicit.get(id),...(bones.has(id)?bonePatch(props):props)});}dirty=true;render();}
     function variable(id) {ensure();if(!variables.has(id)) throw new Error('Unknown variable: '+id);return {get:()=>variables.get(id),set:v=>{ensure();const old=variables.get(id);if((old===null?v!==null:typeof old!==typeof v) || Array.isArray(old)!==Array.isArray(v))throw new Error('Variable type mismatch: '+id);if(v===undefined || typeof v==='function' || (typeof v==='number' && !Number.isFinite(v)))throw new Error('Variable must be a JSON value');if(project.blendSpaces.some(s=>s.parameters.includes(id)))blendParameter(v);variables.set(id,v);dirty=true;render();emit('variable.change',{id,value:v});}};}
     function actions(items,detail) {
       for(const a of items || []) {
@@ -1331,13 +1343,13 @@
     function clip(id) {
       const c=getClip(id);
       return {
-        get time(){return c.time;},get duration(){return c.duration;},get playing(){return c.playing;},get loop(){return c.loop;},
+        get time(){return liveTime(c);},get duration(){return c.duration;},get playing(){return c.playing;},get loop(){return c.loop;},
         get weight(){ensure();syncClock();return c.weight;},
         setWeight(weight){ensure();weightValue(weight);if(c.blendMode==='override')throw new Error('Weight controls require a weighted or additive clip');syncClock();c.ramp=null;c.weight=weight;dirty=true;render();return this;},
-        fadeTo(weight,seconds){ensure();weightValue(weight);fadeDuration(seconds);if(c.blendMode==='override')throw new Error('Weight controls require a weighted or additive clip');syncClock();c.ramp=seconds===0?null:{from:c.weight,to:weight,duration:seconds,elapsed:0};if(seconds===0)c.weight=weight;dirty=true;render();return this;},
+        fadeTo(weight,seconds){ensure();weightValue(weight);fadeDuration(seconds);if(c.blendMode==='override')throw new Error('Weight controls require a weighted or additive clip');syncClock();c.ramp=seconds===0?null:{from:c.weight,to:weight,duration:seconds,elapsed:0};if(seconds===0)c.weight=weight;dirty=true;render();if(c.ramp)armInterval();return this;},
         set loop(v){ensure();c.loop=!!v;if(c.loop)c.time%=c.duration;c.revision++;stopSources(c);dirty=true;render();schedule(c);},
         play(){ensure();syncClock();if(c.playing)return this;if(c.time>=c.duration){c.time=0;c.cycle=0;}c.active=true;c.playing=true;c.revision++;const revision=c.revision;transportPlay();if(dead || c.revision!==revision || !c.playing)return this;dirty=true;render();if(c.time===0)crossing(c,0,0,true);schedule(c);return this;},
-        pause(){ensure();syncClock();c.playing=false;c.revision++;stopSources(c);if(!transport.manual && ![...clips.values()].some(c=>c.playing))transportPause();return this;},
+        pause(){ensure();syncClock();c.playing=false;c.revision++;stopSources(c);if(!transport.manual && ![...clips.values()].some(c=>c.playing))transportPause();if(nat.on){nativeCheck();if(dirty)render();}return this;},
         seek(time){ensure();syncClock();finite(time,'Seek time');c.time=c.loop?Math.max(0,time)%c.duration:clamp(time,0,c.duration);c.cycle=0;c.active=true;c.revision++;stopSources(c);dirty=true;render();schedule(c);return this;},
         stop(){this.pause();c.ramp=null;c.time=0;c.cycle=0;c.active=false;dirty=true;render();return this;}
       };
@@ -1363,7 +1375,7 @@
           for(const cb of callbacks)if(cb.clip===c.id && cb.time>c.time)step=Math.min(step,cb.time-c.time);
         }
         for(let i=0;i<active.length;i++){fromBuf[i]=active[i].time;revBuf[i]=active[i].revision;}
-        for(const c of active){c.time+=step;if(step!==0 && c!==transport && c.tracks.length)dirty=true;}
+        for(const c of active){c.time+=step;if(step!==0 && c!==transport && c.tracks.length && !c.allNative)dirty=true;}
         if(fading.length)dirty=true;
         for(const c of fading) {
           const r=c.ramp;r.elapsed=Math.min(r.duration,r.elapsed+step);
@@ -1377,13 +1389,14 @@
           if(!crossing(c,from,c.time,false))continue;
           if(c.time===c.duration) {
             if(!c.loop){c.playing=false;c.revision++;stopSources(c);emit('clip.end',{clip:c.id},c.id);}
-            else {c.time=0;dirty=true;c.cycle++;for(const [key,h] of c.sources)if(Number(key.split(':')[0])<c.cycle){h.stop();c.sources.delete(key);}render();crossing(c,0,0,true);}
+            else {c.time=0;if(!c.allNative)dirty=true;c.cycle++;for(const [key,h] of c.sources)if(Number(key.split(':')[0])<c.cycle){h.stop();c.sources.delete(key);}render();crossing(c,0,0,true);}
           }
         }
       } while(remaining>0 && !dead);
       if(dead)return;schedule(transport);for(let i=0;i<clipList.length;i++)schedule(clipList[i]);render();
       if(frameHooks)runFrameHooks(delta);
       } finally {ticking=false;}
+      if(nat.on && !dead){nativeCheck();if(dirty)render();}
     }
     function at(time,fn,opts) {
       ensure();finite(time,'Callback time');if(typeof fn!=='function')throw new Error('Timeline callback must be a function');
@@ -1417,7 +1430,7 @@
             const bytes=Uint8Array.from(raw,c=>c.charCodeAt(0));const buffer=await context.decodeAudioData(bytes.buffer);
             if(dead)throw new Error('Splinely runtime destroyed');buffers.set(a.id,buffer);
           }
-          if(dead)throw new Error('Splinely runtime destroyed');audio.ready=true;for(const c of [transport,...clips.values()])schedule(c);return api;
+          if(dead)throw new Error('Splinely runtime destroyed');audio.ready=true;nativeOff();armInterval();for(const c of [transport,...clips.values()])schedule(c);return api;
         })();
         try{return await unlocking;}catch(e){report(e);throw e;}finally{unlocking=null;}
       },
@@ -1475,15 +1488,15 @@
     }
     function snapshot() {
       // Observational only: don't advance clocks, invoke callbacks or expose handles.
-      return {version:1,destroyed:dead,time:transport.time,playing:transport.playing,
-        clips:[...clips.values()].map(c=>({id:c.id,time:c.time,duration:c.duration,active:c.active,playing:c.playing,weight:c.weight,fading:!!c.ramp})),
+      return {version:1,destroyed:dead,time:liveTime(transport),playing:transport.playing,
+        clips:[...clips.values()].map(c=>({id:c.id,time:liveTime(c),duration:c.duration,active:c.active,playing:c.playing,weight:c.weight,fading:!!c.ramp})),
         states:Object.fromEntries([...machines].map(([id,m])=>[id,m.state])),
         audio:{ready:audio.ready,state:context?context.state:'locked',embeddedAssets:project.assets.length},
         reducedMotion,
         diagnostics:diagnostics.map(e=>e.message)};
     }
-    api={version:1,snapshot,reportError(error){ensure();return report(error);},diagnostics,on,emit,bones(){ensure();return bonePoses.map(p=>({...p}));},onDestroy(fn){ensure();if(typeof fn!=='function')throw new Error('Disposer must be a function');cleanup.push(fn);},get destroyed(){return dead;}, get sourceProject(){return source;}, clip,machine,set,variable,timeline:{at,get time(){return transport.time;},get playing(){return transport.playing;},play(){ensure();syncClock();transport.manual=true;transportPlay();return this;},pause(){ensure();transport.manual=false;for(const c of clips.values())clip(c.id).pause();transportPause();return this;},seek(time){ensure();syncClock();finite(time,'Timeline seek time');if(time<0)throw new Error('Timeline seek must be nonnegative');transport.time=time;transport.revision++;stopSources(transport);for(const c of clips.values())if(c.active)clip(c.id).seek(c.loop?time%c.duration:Math.min(time,c.duration));schedule(transport);return this;}},audio,tick,
-      destroy(){if(dead)return;dead=true;if(raf!=null && env.cancelAnimationFrame)env.cancelAnimationFrame(raf);for(const fn of cleanup)try{fn();}catch(error){report(error);}for(const c of [transport,...clips.values()])stopSources(c);audio.pause();loopBuffers.clear();buffers.clear();if(context && context.close)Promise.resolve(context.close()).catch(()=>{});subscriptions.clear();callbacks.clear();for(const [id,start] of pointerStarts)try{if(start.el.releasePointerCapture)start.el.releasePointerCapture(id);}catch(_){}pointerStarts.clear();if(svg.splinely===api)delete svg.splinely;unregister(env,api);}
+    api={version:1,snapshot,reportError(error){ensure();return report(error);},diagnostics,on,emit,bones(){ensure();if(nat.on && nat.boneNative)return shadowBones();return bonePoses.map(p=>({...p}));},onDestroy(fn){ensure();if(typeof fn!=='function')throw new Error('Disposer must be a function');cleanup.push(fn);},get destroyed(){return dead;}, get sourceProject(){return source;}, clip,machine,set,variable,timeline:{at,get time(){return liveTime(transport);},get playing(){return transport.playing;},play(){ensure();syncClock();transport.manual=true;transportPlay();return this;},pause(){ensure();transport.manual=false;for(const c of clips.values())clip(c.id).pause();transportPause();return this;},seek(time){ensure();syncClock();finite(time,'Timeline seek time');if(time<0)throw new Error('Timeline seek must be nonnegative');transport.time=time;transport.revision++;stopSources(transport);for(const c of clips.values())if(c.active)clip(c.id).seek(c.loop?time%c.duration:Math.min(time,c.duration));schedule(transport);return this;}},audio,tick,
+      destroy(){if(dead)return;if(nat.on)try{nativeOff(true);}catch(e){report(e);}dead=true;for(const fn of cleanup)try{fn();}catch(error){report(error);}for(const c of [transport,...clips.values()])stopSources(c);audio.pause();loopBuffers.clear();buffers.clear();if(context && context.close)Promise.resolve(context.close()).catch(()=>{});subscriptions.clear();callbacks.clear();for(const [id,start] of pointerStarts)try{if(start.el.releasePointerCapture)start.el.releasePointerCapture(id);}catch(_){}pointerStarts.clear();if(svg.splinely===api)delete svg.splinely;unregister(env,api);}
     };
     // Screen-reader semantics, keyboard activation, focus ring and live announcements.
     // Opt-in: projects without description, node a11y or state announce are left untouched.
@@ -1682,6 +1695,304 @@
     // Preservation-only customJs is expected, not an error. Trusted hosts decide execution separately.
     render();for(const c of project.clips)if(c.autoplay && !(reducedMotion && (c.looping || c.loop)))clip(c.id).play();
     } catch(error) {api.destroy();throw error;}
+    // ---- Native offload (Web Animations API) ----
+    // Clip tracks that only move bones, move/turn/scale unbound shapes or fade shapes can run as browser
+    // animations (element.animate) instead of per-frame JavaScript. JavaScript keeps the clocks, events and
+    // everything else; it skips those tracks when rendering. A channel (a bone tree, a shape's pose, a shape's
+    // opacity) is offloaded only when every contribution to it is such a track, so blending stays exact:
+    //  - bone trees: the bound shapes get CSS `translate`/`rotate` = their bone's rest pose plus additive
+    //    animations of the bone deltas; the transform attribute carries only the shape's own (local) transform.
+    //  - unbound shapes: CSS translate/rotate/scale carry the pose, the attribute stays at identity.
+    //  - opacity: one animation with the absolute value.
+    // Anything else touching a channel (state overrides, set(), followers, weighted or fading clips, motion
+    // paths, a focus ring) keeps it on the JavaScript path. Animations are re-planned when what plays
+    // changes and re-synchronised with the runtime clock on play/pause/seek/end.
+    function natEligibleTrack(c,t) {
+      const ct=t.ct;if(!ct || !(c.duration>0) || !Number.isFinite(c.duration))return false;
+      const times=ct.times;
+      for(let i=0;i<times.length;i++) {
+        const v=ct.vals[i];if(typeof v!=='number' || !Number.isFinite(v))return false;
+        if(!(times[i]>=0 && times[i]<=c.duration) || (i>0 && !(times[i]>times[i-1])))return false;
+      }
+      return true;
+    }
+    const natNum=v=>Math.abs(v)<1e-9?0:+v.toPrecision(12);
+    // Keyframes for one or two tracks with the same times and easings; map(i) returns the CSS value.
+    function natFrames(ct,D,prop,map) {
+      const out=[], n=ct.times.length, frame=(offset,easing,i)=>{const f={offset,easing};f[prop]=map(i);out.push(f);};
+      if(ct.times[0]>0)frame(0,'linear',0);
+      for(let i=0;i<n;i++){const e=ct.ease[i];frame(ct.times[i]/D,e===0?'linear':e===1?'steps(1, end)':'cubic-bezier('+ct.pts[i].join(', ')+')',i);}
+      if(ct.times[n-1]<D)frame(1,'linear',n-1);
+      return out;
+    }
+    const sameTiming=(a,b)=>{
+      if(a.times.length!==b.times.length)return false;
+      for(let i=0;i<a.times.length;i++){if(a.times[i]!==b.times[i] || a.ease[i]!==b.ease[i])return false;if(a.ease[i]===2 && a.pts[i].some((v,k)=>v!==b.pts[i][k]))return false;}
+      return true;
+    };
+    const boneChildren=new Map();for(const b of boneList)if(b.parentId!=null && bones.has(b.parentId)){if(!boneChildren.has(b.parentId))boneChildren.set(b.parentId,[]);boneChildren.get(b.parentId).push(b.id);}
+    const boneRoot=id=>{let b=bones.get(id),n=0;while(b && b.parentId!=null && bones.has(b.parentId) && n++<130)b=bones.get(b.parentId);return b?b.id:id;};
+    let natRest=null;
+    function natRestPoses() {
+      if(natRest===null){natRest=new Map();try{for(const p of solveBonesPlanned(boneList.map(b=>({...b})),plan))natRest.set(p.id,p);}catch(_){}}
+      return natRest;
+    }
+    function natPlan() {
+      if(afterRender!==null)return {specs:new Map(),natTracks:new Set(),modes:new Map(),lists:new Map(),boneNative:false};
+      const contrib=new Map(), block={block:true};
+      const add=(id,prop,x)=>{const k=id+'\u0000'+prop;let l=contrib.get(k);if(l===undefined)contrib.set(k,l=[]);l.push(x);};
+      const get=(id,prop)=>contrib.get(id+'\u0000'+prop);
+      for(const m of machines.values()) {
+        for(const [id,k] of entries(m.states.get(m.state)))add(id,k,block);
+        if(m.fade)for(const [id,k] of entries(m.states.get(m.fade.from)))add(id,k,block);
+      }
+      for(let ci=0;ci<clipOrder.length;ci++) {
+        const c=clipOrder[ci];if(!c.active)continue;
+        const table=tableOf(c), ok=c.blendMode!=='weighted' && !c.ramp;
+        for(let i=0;i<table.length;i++){const t=table[i];add(t.target,t.property,ok && natEligibleTrack(c,t)?{c,t,i,over:c.blendMode!=='additive'}:block);}
+      }
+      for(const [id,p] of explicit)for(const k of Object.keys(p))add(id,k,block);
+      for(const f of project.followers){if(f.mode==='rotate')add(f.target,'rotation',block);else{add(f.target,'x',block);add(f.target,'y',block);}}
+      for(const n of motionNodes) {
+        for(const k of ['x','y','rotation','motionProgress'])add(n.id,k,block);
+        if(n.motionPath)for(const k of ['x','y','rotation','scaleX','scaleY','d'])add(n.motionPath.path,k,block);
+      }
+      const clean=l=>l!==undefined && l.every(x=>!x.block);
+      // Contributions that reach the output: everything from the last override on (an override replaces what is under it).
+      const effective=l=>{let s=0;for(let i=0;i<l.length;i++)if(l[i].over)s=i;return l.slice(s).filter(x=>!(x.c.blendMode==='additive' && x.c.weight===0));};
+      const specs=new Map(), natTracks=new Set(), modes=new Map();
+      const spec=(node,prop,composite,x,frames,extra)=>{
+        const key=node.id+'|'+prop+'|'+x.c.index+'|'+x.i+'|'+(extra || '')+'|'+(x.c.blendMode==='additive'?x.c.weight:'')+'|'+x.c.loop;
+        specs.set(key,{key,node,prop,composite,c:x.c,frames});
+      };
+      const delta=(x,rest)=>x.over?(v=>v-rest):(v=>x.c.weight*(v-rest));
+      // Bone trees. A tree runs natively when every contribution to its bones is native. Nodes bound to it:
+      // natMode 1 (no ancestor of the node's bone rotates natively): CSS translate/rotate hold the bone's rest
+      // pose plus added deltas (an ancestor's translation is rotated by its parent's rest rotation), the
+      // attribute keeps the node's own transform. natMode 3 (an ancestor rotates): CSS translate/rotate hold
+      // the root bone, the CSS transform list holds each further bone (offset, rotation) and the node's own
+      // transform, which must then be static; deltas accumulate into the matching list entries.
+      const trees=new Map(), treeOf=id=>{const r=boneRoot(id);let t=trees.get(r);if(!t)trees.set(r,t={js:false,native:new Map()});return t;};
+      const chainOf=id=>{const c=[];for(let b=bones.get(id),d=0;b && d<130;b=b.parentId!=null?bones.get(b.parentId):null,d++)c.unshift(b);return c;};
+      for(const b of boneList) {
+        const tree=treeOf(b.id);
+        for(const [k,l] of contrib) {
+          if(!k.startsWith(b.id+'\u0000'))continue;
+          const prop=k.slice(b.id.length+1);
+          if(!boneProperties.has(prop) || !clean(l)){tree.js=true;continue;}
+          tree.native.set(b.id+'\u0000'+prop,l);
+        }
+      }
+      // natMode 3 when an ancestor bone rotates natively, or when the node's own transform is animated by native
+      // tracks only (then it goes into the list too instead of being written each frame).
+      const ancestorTurns=n=>{const c=chainOf(n.boneId), t=treeOf(n.boneId);for(let i=0;i<c.length-1;i++)if(t.native.has(c[i].id+'\u0000rotation'))return true;return false;};
+      const localState=n=>{let any=false;for(const k of transformKeys){const l=get(n.id,k);if(l===undefined)continue;if(!clean(l))return -1;any=true;}return any?1:0;};
+      const listed=n=>ancestorTurns(n) || localState(n)===1?chainOf(n.boneId):null;
+      for(const n of nodes.values()) {
+        if(n.boneId==null || !n.el)continue;
+        if(!n.el.style || (!n.core && !bones.has(n.boneId))){treeOf(n.boneId).js=true;continue;}
+        if(bones.has(n.boneId) && ancestorTurns(n) && localState(n)<0)treeOf(n.boneId).js=true;
+      }
+      const rest=natRestPoses();
+      for(const tree of trees.values()) {
+        if(tree.js || !tree.native.size)continue;
+        for(const l of tree.native.values())for(const x of l)natTracks.add(x.t);
+      }
+      const lists=new Map(), deg=v=>natNum(v)+'deg', px=(x,y)=>natNum(x)+'px '+natNum(y)+'px';
+      const listOf=(chain,vals,local)=>{let out='';for(let i=1;i<chain.length;i++)out+='translate('+natNum(vals[i][0])+'px, '+natNum(vals[i][1])+'px) rotate('+deg(vals[i][2])+') ';return out+'translate('+natNum(local[0])+'px, '+natNum(local[1])+'px) rotate('+deg(local[2])+') scale('+natNum(local[3])+', '+natNum(local[4])+')';};
+      for(const node of nodes.values()) {
+        if(!node.el || !node.el.style)continue;
+        let mode=0;
+        if(node.boneId!=null && bones.has(node.boneId)) {
+          const tree=treeOf(node.boneId), chain=!tree.js && tree.native.size?listed(node):null;
+          if(chain) {
+            mode=3;
+            const zero=chain.map(()=>[0,0,0]), local=['x','y','rotation','scaleX','scaleY'].map((k,i)=>finite(node.base[k]==null?(i>2?1:0):unwrap(node.base[k]),'Transform '+k));
+            const restVals=chain.map((b,i)=>i?[chain[i-1].length+b.x,b.y,b.rotation]:[0,0,0]);
+            lists.set(node,{translate:px(chain[0].x,chain[0].y),rotate:deg(chain[0].rotation),transform:listOf(chain,restVals,local)});
+            // The node's own transform: native clip tracks accumulate into the last list entries.
+            for(const [slot,prop] of ['x','y','rotation','scaleX','scaleY'].entries()) {
+              const l=get(node.id,prop);if(!l)continue;
+              for(const x of l)natTracks.add(x.t);
+              for(const x of effective(l)) {
+                const d=delta(x,local[slot]), ct=x.t.ct, D=x.c.duration;
+                spec(node,'transform','accumulate',x,natFrames(ct,D,'transform',k=>{const v=[0,0,0,1,1];v[slot]+=d(ct.nums[k]);return listOf(chain,zero,v);}),'local');
+              }
+            }
+            for(let i=0;i<chain.length;i++) {
+              const b=chain[i];
+              for(const prop of ['x','y','rotation']) {
+                const l=tree.native.get(b.id+'\u0000'+prop);if(!l)continue;
+                for(const x of effective(l)) {
+                  const d=delta(x,b[prop]), ct=x.t.ct, D=x.c.duration;
+                  if(i===0) {
+                    if(prop==='rotation')spec(node,'rotate','add',x,natFrames(ct,D,'rotate',k=>deg(d(ct.nums[k]))),b.id);
+                    else spec(node,'translate','add',x,natFrames(ct,D,'translate',k=>{const v=d(ct.nums[k]);return prop==='x'?px(v,0):px(0,v);}),b.id);
+                  } else {
+                    const slot=prop==='x'?0:prop==='y'?1:2;
+                    spec(node,'transform','accumulate',x,natFrames(ct,D,'transform',k=>{const v=zero.map(z=>z.slice());v[i][slot]=d(ct.nums[k]);return listOf(chain,v,[0,0,0,1,1]);}),b.id);
+                  }
+                }
+              }
+            }
+          } else if(!tree.js && tree.native.size) {
+            for(let b=bones.get(node.boneId),depth=0;b && depth<130;b=b.parentId!=null?bones.get(b.parentId):null,depth++) {
+              const parent=b.parentId!=null?rest.get(b.parentId):null, angle=parent?(parent.rotation%360)*Math.PI/180:0, cos=Math.cos(angle), sin=Math.sin(angle);
+              for(const prop of ['x','y','rotation']) {
+                const l=tree.native.get(b.id+'\u0000'+prop);if(!l)continue;
+                mode=1;
+                if(prop==='rotation' && b.id!==node.boneId)continue; // ancestors rotating: natMode 3
+                const restValue=b[prop];
+                for(const x of effective(l)) {
+                  const d=delta(x,restValue), ct=x.t.ct, D=x.c.duration;
+                  if(prop==='rotation')spec(node,'rotate','add',x,natFrames(ct,D,'rotate',i=>deg(d(ct.nums[i]))),b.id);
+                  else {const ux=prop==='x'?cos:-sin, uy=prop==='x'?sin:cos;spec(node,'translate','add',x,natFrames(ct,D,'translate',i=>{const v=d(ct.nums[i]);return px(ux*v,uy*v);}),b.id);}
+                }
+              }
+            }
+          }
+        } else if(node.boneId==null && node.core) {
+          const lists={};let any=false,ok=true;
+          for(const prop of ['x','y','rotation','scaleX','scaleY']){const l=get(node.id,prop);if(l===undefined)continue;any=true;if(!clean(l))ok=false;lists[prop]=l;}
+          let sx=null,sy=null;
+          if(ok && any) {
+            sx=lists.scaleX?effective(lists.scaleX):[];sy=lists.scaleY?effective(lists.scaleY):[];
+            if(sx.length>1 || sy.length>1 || (sx.length && sy.length && (sx[0].c!==sy[0].c || !sameTiming(sx[0].t.ct,sy[0].t.ct))))ok=false;
+          }
+          if(ok && any) {
+            mode=2;
+            for(const prop of ['x','y','rotation'])if(lists[prop])for(const x of lists[prop])natTracks.add(x.t);
+            for(const prop of ['scaleX','scaleY'])if(lists[prop])for(const x of lists[prop])natTracks.add(x.t);
+            for(const prop of ['x','y','rotation'])if(lists[prop])for(const x of effective(lists[prop])) {
+              const d=delta(x,finite(unwrap(node.base[prop]),'Transform '+prop)), ct=x.t.ct, D=x.c.duration;
+              if(prop==='rotation')spec(node,'rotate','add',x,natFrames(ct,D,'rotate',i=>natNum(d(ct.nums[i]))+'deg'));
+              else spec(node,'translate','add',x,natFrames(ct,D,'translate',i=>{const v=natNum(d(ct.nums[i]));return prop==='x'?v+'px 0px':'0px '+v+'px';}));
+            }
+            if(sx.length || sy.length) {
+              const x=sx[0] || sy[0], baseX=unwrap(node.base.scaleX), baseY=unwrap(node.base.scaleY);
+              const abs=(e,base)=>e?(e.over?(v=>v):(v=>base+e.c.weight*(v-base))):null, fx=abs(sx[0],baseX), fy=abs(sy[0],baseY);
+              spec(node,'scale','replace',x,natFrames(x.t.ct,x.c.duration,'scale',i=>natNum(fx?fx(sx[0].t.ct.nums[i]):baseX)+' '+natNum(fy?fy(sy[0].t.ct.nums[i]):baseY)),(sx[0]?sx[0].i:'')+'+'+(sy[0]?sy[0].i:''));
+            }
+          }
+        }
+        modes.set(node,mode);
+        // Opacity: a single contribution that reaches the output (JavaScript clamps, so does CSS).
+        if(node.core) {
+          const l=get(node.id,'opacity');
+          if(clean(l)) {
+            const e=effective(l);
+            if(e.length<=1) {
+              for(const x of l)natTracks.add(x.t);
+              if(e.length) {
+                const x=e[0], base=finite(unwrap(node.base.opacity==null?1:node.base.opacity),'Opacity'), ct=x.t.ct;
+                spec(node,'opacity','replace',x,natFrames(ct,x.c.duration,'opacity',i=>String(natNum(x.over?ct.nums[i]:base+x.c.weight*(ct.nums[i]-base)))));
+              }
+            }
+          }
+        }
+      }
+      return {specs,natTracks,modes,lists,boneNative:[...trees.values()].some(t=>!t.js && t.native.size)};
+    }
+    const natSigBuf=[];
+    function natSignature() {
+      const s=natSigBuf;let i=0,changed=nat.sig===null;
+      const put=v=>{if(!changed && s[i]!==v)changed=true;s[i++]=v;};
+      put(explicitRev);put(afterRender!==null);put(nat.hidden);
+      for(let k=0;k<clipList.length;k++){const c=clipList[k];put(c.active);put(c.playing);put(c.revision);put(c.ramp!==null?-1:c.weight);put(c.loop);}
+      for(const m of machines.values()){put(m.state);put(m.fade?m.fade.from:null);}
+      if(s.length!==i){s.length=i;changed=true;}
+      nat.sig=s;return changed;
+    }
+    function natSync(rec) {
+      const c=rec.c, a=rec.anim, t=c.time*1000;
+      try {
+        if(!c.playing || nat.hidden){a.pause();a.currentTime=t;}
+        else {
+          const tl=env.document && env.document.timeline, base=nat.clockMs();
+          if(base!=null && tl && typeof tl.currentTime==='number')a.startTime=base-t;
+          else {a.currentTime=t;a.play();}
+        }
+      } catch(e){report(e);}
+      rec.sync=c.revision+'|'+c.playing+'|'+nat.hidden;
+    }
+    function natStyle(node,mode,list) {
+      const el=node.el, st=el.style;let key='';
+      if(mode===1){const p=natRestPoses().get(node.boneId);key=p?natNum(p.x)+'px '+natNum(p.y)+'px|'+natNum(p.rotation)+'deg||':'0px 0px|0deg||';}
+      else if(mode===2){const b=node.base;key=natNum(unwrap(b.x))+'px '+natNum(unwrap(b.y))+'px|'+natNum(unwrap(b.rotation))+'deg|'+natNum(unwrap(b.scaleX))+' '+natNum(unwrap(b.scaleY))+'|';}
+      else if(mode===3 && list)key=list.translate+'|'+list.rotate+'||'+list.transform;
+      if(node.natStyle===key)return;
+      const [tr,rot,sc,tf]=key?key.split('|'):['','','',''];
+      try{st.translate=tr;st.rotate=rot;st.scale=sc;st.transform=tf;}catch(e){report(e);}
+      node.natStyle=key || null;
+    }
+    // Brings animations, flags and styles in line with what currently plays. Runs at the start of render().
+    function nativeCheck() {
+      if(!nat.on || dead || !natSignature())return;
+      let np;
+      try{np=natPlan();}catch(e){report(e);nativeOff();return;}
+      const anims=nat.anims;
+      for(const [key,rec] of anims)if(!np.specs.has(key)){try{rec.anim.cancel();}catch(_){}anims.delete(key);}
+      for(const node of nodes.values()) {
+        const mode=np.modes.get(node) || 0;
+        if(node.natMode!==mode){node.natMode=mode;node.lastProps=null;node.atRest=false;dirty=true;}
+        if(node.el && node.el.style && (mode!==0 || node.natStyle!==null))natStyle(node,mode,np.lists.get(node));
+      }
+      for(const c of clipList) {
+        const table=tableOf(c);let all=true;
+        for(let i=0;i<table.length;i++){const t=table[i], on=np.natTracks.has(t);if(t.nat!==on){t.nat=on;dirty=true;}if(!on)all=false;}
+        c.allNative=all;
+      }
+      nat.boneNative=np.boneNative;
+      for(const [key,s] of np.specs) {
+        let rec=anims.get(key);
+        if(rec===undefined) {
+          try {
+            const anim=s.node.el.animate(s.frames,{duration:s.c.duration*1000,iterations:s.c.loop?Infinity:1,fill:'both',composite:s.composite,easing:'linear'});
+            rec={anim,c:s.c,sync:null};anims.set(key,rec);
+          } catch(e){report(e);nativeOff();return;}
+        }
+        if(rec.sync!==s.c.revision+'|'+s.c.playing+'|'+nat.hidden)natSync(rec);
+      }
+    }
+    // Back to the JavaScript path for everything (audio unlock, destroy).
+    function nativeOff(final) {
+      if(!nat.on)return;
+      if(final)for(const c of clipList)c.time=liveTime(c);
+      nat.on=false;nat.sig=null;nat.boneNative=false;
+      for(const rec of nat.anims.values())try{rec.anim.cancel();}catch(_){}
+      nat.anims.clear();
+      for(const node of nodes.values()){if(node.natMode!==0 || node.natStyle!==null){node.natMode=0;natStyle(node,0);node.lastProps=null;node.atRest=false;}}
+      for(const c of clipList){c.allNative=false;if(c.table)for(const t of c.table)t.nat=false;}
+      dirty=true;render();
+    }
+    // Clip time as the clock stands now: while the frame loop sleeps (native animations only, or hidden),
+    // the stored time lags behind and is projected forward without ticking.
+    function liveTime(c) {
+      if(!c.playing)return c.time;
+      const p=pendingDelta();if(!(p>0))return c.time;
+      return c.loop?(c.time+p)%c.duration:Math.min(c.duration,c.time+p);
+    }
+    // Poses including natively animated bones (computed on demand; the render skips those tracks).
+    function shadowBones() {
+      const saved=[values,boneValues,boneWork,bonePoses,boneCache], solved=boneSolved.slice();
+      values=new Map();freshBones();shadowing=true;
+      try{computeFrame(true);return bonePoses.map(p=>({...p}));}
+      finally{shadowing=false;[values,boneValues,boneWork,bonePoses,boneCache]=saved;boneSolved.set(solved);}
+    }
+    // Seconds until the next thing JavaScript must do while clips run natively: timers, one-shot clip
+    // ends and timeline callbacks. Capped so a long sleep never needs a huge catch-up tick.
+    function nextEvent() {
+      let due=nextTimer();if(due<0)return due;
+      let playing=false;
+      for(let i=0;i<clipList.length;i++) {
+        const c=clipList[i];if(!c.playing)continue;
+        playing=true;
+        const left=c.duration-c.time;if(!c.loop && left>=0 && left<due)due=left;
+        for(const cb of callbacks)if(cb.clip===c.id){let l=cb.time-c.time;if(l<=0 && c.loop)l+=c.duration;if(l>0 && l<due)due=l;}
+      }
+      if(playing && due>10)due=10;
+      return due;
+    }
     // Idle detection for the auto-tick loop: true when a tick can change nothing visible or observable —
     // no clip playing or fading, no state-machine fade, followers at rest, no queued events, no plugin
     // frame hooks and no diagnostics that an unchanged frame would replay. A playing timeline transport
@@ -1689,7 +2000,7 @@
     function quiet() {
       if(dirty || queue.length || frameHooks || renderReports.length || followMoving)return false;
       if(transport.playing && audio.ready && transport.audioCues.length)return false;
-      for(let i=0;i<clipList.length;i++){const c=clipList[i];if(c.playing || c.ramp)return false;}
+      for(let i=0;i<clipList.length;i++){const c=clipList[i];if(c.ramp || (c.playing && !c.allNative))return false;}
       for(const m of machines.values())if(m.fade)return false;
       return true;
     }
@@ -1714,47 +2025,131 @@
     if(options.maxFps!=null && !(Number.isFinite(maxFps) && maxFps>0))throw new Error('maxFps must be a positive number');
     if(options.autoTick!==false && !dead){
       const now=()=>env.performance && env.performance.now?env.performance.now():Date.now();last=now();let clock=env;
-      let sleeping=false,sleepTimer=null,frameStep=1000/60;
+      let sleeping=false,sleepTimer=null,frameStep=1000/60,framePending=false,frameAt=-Infinity,vsync=1000/60,woke=true;
+      let hidden=false,hiddenTimer=null,hiddenBusy=false,hiddenPoke=false,intervalTimer=null;
       const advance=()=>{if(dead)return;const nextClock=audio.ready && context.state==='running'?context:env;
         const current=nextClock===env?now():context.currentTime*1000;
         if(clock!==nextClock){clock=nextClock;last=current;return;}
         const delta=Math.max(0,(current-last)/1000);if(!sleeping && delta>0)frameStep=Math.min(delta*1000,100);last=current;try{tick(delta);}catch(e){report(e);}
-        if(sleeping && wake!==null && !quiet())wake();};
+        if(sleeping && !hidden && wake!==null && !quiet())wake();};
       syncClock=()=>{if(!ticking && !processing && !dead)advance();};
-      if(env.requestAnimationFrame){
+      // Time the clock has run since the last tick while the frame loop sleeps (see liveTime).
+      pendingDelta=()=>sleeping && clock===env && !ticking && !dead?Math.max(0,(now()-last)/1000):0;
+      // Ramps (fadeTo) and audio clocks also advance from a 25 ms timer, so they progress while frames are
+      // throttled. Armed only while one of them is in use.
+      armInterval=()=>{
+        if(intervalTimer!==null || dead || !env.setInterval)return;
+        intervalTimer=env.setInterval(()=>{
+          if(!audio.ready && !clipList.some(c=>c.ramp)){env.clearInterval(intervalTimer);intervalTimer=null;return;}
+          if(hidden && !audio.ready)return;
+          advance();
+        },25);
+      };
+      cleanup.push(()=>{if(intervalTimer!==null)env.clearInterval(intervalTimer);intervalTimer=null;});
+      if(audio.ready || clipList.some(c=>c.ramp))armInterval();
+      const scheduler=env.requestAnimationFrame?frameScheduler(env):null;
+      if(scheduler){
+        const request=()=>{framePending=true;scheduler.request(frame);};
         // maxFps: frames arriving sooner than the interval (minus 1 ms of vsync jitter) are skipped.
         const interval=maxFps?1000/maxFps:0;let lastFrame=-Infinity;
-        const frame=()=>{
-          raf=null;if(dead)return;
-          if(interval){const t=now();if(t-lastFrame<interval-1){raf=env.requestAnimationFrame(frame);return;}lastFrame=t;}
-          advance();if(dead)return;
-          // Idle fast path: stop requesting frames while nothing animates. The clock (`last`) keeps running, so
-          // the first tick after waking covers the slept time exactly like the skipped ticks would have.
-          // Wakes: any API call or DOM event (ensure/listener), a non-quiet transport tick, or the next timer.
-          const due=quiet()?nextTimer():-1;
+        function frame(){
+          framePending=false;if(dead || hidden)return;
+          if(interval){const t=now();if(t-lastFrame<interval-1){request();return;}lastFrame=t;}
+          advance();
+          if(clock===env){const d=last-frameAt;if(!woke && d>0 && d<100)vsync+=(d-vsync)*0.1;frameAt=last;woke=false;}
+          if(dead || hidden || framePending)return;
+          // Idle fast path: stop requesting frames while nothing animates in JavaScript. The clock (`last`)
+          // keeps running, so the first tick after waking covers the slept time exactly like the skipped
+          // ticks would have. Clips running as native animations count as idle; the loop wakes for their
+          // ends and callbacks. Wakes: any API call or DOM event (ensure/listener), a non-quiet transport
+          // tick, or the next timer.
+          const due=quiet()?nextEvent():-1;
           if(due>=0 && (due===Infinity || env.setTimeout)) {
             sleeping=true;
             if(due!==Infinity)sleepTimer=env.setTimeout(()=>{sleepTimer=null;if(wake!==null)wake();},Math.max(0,due*1000-20));
             return;
           }
-          raf=env.requestAnimationFrame(frame);
+          request();
+        }
+        // Hidden (off screen or background tab): no frames and paused native animations. Clocks still
+        // advance on timers at the next due event (state timers, clip ends, callbacks), so events fire on
+        // time; nothing is drawn until the figure is visible again.
+        const hiddenAdvance=()=>{if(hiddenBusy || ticking || processing || dead)return;hiddenBusy=true;try{advance();}finally{hiddenBusy=false;}};
+        const hiddenArm=()=>{
+          if(hiddenTimer!==null){if(env.clearTimeout)env.clearTimeout(hiddenTimer);hiddenTimer=null;}
+          if(!hidden || dead || !env.setTimeout)return;
+          let due=nextEvent();if(due<0)due=1;
+          if(due===Infinity)return;
+          // At least 1 ms: a due time a rounding error away must not re-arm without the clock moving.
+          hiddenTimer=env.setTimeout(()=>{hiddenTimer=null;hiddenAdvance();hiddenArm();},Math.max(1,due*1000));
+        };
+        const setHidden=h=>{
+          if(dead || h===hidden)return;
+          if(h) {
+            hiddenAdvance();if(dead)return;
+            hidden=true;nat.hidden=true;sleeping=true;
+            if(framePending){scheduler.cancel(frame);framePending=false;}
+            if(sleepTimer!==null){if(env.clearTimeout)env.clearTimeout(sleepTimer);sleepTimer=null;}
+            if(nat.on){nativeCheck();if(dirty)render();}
+            hiddenArm();
+          } else {
+            hidden=false;nat.hidden=false;
+            if(hiddenTimer!==null){if(env.clearTimeout)env.clearTimeout(hiddenTimer);hiddenTimer=null;}
+            if(wake!==null)wake();
+            if(nat.on && !dead){nativeCheck();if(dirty)render();}
+          }
         };
         wake=()=>{
-          if(!sleeping)return;sleeping=false;
+          if(!sleeping || hiddenBusy)return;
+          if(hidden) {
+            // An API call while hidden: bring the clocks up to date, then re-plan the next timer after it.
+            hiddenAdvance();
+            if(!hiddenPoke && env.setTimeout){hiddenPoke=true;env.setTimeout(()=>{hiddenPoke=false;hiddenArm();},0);}
+            return;
+          }
+          sleeping=false;woke=true;
           if(sleepTimer!==null){if(env.clearTimeout)env.clearTimeout(sleepTimer);sleepTimer=null;}
-          // Catch the clock up to one frame before now with a (quiet) tick, so the next frame advances by a
-          // normal frame step instead of the whole slept time — as if the loop had kept ticking.
+          // Catch the clock up to the last frame the loop would have run (the last frame plus whole frame
+          // periods, `vsync` being the running average; one step before now without a frame yet) with a quiet tick, so the next frame advances by a normal
+          // frame step instead of the whole slept time — as if the loop had kept ticking.
           if(clock===env && !ticking && !processing && !dead) {
-            const target=now()-frameStep;
+            const t=now(), tl=env.document && env.document.timeline, ft=tl && typeof tl.currentTime==='number'?tl.currentTime:NaN;
+            // Browsers report the current frame's time as document.timeline.currentTime (same time origin).
+            const target=ft<=t && ft>t-100?ft:frameAt>-Infinity && t>=frameAt?frameAt+Math.floor((t-frameAt)/vsync)*vsync:t-frameStep;
             if(target>last){const delta=(target-last)/1000;last=target;creditTick=true;try{tick(delta);}catch(e){report(e);}finally{creditTick=false;}}
           }
-          if(!dead)raf=env.requestAnimationFrame(frame);
+          if(!dead && !framePending)request();
         };
-        cleanup.push(()=>{wake=null;if(sleepTimer!==null && env.clearTimeout)env.clearTimeout(sleepTimer);});
-        raf=env.requestAnimationFrame(frame);
+        cleanup.push(()=>{wake=null;if(framePending)scheduler.cancel(frame);framePending=false;if(sleepTimer!==null && env.clearTimeout)env.clearTimeout(sleepTimer);if(hiddenTimer!==null && env.clearTimeout)env.clearTimeout(hiddenTimer);});
+        request();
+        if(nativeSupported()){nat.on=true;nat.clockMs=()=>clock===env?last:null;nat.sig=null;dirty=true;render();}
+        if(options.pauseWhenHidden!==false) {
+          const doc=svg.ownerDocument || env.document;
+          let offscreen=false,docHidden=!!(doc && doc.visibilityState==='hidden');
+          const update=()=>setHidden(offscreen || docHidden);
+          if(doc && typeof doc.addEventListener==='function') {
+            const onVisibility=()=>{docHidden=doc.visibilityState==='hidden';update();};
+            doc.addEventListener('visibilitychange',onVisibility);cleanup.push(()=>doc.removeEventListener('visibilitychange',onVisibility));
+          }
+          if(typeof env.IntersectionObserver==='function') {
+            try {
+              const observer=new env.IntersectionObserver(list=>{const e=list[list.length-1];if(e && !dead){offscreen=!e.isIntersecting;update();}});
+              observer.observe(svg);cleanup.push(()=>observer.disconnect());
+            } catch(e){report(e);}
+          }
+          if(docHidden)update();
+        }
       }
-      // Replenish/audio-clock transport even when rendering is suspended. Native padded loops do not depend on either timer.
-      if(env.setInterval){const timer=env.setInterval(()=>{if(audio.ready || [...clips.values()].some(c=>c.ramp))advance();},25);cleanup.push(()=>env.clearInterval(timer));}
+    }
+    // Native animations need: the auto-tick loop (it keeps their clocks), element.animate with composite
+    // modes and the individual CSS transform properties. options.nativeAnimations === false opts out.
+    function nativeSupported() {
+      if(options.nativeAnimations===false || audio.ready || typeof svg.animate!=='function')return false;
+      try {
+        const css=env.CSS, effect=env.KeyframeEffect;
+        if(!css || typeof css.supports!=='function' || !css.supports('translate','1px 2px') || !css.supports('rotate','1deg') || !css.supports('scale','1 2'))return false;
+        return !!(effect && effect.prototype && 'composite' in effect.prototype && svg.style);
+      } catch(_){return false;}
     }
     return api;
   }
@@ -1762,6 +2157,28 @@
   const PLUGIN_API_VERSION=1,PLUGIN_ID=/^[A-Za-z][A-Za-z0-9_.-]{0,63}$/,PLUGIN_NAME=/^[A-Za-z][A-Za-z0-9._:-]{0,63}$/;
   const PLUGIN_KEYS=['id','apiVersion','events','frameBudgetMs','setup','onEvent','onState','onFrame'];
   const PLUGIN_MAX=8,PLUGIN_MAX_EVENTS=32,PLUGIN_MAX_ERRORS=5,PLUGIN_MAX_OVERRUNS=3,PLUGIN_FRAME_BUDGET_MS=4;
+  // One requestAnimationFrame loop per window for every runtime in it (also across copies of this file):
+  // runtimes register a frame callback; a single browser frame dispatches all pending ones.
+  const schedulerKey=typeof Symbol==='function'?Symbol.for('splinely.frameScheduler.v1'):'__splinelyFrameSchedulerV1';
+  const schedulerFallback=typeof WeakMap==='function'?new WeakMap():null;
+  function frameScheduler(env) {
+    let s=null;
+    try{s=env[schedulerKey] || null;}catch(_){}
+    if(s===null && schedulerFallback)s=schedulerFallback.get(env) || null;
+    if(s!==null && typeof s.request==='function' && typeof s.cancel==='function')return s;
+    let pending=new Set(), handle=null;
+    const dispatch=time=>{
+      handle=null;const run=pending;pending=new Set();
+      for(const fn of run)try{fn(time);}catch(e){if(env.console && env.console.error)env.console.error(e);}
+    };
+    s={
+      request(fn){pending.add(fn);if(handle===null)handle=env.requestAnimationFrame(dispatch);},
+      cancel(fn){pending.delete(fn);if(!pending.size && handle!==null){if(env.cancelAnimationFrame)env.cancelAnimationFrame(handle);handle=null;}},
+      get size(){return pending.size;}
+    };
+    try{Object.defineProperty(env,schedulerKey,{value:s,configurable:true});}catch(_){if(schedulerFallback)schedulerFallback.set(env,s);}
+    return s;
+  }
   const registryKey=typeof Symbol==='function'?Symbol.for('splinely.runtime.instances.v1'):'__splinelyRuntimeInstancesV1';
   function register(env,api){if(!env)return;if(!env[registryKey])env[registryKey]={instances:new Set(),alias:null};const r=env[registryKey];r.instances.add(api);syncAlias(env,r);}
   function unregister(env,api){const r=env && env[registryKey];if(r){r.instances.delete(api);syncAlias(env,r);}}
