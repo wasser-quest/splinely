@@ -1,11 +1,16 @@
 #!/usr/bin/env node
 'use strict';
 // Micro-benchmark for the browser runtime's per-frame cost (runtime/src/splinely.js) on a fake DOM.
-//   node scripts/runtime-frame-bench.cjs [--runtime path/to/splinely.js] [--frames N] [--only scenario-prefix] [--json]
+//   node scripts/runtime-frame-bench.cjs [--runtime path/to/splinely.js] [--frames N] [--only scenario-prefix] [--figure f.svg=f.sply] [--json]
 // Each scenario mounts a checked-in example with autoTick:false and calls tick(1/60) repeatedly,
 // reporting microseconds per frame and DOM attribute writes per frame. The "idle-raf" scenario mounts
 // the mascot with autoTick:true and a fake requestAnimationFrame and counts how many frames are still
 // requested over 10 simulated seconds once nothing animates (the idle fast path).
+// The "autotick:" scenarios mount a figure with the real auto-tick loop on the fake browser of
+// runtime/tests/fake-waapi.cjs (rAF at 60 Hz, timers, Web Animations) and report JavaScript time and
+// DOM writes per displayed frame over 20 simulated seconds — once with Web Animations available
+// ("native") and once without ("js"). Add figures with --figure file.svg=file.sply (repeatable);
+// stickfight is built in.
 const fs=require('node:fs');
 const path=require('node:path');
 const ROOT=path.join(__dirname,'..');
@@ -103,7 +108,22 @@ function idleRaf(){
   const state=api.machine('blink').state;api.destroy();
   return {scenario:'idle-raf(mascot,10s@60Hz)',rafCallbacks:calls,usTotal:+(ms*1000).toFixed(0),blinkState:state};
 }
+// Auto-tick loop on the fake browser: JS µs and DOM writes (attributes + style properties) per frame.
+function autotick(label,svgFile,projectBytes,waapi){
+  const {createEnv}=require(path.join(ROOT,'runtime/tests/fake-waapi.cjs'));
+  const {env,svg}=createEnv(fs.readFileSync(svgFile,'utf8'),{waapi,io:true});
+  const api=rt.createRuntime(svg,projectBytes(),{reducedMotion:false});
+  env.advanceTo(env.time+2000); // warm up the JIT, let autoplay settle
+  const w0=env.writes,f0=env.frames,a0=env.animateCalls||0,t0=process.hrtime.bigint();
+  env.advanceTo(env.time+20000);
+  const ms=Number(process.hrtime.bigint()-t0)/1e6,frames=env.frames-f0||1,displayed=1200;
+  api.destroy();
+  return {scenario:'autotick:'+label+(waapi?' native':' js'),usPerFrame:+(ms*1000/displayed).toFixed(2),writesPerFrame:+((env.writes-w0)/displayed).toFixed(2),rafCallbacksPer20s:frames,animateCalls:(env.animateCalls||0)-a0};
+}
+const figures=[['stickfight',path.join(ROOT,'examples/stickfight.svg'),()=>readProject('stickfight')]];
+for(let i=0;i<args.length;i++)if(args[i]==='--figure'){const [svgFile,sply]=args[i+1].split('=');figures.push([path.basename(sply).replace(/\.sply$/,''),svgFile,()=>fs.readFileSync(sply)]);}
 const only=opt('--only',null);
 const results=scenarios.filter(s=>!only || s.name.startsWith(only)).map(run);if(!only || only==='idle')results.push(idleRaf());
+if(!only || only.startsWith('autotick'))for(const [label,svgFile,project] of figures)for(const waapi of [false,true])results.push(autotick(label,svgFile,project,waapi));
 if(args.includes('--json'))console.log(JSON.stringify(results,null,1));
 else {console.log('runtime:',path.relative(process.cwd(),runtimePath),'frames:',FRAMES);console.table(results);}
