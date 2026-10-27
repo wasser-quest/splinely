@@ -914,7 +914,7 @@
     // (dirty); an unchanged frame replays the diagnostics the last full render produced.
     // Native offload state (see nativeCheck); pendingDelta/armInterval are set by the auto-tick loop.
     const nat={on:false,hidden:false,sig:null,anims:new Map(),boneNative:false,clockMs:()=>null};
-    let explicitRev=0, shadowing=false, pendingDelta=()=>0, armInterval=()=>{};
+    let explicitRev=0, hiddenTicking=false, shadowing=false, pendingDelta=()=>0, armInterval=()=>{};
     let followMoving=true, creditTick=false, dirty=true, renderDepth=0, reentered=false, renderReports=[], reportSink=renderReports, boneCache=null;
     const rr=x=>{if(shadowing)return;reportSink.push(x);report(x);};
     const emptyMap=new Map(), noPoses=[], noEntries=[], stateEntries=new WeakMap();
@@ -954,6 +954,8 @@
     }
     function render() {
       if(dead) return;
+      // Clocks advanced by the hidden figure's timers draw nothing: the frame stays dirty until it is shown.
+      if(hiddenTicking)return;
       // Native animations are re-planned and re-synced once clip times are final: not during a tick's
       // intermediate segment renders (the tick checks again when it ends).
       if(nat.on && renderDepth===0 && !ticking)nativeCheck();
@@ -1463,21 +1465,27 @@
       try {const matrix=svg.getScreenCTM();if(matrix){const p=svg.createSVGPoint();p.x=x;p.y=y;const q=p.matrixTransform(matrix.inverse());x=q.x;y=q.y;}}catch(e){report(e);}
       return {x,y};
     }
+    // DOM events nobody consumes (no subscription, interaction or machine transition for the name) are not
+    // emitted: emitting syncs the clock, which ticks and draws once per event, between and beyond frames,
+    // and even while the figure is hidden. Hosts that forward pointer moves at a high rate pay nothing then.
+    const machineEvents=new Set();
+    for(const m of project.machines)for(const t of [...(m.transitions || []),...m.states.flatMap(s=>s.transitions || [])])if(t.event!=null)machineEvents.add(typeof t.event==='string'?t.event:t.event.name);
+    const heard=(type,target)=>machineEvents.has(type) || subscriptions.has(type) || subscriptions.has(target+'\u0000'+type) || (project.interactions || []).some(b=>b.target===target && b.event===type);
     const listeners=new Map();
     for(const type of eventTypes) {
       const listener=event=>{
         if(dead)return;
-        if(wake!==null)wake();
+        // Hidden figures stay asleep: the pointer is only recorded (followers catch up once visible).
+        if(wake!==null && !nat.hidden)wake();
         for(let control=event.target;control && control!==svg;control=control.parentNode)if(control.getAttribute && control.getAttribute('data-splinely-host-control')!=null)return;
         if(event.target && owningSvg(event.target) && owningSvg(event.target)!==svg)return;
         let el=event.target;while(el && el!==svg && elements.get(el.id)!==el)el=el.parentNode;
         const target=el && el.id || svg.id,point=coordinates(event),detail={...point,event,target,key:event.key,pointerId:event.pointerId,buttons:event.buttons};
         if(type==='pointermove' || type==='pointerdown' || type==='pointerenter')pointer=[point.x,point.y];
         if(type==='pointerleave' && event.target===svg)pointer=null;
-        if(project.followers.length && /^pointer/.test(type)){followMoving=true;if(updateFollowers(0))dirty=true;render();}
+        if(project.followers.length && /^pointer/.test(type)){followMoving=true;if(updateFollowers(0))dirty=true;if(!nat.hidden)render();}
         // Keep keyboard handling scoped to focus within this SVG. Focusability remains exporter's choice.
-        emit(type,detail,target);
-        if(dead)return;
+        if(heard(type,target)){emit(type,detail,target);if(dead)return;}
         for(const binding of project.interactions || [])if(binding.target===target && binding.event===type)actions(binding.actions,detail);
         if(dead)return;
         if(type==='pointerdown') {pointerStarts.set(event.pointerId,{...point,target,el});try{if(el && el.setPointerCapture && wantsPointerCapture(target))el.setPointerCapture(event.pointerId);}catch(_){}emit('dragstart',{...detail,dx:0,dy:0},target);}
@@ -2074,7 +2082,7 @@
         // Hidden (off screen or background tab): no frames and paused native animations. Clocks still
         // advance on timers at the next due event (state timers, clip ends, callbacks), so events fire on
         // time; nothing is drawn until the figure is visible again.
-        const hiddenAdvance=()=>{if(hiddenBusy || ticking || processing || dead)return;hiddenBusy=true;try{advance();}finally{hiddenBusy=false;}};
+        const hiddenAdvance=()=>{if(hiddenBusy || ticking || processing || dead)return;hiddenBusy=true;hiddenTicking=hidden;try{advance();}finally{hiddenBusy=false;hiddenTicking=false;}};
         const hiddenArm=()=>{
           if(hiddenTimer!==null){if(env.clearTimeout)env.clearTimeout(hiddenTimer);hiddenTimer=null;}
           if(!hidden || dead || !env.setTimeout)return;
