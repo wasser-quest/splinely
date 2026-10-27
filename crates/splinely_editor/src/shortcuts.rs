@@ -346,12 +346,22 @@ impl Editor {
         if self.preview_mode {
             return;
         }
+        // Pfadpunkte tool: clipboard, Delete and arrows act on the points.
+        let point_mode = self.point_path().is_some();
+        let has_points = point_mode && self.selected_points().is_some();
         if let Some(key) = self.selected_key.filter(|_| copy || cut) {
             // A selected timeline key takes Ctrl+C/X before shapes do.
             self.copy_key(key);
             if cut {
                 self.selected_key = None;
                 self.delete_key(key);
+            }
+        } else if (copy || cut) && has_points {
+            if self.copy_points(ctx) {
+                self.paste_key_next = false;
+                if cut {
+                    self.delete_points();
+                }
             }
         } else if (copy || cut) && self.copy_selected(ctx) {
             self.paste_key_next = false;
@@ -362,6 +372,8 @@ impl Editor {
         let paste = pasted.is_some() || (command && pressed(egui::Key::V));
         if paste && self.paste_key_next && self.key_clipboard.is_some() {
             self.paste_key();
+        } else if paste && point_mode && self.paste_points(pasted.as_deref()) {
+            // Pasted as a new subpath of the edited path.
         } else if let Some(text) = pasted {
             self.paste(Some(&text));
         } else if command && pressed(egui::Key::V) {
@@ -369,6 +381,27 @@ impl Editor {
         }
         if command {
             return;
+        }
+        if has_points && self.selected_key.is_none() {
+            if pressed(egui::Key::Delete) || pressed(egui::Key::Backspace) {
+                self.delete_points();
+            }
+            for k in [
+                egui::Key::ArrowLeft,
+                egui::Key::ArrowRight,
+                egui::Key::ArrowUp,
+                egui::Key::ArrowDown,
+            ] {
+                let delta = keyboard_nav::nudge_delta(
+                    k,
+                    shift,
+                    self.settings.nudge_small,
+                    self.settings.nudge_large,
+                );
+                if let (true, Some(delta)) = (pressed(k), delta) {
+                    self.nudge_points(delta);
+                }
+            }
         }
         if self.canvas_tool() == CanvasTool::Selection && self.tab == Tab::Canvas {
             // With a timeline key selected, Delete belongs to the timeline.

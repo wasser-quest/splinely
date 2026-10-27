@@ -73,6 +73,7 @@ Schema. All canonical document fields are writable as JSON or with `apply`.
 | Seeded/deterministic starter scenes | `random-figures`, `water-drop`, `rig-demo`, `new --demo` |
 | Validation, inspection, independent clocks/weights, SVG | `validate`, `inspect`, `evaluate --context`, `export` |
 | Visual self-check | `render --time S --output shot.png` (static PNG), `render --output anim.gif` (animated GIF); no scripts |
+| Look without seeing images | `inspect F --ascii [--crop]` (shapes back to front with colour words, world bounds, layout sentences, ASCII picture, animation summary), `inspect F --node ID`, `--detail full` |
 
 ## Review and verify
 
@@ -81,7 +82,8 @@ Schema. All canonical document fields are writable as JSON or with `apply`.
    to a new file, then `validate`. Do not overwrite a good
    project with an unvalidated draft. `apply` validates before atomic replacement;
    arrays replace entirely, so retain all unrelated array entries/references.
-3. `check` and fix all warnings; `render` previews and inspect them; `inspect`,
+3. `check` and fix all warnings; `render` previews and inspect them (if you cannot
+   view images, use `inspect --ascii`: read `scene.summary`, `layout` and `ascii`); `inspect`,
    then `evaluate` representative times and contexts. Explicit context
    states/clip times/weights are snapshots; transitions/actions/fades are not run.
 4. Export without trust flags first. Review authored JavaScript before explicitly
@@ -104,3 +106,13 @@ Outputs are JSON (help/version excepted); errors are JSON stderr with nonzero
 exit. `--output -` emits project JSON, but SVG export wraps its string in JSON.
 See [CLI.md](CLI.md) for commands/protocol and [BLENDING_SPEC.md](BLENDING_SPEC.md)
 for weighted ordering and runtime fade semantics.
+
+## Looking at a file without seeing images
+
+`splinely-cli inspect F --ascii` describes the picture as text: `scene.nodes`
+(back to front, `looksLike` e.g. "white ellipse", world `bounds` [x,y,w,h],
+`center`, `inside`, `visiblePercent`), `layout` sentences (inside / overlaps /
+hidden behind / left of / mirrored pairs), an `ascii` grid with a letter per
+shape and `legend`, and `animation` (clips, keyframes, interactions, followers,
+bones). `--crop` zooms the grid to the drawn shapes, `--cols N` sets its width,
+`--node ID` focuses one shape, `--detail full` lists everything.

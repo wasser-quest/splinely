@@ -21,6 +21,7 @@ mod guide;
 mod isolated_preview;
 mod keyframes;
 mod lint;
+mod look;
 mod paths;
 mod plugins;
 mod scaffold;
@@ -348,8 +349,33 @@ enum Command {
     },
     /// Validate a project. Use - to read JSON from stdin.
     Validate { input: String },
-    /// Summarize a validated project plus its file encoding (format, sizes, CRC, JSON-equivalent size).
-    Inspect { input: String },
+    /// Look at a file without seeing images: every shape in draw order with colour words,
+    /// world bounds and centre, plain-English layout (inside / overlaps / left of / mirrored
+    /// pairs / hidden behind), animation summary, optional ASCII picture; plus file encoding
+    /// facts (format, sizes, CRC) and counts.
+    #[command(
+        after_help = "Output (JSON): `scene` (canvas, background, nodes back to front with `looksLike`, `bounds` [x,y,w,h], `center`, `visiblePercent`, `inside`), `layout` (sentences), `animation` (clips/tracks/keys, interactions, timers, followers, bones), `ascii` (with --ascii), and the older fields (`file`, `stats`, `nodes`, `clips` …).\nExamples:\n  splinely-cli inspect face.sply --ascii\n  splinely-cli inspect face.sply --node pupil-left --detail full"
+    )]
+    Inspect {
+        /// Project path, or - for stdin.
+        input: String,
+        /// summary (default): compact; full: transforms, local geometry, every relation and keyframe.
+        #[arg(long, value_enum, default_value = "summary")]
+        detail: look::Detail,
+        /// Describe only this node: its entry (full detail), its relations and its animation.
+        #[arg(long)]
+        node: Option<String>,
+        /// Add an ASCII-art picture: one letter per shape (see `ascii.legend`), '.' = empty.
+        #[arg(long)]
+        ascii: bool,
+        /// Width of the ASCII picture in characters (8..200; rows follow the aspect ratio).
+        #[arg(long, default_value_t = 64)]
+        cols: usize,
+        /// Zoom the ASCII picture to the drawn shapes (ignores a full-canvas background)
+        /// instead of the whole canvas; `ascii.area` tells what is shown.
+        #[arg(long, requires = "ascii")]
+        crop: bool,
+    },
     /// Export isolated browser preview HTML; custom JS requires consent in the page.
     IsolatedPreview {
         input: String,
@@ -1222,7 +1248,23 @@ fn run(cli: Cli) -> Result<Value> {
             let project = load(&input)?;
             Ok(json!({"ok":true,"schemaVersion":project.schema_version}))
         }
-        Command::Inspect { input } => inspect(&input),
+        Command::Inspect {
+            input,
+            detail,
+            node,
+            ascii,
+            cols,
+            crop,
+        } => inspect(
+            &input,
+            &look::Options {
+                detail,
+                node,
+                ascii,
+                cols,
+                crop,
+            },
+        ),
         Command::IsolatedPreview {
             input,
             output,
@@ -1279,9 +1321,10 @@ fn run(cli: Cli) -> Result<Value> {
     }
 }
 
-/// Project summary plus how the file is encoded (binary header facts, sizes, CRC).
+/// Project summary plus how the file is encoded (binary header facts, sizes, CRC),
+/// and a textual picture of the scene (see `look`).
 /// A damaged or hostile binary file fails with the typed `invalid_binary` error.
-fn inspect(input: &str) -> Result<Value> {
+fn inspect(input: &str, options: &look::Options) -> Result<Value> {
     let bytes = read_bytes(input)?;
     let project = validated(project_bytes_value(&bytes, input)?)?;
     let json_bytes = serde_json::to_vec_pretty(&project)
@@ -1321,8 +1364,8 @@ fn inspect(input: &str) -> Result<Value> {
         .flat_map(|c| &c.tracks)
         .map(|t| t.keyframes.len())
         .sum();
-    Ok(
-        json!({"ok":true,"schemaVersion":project.schema_version,"name":project.name,
+    let view = look::describe(&project, options)?;
+    let mut result = json!({"ok":true,"schemaVersion":project.schema_version,"name":project.name,
         "file":file,
         "stats":{"nodes":project.nodes.len(),"bones":project.bones.len(),"clips":project.clips.len(),
             "tracks":tracks,"keyframes":keyframes,"stateMachines":project.state_machines.len(),
@@ -1334,8 +1377,9 @@ fn inspect(input: &str) -> Result<Value> {
         "clips":project.clips,"stateMachines":project.state_machines,
         "variables":project.variables,"audioAssets":project.audio_assets.iter().map(|a| json!({"id":a.id,"name":a.name,"mimeType":a.mime_type,"base64Length":a.data_base64.len()})).collect::<Vec<_>>(),
         "audioCues":project.audio_cues,
-        "followers":project.followers,"hasCustomJs":!project.custom_js.is_empty(),"hasRawSvg":!project.raw_svg.is_empty(),"svgSourceSync":project.source_sync().as_str()}),
-    )
+        "followers":project.followers,"hasCustomJs":!project.custom_js.is_empty(),"hasRawSvg":!project.raw_svg.is_empty(),"svgSourceSync":project.source_sync().as_str()});
+    result.as_object_mut().expect("object").extend(view);
+    Ok(result)
 }
 
 fn export_svg(

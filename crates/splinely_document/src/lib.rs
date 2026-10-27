@@ -20,6 +20,7 @@ mod json_loading;
 mod model;
 mod morph;
 mod motion;
+pub mod path_edit;
 pub mod platform_dirs;
 pub mod plugin;
 mod primitives;

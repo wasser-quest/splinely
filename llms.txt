@@ -57,6 +57,10 @@ glibc 2.35 or newer (Ubuntu 22.04+, Debian 12+, Fedora 36+).
   `splinely-cli node add`, animate with `splinely-cli keyframe`, validate with
   `splinely-cli check scene.sply`, look at `splinely-cli render scene.sply --time 1 --output preview.png`,
   then `splinely-cli export scene.sply --output scene.svg`.
+- Cannot view images? `splinely-cli inspect scene.sply --ascii` describes the
+  picture as text: shapes back to front with colour words and positions,
+  layout sentences (inside, overlaps, hidden behind, mirrored pairs), an ASCII
+  grid with a legend, and an animation summary (`--node ID`, `--detail full`, `--crop`).
 - `splinely-cli COMMAND --help` documents every command; output is JSON.
 - Only pass `--trusted-js` to `export` when the user explicitly approves the
   project's custom JavaScript. The same applies to `export --plugin DIR`, which

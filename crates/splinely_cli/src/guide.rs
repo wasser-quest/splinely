@@ -128,6 +128,29 @@ splinely-cli batch card.sply --steps steps.txt
 Steps omit the program name, the project path and `--output`. If any step
 fails, nothing is saved and the error names the step.
 
+## Look at a file without seeing images: inspect
+`render` makes PNGs; if you cannot view images, read the picture as text:
+```sh
+splinely-cli inspect scene.sply --ascii --cols 48     # whole scene + ASCII picture
+splinely-cli inspect scene.sply --ascii --crop        # zoom the picture to the drawn shapes
+splinely-cli inspect scene.sply --node sun            # one shape, its relations and animation
+splinely-cli inspect scene.sply --detail full         # transforms, every relation and keyframe
+```
+- `scene.summary`: canvas, background and draw order in one line.
+- `scene.nodes` (back to front): `looksLike` ("white ellipse"), `fill`, `bounds`
+  [x, y, w, h] and `center` in canvas units after transforms (origin top-left,
+  y down), `inside` (smallest shape containing it), `visiblePercent` (how much is
+  not covered by shapes in front), `notDrawn` (hidden, opacity 0, no paint).
+- `layout`: sentences such as "node-2 (white ellipse) is inside node-1 …, upper-left
+  of it", "… overlaps …; … is in front", "… is completely hidden behind …",
+  "a (left) and b (right) are a matching pair … mirrored about x≈400".
+- `ascii` (with `--ascii`, `--cols N`, default 64): one letter per shape, `.` empty;
+  `ascii.legend` maps letters to shapes. Use it to check rough placement.
+- `animation`: clips (duration, autoplay, loop, keyframes per target/property),
+  interactions, timers, followers and bones in short sentences.
+Check your edits with `inspect` after each step: a shape with `visiblePercent` 0
+or a "hidden behind" sentence is the usual "where did it go?" bug.
+
 ## More tools
 - Shapes: `node add|update|delete|duplicate|list` (`node update F ID --fill red --tx 20`).
 - Layout: `arrange align|distribute|flip|move|scale|rotate|order|group|ungroup`
@@ -138,7 +161,7 @@ fails, nothing is saved and the error names the step.
 - Clips: `clip list|add|update|delete` (duration, `--autoplay`, `--loop`, `--easing` for all keys).
 - Inspect: `node list F` (IDs + bounds), `clip list F`, `inspect F`,
   `evaluate F --time 1.2` (values at a time), `validate F`.
-- Look: `render F --time T --output x.png`, `render F --output x.gif [--clip ID]`.
+- Look: `inspect F --ascii` (text picture, see above), `render F --time T --output x.png`, `render F --output x.gif [--clip ID]`.
 - Advanced JSON: `apply F --patch patch.json` (RFC 7396; arrays are REPLACED
   entirely), `schema` (format + examples), `capabilities` (full reference).
 - Bones, blending, audio: see `capabilities` and CLI.md.

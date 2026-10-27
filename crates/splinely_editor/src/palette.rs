@@ -2,6 +2,7 @@
 //! letters of its name or an English/German synonym. ↑/↓ choose, Enter runs,
 //! Escape closes. Also hosts the shortcut overview (F1).
 use super::files::FileAction;
+use super::path_points::PointOp;
 use super::selection::ArrangeOp;
 use super::shortcuts::NewShape;
 use super::*;
@@ -21,6 +22,7 @@ pub(super) enum Cmd {
     Duplicate,
     Delete,
     Arrange(ArrangeOp),
+    Points(PointOp),
     Fit,
     ZoomSelection,
     Rulers,
@@ -296,6 +298,61 @@ fn commands() -> Vec<(&'static str, &'static str, Cmd)> {
             "auto key record animation",
             AutoKey,
         ),
+        (
+            tr("Punkte: Tangenten trennen (Ecke)"),
+            "path point node cusp corner split break tangent ecke",
+            Points(PointOp::Cusp),
+        ),
+        (
+            tr("Punkte: glatt"),
+            "path point node smooth glatt",
+            Points(PointOp::Smooth),
+        ),
+        (
+            tr("Punkte: symmetrisch"),
+            "path point node symmetric symmetrisch",
+            Points(PointOp::Symmetric),
+        ),
+        (
+            tr("Punkte: automatisch"),
+            "path point node auto automatic",
+            Points(PointOp::Auto),
+        ),
+        (
+            tr("Punkte: Griffe einziehen"),
+            "path point handles retract einziehen",
+            Points(PointOp::Retract),
+        ),
+        (
+            tr("Punkte: Griffe herausziehen"),
+            "path point handles extend herausziehen",
+            Points(PointOp::Extend),
+        ),
+        (
+            tr("Punkte: Pfad auftrennen"),
+            "path point break split open auftrennen",
+            Points(PointOp::Break),
+        ),
+        (
+            tr("Punkte: Endpunkte verbinden"),
+            "path point join connect close verbinden",
+            Points(PointOp::Join),
+        ),
+        (
+            tr("Punkte: Segment zu Linie"),
+            "path segment line straight linie",
+            Points(PointOp::ToLine),
+        ),
+        (
+            tr("Punkte: Segment zu Kurve"),
+            "path segment curve bezier kurve",
+            Points(PointOp::ToCurve),
+        ),
+        (
+            tr("Punkte: Pfadrichtung umkehren"),
+            "path reverse direction umkehren",
+            Points(PointOp::Reverse),
+        ),
         (tr("Befehlspalette"), "command palette search", Palette),
         (
             tr("Einstellungen …"),
@@ -382,6 +439,7 @@ impl Editor {
             Cmd::Undo => self.undo_redo(false),
             Cmd::Redo => self.undo_redo(true),
             Cmd::History => self.history_open = true,
+            Cmd::SelectAll if self.select_all_points() => {}
             Cmd::SelectAll => {
                 if matches!(self.tab, Tab::Canvas | Tab::Bones) {
                     self.choose_tool(CanvasTool::Selection);
@@ -391,6 +449,9 @@ impl Editor {
             Cmd::Duplicate => self.duplicate_selected(),
             Cmd::Delete => self.delete_selected(),
             Cmd::Arrange(op) => self.apply_arrange(op),
+            Cmd::Points(op) => {
+                self.apply_point_op(op);
+            }
             Cmd::Fit => self.fit_requested = true,
             Cmd::ZoomSelection => self.zoom_selection_requested = true,
             Cmd::Rulers => self.show_rulers = !self.show_rulers,
@@ -630,6 +691,21 @@ const FIXED_SHORTCUTS: &[(&str, &str)] = &[
         "Auswahl aufheben, dann die Zeichenfläche verlassen",
     ),
     ("? oder F1", "Diese Übersicht"),
+    ("", "Pfadpunkte-Werkzeug"),
+    ("Klick / Umschalt+Klick", "Punkt wählen / hinzufügen"),
+    ("Ziehen auf freier Fläche", "Punkte per Rahmen wählen"),
+    ("Punkt ziehen", "Gewählte Punkte samt Griffen verschieben"),
+    ("Doppelklick auf Kante", "Punkt einfügen"),
+    ("Entf / Rücktaste", "Gewählte Punkte löschen"),
+    ("Pfeile (Umschalt)", "Gewählte Punkte verschieben"),
+    (
+        "Strg+C / X / V",
+        "Punkte als Teilpfad kopieren / ausschneiden / einfügen",
+    ),
+    ("", "Zeichenstift"),
+    ("Rücktaste", "Letzten Punkt entfernen"),
+    ("Klick auf ersten Punkt", "Pfad schließen"),
+    ("Enter / Esc", "Fertigstellen / abbrechen"),
     ("", "Maus und Ansicht"),
     ("Griffe + Umschalt / Alt", "Proportional / von der Mitte"),
     ("Strg+Mausrad", "Zoomen"),

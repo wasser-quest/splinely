@@ -51,6 +51,8 @@ mod palette;
 mod pan_tests;
 #[path = "panels.rs"]
 mod panels;
+#[path = "path_points.rs"]
+mod path_points;
 #[path = "rulers.rs"]
 mod rulers;
 #[path = "selection.rs"]
@@ -330,6 +332,14 @@ pub struct Editor {
     snap_grid: bool,
     edit_path_handles: bool,
     path_drag: Option<(PathGesture, CanvasMap, String)>,
+    /// Selected anchors of the path `point_owner` (Pfadpunkte tool).
+    point_selection: std::collections::BTreeSet<vector::tools::Handle>,
+    point_owner: Option<String>,
+    /// Point rubber band in screen coordinates (start, end, additive).
+    point_marquee: Option<(Pos2, Pos2, bool)>,
+    point_clipboard: Vec<vector::tools::Segment>,
+    /// Last frame's local-to-screen mapping of the point-edited path.
+    point_map: Option<(String, CanvasMap)>,
     pen: Option<PenPath>,
     pen_press: Option<[f64; 2]>,
     freehand: splinely_editor::freehand::FreehandTool,
@@ -467,6 +477,11 @@ impl Default for Editor {
             snap_grid: settings.snap_grid,
             edit_path_handles: false,
             path_drag: None,
+            point_selection: Default::default(),
+            point_owner: None,
+            point_marquee: None,
+            point_clipboard: vec![],
+            point_map: None,
             pen: None,
             pen_press: None,
             freehand: splinely_editor::freehand::FreehandTool::default(),
@@ -514,12 +529,12 @@ impl Editor {
             .unwrap_or(0)
             + serde_json::to_vec(&next).map(|s| s.len()).unwrap_or(0);
         let limit = self.settings.undo_steps;
-        if self.history_bytes + size > 128 * 1024 * 1024 || self.history_steps >= limit {
-            self.history.clear();
-            self.history_bytes = 0;
-            self.history_steps = 0;
-            self.status = trf("Ältere Rückgängig-Schritte verworfen (Grenze: {limit} Schritte / ~128 MiB · änderbar in den Einstellungen).", &[format!("{limit}")]);
-        }
+        // Drop only the oldest steps when a limit is reached instead of
+        // discarding the whole history.
+        self.history.set_limits(HistoryLimits {
+            max_steps: Some(limit.max(1)),
+            max_bytes: Some(128 * 1024 * 1024),
+        });
         let label = history_panel::describe_change(&self.project, &next);
         match self
             .history
@@ -527,8 +542,12 @@ impl Editor {
         {
             Ok(()) => {
                 self.history.set_last_label(label);
-                self.history_bytes += size;
-                self.history_steps += 1;
+                self.history.set_last_size(size);
+                self.history_bytes = self.history.bytes();
+                self.history_steps = self.history.undo_len();
+                if self.history.take_dropped() > 0 {
+                    self.status = trf("Ältere Rückgängig-Schritte verworfen (Grenze: {limit} Schritte / ~128 MiB · änderbar in den Einstellungen).", &[format!("{limit}")]);
+                }
             }
             Err(error) => self.status = error.to_string(),
         }
@@ -573,6 +592,7 @@ impl Editor {
         self.scene_cache = None;
         self.state_graph = Default::default();
         self.path_drag = None;
+        self.point_marquee = None;
         self.pen = None;
         self.pen_press = None;
         self.preview_mode = false;
@@ -1473,6 +1493,17 @@ impl Editor {
                     self.canvas_context_menu(ui);
                 });
             }
+            if self.point_path().is_some() {
+                if response.secondary_clicked() {
+                    if let Some(p) = response.interact_pointer_pos() {
+                        self.point_context_pick(p);
+                    }
+                }
+                response.context_menu(|ui| {
+                    ui.set_min_width(220.);
+                    self.points_context_menu(ui);
+                });
+            }
             if self.show_rulers {
                 rulers::paint(&outer_painter, viewport, origin, self.zoom);
             }
@@ -1663,6 +1694,7 @@ impl Editor {
         self.cancel_transform();
         // Pending path/pen gestures are speculative; keep the existing Pen draft.
         self.path_drag = None;
+        self.point_marquee = None;
         self.pen_press = None;
         self.drag_base = None;
         self.drag_snap = None;

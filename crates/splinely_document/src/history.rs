@@ -16,6 +16,19 @@ pub struct History {
     /// Human-readable names parallel to `undo`/`redo` (empty if unnamed).
     undo_labels: Vec<String>,
     redo_labels: Vec<String>,
+    /// Caller-reported byte sizes parallel to `undo`/`redo` (0 if unreported).
+    undo_sizes: Vec<usize>,
+    redo_sizes: Vec<usize>,
+    limits: HistoryLimits,
+    dropped: usize,
+}
+
+/// Caps on retained undo steps. When exceeded, the oldest steps are dropped
+/// (never the newest one); `None` means unlimited.
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
+pub struct HistoryLimits {
+    pub max_steps: Option<usize>,
+    pub max_bytes: Option<usize>,
 }
 impl History {
     pub fn execute(
@@ -58,9 +71,12 @@ impl History {
         if next != *project {
             self.undo.push((project.clone(), next.clone()));
             self.undo_labels.push(String::new());
+            self.undo_sizes.push(0);
             self.redo.clear();
             self.redo_labels.clear();
+            self.redo_sizes.clear();
             *project = next;
+            self.enforce_limits();
         }
         Ok(())
     }
@@ -78,6 +94,8 @@ impl History {
         self.redo.push((before, after));
         self.redo_labels
             .push(self.undo_labels.pop().unwrap_or_default());
+        self.redo_sizes
+            .push(self.undo_sizes.pop().unwrap_or_default());
         true
     }
     pub fn redo(&mut self, project: &mut Project) -> bool {
@@ -88,6 +106,8 @@ impl History {
         self.undo.push((before, after));
         self.undo_labels
             .push(self.redo_labels.pop().unwrap_or_default());
+        self.undo_sizes
+            .push(self.redo_sizes.pop().unwrap_or_default());
         true
     }
     pub fn clear(&mut self) {
@@ -95,6 +115,56 @@ impl History {
         self.redo.clear();
         self.undo_labels.clear();
         self.redo_labels.clear();
+        self.undo_sizes.clear();
+        self.redo_sizes.clear();
+    }
+    /// Set retention caps; applies immediately to existing steps.
+    pub fn set_limits(&mut self, limits: HistoryLimits) {
+        self.limits = limits;
+        self.enforce_limits();
+    }
+    pub fn limits(&self) -> HistoryLimits {
+        self.limits
+    }
+    /// Record the approximate memory cost of the most recent undo step and
+    /// enforce the byte cap.
+    pub fn set_last_size(&mut self, bytes: usize) {
+        if let Some(last) = self.undo_sizes.last_mut() {
+            *last = bytes;
+        }
+        self.enforce_limits();
+    }
+    pub fn undo_len(&self) -> usize {
+        self.undo.len()
+    }
+    pub fn redo_len(&self) -> usize {
+        self.redo.len()
+    }
+    /// Sum of reported sizes of all retained (undo and redo) steps.
+    pub fn bytes(&self) -> usize {
+        self.undo_sizes.iter().chain(&self.redo_sizes).sum()
+    }
+    /// Number of old steps dropped by the limits since the last call.
+    pub fn take_dropped(&mut self) -> usize {
+        std::mem::take(&mut self.dropped)
+    }
+    /// Drop the oldest undo steps until the caps hold; the newest step stays.
+    fn enforce_limits(&mut self) {
+        let mut drop = 0;
+        while self.undo.len() - drop > 1 && {
+            let steps = self.undo.len() - drop;
+            let bytes: usize = self.undo_sizes[drop..].iter().chain(&self.redo_sizes).sum();
+            self.limits.max_steps.is_some_and(|m| steps > m.max(1))
+                || self.limits.max_bytes.is_some_and(|m| bytes > m)
+        } {
+            drop += 1;
+        }
+        if drop > 0 {
+            self.undo.drain(..drop);
+            self.undo_labels.drain(..drop);
+            self.undo_sizes.drain(..drop);
+            self.dropped += drop;
+        }
     }
     /// Name the most recent undo step.
     pub fn set_last_label(&mut self, label: impl Into<String>) {

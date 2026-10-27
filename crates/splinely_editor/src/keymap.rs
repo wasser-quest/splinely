@@ -3,6 +3,7 @@
 //! A single dispatcher replaces the former hard-wired shortcut checks.
 use super::files::FileAction;
 use super::palette::Cmd;
+use super::path_points::PointOp;
 use super::selection::ArrangeOp;
 use super::shortcuts::NewShape;
 use super::*;
@@ -189,6 +190,15 @@ pub(super) fn default_bindings() -> Vec<(Cmd, Vec<KeyCombo>)> {
             Cmd::Arrange(ArrangeOp::Flip(Axis::Vertical)),
             vec![KeyCombo::shift(K::V)],
         ),
+        (Cmd::Points(PointOp::Cusp), vec![KeyCombo::ctrl(K::Num1)]),
+        (Cmd::Points(PointOp::Smooth), vec![KeyCombo::ctrl(K::Num2)]),
+        (
+            Cmd::Points(PointOp::Symmetric),
+            vec![KeyCombo::ctrl(K::Num3)],
+        ),
+        (Cmd::Points(PointOp::Auto), vec![KeyCombo::ctrl(K::Num4)]),
+        (Cmd::Points(PointOp::Break), vec![KeyCombo::ctrl(K::B)]),
+        (Cmd::Points(PointOp::Join), vec![KeyCombo::ctrl(K::J)]),
         (Cmd::Fit, vec![KeyCombo::new(K::F), KeyCombo::new(K::Home)]),
         (Cmd::ZoomSelection, vec![KeyCombo::shift(K::Num2)]),
         (
@@ -256,6 +266,7 @@ impl Editor {
             Cmd::SelectAll => canvas && editing,
             Cmd::Duplicate | Cmd::Redo => editing,
             Cmd::Arrange(_) => selecting && !self.selection().is_empty(),
+            Cmd::Points(op) => self.point_op_allowed(*op),
             Cmd::Eyedropper => selecting && !self.editable_selection().is_empty(),
             _ => true,
         }

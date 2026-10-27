@@ -4,34 +4,13 @@
 //! renderer's f32 precision. The original text is retained until an actual edit.
 use eframe::egui::{self, Color32, Pos2, Stroke};
 use resvg::{tiny_skia, usvg};
+use splinely_document::path_edit;
 use splinely_document::{Node, NodeKind, Project};
 use splinely_editor::i18n::{tr, trf};
+use std::collections::BTreeSet;
 use std::fmt::Write;
 
-pub type Point = [f64; 2];
-
-#[derive(Clone, Debug, PartialEq)]
-pub enum Segment {
-    Move(Point),
-    Line(Point),
-    Quadratic {
-        control: Point,
-        end: Point,
-    },
-    Cubic {
-        first: Point,
-        second: Point,
-        end: Point,
-    },
-    Close,
-}
-
-#[derive(Clone, Copy, Debug, PartialEq, Eq)]
-pub enum HandleKind {
-    Anchor,
-    FirstControl,
-    SecondControl,
-}
+pub use splinely_document::path_edit::{Handle, HandleKind, NodeType, Point, Segment};
 
 /// Gesture-only tangent coupling; no automatic modes are persisted in SVG.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -39,12 +18,6 @@ pub enum TangentLink {
     Independent,
     Smooth,
     Symmetric,
-}
-
-#[derive(Clone, Copy, Debug, PartialEq, Eq)]
-pub struct Handle {
-    pub segment: usize,
-    pub kind: HandleKind,
 }
 
 #[derive(Clone, Debug)]
@@ -181,6 +154,20 @@ impl EditablePath {
 
     pub fn segments(&self) -> &[Segment] {
         &self.segments
+    }
+
+    /// A validated path built from edited segments (e.g. a `path_edit` result).
+    pub fn from_segments(segments: Vec<Segment>) -> Result<Self, String> {
+        if segments.len() > path_edit::MAX_SEGMENTS {
+            return Err("SVG path segment limit is 50000".into());
+        }
+        let path = Self {
+            segments,
+            source: None,
+            changed: true,
+        };
+        splinely_document::path_bounds(&path.path_data()).map_err(|e| e.to_string())?;
+        Ok(path)
     }
 
     pub fn handles(&self) -> Vec<(Handle, Point)> {
@@ -528,14 +515,33 @@ impl EditablePath {
         if !radius.is_finite() || radius < 0.0 {
             return None;
         }
-        self.handles()
+        let candidates = self
+            .handles()
             .into_iter()
-            .filter_map(|(h, p)| {
-                let distance = map.to_screen(p).ok()?.distance(screen);
-                (distance <= radius).then_some((h, distance))
-            })
-            .min_by(|a, b| a.1.total_cmp(&b.1))
-            .map(|(h, _)| h)
+            .filter_map(|(h, p)| Some((h, map.to_screen(p).ok()?.distance(screen) as f64)));
+        path_edit::pick_handle(candidates, radius as f64)
+    }
+
+    /// Like `hit_test`, but only anchors and the controls shown for `selection`
+    /// (see `paint_points`) can be hit. Anchors are canonical.
+    pub fn hit_test_points(
+        &self,
+        screen: Pos2,
+        map: &CanvasMap,
+        radius: f32,
+        selection: &BTreeSet<Handle>,
+    ) -> Option<Handle> {
+        if !radius.is_finite() || radius < 0.0 {
+            return None;
+        }
+        let visible = path_edit::visible_controls(&self.segments, selection);
+        let candidates = self
+            .handles()
+            .into_iter()
+            .filter(|(h, _)| visible.contains(h))
+            .chain(path_edit::anchors(&self.segments))
+            .filter_map(|(h, p)| Some((h, map.to_screen(p).ok()?.distance(screen) as f64)));
+        path_edit::pick_handle(candidates, radius as f64)
     }
 
     /// Draw a stroke-only live preview, including unfinished Pen geometry.
@@ -603,61 +609,108 @@ impl EditablePath {
     }
 
     /// Paint after the scene. Does not consume egui input or mutate the project.
+    /// Shows every control (Pen preview); `selected` is highlighted.
     pub fn paint_handles(
         &self,
         painter: &egui::Painter,
         map: &CanvasMap,
         selected: Option<Handle>,
     ) -> Result<(), String> {
-        let stroke = Stroke::new(1.0_f32, Color32::from_rgb(80, 130, 210));
-        let mut current = None;
-        let mut start = None;
-        for s in &self.segments {
-            match *s {
-                Segment::Move(p) => {
-                    current = Some(p);
-                    start = Some(p);
+        let selection: BTreeSet<Handle> = selected.into_iter().collect();
+        self.paint_styled(painter, map, &selection, None, |_| true)
+    }
+
+    /// Point-editing view: hollow anchors, filled selected anchors, a larger
+    /// hovered point; corners are squares, smooth nodes circles and symmetric
+    /// nodes diamonds. Controls only for selected anchors and their neighbours.
+    pub fn paint_points(
+        &self,
+        painter: &egui::Painter,
+        map: &CanvasMap,
+        selection: &BTreeSet<Handle>,
+        hovered: Option<Handle>,
+    ) -> Result<(), String> {
+        let visible = path_edit::visible_controls(&self.segments, selection);
+        self.paint_styled(painter, map, selection, hovered, |h| visible.contains(&h))
+    }
+
+    fn paint_styled(
+        &self,
+        painter: &egui::Painter,
+        map: &CanvasMap,
+        selection: &BTreeSet<Handle>,
+        hovered: Option<Handle>,
+        show_control: impl Fn(Handle) -> bool,
+    ) -> Result<(), String> {
+        let accent = Color32::from_rgb(80, 130, 210);
+        let stroke = Stroke::new(1.0_f32, accent);
+        // Tangent lines from each shown control to the anchor it belongs to.
+        for (h, p) in self.handles() {
+            if h.kind == HandleKind::Anchor || !show_control(h) {
+                continue;
+            }
+            let (start, _) = self.segment_start(h.segment)?;
+            let control = map.to_screen(p)?;
+            match (self.segments[h.segment].clone(), h.kind) {
+                (Segment::Quadratic { end, .. }, _) => {
+                    painter.line_segment([map.to_screen(start)?, control], stroke);
+                    painter.line_segment([control, map.to_screen(end)?], stroke);
                 }
-                Segment::Line(p) => current = Some(p),
-                Segment::Quadratic { control, end } => {
-                    if let Some(p) = current {
-                        painter.line_segment([map.to_screen(p)?, map.to_screen(control)?], stroke);
-                    }
-                    painter.line_segment([map.to_screen(control)?, map.to_screen(end)?], stroke);
-                    current = Some(end);
+                (Segment::Cubic { end, .. }, HandleKind::SecondControl) => {
+                    painter.line_segment([control, map.to_screen(end)?], stroke);
                 }
-                Segment::Cubic { first, second, end } => {
-                    if let Some(p) = current {
-                        painter.line_segment([map.to_screen(p)?, map.to_screen(first)?], stroke);
-                    }
-                    painter.line_segment([map.to_screen(second)?, map.to_screen(end)?], stroke);
-                    current = Some(end);
+                _ => {
+                    painter.line_segment([map.to_screen(start)?, control], stroke);
                 }
-                Segment::Close => current = start,
             }
         }
         for (h, p) in self.handles() {
-            let color = if Some(h) == selected {
-                Color32::YELLOW
+            if h.kind == HandleKind::Anchor || !show_control(h) {
+                continue;
+            }
+            let center = map.to_screen(p)?;
+            let radius = if hovered == Some(h) { 5. } else { 3.5 };
+            let fill = if selection.contains(&h) {
+                accent
             } else {
                 Color32::WHITE
             };
+            painter.circle_filled(center, radius, fill);
+            painter.circle_stroke(center, radius, stroke);
+        }
+        for (h, p) in path_edit::anchors(&self.segments) {
             let center = map.to_screen(p)?;
-            if h.kind == HandleKind::Anchor {
-                painter.rect_filled(
-                    egui::Rect::from_center_size(center, egui::vec2(8., 8.)),
-                    0.,
-                    color,
-                );
-                painter.rect_stroke(
-                    egui::Rect::from_center_size(center, egui::vec2(8., 8.)),
-                    0.,
-                    stroke,
-                    egui::StrokeKind::Outside,
-                );
+            let selected = selection.contains(&h);
+            let half = if hovered == Some(h) { 5.5 } else { 4. };
+            let (fill, outline) = if selected {
+                (accent, Stroke::new(1.0_f32, Color32::WHITE))
             } else {
-                painter.circle_filled(center, 4., color);
-                painter.circle_stroke(center, 4., stroke);
+                (Color32::WHITE, Stroke::new(1.5_f32, accent))
+            };
+            match path_edit::node_type(&self.segments, h) {
+                Some(NodeType::Smooth) => {
+                    painter.circle_filled(center, half, fill);
+                    painter.circle_stroke(center, half, outline);
+                }
+                Some(NodeType::Symmetric) => {
+                    let r = half * 1.3;
+                    painter.add(egui::Shape::convex_polygon(
+                        vec![
+                            center + egui::vec2(0., -r),
+                            center + egui::vec2(r, 0.),
+                            center + egui::vec2(0., r),
+                            center + egui::vec2(-r, 0.),
+                        ],
+                        fill,
+                        outline,
+                    ));
+                }
+                _ => {
+                    let rect =
+                        egui::Rect::from_center_size(center, egui::vec2(2. * half, 2. * half));
+                    painter.rect_filled(rect, 0., fill);
+                    painter.rect_stroke(rect, 0., outline, egui::StrokeKind::Outside);
+                }
             }
         }
         Ok(())
@@ -741,13 +794,28 @@ pub struct PathGesture {
     pub handle: Handle,
     grab_offset: Point,
     initial_path: EditablePath,
+    /// Anchors that move together when an anchor is dragged.
+    moving: Vec<Handle>,
 }
 impl PathGesture {
+    /// Grab any point (all controls hittable); an anchor moves alone.
+    #[cfg(test)]
     pub fn begin(
         project: &Project,
         id: &str,
         screen: Pos2,
         map: &CanvasMap,
+    ) -> Result<Option<Self>, String> {
+        Self::begin_with(project, id, screen, map, None)
+    }
+    /// With a point selection, only visible controls can be grabbed and
+    /// dragging a selected anchor moves every selected anchor.
+    pub fn begin_with(
+        project: &Project,
+        id: &str,
+        screen: Pos2,
+        map: &CanvasMap,
+        selection: Option<&BTreeSet<Handle>>,
     ) -> Result<Option<Self>, String> {
         let node = project
             .nodes
@@ -763,14 +831,24 @@ impl PathGesture {
         let path = EditablePath::parse(d)?;
         map.validate()?;
         let local = map.to_local(screen)?;
-        Ok(path.hit_test(screen, map, 8.).map(|handle| {
-            let picked = path
-                .handles()
-                .into_iter()
-                .find(|(h, _)| *h == handle)
-                .expect("hit_test returns an existing handle")
-                .1;
+        let hit = match selection {
+            Some(selection) => path.hit_test_points(screen, map, 8., selection),
+            None => path.hit_test(screen, map, 8.),
+        };
+        Ok(hit.map(|handle| {
+            let picked = path_edit::handle_point(&path.segments, handle)
+                .expect("hit_test returns an existing handle");
+            let moving = match selection {
+                _ if handle.kind != HandleKind::Anchor => vec![],
+                Some(selection) if selection.contains(&handle) => selection
+                    .iter()
+                    .copied()
+                    .filter(|h| h.kind == HandleKind::Anchor)
+                    .collect(),
+                _ => vec![handle],
+            };
             Self {
+                moving,
                 before: project.clone(),
                 id: id.into(),
                 initial_path: path.clone(),
@@ -790,15 +868,22 @@ impl PathGesture {
         link: TangentLink,
     ) -> Result<(), String> {
         let local = map.to_local(screen)?;
+        let target = [
+            local[0] + self.grab_offset[0],
+            local[1] + self.grab_offset[1],
+        ];
+        if self.handle.kind == HandleKind::Anchor {
+            // Anchors carry their tangent handles (and other selected anchors).
+            let picked = path_edit::handle_point(&self.initial_path.segments, self.handle)
+                .ok_or("Path handle no longer exists")?;
+            let delta = [target[0] - picked[0], target[1] - picked[1]];
+            let segments =
+                path_edit::translate_anchors(&self.initial_path.segments, &self.moving, delta)?;
+            self.path = EditablePath::from_segments(segments)?;
+            return Ok(());
+        }
         let mut next = self.initial_path.clone();
-        next.move_tangent(
-            self.handle,
-            [
-                local[0] + self.grab_offset[0],
-                local[1] + self.grab_offset[1],
-            ],
-            link,
-        )?;
+        next.move_tangent(self.handle, target, link)?;
         self.path = next;
         Ok(())
     }
@@ -831,6 +916,35 @@ impl PathGesture {
             super::VectorCommand::SetPath(path.path_data()),
         )?;
         Ok(Some(next))
+    }
+    /// The editable path of an unlocked, visible path node.
+    pub fn node_path(project: &Project, id: &str) -> Result<EditablePath, String> {
+        let node = project
+            .nodes
+            .iter()
+            .find(|n| n.id == id)
+            .ok_or(tr("Pfad fehlt"))?;
+        if node.locked || !node.visible {
+            return Err(tr("Pfad ist gesperrt oder ausgeblendet").into());
+        }
+        let NodeKind::Path { d, .. } = &node.kind else {
+            return Err(tr("Pfad wählen, um Punkte zu bearbeiten").into());
+        };
+        EditablePath::parse(d)
+    }
+    /// One validated candidate replacing the path of `id` (one undo step).
+    pub fn replace_candidate(
+        project: &Project,
+        id: &str,
+        path: &EditablePath,
+    ) -> Result<Project, String> {
+        let mut next = project.clone();
+        super::apply_vector_command(
+            &mut next,
+            id,
+            super::VectorCommand::SetPath(path.path_data()),
+        )?;
+        Ok(next)
     }
     pub fn candidate(&self, current: &Project) -> Result<Project, String> {
         if *current != self.before {
@@ -910,6 +1024,42 @@ impl PenPath {
         }
         self.outgoing = outgoing;
         Ok(())
+    }
+    /// First anchor of the staged path (clicking it closes the path).
+    pub fn first_anchor(&self) -> Option<Point> {
+        match self.path.segments.first() {
+            Some(Segment::Move(p)) => Some(*p),
+            _ => None,
+        }
+    }
+    pub fn anchor_count(&self) -> usize {
+        self.path
+            .segments
+            .iter()
+            .filter(|s| !matches!(s, Segment::Close))
+            .count()
+    }
+    /// Undo the last Pen step: reopen a closed path, else drop the last anchor
+    /// (restoring the outgoing tangent dragged from the previous anchor).
+    pub fn remove_last_anchor(&mut self) -> bool {
+        if self.closed {
+            self.path.segments.pop();
+            self.closed = false;
+            return true;
+        }
+        let Some(removed) = self.path.segments.pop() else {
+            return false;
+        };
+        let previous = self.path.segments.last().and_then(|s| match *s {
+            Segment::Move(p) | Segment::Line(p) => Some(p),
+            Segment::Quadratic { end, .. } | Segment::Cubic { end, .. } => Some(end),
+            Segment::Close => None,
+        });
+        self.outgoing = match (removed, previous) {
+            (Segment::Cubic { first, .. }, Some(previous)) if first != previous => Some(first),
+            _ => None,
+        };
+        true
     }
     pub fn close(&mut self) -> Result<(), String> {
         if self.closed {
