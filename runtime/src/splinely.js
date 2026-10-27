@@ -340,7 +340,7 @@
   const weightValue = v => { finite(v,'Clip weight'); if(v<0 || v>1)throw new Error('Clip weight must be in [0,1]'); return v; };
   const fadeDuration = v => { finite(v,'Fade duration'); if(v<0)throw new Error('Fade duration must be nonnegative'); return v; };
   const list = v => Array.isArray(v) ? v : Object.entries(v || {}).map(([id, item]) => ({ ...item, id: item.id || id }));
-  const unwrap = v => v && ['number','color','gradient','path'].includes(v.type) ? v.value : v;
+  const unwrap = v => { if (!v) return v; const t = v.type; return t === 'number' || t === 'color' || t === 'gradient' || t === 'path' ? v.value : v; };
   const own = (o, k) => Object.prototype.hasOwnProperty.call(o, k);
   // Accessibility data (opt-in, browser-only semantics). Limits mirror crates/splinely_document/src/accessibility.rs.
   const A11Y_ROLES = ['button','link','img','group','heading'], A11Y_KEYS = ['label','description','role','hidden'];
@@ -520,6 +520,31 @@
       poses.set(id,pose); return pose;
     }
     return bones.map(b=>solve(b.id,1));
+  }
+  // Hot-path FK for a structurally validated rig: `plan` is the order in which solveBones() creates poses
+  // (parents first), so the arithmetic, the checks and the first reported error are the same as solveBones().
+  function bonePlan(bones) {
+    const index=new Map(bones.map((b,i)=>[b.id,i])), parents=bones.map(b=>b.parentId==null?-1:index.get(b.parentId)), order=[], seen=new Uint8Array(bones.length);
+    const visit=i=>{if(parents[i]>=0)visit(parents[i]);if(!seen[i]){seen[i]=1;order.push(i);}};
+    for(let i=0;i<bones.length;i++)visit(i);
+    return {order,parents};
+  }
+  function solveBonesPlanned(bones, plan) {
+    const out=new Array(bones.length), order=plan.order, parents=plan.parents;
+    for(let k=0;k<order.length;k++) {
+      const i=order[k], b=bones[i], parent=parents[i]<0?null:out[parents[i]];
+      let x=finite(b.x,'Bone x'), y=finite(b.y,'Bone y'), rotation=finite(b.rotation,'Bone rotation');
+      const length=finite(b.length,'Bone length'); if(length<=0) throw new Error('Bone length must be positive');
+      if(parent) {
+        const angle=(parent.rotation%360)*Math.PI/180, c=Math.cos(angle), s=Math.sin(angle);
+        const localX=x, localY=y;
+        x=parent.tipX+c*localX-s*localY; y=parent.tipY+s*localX+c*localY;
+        rotation+=parent.rotation;
+      }
+      const angle=(rotation%360)*Math.PI/180;
+      out[i]={id:b.id,x:finite(x,'Bone world x'),y:finite(y,'Bone world y'),rotation:finite(rotation,'Bone world rotation'),length,tipX:finite(x+length*Math.cos(angle),'Bone tip x'),tipY:finite(y+length*Math.sin(angle),'Bone tip y')};
+    }
+    return out;
   }
   // Same deterministic 64-chord arc-length approximation as splinely_document.
   function motionSample(d, transform, progress) {
@@ -756,7 +781,9 @@
         catch(e) { if (name !== 'error') report(e); }
       }
     }
-    const ensure = () => { if (dead) throw new Error('Splinely runtime destroyed'); };
+    // Every API call passes through ensure(): it also wakes a sleeping auto-tick loop (see autoTick below).
+    let wake=null;
+    const ensure = () => { if (dead) throw new Error('Splinely runtime destroyed'); if (wake !== null) wake(); };
     function on(a,b,c) {
       ensure(); const key=typeof b === 'function' ? a : a+'\u0000'+b, fn=typeof b === 'function' ? b : c;
       if (typeof fn !== 'function') throw new Error('Event handler must be a function');
@@ -770,11 +797,11 @@
       const core=!!node.kind;
       const base=core ? {x:0,y:0,rotation:0,scaleX:1,scaleY:1,opacity:1,fill:{r:80/255,g:140/255,b:240/255,a:1},...node.transform,...node.style} : {...node.properties};
       if(core) { for(const k of ['width','height','radius','fontSize','d']) if(node.kind[k]!=null) base[k]=node.kind[k]; if(node.gradient) base.gradient=node.gradient; if(node.motionPath) base.motionProgress=node.motionPath.progress===undefined?0:node.motionPath.progress; }
-      nodes.set(node.id,{el,base,core,visible:node.visible!==false,boneId:node.boneId,gradient:!!(core && node.gradient),original:new Map(),lastKeys:new Set(),written:new Map(),lastProps:null,lastReports:null});
+      nodes.set(node.id,{id:node.id,el,base,core,visible:node.visible!==false,boneId:node.boneId,gradient:!!(core && node.gradient),original:new Map(),lastKeys:new Set(),written:new Map(),lastProps:null,lastReports:null,atRest:false,restPoses:null});
     }
     // Adapter allows exported elements without a corresponding node descriptor.
     function getNode(id) {
-      if(!nodes.has(id) && elements.has(id)) nodes.set(id,{el:elements.get(id),base:{},core:false,original:new Map(),lastKeys:new Set(),written:new Map(),lastProps:null,lastReports:null});
+      if(!nodes.has(id) && elements.has(id)) nodes.set(id,{id,el:elements.get(id),base:{},core:false,original:new Map(),lastKeys:new Set(),written:new Map(),lastProps:null,lastReports:null,atRest:false,restPoses:null});
       if(!nodes.has(id)) throw new Error('Unknown node: '+id); return nodes.get(id);
     }
     function attr(node,name,value) {
@@ -819,17 +846,21 @@
     // Honour the viewer's "reduce motion" setting unless the host decides: no
     // looping autoplay, instant state changes, resting followers.
     const reducedMotion=options.reducedMotion!=null?!!options.reducedMotion:(()=>{try{return !!(env.matchMedia && env.matchMedia('(prefers-reduced-motion: reduce)').matches);}catch(_){return false;}})();
+    // Node-based follower origins depend only on the static project descriptor: computed once per follower.
+    const nodeOrigins=new Map();
     function followerOrigin(f) {
       if(Array.isArray(f.origin))return f.origin;
+      let cached=nodeOrigins.get(f);if(cached!==undefined)return cached;
       const n=project.nodes.find(n=>n.id===f.target);
-      if(n && n.kind) {
+      if(n && n.kind){cached=nodeOrigin(n);nodeOrigins.set(f,cached);return cached;}
+      const pose=bonePoses.find(p=>p.id===f.target);return pose?[pose.x,pose.y]:[0,0];
+    }
+    function nodeOrigin(n) {
         const k=n.kind,t={x:0,y:0,rotation:0,scaleX:1,scaleY:1,...n.transform};
         const box=k.type==='rect'?[k.x,k.y,k.width,k.height]:k.type==='circle'?[k.cx-k.radius,k.cy-k.radius,2*k.radius,2*k.radius]:k.type==='path'?k.bounds:[k.x,k.y-k.fontSize,String(k.text).length*k.fontSize*0.6,k.fontSize*1.2];
         const a=t.rotation*Math.PI/180,c=Math.cos(a),s=Math.sin(a),xs=[],ys=[];
         for(const [px,py] of [[box[0],box[1]],[box[0]+box[2],box[1]],[box[0],box[1]+box[3]],[box[0]+box[2],box[1]+box[3]]]){const sx=px*t.scaleX,sy=py*t.scaleY;xs.push(t.x+sx*c-sy*s);ys.push(t.y+sx*s+sy*c);}
         return [(Math.min(...xs)+Math.max(...xs))/2,(Math.min(...ys)+Math.max(...ys))/2];
-      }
-      const pose=bonePoses.find(p=>p.id===f.target);return pose?[pose.x,pose.y]:[0,0];
     }
     function followerGoal(f) {
       if(!pointer || reducedMotion)return [0,0];
@@ -847,11 +878,13 @@
     function updateFollowers(dt) {
       let moved=false;
       for(const f of project.followers) {
-        const goal=followerGoal(f),cur=follow.get(f.id) || [0,0];
+        const goal=followerGoal(f);let cur=follow.get(f.id);
+        if(cur===undefined){cur=[0,0];follow.set(f.id,cur);}
         const keep=f.smoothing>0?Math.exp(-4*dt/f.smoothing):0;
-        const next=[goal[0]+(cur[0]-goal[0])*keep,goal[1]+(cur[1]-goal[1])*keep].map(v=>Math.abs(v)<1e-6?0:v);
-        if(next[0]!==cur[0] || next[1]!==cur[1])moved=true;
-        follow.set(f.id,next);
+        let x=goal[0]+(cur[0]-goal[0])*keep,y=goal[1]+(cur[1]-goal[1])*keep;
+        if(Math.abs(x)<1e-6)x=0;if(Math.abs(y)<1e-6)y=0;
+        // Updated in place: the stored pair is only read by renderFrame().
+        if(x!==cur[0] || y!==cur[1]){moved=true;cur[0]=x;cur[1]=y;}
       }
       return moved;
     }
@@ -871,13 +904,15 @@
       for(const m of machines.values())m.elapsed=(m.elapsed || 0)+dt;
       fireTimers();
       for(const m of machines.values())if(m.fade){m.fade.elapsed=Math.min(m.fade.duration,m.fade.elapsed+dt);if(m.fade.elapsed>=m.fade.duration)m.fade=null;changed=true;}
-      if(updateFollowers(dt))changed=true;
+      // Followers count as at rest only after a real time step left them unchanged (dt=0 never moves them).
+      // While catching up a slept (idle) span they are at their resting fixed point and stay untouched.
+      if(!creditTick){const moved=updateFollowers(dt);if(moved || dt>0)followMoving=moved;if(moved)changed=true;}
       if(changed)dirty=true;
       return changed;
     }
     // Frame cache: render() recomputes only after something that feeds a frame changed
     // (dirty); an unchanged frame replays the diagnostics the last full render produced.
-    let dirty=true, renderDepth=0, reentered=false, renderReports=[], reportSink=renderReports, boneCache=null;
+    let followMoving=true, creditTick=false, dirty=true, renderDepth=0, reentered=false, renderReports=[], reportSink=renderReports, boneCache=null;
     const rr=x=>{reportSink.push(x);report(x);};
     const emptyMap=new Map(), noPoses=[], noEntries=[], stateEntries=new WeakMap();
     const transformKeys=new Set(['x','y','rotation','scaleX','scaleY']);
@@ -930,14 +965,26 @@
       finally {reportSink=outer;if(--renderDepth===0 && reentered){dirty=true;reentered=false;}}
       if(afterRender)afterRender();
     }
+    // Per-frame working set. `values` holds property objects (fresh copies of the node base) only for nodes
+    // that something touches this frame; every other node reads its base and, when it is already showing that
+    // base, is skipped by the apply loop. Bone working objects are reused and reset from the rig each frame.
+    const boneList=[...bones.values()], plan=bonePlan(boneList), boneSolved=new Float64Array(boneList.length*3);
+    let values=new Map(), boneValues=null, boneWork=null;
+    const freshBones=()=>{boneValues=new Map();for(const [id,b] of bones)boneValues.set(id,{...b});boneWork=[...boneValues.values()];};
+    freshBones();
+    const baseOf=id=>{const n=nodes.get(id);return n===undefined?undefined:n.base;};
+    const touch=id=>{let t=values.get(id);if(t===undefined){const n=getNode(id);t={...n.base};values.set(id,t);}return t;};
     function renderFrame() {
-      const values=new Map();
-      for(const [id,n] of nodes) values.set(id,{...n.base});
-      let boneValues=emptyMap;
-      if(bones.size){boneValues=new Map();for(const [id,b] of bones)boneValues.set(id,{...b});}
+      if(renderDepth<=1){values.clear();computeFrame();return;}
+      // Re-entered from an error handler during a frame: use private working state so the outer frame is untouched.
+      const saved=[values,boneValues,boneWork];values=new Map();freshBones();
+      try{computeFrame();}finally{values=saved[0];boneValues=saved[1];boneWork=saved[2];}
+    }
+    function computeFrame() {
+      for(let i=0;i<boneList.length;i++){const b=boneList[i],w=boneWork[i];w.x=b.x;w.y=b.y;w.rotation=b.rotation;}
       const merge=(id,props) => { try {
         if(bones.has(id)) Object.assign(boneValues.get(id),bonePatch(props));
-        else {getNode(id); if(!values.has(id)) values.set(id,{}); Object.assign(values.get(id),props);}
+        else Object.assign(touch(id),props);
       } catch(e){rr(e);} };
       // Single-property merge for the hot track loop; same checks and errors as merge().
       const mergeOne=(id,k,v) => { try {
@@ -945,13 +992,9 @@
           if(!boneProperties.has(k)) throw new Error('Unsupported bone property: '+k);
           if(v && typeof v==='object' && (v.type!=='number' || !own(v,'value'))) throw new Error('Bone '+k+' must be numeric');
           boneValues.get(id)[k]=finite(unwrap(v),'Bone '+k);
-        } else {
-          let t=values.get(id);
-          if(t===undefined) {getNode(id);t=values.get(id);if(t===undefined){t={};values.set(id,t);}}
-          t[k]=v;
-        }
+        } else touch(id)[k]=v;
       } catch(e){rr(e);} };
-      const current=(id,property)=>{const v=bones.has(id)?boneValues.get(id):values.get(id);return v && v[property];};
+      const current=(id,property)=>{const v=bones.has(id)?boneValues.get(id):(values.get(id) || baseOf(id));return v && v[property];};
       for(const m of machines.values()) {
         const now=entries(m.states.get(m.state));
         if(!m.fade) {for(let i=0;i<now.length;i++)mergeOne(now[i][0],now[i][1],now[i][2]);continue;}
@@ -1066,14 +1109,14 @@
       for(const [id,p] of explicit) merge(id,p);
       for(const f of project.followers) {
         const [a,b]=follow.get(f.id) || [0,0];if(a===0 && b===0)continue;
-        const v=bones.has(f.target)?boneValues.get(f.target):(values.get(f.target) || {});
+        const v=bones.has(f.target)?boneValues.get(f.target):(values.get(f.target) || baseOf(f.target) || {});
         const num=k=>{const x=unwrap(v[k]);return typeof x==='number'?x:0;};
         if(f.mode==='rotate')merge(f.target,{rotation:num('rotation')+a});
         else merge(f.target,{x:num('x')+a,y:num('y')+b});
       }
       for(const n of motionNodes) {
         try {
-          const binding=n.motionPath,source=values.get(binding.path),props=values.get(n.id);
+          const binding=n.motionPath,source=values.get(binding.path) || baseOf(binding.path),props=nodes.has(n.id)?touch(n.id):undefined;
           const [x,y,angle]=motionSample(unwrap(source.d),Object.fromEntries(['x','y','rotation','scaleX','scaleY'].map(k=>[k,unwrap(source[k])])),unwrap(props.motionProgress));
           props.x=(unwrap(props.x)||0)+x;props.y=(unwrap(props.y)||0)+y;
           if(binding.orient)props.rotation=(unwrap(props.rotation)||0)+angle;
@@ -1083,24 +1126,34 @@
       try {
         if(!bones.size){bonePoses=noPoses;poses=emptyMap;}
         else {
-          // Bone solving is pure in (id, parent, x, y, rotation, length): reuse the last poses when unchanged.
-          let same=boneCache!==null, bi=0;
-          for(const b of boneValues.values()) {
-            if(same){const p=boneCache.inputs[bi];same=p!==undefined && Object.is(p.x,b.x) && Object.is(p.y,b.y) && Object.is(p.rotation,b.rotation) && Object.is(p.length,b.length) && Object.is(p.parentId,b.parentId) && p.id===b.id;}
-            bi++;
-          }
-          if(same && boneCache.inputs.length===bi){bonePoses=boneCache.poses;poses=boneCache.map;}
+          // Bone solving is pure in (x, y, rotation) of each bone (id, parent and length are fixed per rig):
+          // reuse the last poses, and the same poses Map, when none of them changed.
+          let same=boneCache!==null;
+          for(let i=0,j=0;same && i<boneWork.length;i++,j+=3){const b=boneWork[i];same=Object.is(boneSolved[j],b.x) && Object.is(boneSolved[j+1],b.y) && Object.is(boneSolved[j+2],b.rotation);}
+          if(same){bonePoses=boneCache.poses;poses=boneCache.map;}
           else {
-            const inputs=[...boneValues.values()];
-            bonePoses=solveBones(inputs); poses=new Map(bonePoses.map(p=>[p.id,p]));
-            boneCache={inputs,poses:bonePoses,map:poses};
+            bonePoses=solveBonesPlanned(boneWork,plan); poses=new Map(bonePoses.map(p=>[p.id,p]));
+            for(let i=0,j=0;i<boneWork.length;i++,j+=3){const b=boneWork[i];boneSolved[j]=b.x;boneSolved[j+1]=b.y;boneSolved[j+2]=b.rotation;}
+            boneCache={poses:bonePoses,map:poses};
           }
         }
       }
       catch(e) {rr(e);return;} // Keep the last valid frame on FK overflow.
-      for(const [id,props] of values) {
+      for(const node of nodes.values()) {
         if(dead) return;
-        const node=nodes.get(id) || getNode(id), binding=node.boneId;
+        let props=values.get(node.id);
+        const touched=props!==undefined, binding=node.boneId;
+        if(!touched) {
+          // Nothing contributed and the node already shows its base (with the same bone poses): only the
+          // diagnostics of that application are replayed, exactly as the sameProps() path below would.
+          if(node.atRest && (binding==null || node.restPoses===poses)) {
+            const again=node.lastReports;
+            if(again!==null)for(let i=0;i<again.length;i++)rr(again[i]);
+            continue;
+          }
+          props={...node.base};
+        }
+        node.atRest=false;
         if(binding!=null) {
           try {
             const pose=poses.get(binding), angle=(pose.rotation%360)*Math.PI/180, c=Math.cos(angle), s=Math.sin(angle);
@@ -1109,11 +1162,12 @@
             props.rotation=finite(pose.rotation+finite(unwrap(props.rotation==null?0:props.rotation),'Transform rotation'),'Attached rotation');
           } catch(e) {rr(e);continue;}
         }
-        if(!node.el) continue; // Hidden descriptors remain valid animation/override targets.
+        if(!node.el) {if(!touched){node.atRest=true;node.restPoses=poses;}continue;} // Hidden descriptors remain valid animation/override targets.
         // Same properties as the last application: the DOM already shows the result.
         if(node.lastProps!==null && props.gradient===undefined && sameProps(node.lastProps,props)) {
           const again=node.lastReports;
           if(again!==null)for(let i=0;i<again.length;i++)rr(again[i]);
+          if(!touched){node.atRest=true;node.restPoses=poses;}
           continue;
         }
         const keys=new Set(), mark=reportSink.length;
@@ -1156,6 +1210,7 @@
         node.lastKeys=keys;
         node.lastProps=snapshotProps(props);
         node.lastReports=reportSink.length>mark?reportSink.slice(mark):null;
+        if(!touched && node.lastProps!==null && props.gradient===undefined){node.atRest=true;node.restPoses=poses;}
       }
     }
     // A group is set through its rig: x/y offset the move bone, rotation turns the turn bone.
@@ -1399,13 +1454,14 @@
     for(const type of eventTypes) {
       const listener=event=>{
         if(dead)return;
+        if(wake!==null)wake();
         for(let control=event.target;control && control!==svg;control=control.parentNode)if(control.getAttribute && control.getAttribute('data-splinely-host-control')!=null)return;
         if(event.target && owningSvg(event.target) && owningSvg(event.target)!==svg)return;
         let el=event.target;while(el && el!==svg && elements.get(el.id)!==el)el=el.parentNode;
         const target=el && el.id || svg.id,point=coordinates(event),detail={...point,event,target,key:event.key,pointerId:event.pointerId,buttons:event.buttons};
         if(type==='pointermove' || type==='pointerdown' || type==='pointerenter')pointer=[point.x,point.y];
         if(type==='pointerleave' && event.target===svg)pointer=null;
-        if(project.followers.length && /^pointer/.test(type)){if(updateFollowers(0))dirty=true;render();}
+        if(project.followers.length && /^pointer/.test(type)){followMoving=true;if(updateFollowers(0))dirty=true;render();}
         // Keep keyboard handling scoped to focus within this SVG. Focusability remains exporter's choice.
         emit(type,detail,target);
         if(dead)return;
@@ -1626,14 +1682,77 @@
     // Preservation-only customJs is expected, not an error. Trusted hosts decide execution separately.
     render();for(const c of project.clips)if(c.autoplay && !(reducedMotion && (c.looping || c.loop)))clip(c.id).play();
     } catch(error) {api.destroy();throw error;}
+    // Idle detection for the auto-tick loop: true when a tick can change nothing visible or observable —
+    // no clip playing or fading, no state-machine fade, followers at rest, no queued events, no plugin
+    // frame hooks and no diagnostics that an unchanged frame would replay. A playing timeline transport
+    // only advances its clock, which the catch-up tick on wake reproduces; its audio cues keep it awake.
+    function quiet() {
+      if(dirty || queue.length || frameHooks || renderReports.length || followMoving)return false;
+      if(transport.playing && audio.ready && transport.audioCues.length)return false;
+      for(let i=0;i<clipList.length;i++){const c=clipList[i];if(c.playing || c.ramp)return false;}
+      for(const m of machines.values())if(m.fade)return false;
+      return true;
+    }
+    // Seconds until the next timed (`after`) transition or timeline callback can fire; -1 when unknown.
+    function nextTimer() {
+      let due=Infinity;
+      if(transport.playing)for(const cb of callbacks)if(cb.clip===transport.id){const left=cb.time-transport.time;if(left>0 && left<due)due=left;}
+      for(const m of machines.values()) {
+        const list=m.timers && m.timers.get(m.states.get(m.state));
+        if(!list)return -1;
+        for(let i=0;i<list.length;i++) {
+          const x=list[i];
+          if(x.from!=null && x.from!==m.state)continue;
+          if(x.guard && (typeof x.guard!=='object' || !own(x.guard,'variable')))return -1;
+          const left=x.after-(m.elapsed || 0);
+          if(left>0 && left<due)due=left;
+        }
+      }
+      return due;
+    }
+    const maxFps=options.maxFps==null?0:Number(options.maxFps);
+    if(options.maxFps!=null && !(Number.isFinite(maxFps) && maxFps>0))throw new Error('maxFps must be a positive number');
     if(options.autoTick!==false && !dead){
       const now=()=>env.performance && env.performance.now?env.performance.now():Date.now();last=now();let clock=env;
+      let sleeping=false,sleepTimer=null,frameStep=1000/60;
       const advance=()=>{if(dead)return;const nextClock=audio.ready && context.state==='running'?context:env;
         const current=nextClock===env?now():context.currentTime*1000;
         if(clock!==nextClock){clock=nextClock;last=current;return;}
-        const delta=Math.max(0,(current-last)/1000);last=current;try{tick(delta);}catch(e){report(e);}};
+        const delta=Math.max(0,(current-last)/1000);if(!sleeping && delta>0)frameStep=Math.min(delta*1000,100);last=current;try{tick(delta);}catch(e){report(e);}
+        if(sleeping && wake!==null && !quiet())wake();};
       syncClock=()=>{if(!ticking && !processing && !dead)advance();};
-      if(env.requestAnimationFrame){const frame=()=>{advance();if(!dead)raf=env.requestAnimationFrame(frame);};raf=env.requestAnimationFrame(frame);}
+      if(env.requestAnimationFrame){
+        // maxFps: frames arriving sooner than the interval (minus 1 ms of vsync jitter) are skipped.
+        const interval=maxFps?1000/maxFps:0;let lastFrame=-Infinity;
+        const frame=()=>{
+          raf=null;if(dead)return;
+          if(interval){const t=now();if(t-lastFrame<interval-1){raf=env.requestAnimationFrame(frame);return;}lastFrame=t;}
+          advance();if(dead)return;
+          // Idle fast path: stop requesting frames while nothing animates. The clock (`last`) keeps running, so
+          // the first tick after waking covers the slept time exactly like the skipped ticks would have.
+          // Wakes: any API call or DOM event (ensure/listener), a non-quiet transport tick, or the next timer.
+          const due=quiet()?nextTimer():-1;
+          if(due>=0 && (due===Infinity || env.setTimeout)) {
+            sleeping=true;
+            if(due!==Infinity)sleepTimer=env.setTimeout(()=>{sleepTimer=null;if(wake!==null)wake();},Math.max(0,due*1000-20));
+            return;
+          }
+          raf=env.requestAnimationFrame(frame);
+        };
+        wake=()=>{
+          if(!sleeping)return;sleeping=false;
+          if(sleepTimer!==null){if(env.clearTimeout)env.clearTimeout(sleepTimer);sleepTimer=null;}
+          // Catch the clock up to one frame before now with a (quiet) tick, so the next frame advances by a
+          // normal frame step instead of the whole slept time — as if the loop had kept ticking.
+          if(clock===env && !ticking && !processing && !dead) {
+            const target=now()-frameStep;
+            if(target>last){const delta=(target-last)/1000;last=target;creditTick=true;try{tick(delta);}catch(e){report(e);}finally{creditTick=false;}}
+          }
+          if(!dead)raf=env.requestAnimationFrame(frame);
+        };
+        cleanup.push(()=>{wake=null;if(sleepTimer!==null && env.clearTimeout)env.clearTimeout(sleepTimer);});
+        raf=env.requestAnimationFrame(frame);
+      }
       // Replenish/audio-clock transport even when rendering is suspended. Native padded loops do not depend on either timer.
       if(env.setInterval){const timer=env.setInterval(()=>{if(audio.ready || [...clips.values()].some(c=>c.ramp))advance();},25);cleanup.push(()=>env.clearInterval(timer));}
     }
