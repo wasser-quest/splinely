@@ -7,11 +7,12 @@ use crate::geometry::{apply as map_point, dist, matrix, parse};
 use crate::*;
 use std::collections::HashMap;
 
-/// Most nonzero chords in one sampled motion path.
+/// Most sampled chords (64 per segment, zero-length ones included) in one motion path.
 pub const MOTION_MAX_CHORDS: usize = 100_000;
-/// Most chords summed over the distinct motion source paths of a document,
+/// Most sampled chords summed over the distinct motion source paths of a document,
 /// counting each source's `d` plus every `d` keyframe and state override value
-/// targeting it. Real assets use none (tests: a few hundred).
+/// targeting it, independent of transforms. Also enforced per evaluation.
+/// Real assets use none (tests: a few hundred).
 pub const MOTION_TOTAL_CHORDS: usize = 100_000;
 /// Paths with more chords locate by binary search (same chord as the walk, as in JS).
 const SEARCH_FROM: usize = 1024;
@@ -52,13 +53,19 @@ pub(crate) fn validate(
         return Ok(());
     }
     // Sampling success does not depend on progress: flatten each source once.
+    // Counted per segment, before length checks, so neither a tiny base scale
+    // nor zero-length or unsampleable values slip past the budget.
     let mut total = 0usize;
     let mut count = |d: &str, transform: &Transform, strict: bool| {
-        match flatten(d, transform, &mut |_| ()) {
-            Ok((n, _)) => total += n,
+        if strict {
+            total += flatten(d, transform, &mut |_| ())?.2;
+        } else {
             // Animated values that cannot be sampled fail at evaluation instead (as in JS).
-            Err(e) if strict || e.0 == TOO_COMPLEX => return Err(e),
-            Err(_) => {}
+            match sampled(d) {
+                Ok(n) => total += n,
+                Err(e) if e.0 == TOO_COMPLEX => return Err(e),
+                Err(_) => {}
+            }
         }
         if total > MOTION_TOTAL_CHORDS {
             return Err(DocumentError(format!(
@@ -101,18 +108,49 @@ pub(crate) fn validate(
 
 const TOO_COMPLEX: &str = "motion path too complex";
 
-/// Flatten `d` into chords, passing each to `chord`; returns (count, total length).
-fn flatten(
-    d: &str,
-    transform: &Transform,
-    chord: &mut dyn FnMut(Chord),
-) -> Result<(usize, f64), DocumentError> {
-    // Deliberately the same bounded syntax as the path editor, not browser DOM geometry.
+/// Deliberately the same bounded syntax as the path editor, not browser DOM geometry.
+fn check_syntax(d: &str) -> Result<(), DocumentError> {
     if d.chars()
         .any(|c| c.is_ascii_alphabetic() && !"MmLlQqCcZzeE".contains(c))
     {
         return Err(DocumentError("motion paths support M/L/Q/C/Z only".into()));
     }
+    Ok(())
+}
+
+/// Sampled chords of `d`: 64 per drawn segment, zero-length ones included
+/// (`parse` drops those later, JS samples them), independent of transforms.
+fn sampled(d: &str) -> Result<usize, DocumentError> {
+    use svgtypes::SimplePathSegment::*;
+    check_syntax(d)?;
+    let (mut start, mut current, mut n) = ((0., 0.), (0., 0.), 0usize);
+    for segment in svgtypes::SimplifyingPathParser::from(d) {
+        match segment.map_err(|e| DocumentError(format!("Invalid SVG path: {e}")))? {
+            MoveTo { x, y } => (start, current) = ((x, y), (x, y)),
+            LineTo { x, y } | Quadratic { x, y, .. } | CurveTo { x, y, .. } => {
+                current = (x, y);
+                n += 64;
+            }
+            ClosePath => {
+                n += if dist(current, start) > 1e-9 { 64 } else { 0 };
+                current = start;
+            }
+        }
+        if n > MOTION_MAX_CHORDS {
+            return Err(DocumentError(TOO_COMPLEX.into()));
+        }
+    }
+    Ok(n)
+}
+
+/// Flatten `d` into chords, passing each nonzero one to `chord`;
+/// returns (nonzero count, total length, sampled chords).
+fn flatten(
+    d: &str,
+    transform: &Transform,
+    chord: &mut dyn FnMut(Chord),
+) -> Result<(usize, f64, usize), DocumentError> {
+    let sampled = sampled(d)?;
     let m = matrix(transform);
     let subs = parse(d, &|p| map_point(m, p))?;
     let mut count = 0;
@@ -127,9 +165,6 @@ fn flatten(
                     total += length;
                     chord((a, b, length));
                     count += 1;
-                    if count > MOTION_MAX_CHORDS {
-                        return Err(DocumentError(TOO_COMPLEX.into()));
-                    }
                 }
                 a = b;
             }
@@ -140,7 +175,7 @@ fn flatten(
             "motion path must have finite nonzero length (at most {MOTION_MAX_CHORDS} chords)"
         )));
     }
-    Ok((count, total))
+    Ok((count, total, sampled))
 }
 
 /// Point and tangent angle at `progress`; `cum` holds prefix lengths on long paths.
@@ -199,13 +234,21 @@ pub(crate) fn apply(nodes: &mut [Node]) -> Result<(), DocumentError> {
         by_source[s].1.push(i);
     }
     drop(index);
+    let mut budget = 0usize;
     for (source, targets) in by_source {
         let NodeKind::Path { d, .. } = &nodes[source].kind else {
             unreachable!()
         };
         // Animated `d` is flattened as evaluated; `flatten` caps each path.
         let mut chords = vec![];
-        let (count, total) = flatten(d, &nodes[source].transform, &mut |c| chords.push(c))?;
+        let (count, total, sampled) =
+            flatten(d, &nodes[source].transform, &mut |c| chords.push(c))?;
+        budget += sampled;
+        if budget > MOTION_TOTAL_CHORDS {
+            return Err(DocumentError(format!(
+                "motion paths too complex: more than {MOTION_TOTAL_CHORDS} chords"
+            )));
+        }
         let mut cum = vec![];
         if count > SEARCH_FROM {
             cum.reserve(count + 1);

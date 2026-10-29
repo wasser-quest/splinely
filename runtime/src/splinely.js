@@ -553,20 +553,23 @@
     }
     return out;
   }
-  // Same deterministic 64-chord arc-length approximation as splinely_document. Chord tables are built once per
+  // Same deterministic 64-chord arc-length approximation as splinely_document. Budgets count sampled chords
+  // (64 per segment, zero-length ones included), independent of the transform. Chord tables are built once per
   // (d, transform) and shared by every binding and runtime (small LRU); a lookup walks the chords like Rust, or
   // binary-searches the cumulative lengths on long paths (same chord, results within rounding).
   const MOTION_MAX_CHORDS=100000, MOTION_TOTAL_CHORDS=100000, MOTION_SEARCH=1024, MOTION_CACHE=64, MOTION_CACHE_CHORDS=400000;
   const motionCache=new Map();let motionCached=0;
+  const motionOver=()=>new Error('Motion paths too complex: more than '+MOTION_TOTAL_CHORDS+' chords');
   const numKey=v=>v===0 && 1/v<0?'-0':String(v);
   function motionBuild(d, tr) {
     if(typeof d!=='string' || d.replace(pathToken,'').replace(/[\s,]/g,''))throw new Error('Invalid motion path');
     if(/(?:^|[a-zA-Z,])\s*,|,\s*(?:[a-zA-Z]|$)/.test(d))throw new Error('Invalid motion path separators');
     if(!/^\s*[Mm]/.test(d))throw new Error('Motion path must start with M');
-    const tokens=d.match(pathToken)||[];let i=0,cmd='',current=[0,0],start=[0,0],total=0,n=0,ch=new Float64Array(1024),lens=new Float64Array(256);
+    const tokens=d.match(pathToken)||[];let i=0,cmd='',current=[0,0],start=[0,0],total=0,n=0,samples=0,ch=new Float64Array(1024),lens=new Float64Array(256);
     const angle=(tr.rotation||0)*Math.PI/180,c=Math.cos(angle),s=Math.sin(angle);
     const sx=tr.scaleX==null?1:tr.scaleX, sy=tr.scaleY==null?1:tr.scaleY, tx=tr.x||0, ty=tr.y||0;
     const segment=(points)=>{
+      if((samples+=64)>MOTION_MAX_CHORDS)throw new Error('Motion path too complex');
       const p0=points[0],p1=points[1],p2=points[2],p3=points[3];
       let ax=c*sx*p0[0]-s*sy*p0[1]+tx, ay=s*sx*p0[0]+c*sy*p0[1]+ty;
       for(let j=1;j<=64;j++){
@@ -574,7 +577,6 @@
         const bx=c*sx*qx-s*sy*qy+tx, by=s*sx*qx+c*sy*qy+ty, len=Math.hypot(bx-ax,by-ay);
         if(len>1e-12){
           total+=len;
-          if(n>=MOTION_MAX_CHORDS)throw new Error('Motion path too complex');
           if(n===lens.length){const l2=new Float64Array(n*2),c2=new Float64Array(n*8);l2.set(lens);c2.set(ch);lens=l2;ch=c2;}
           ch[4*n]=ax;ch[4*n+1]=ay;ch[4*n+2]=bx;ch[4*n+3]=by;lens[n++]=len;
         }
@@ -596,10 +598,10 @@
       else if(upper==='Q'){const q=points[0];segment([current,[current[0]+2*(q[0]-current[0])/3,current[1]+2*(q[1]-current[1])/3],[end[0]+2*(q[0]-end[0])/3,end[1]+2*(q[1]-end[1])/3],end]);}
       else segment([current,...points]);current=end;
     }
-    if(!Number.isFinite(total) || total<=1e-12)throw new Error('Motion path must have finite nonzero length');
+    if(!Number.isFinite(total) || total<=1e-12)throw Object.assign(new Error('Motion path must have finite nonzero length'),{samples});
     let cum=null;
     if(n>MOTION_SEARCH){cum=new Float64Array(n+1);for(let j=0;j<n;j++)cum[j+1]=cum[j]+lens[j];}
-    return {n,ch,lens,cum,total};
+    return {n,ch,lens,cum,total,samples};
   }
   // Table for (d, transform); failures are cached too (as their message), so a bad path is not re-parsed every frame.
   function motionTable(d, tr) {
@@ -609,14 +611,14 @@
     let hit=motionCache.get(key);
     if(hit!==undefined){motionCache.delete(key);motionCache.set(key,hit);}
     else {
-      try{hit=motionBuild(d,tr);}catch(e){hit={error:e.message,n:0};}
+      try{hit=motionBuild(d,tr);}catch(e){hit={error:e.message,n:0,samples:e.samples};}
       motionCache.set(key,hit);motionCached+=hit.n;
       for(const [k,v] of motionCache){if(motionCache.size<=MOTION_CACHE && motionCached<=MOTION_CACHE_CHORDS)break;if(v===hit)break;motionCache.delete(k);motionCached-=v.n;}
     }
-    if(hit.error!==undefined)throw new Error(hit.error);
+    if(hit.error!==undefined)throw Object.assign(new Error(hit.error),{samples:hit.samples});
     return hit;
   }
-  const motionOut=[0,0,0];
+  const motionOut=[0,0,0,0];
   function motionSample(d, transform, progress) {
     const tb=motionTable(d,transform||{}),n=tb.n,lens=tb.lens,ch=tb.ch,total=tb.total,eps=total*1e-12;
     let distance=clamp(progress,0,1)*total,j=0;
@@ -627,7 +629,7 @@
       distance-=cum[j];
     } else for(;j<n-1;j++){if(distance<=lens[j]+eps)break;distance-=lens[j];}
     const t=clamp(distance/lens[j],0,1),k=4*j,ax=ch[k],ay=ch[k+1],bx=ch[k+2],by=ch[k+3];
-    motionOut[0]=ax+(bx-ax)*t;motionOut[1]=ay+(by-ay)*t;motionOut[2]=Math.atan2(by-ay,bx-ax)*180/Math.PI;
+    motionOut[0]=ax+(bx-ax)*t;motionOut[1]=ay+(by-ay)*t;motionOut[2]=Math.atan2(by-ay,bx-ax)*180/Math.PI;motionOut[3]=tb.samples;
     return motionOut;
   }
 
@@ -734,8 +736,9 @@
     solveBones(bones);
     for(const n of nodes) if(n.boneId!=null && !boneIds.has(n.boneId)) throw new Error('Missing node bone: '+n.boneId);
     // Group rigs (move → turn → attach bones) let a whole group be animated; see Project::rig_group.
+    const boneById=new Map(bones.map(b=>[b.id,b]));
     for(const g of list(project.groups)) if(g && g.rig!=null) {
-      const r=g.rig, parent=id=>bones.find(b=>b.id===id);
+      const r=g.rig, parent=id=>boneById.get(id);
       if(!r || typeof r!=='object' || ![r.moveBone,r.turnBone,r.attachBone].every(id=>typeof id==='string' && boneIds.has(id)))throw new Error('Group '+g.id+': rig needs existing moveBone, turnBone and attachBone');
       if(parent(r.turnBone).parentId!==r.moveBone || parent(r.attachBone).parentId!==r.turnBone)throw new Error('Group '+g.id+': rig bones must be chained move → turn → attach');
     }
@@ -752,8 +755,9 @@
     if(motionSources.size) {
       let chords=0;
       const count=(d,tr,strict)=>{
-        try{chords+=motionTable(d,tr || {}).n;}catch(e){if(strict || e.message==='Motion path too complex')throw e;}
-        if(chords>MOTION_TOTAL_CHORDS)throw new Error('Motion paths too complex: more than '+MOTION_TOTAL_CHORDS+' chords');
+        // Unsampleable animated values still count their segments (they fail at evaluation, as in Rust).
+        try{chords+=motionTable(d,tr || {}).samples;}catch(e){if(strict || e.message==='Motion path too complex')throw e;chords+=e.samples || 0;}
+        if(chords>MOTION_TOTAL_CHORDS)throw motionOver();
       };
       for(const n of nodes)if(motionSources.has(n.id))count(n.kind.d,n.transform,true);
       for(const c of clips)for(const t of c.tracks)if(t.property==='d' && motionSources.has(t.target)){const src=nodes.find(n=>n.id===t.target);for(const k of t.keyframes){const v=unwrap(k.value);if(typeof v==='string')count(v,src.transform,false);}}
@@ -818,9 +822,9 @@
   function decodeBinaryProject(decode, input) {
     try { return decode(input); } catch (e) { throw projectError('invalid-sply', 'Invalid splinely-project SPLY: ' + (e && e.message), e); }
   }
-  function readProject(svg) {
+  function readProject(svg, idPrefix) {
     // Same rule as Rust `Project::from_svg_metadata`: an SVG-namespace direct child of the root svg; exactly one.
-    const candidates=[...svg.querySelectorAll('[id="splinely-project"], [data-splinely-project]')].filter(el=>el.parentNode===svg && (!el.namespaceURI || el.namespaceURI==='http://www.w3.org/2000/svg'));
+    const candidates=[...svg.querySelectorAll('[id="'+(idPrefix || '')+'splinely-project"], [data-splinely-project]')].filter(el=>el.parentNode===svg && (!el.namespaceURI || el.namespaceURI==='http://www.w3.org/2000/svg'));
     if (!candidates.length) throw projectError('missing-metadata', 'Missing splinely-project metadata');
     if (candidates.length>1) throw projectError('ambiguous-metadata', 'Multiple splinely-project metadata blocks');
     const block=candidates[0];
@@ -832,9 +836,12 @@
   function createRuntime(svg, project, options) {
     options = options || {};
     if (!svg || typeof svg.querySelectorAll !== 'function') throw new Error('An SVG root is required');
+    // idPrefix: element ids carry this prefix (splinely-mount.js scopes ids per inline mount); node ids do not.
+    const idPrefix = typeof options.idPrefix === 'string' ? options.idPrefix : '';
+    const unscope = id => idPrefix && typeof id === 'string' && id.startsWith(idPrefix) ? id.slice(idPrefix.length) : id;
     // The raw project object (passed in as an object or SPLY bytes, or decoded once from <metadata>) is exposed
     // as api.sourceProject so hosts need not parse/decode the same project a second time.
-    const source = project == null ? readProject(svg) : isBinaryProject(project) ? decodeBinaryProject(SplyDecode.decodeSply, project) : project;
+    const source = project == null ? readProject(svg, idPrefix) : isBinaryProject(project) ? decodeBinaryProject(SplyDecode.decodeSply, project) : project;
     project = normalize(source);
     if (svg.splinely) throw new Error('SVG already has a Splinely runtime');
     const env=options.window || (svg.ownerDocument && svg.ownerDocument.defaultView) || host;
@@ -864,8 +871,8 @@
       if (!subscriptions.has(key)) subscriptions.set(key,new Set()); subscriptions.get(key).add(fn);
       return () => { const set=subscriptions.get(key); if(set) {set.delete(fn); if(!set.size) subscriptions.delete(key);} };
     }
-    const elements=new Map(); if(svg.id) elements.set(svg.id,svg);
-    for(const el of svg.querySelectorAll('[id]'))if((!owningSvg(el) || owningSvg(el)===svg) && (!el.namespaceURI || el.namespaceURI==='http://www.w3.org/2000/svg') && !['svg','script','metadata'].includes((el.tagName || '').toLowerCase()))elements.set(el.id,el);
+    const elements=new Map(); if(svg.id) elements.set(unscope(svg.id),svg);
+    for(const el of svg.querySelectorAll('[id]'))if((!owningSvg(el) || owningSvg(el)===svg) && (!el.namespaceURI || el.namespaceURI==='http://www.w3.org/2000/svg') && !['svg','script','metadata'].includes((el.tagName || '').toLowerCase()))elements.set(unscope(el.id),el);
     // Nested base values (colours, gradients, wrapped numbers) are private copies the runtime never mutates, so
     // snapshotProps() can keep them by reference (see `owned`).
     const owned=new WeakSet();
@@ -905,7 +912,7 @@
     function applyGradient(node,g) {
       if(!node.el || !g || !Array.isArray(g.stops)) return;
       const ref=/url\(#([^)]+)\)/.exec(node.el.getAttribute('fill') || '');
-      const el=ref && elements.get(ref[1]);
+      const el=ref && elements.get(unscope(ref[1]));
       if(!el) return;
       if(!g.radial) {
         const a=(Number(g.angle)||0)*Math.PI/180, r=v=>Math.round(v*1e6)/1e6+0;
@@ -999,7 +1006,7 @@
     const rr=x=>{if(shadowing)return;reportSink.push(x);report(x);};
     const emptyMap=new Map(), noPoses=[], noEntries=[], stateEntries=new WeakMap();
     const transformKeys=new Set(['x','y','rotation','scaleX','scaleY']);
-    const motionNodes=project.nodes.filter(n=>n.motionPath), motionTr={x:0,y:0,rotation:0,scaleX:1,scaleY:1};
+    const motionNodes=project.nodes.filter(n=>n.motionPath), motionTr={x:0,y:0,rotation:0,scaleX:1,scaleY:1}, motionSeen=new Set();
     const entries=state=>{
       if(!state)return noEntries;
       let out=stateEntries.get(state);if(out)return out;
@@ -1206,11 +1213,16 @@
         if(f.mode==='rotate')merge(f.target,{rotation:num('rotation')+a});
         else merge(f.target,{x:num('x')+a,y:num('y')+b});
       }
+      // The document total also holds per frame, over the distinct sources as evaluated.
+      let motionBudget=0;motionSeen.clear();
       for(const n of motionNodes) {
         try {
           const binding=n.motionPath,source=values.get(binding.path) || baseOf(binding.path),props=nodes.has(n.id)?touch(n.id):undefined;
+          const fresh=!motionSeen.has(binding.path);
+          if(motionBudget>MOTION_TOTAL_CHORDS)throw motionOver();
           motionTr.x=unwrap(source.x);motionTr.y=unwrap(source.y);motionTr.rotation=unwrap(source.rotation);motionTr.scaleX=unwrap(source.scaleX);motionTr.scaleY=unwrap(source.scaleY);
-          const [x,y,angle]=motionSample(unwrap(source.d),motionTr,unwrap(props.motionProgress));
+          const [x,y,angle,sampled]=motionSample(unwrap(source.d),motionTr,unwrap(props.motionProgress));
+          if(fresh){motionSeen.add(binding.path);if((motionBudget+=sampled)>MOTION_TOTAL_CHORDS)throw motionOver();}
           props.x=(unwrap(props.x)||0)+x;props.y=(unwrap(props.y)||0)+y;
           if(binding.orient)props.rotation=(unwrap(props.rotation)||0)+angle;
         } catch(e){rr(e);}
@@ -1330,6 +1342,7 @@
     function set(id,props) {ensure();explicitRev++;if(!bones.has(id) && !nodes.has(id) && groupIds.has(id))return setGroup(id,props);if(props && own(props,'motionProgress')) {if(!project.nodes.some(n=>n.id===id && n.motionPath))throw new Error('motionProgress requires a motionPath binding');weightValue(unwrap(props.motionProgress));}if(!bones.has(id))getNode(id); if(props===null) explicit.delete(id); else {if(!props || typeof props!=='object' || Array.isArray(props)) throw new Error('Properties must be an object or null');explicit.set(id,{...explicit.get(id),...(bones.has(id)?bonePatch(props):props)});}dirty=true;render();}
     function variable(id) {ensure();if(!variables.has(id)) throw new Error('Unknown variable: '+id);return {get:()=>variables.get(id),set:v=>{ensure();const old=variables.get(id);if((old===null?v!==null:typeof old!==typeof v) || Array.isArray(old)!==Array.isArray(v))throw new Error('Variable type mismatch: '+id);if(v===undefined || typeof v==='function' || (typeof v==='number' && !Number.isFinite(v)))throw new Error('Variable must be a JSON value');if(project.blendSpaces.some(s=>s.parameters.includes(id)))blendParameter(v);variables.set(id,v);dirty=true;render();emit('variable.change',{id,value:v});}};}
     function actions(items,detail) {
+      if(items)actionWork+=items.length;
       for(const a of items || []) {
         try {
           switch(a.type) {
@@ -1390,7 +1403,7 @@
       machines.set(m.id,{...m,states,state:m.initial,elapsed:0});
     }
     function machine(id) {ensure();const m=machines.get(id);if(!m) throw new Error('Unknown machine: '+id);return {send:(event,detail)=>send(id,typeof event==='object'?event.name:event,detail,typeof event==='object'?event.target:undefined),get state(){return m.state;}};}
-    const callbacks=new Set();
+    const callbacks=new Set();let actionWork=0;
     for(const [index,c] of project.clips.entries()) clips.set(c.id,{...c,index,priority:c.priority || 0,time:0,playing:false,active:false,cycle:0,revision:0,ramp:null,sources:new Map(),table:null});
     // Track tables are compiled the first time a clip is rendered, keeping load time low.
     const tableOf=c=>c.table || (c.table=c.tracks.map(t=>({target:t.target,property:t.property,track:t,ct:compileTrack(t)})));
@@ -1439,8 +1452,13 @@
         } catch(e){report(e);}
       }
     }
+    // One handle per clip: actions call clip(id) per event, and building the accessor object each time dominated catch-up ticks.
+    const clipHandles=new Map();
     function clip(id) {
       const c=getClip(id);
+      let h=clipHandles.get(c);if(h===undefined)clipHandles.set(c,h=clipHandle(c));return h;
+    }
+    function clipHandle(c) {
       return {
         get time(){return liveTime(c);},get duration(){return c.duration;},get playing(){return c.playing;},get loop(){return c.loop;},
         get weight(){ensure();syncClock();return c.weight;},
@@ -1457,21 +1475,29 @@
     // loop wrap). After that, or from the start when a looping clip would wrap LAP_EXACT times, looping clips without callbacks advance whole laps arithmetically instead of one
     // segment per lap, and intermediate frames are drawn only when a callback or a clip.end can observe them.
     // At most TICK_RENDERS intermediate frames per tick; the tick's final frame is always drawn.
-    const LAP_EXACT=8, TICK_RENDERS=64, freeBuf=[];
+    // Work per tick (clips visited per segment plus actions run, e.g. clip.end replaying every clip) is capped
+    // like the segment count; the Locora assets peak at 42 units.
+    const LAP_EXACT=8, TICK_RENDERS=64, TICK_WORK=20000, freeBuf=[];
+    function catchUpLimit(what) {
+      report('Transport catch-up limit exceeded ('+what+')');
+      for(const c of clipList)if(c.playing){c.playing=false;c.revision++;stopSources(c);}
+      transportPause();
+    }
     function tick(delta) {
       ensure();if(finite(delta,'Tick delta')<0)throw new Error('Tick delta must be nonnegative');
       if(ticking)throw new Error('Reentrant tick is unsupported');
       ticking=true;renderBudget=TICK_RENDERS;
       try {
       if(advanceBlends(delta))render();
-      let remaining=delta,segments=0,fast=false;
+      let remaining=delta,segments=0,fast=false,work=0;actionWork=0;
       do {
-        if(++segments>10000){report('Transport catch-up limit exceeded (10000)');for(const c of clips.values())if(c.playing)clip(c.id).pause();transportPause();break;}
+        if(++segments>10000){catchUpLimit(10000);break;}
         const active=activeBuf, fading=fadingBuf;
         active.length=0;fading.length=0;
         if(transport.playing)active.push(transport);
         for(let i=0;i<clipList.length;i++){const c=clipList[i];if(c.playing)active.push(c);if(c.ramp)fading.push(c);}
         if(!active.length && !fading.length)break;
+        if((work+=active.length+fading.length)+actionWork>TICK_WORK){catchUpLimit('work '+TICK_WORK);break;}
         if(!fast){if(segments>LAP_EXACT)fast=true;else if(segments===1)for(let i=0;i<active.length;i++)if(active[i].loop && remaining>=LAP_EXACT*active[i].duration)fast=true;}
         let step=remaining,observe=!fast || callbacks.size>0;
         for(const c of fading)step=Math.min(step,c.ramp.duration-c.ramp.elapsed);
@@ -1589,8 +1615,8 @@
         if(wake!==null && !nat.hidden)wake();
         for(let control=event.target;control && control!==svg;control=control.parentNode)if(control.getAttribute && control.getAttribute('data-splinely-host-control')!=null)return;
         if(event.target && owningSvg(event.target) && owningSvg(event.target)!==svg)return;
-        let el=event.target;while(el && el!==svg && elements.get(el.id)!==el)el=el.parentNode;
-        const target=el && el.id || svg.id,point=coordinates(event),detail={...point,event,target,key:event.key,pointerId:event.pointerId,buttons:event.buttons};
+        let el=event.target;while(el && el!==svg && elements.get(unscope(el.id))!==el)el=el.parentNode;
+        const target=unscope(el && el.id || svg.id),point=coordinates(event),detail={...point,event,target,key:event.key,pointerId:event.pointerId,buttons:event.buttons};
         if(type==='pointermove' || type==='pointerdown' || type==='pointerenter')pointer=[point.x,point.y];
         if(type==='pointerleave' && event.target===svg)pointer=null;
         if(project.followers.length && /^pointer/.test(type)){followMoving=true;if(updateFollowers(0))dirty=true;if(!nat.hidden)render();}
@@ -1707,7 +1733,7 @@
       const onFocus=event=>{
         const el=event.target;if(dead || !focusables.has(el) || !focusVisible(el))return;
         showRing(el);
-        if(hover.has(el.id)){entered.add(el);const l=listeners.get('pointerenter');if(l)l({type:'pointerenter',target:el,...center(el)});}
+        if(hover.has(unscope(el.id))){entered.add(el);const l=listeners.get('pointerenter');if(l)l({type:'pointerenter',target:el,...center(el)});}
       };
       const onBlur=event=>{
         const el=event.target;if(!focusables.has(el))return;

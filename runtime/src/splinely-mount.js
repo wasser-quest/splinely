@@ -10,6 +10,9 @@
 // writes are kept (scripts, styles, foreignObject, links, images, animation elements and event-handler
 // attributes go), references must stay inside the document ('#id'), and url() may only name '#id'. The host
 // runs the graphic; the file's own runtime copy is not used.
+// Ids are scoped per mount ('splinely<n>-' + id, references rewritten to match), so a graphic cannot take
+// over the page's own ids or aria references; `graphic.idPrefix` names the prefix. Node ids in the runtime
+// API stay unprefixed.
 // A graphic that cannot start stays visible as its static drawing; `error` then says why.
 (function (host) {
   'use strict';
@@ -31,6 +34,10 @@
   // Attributes whose value is CSS and may carry url(): only same-document 'url(#id)' references survive.
   const PAINT = new Set(['fill', 'stroke', 'clip-path', 'mask']);
   const LOCAL_URL = /url\(\s*(['"]?)#[A-Za-z0-9_.:-]+\1\s*\)/gi;
+  // Attributes holding id references (space-separated).
+  const IDREFS = new Set(['aria-labelledby', 'aria-describedby', 'aria-controls', 'aria-owns', 'aria-flowto',
+    'aria-details', 'aria-errormessage', 'aria-activedescendant']);
+  let mounts = 0;
 
   function allowedAttribute(el, name, value) {
     if (/^on/i.test(name) || name === 'style' || name === 'class') return false;
@@ -59,6 +66,23 @@
     return root;
   }
 
+  /** Prefixes every id in sanitized `root` and the same-document references to them (in place). */
+  function scopeIds(root, prefix) {
+    const walk = el => {
+      for (const { name, value } of [...el.attributes]) {
+        let next = value;
+        if (name === 'id') next = prefix + value;
+        else if (name === 'href' || name === 'xlink:href') next = '#' + prefix + value.slice(1);
+        else if (PAINT.has(name)) next = value.replace(LOCAL_URL, m => m.replace('#', '#' + prefix));
+        else if (IDREFS.has(name)) next = value.split(/\s+/).filter(Boolean).map(id => prefix + id).join(' ');
+        if (next !== value) el.setAttribute(name, next);
+      }
+      for (let child = el.firstChild; child; child = child.nextSibling) if (child.nodeType === 1) walk(child);
+    };
+    walk(root);
+    return root;
+  }
+
   /** Parses exported SVG text into its sanitized root <svg>. */
   function parse(source) {
     const doc = new host.DOMParser().parseFromString(source, 'image/svg+xml');
@@ -74,15 +98,19 @@
    * exported graphic, or an SVG element. `options` are passed to createRuntime.
    */
   function mount(container, source, options) {
-    const root = typeof source === 'string' ? parse(source) : source;
-    const svg = host.document.importNode(root, true);
-    if (typeof source !== 'string') sanitize(svg);
+    // Element sources are copied into an inert document first: importing unsanitized markup into the page
+    // would start its image loads before sanitize() removes them.
+    const root = typeof source === 'string' ? parse(source)
+      : sanitize(host.document.implementation.createDocument(SVG_NS, 'svg', null).importNode(source, true));
+    const idPrefix = 'splinely' + (++mounts) + '-';
+    const svg = host.document.importNode(scopeIds(root, idPrefix), true);
     container.replaceChildren(svg);
     try {
-      const runtime = SplinelyRuntime.createRuntime(svg, undefined, options);
+      const runtime = SplinelyRuntime.createRuntime(svg, undefined, { ...options, idPrefix });
       return {
         svg,
         runtime,
+        idPrefix,
         error: null,
         destroy() {
           runtime.destroy();
@@ -91,7 +119,7 @@
       };
     } catch (error) {
       // The static drawing stays in the container; the host can show the error or ignore it.
-      return { svg, runtime: null, error, destroy() { svg.remove(); } };
+      return { svg, runtime: null, idPrefix, error, destroy() { svg.remove(); } };
     }
   }
 

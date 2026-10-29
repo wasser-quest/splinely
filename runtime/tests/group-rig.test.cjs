@@ -58,3 +58,9 @@ test('broken group rigs are rejected',()=>{
   const unchained=rigged();unchained.bones[2].parentId='g-move';
   assert.throws(()=>mount(unchained),/chained move → turn → attach/);
 });
+
+test('many rigged groups load in linear time (bone lookups were a scan per group)',()=>{
+  const p=rigged();const extra=Array.from({length:40000},(_,i)=>bone('x'+i));p.bones=[...extra,...p.bones];
+  for(let i=0;i<40000;i++)p.groups.push({id:'r'+i,name:'',rig:{moveBone:'g-move',turnBone:'g-turn',attachBone:'g-attach'}});
+  const start=Date.now();const {f}=mount(p);assert.ok(Date.now()-start<3000,(Date.now()-start)+' ms');f.destroy();
+});

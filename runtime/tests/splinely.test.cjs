@@ -432,6 +432,23 @@ test('motion path chord budget: 100000 per path and summed over distinct sources
   const overMap=motionScene(linePath(800));overMap.stateMachines=[{id:'m',initial:'a',states:[{id:'a',overrides:{route:{d:linePath(800)}}}]}];
   assert.throws(()=>normalize(overMap),/Motion paths too complex/);
 });
+test('motion chord budget counts sampled segments: zero-length ones, tiny scales and per frame',()=>{
+  // Zero-length segments still cost 64 samples each (as in splinely_document).
+  assert.throws(()=>normalize(motionScene('M0 0 L1 0'+' L1 0'.repeat(1562))),/^Error: Motion path too complex$/);
+  // A tiny base scale made animated d values unsampleable and count 0; they now count per segment.
+  const tiny=()=>{const p=motionScene('M0 0 L1e7 0');p.nodes[1].transform={scaleX:1e-17,scaleY:1e-17};
+    p.clips=[{id:'grow',duration:1,autoplay:true,tracks:[{nodeId:'route',property:'d',keyframes:[frame(0,linePath(800))]}]}];return p;};
+  assert.doesNotThrow(()=>normalize(tiny()));
+  const both=tiny();both.clips[0].tracks[0].keyframes.push(frame(1,linePath(800)));
+  assert.throws(()=>normalize(both),/Motion paths too complex: more than 100000 chords/);
+  // Values set at runtime are held to the document total per frame.
+  const p=motionScene(linePath(700));p.nodes.push({id:'m',kind:{type:'circle',cx:0,cy:0,radius:1},motionPath:{path:'route2'}},
+    {id:'route2',visible:false,kind:{type:'path',d:linePath(700),bounds:[0,0,1,1]},transform:{}});
+  const {f}=runtime(p,{},['n','route','m','route2']);assert.deepEqual(f.diagnostics,[]);
+  f.set('route2',{d:linePath(1000)});
+  assert.ok(f.diagnostics.some(d=>/Motion paths too complex: more than 100000 chords/.test(d.message || d)),JSON.stringify(f.diagnostics));
+  f.destroy();
+});
 test('long motion paths: tables are built once, progress is a binary search and samples match the chord walk',()=>{
   const reference=require('./fixtures/splinely-reference.js');
   const d='M0 0'+Array.from({length:700},(_,i)=>` Q${i*3+1} ${(i%7)*2} ${i*3+3} ${i%5} L${i*3+3.5} ${(i%3)-1}`).join('');
@@ -454,6 +471,22 @@ test('clip durations below 0.001 s are rejected; tiny looping clips advance whol
   // A long catch-up (e.g. after a hidden tab) keeps the clip playing: no 10000-segment pause.
   f.tick(3600);assert.equal(f.clip('a').playing,true);assert.deepEqual(f.diagnostics,[]);
   assert.ok(f.clip('a').time>=0 && f.clip('a').time<0.001);f.destroy();
+});
+test('idPrefix: element ids carry a per-mount prefix, node ids in the API do not',()=>{
+  const {f,n}=runtime(project(),{},['m1-n'],{idPrefix:'m1-'});
+  f.clip('a').seek(1);assert.equal(n.getAttribute('cx'),'10');f.set('n',{opacity:0.5});assert.equal(n.getAttribute('opacity'),'0.5');
+  assert.deepEqual(f.diagnostics,[]);f.destroy();
+});
+test('clip.end replaying many tiny clips: catch-up work per tick is capped, clip handles are reused',()=>{
+  const clips=Array.from({length:300},(_,c)=>({id:'c'+c,duration:0.001+c*1e-6,autoplay:true,tracks:[{target:'n',property:'cx',keyframes:[frame(0,0),frame(0.001,10)]}]}));
+  const act=clips.map(c=>({type:'playClip',clipId:c.id}));
+  const p=project({clips,stateMachines:[{id:'m',initial:'a',states:[{id:'a',onEnter:act},{id:'b',onEnter:act}],
+    transitions:[{from:'a',to:'b',event:{name:'clip.end'}},{from:'b',to:'a',event:{name:'clip.end'}},{from:'a',to:'b',after:0},{from:'b',to:'a',after:0}]}]});
+  const {f}=runtime(p);assert.equal(f.clip('c1'),f.clip('c1'));
+  // Before: about 4 s per tick (segments x actions), with no diagnostic.
+  const start=Date.now();for(let i=0;i<5;i++)f.tick(1/30);
+  assert.ok(Date.now()-start<1500,(Date.now()-start)+' ms');
+  assert.match(f.diagnostics.at(-1).message,/catch-up limit exceeded \(work 20000\)/);f.destroy();
 });
 test('after:0 timers restarting a tiny clip or an emit ping-pong cost a bounded number of frames and are stopped',()=>{
   const act=[{type:'playClip',clipId:'a'}];

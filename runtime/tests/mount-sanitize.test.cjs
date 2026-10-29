@@ -11,7 +11,7 @@ class Node {constructor(type){this.nodeType=type;this.parentNode=null;this.child
   appendChild(c){c.parentNode=this;this.children.push(c);return c;}}
 class El extends Node {constructor(ns,name,attrs={}){super(1);this.namespaceURI=ns;this.localName=name.split(':').pop();this.tagName=name;this.map=new Map(Object.entries(attrs));}
   get attributes(){return [...this.map].map(([name,value])=>({name,value}));}
-  getAttribute(k){return this.map.has(k)?this.map.get(k):null;}removeAttribute(k){this.map.delete(k);}}
+  getAttribute(k){return this.map.has(k)?this.map.get(k):null;}removeAttribute(k){this.map.delete(k);}setAttribute(k,v){this.map.set(k,String(v));}}
 const el=(ns,name,attrs,...kids)=>{const e=new El(ns,name,attrs);for(const k of kids)e.appendChild(typeof k==='string'?Object.assign(new Node(3),{data:k}):k);return e;};
 globalThis.SplinelyRuntime=require('../src/splinely.js');
 const {sanitize}=require('../src/splinely-mount.js');
@@ -52,13 +52,36 @@ test('scripts, styles, foreign content, links, animation and external references
   assert.deepEqual([...circle.map],[['fill','URL(#g)'],['stroke','rgb(1 2 3)'],['aria-label','a \\ b'],['data-x','url(x)']]);
 });
 
-test('mount() sanitizes element sources too',()=>{
-  const doc={importNode:n=>n};globalThis.document=doc;
+test('mount() sanitizes element sources in an inert document before they reach the page',()=>{
+  // The page document only ever imports the sanitized copy (live imports would start <image> loads).
+  const seen=[],copy=n=>{const c=el(n.namespaceURI,n.tagName,Object.fromEntries(n.map));for(const k of n.children)c.appendChild(k.nodeType===1?copy(k):k);return c;};
+  const doc={importNode:n=>{seen.push(['page',names(n)]);return copy(n);},implementation:{createDocument:()=>({importNode:n=>{seen.push(['inert',names(n)]);return copy(n);}})}};
+  globalThis.document=doc;
   try {
-    const svg=el(SVG,'svg',{},el(SVG,'style',{},'*{}'),el(SVG,'circle',{id:'n',onclick:'x'}));
+    const svg=el(SVG,'svg',{},el(SVG,'style',{},'*{}'),el(SVG,'image',{href:'https://e/i.png'}),el(SVG,'circle',{id:'n',onclick:'x'}));
     const container={replaceChildren(c){this.child=c;}};
     const g=require('../src/splinely-mount.js').mount(container,svg,{autoTick:false});
-    assert.equal(container.child,svg);assert.deepEqual(names(svg),['circle']);assert.equal(svg.children[0].getAttribute('onclick'),null);
+    assert.deepEqual(seen,[['inert',['style','image','circle']],['page',['circle']]]);
+    assert.equal(container.child,g.svg);assert.deepEqual(names(g.svg),['circle']);assert.equal(g.svg.children[0].getAttribute('onclick'),null);
+    assert.equal(names(svg).length,3,'the caller\'s element is left alone');
     assert.ok(g.error,'no project metadata: the static drawing stays');
+  } finally {delete globalThis.document;}
+});
+
+test('mount() scopes ids and same-document references per graphic',()=>{
+  const {mount}=require('../src/splinely-mount.js');
+  const doc={importNode:n=>n,implementation:{createDocument:()=>({importNode:n=>n})}};globalThis.document=doc;
+  try {
+    const graphic=()=>el(SVG,'svg',{'aria-labelledby':'splinely-title','aria-describedby':'splinely-desc tour-home-import'},
+      el(SVG,'title',{id:'splinely-title'},'T'),el(SVG,'defs',{},el(SVG,'linearGradient',{id:'g'})),
+      el(SVG,'rect',{id:'tour-home-import',fill:'url(#g)',stroke:'url( "#g" )',mask:'url(#m)'}),el(SVG,'use',{href:'#tour-home-import','xlink:href':'#g'}));
+    const a=mount({replaceChildren(){}},graphic(),{autoTick:false}),b=mount({replaceChildren(){}},graphic(),{autoTick:false});
+    assert.notEqual(a.idPrefix,b.idPrefix);
+    const p=a.idPrefix,[title,defs,rect,use]=a.svg.children;
+    assert.equal(a.svg.getAttribute('aria-labelledby'),p+'splinely-title');
+    assert.equal(a.svg.getAttribute('aria-describedby'),p+'splinely-desc '+p+'tour-home-import');
+    assert.equal(title.getAttribute('id'),p+'splinely-title');assert.equal(defs.children[0].getAttribute('id'),p+'g');
+    assert.deepEqual([...rect.map],[['id',p+'tour-home-import'],['fill','url(#'+p+'g)'],['stroke','url( "#'+p+'g" )'],['mask','url(#'+p+'m)']]);
+    assert.deepEqual([use.getAttribute('href'),use.getAttribute('xlink:href')],['#'+p+'tour-home-import','#'+p+'g']);
   } finally {delete globalThis.document;}
 });

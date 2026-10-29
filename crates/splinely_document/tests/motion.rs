@@ -285,6 +285,46 @@ fn chord_limits_match_the_js_runtime() {
     assert!(err.contains("motion paths too complex"), "{err}");
 }
 #[test]
+fn chord_budget_counts_segments_not_visible_length() {
+    // Zero-length segments still cost 64 samples each: 1563 of them are too complex.
+    let d = format!("M0 0 L1 0{}", " L1 0".repeat(1562));
+    let err = scene(&d).validate().unwrap_err().0;
+    assert!(err.contains("motion path too complex"), "{err}");
+    // A tiny base scale made animated `d` values flatten to nothing and count 0;
+    // they now count per segment, independent of the transform.
+    let mut p = scene("M0 0 L1e7 0");
+    p.nodes[1].transform.scale_x = 1e-17;
+    p.nodes[1].transform.scale_y = 1e-17;
+    p.clips.push(Clip {
+        audio_cues: vec![],
+        id: "grow".into(),
+        name: String::new(),
+        duration: 1.,
+        looping: false,
+        autoplay: true,
+        blend_mode: BlendMode::Override,
+        weight: 1.,
+        tracks: vec![Track {
+            node_id: "route".into(),
+            property: Property::D,
+            keyframes: vec![Keyframe {
+                time: 0.,
+                value: AnimValue::Path(zigzag(800)),
+                easing: Easing::Linear,
+            }],
+        }],
+    });
+    p.validate().unwrap();
+    let mut q = p.clone();
+    q.clips[0].tracks[0].keyframes.push(Keyframe {
+        time: 1.,
+        value: AnimValue::Path(zigzag(800)),
+        easing: Easing::Linear,
+    });
+    let err = q.validate().unwrap_err().0;
+    assert!(err.contains("motion paths too complex"), "{err}");
+}
+#[test]
 fn many_bindings_sample_each_source_once() {
     // Before: every binding re-flattened the path (bindings x chords, minutes).
     let mut p = scene(&zigzag(1500));

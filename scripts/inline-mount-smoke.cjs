@@ -87,8 +87,24 @@ const server = http.createServer((req, res) => {
     });
     check('sanitizer removes scripts, styles, handlers, foreign content and external references',
       !/style|onload|onclick|foreignObject|<a |<image|<animate|<set|<script|example\.invalid/.test(hostile.html) &&
-      /<use xlink:href="#r"/.test(hostile.html) && /stroke="url\(#r\)"/.test(hostile.html) && !hostile.hit && hostile.display !== 'none',
+      /<use xlink:href="#splinely\d+-r"/.test(hostile.html) && /stroke="url\(#splinely\d+-r\)"/.test(hostile.html) && !hostile.hit && hostile.display !== 'none',
       hostile.html);
+
+    // Ids are scoped per mount: a graphic cannot capture the page's ids, and element sources never touch the page unsanitized.
+    const scoped = await tab.evaluate(async () => {
+      const app = document.createElement('div');app.id = 'tour-home-import';document.body.append(app);
+      const text = '<svg xmlns="http://www.w3.org/2000/svg" aria-labelledby="t"><title id="t">x</title><rect id="tour-home-import"/></svg>';
+      const g = window.SplinelyMount.mount(document.getElementById('stage'), text);
+      const svg = new DOMParser().parseFromString('<svg xmlns="http://www.w3.org/2000/svg"><image href="/elsrc-image"/>' +
+        '<foreignObject><img xmlns="http://www.w3.org/1999/xhtml" src="/elsrc-img"/></foreignObject></svg>', 'image/svg+xml').documentElement;
+      const h = window.SplinelyMount.mount(document.createElement('div'), svg);
+      await new Promise(done => setTimeout(done, 200));
+      const out = { found: document.getElementById('tour-home-import') === app, label: g.svg.getAttribute('aria-labelledby') === g.idPrefix + 't',
+        loads: performance.getEntriesByType('resource').filter(e => /elsrc/.test(e.name)).length };
+      g.destroy();h.destroy();app.remove();
+      return out;
+    });
+    check('mounted ids are scoped and element sources load nothing', scoped.found && scoped.label && scoped.loads === 0, JSON.stringify(scoped));
 
     // decodeSplyBase64: the native Uint8Array.fromBase64 path and the atob fallback agree.
     await tab.addScriptTag({ url: '/runtime/src/sply_decode.js' });
