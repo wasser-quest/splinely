@@ -165,7 +165,7 @@ test('speech is gone: no API, legacy speech data and actions never reach the bro
 });
 
 test('malformed data, callback faults, script properties and unknown IDs are handled',()=>{
-  assert.throws(()=>runtime({schemaVersion:2}),/schemaVersion/);assert.throws(()=>runtime({clips:[{id:'a',duration:0}]}),/positive/);
+  assert.throws(()=>runtime({schemaVersion:2}),/schemaVersion/);assert.throws(()=>runtime({clips:[{id:'a',duration:0}]}),/at least 0\.001 seconds/);
   assert.throws(()=>runtime({clips:[{id:'a',duration:1},{id:'a',duration:2}]}),/duplicate/);
   assert.throws(()=>runtime({clips:[{id:'a',duration:1,tracks:[{target:'n',property:'cx',keyframes:[frame(NaN,1)]}]}]}),/finite/);
   assert.throws(()=>easing({type:'cubicBezier',x1:2,y1:0,x2:1,y2:1},0.5),/Unsupported/);
@@ -410,4 +410,99 @@ test('motion progress participates in clips, states, explicit changes and valida
   for(const path of ['n','missing']){const q=motionScene();q.nodes[0].motionPath.path=path;assert.throws(()=>normalize(q));}
   for(const d of ['M0 0','M0 0 L0 0','M0 0 H100'])assert.throws(()=>normalize(motionScene(d)));
   const q=motionScene();q.nodes[1].motionPath={path:'n'};assert.throws(()=>normalize(q));
+});
+
+// Hostile-input bounds (audit JS-1..JS-3). Limits match splinely_document (RUNTIME_API.md, "Limits").
+const linePath=(segments,step=1)=>'M0 0'+Array.from({length:segments},(_,i)=>` L${(i+1)*step} ${i%2}`).join('');
+test('motion path chord budget: 100000 per path and summed over distinct sources, their d keyframes and overrides',()=>{
+  // 64 chords per segment: 1562 segments = 99968 chords fit, 1563 do not.
+  assert.doesNotThrow(()=>normalize(motionScene(linePath(1562))));
+  assert.throws(()=>normalize(motionScene(linePath(1563))),/^Error: Motion path too complex$/);
+  const two=(d1,d2,extra={})=>({...motionScene(d1),...extra,nodes:[...motionScene(d1).nodes,{id:'m',kind:{type:'circle',cx:0,cy:0,radius:1},motionPath:{path:'route2'}},
+    {id:'route2',visible:false,kind:{type:'path',d:d2,bounds:[0,0,1,1]},transform:{}}]});
+  assert.doesNotThrow(()=>normalize(two(linePath(700),linePath(800))));
+  assert.throws(()=>normalize(two(linePath(800),linePath(800))),/Motion paths too complex: more than 100000 chords/);
+  // Many bindings to one source count it once.
+  const shared=motionScene(linePath(1500));for(let i=0;i<50;i++)shared.nodes.push({id:'b'+i,kind:{type:'circle',cx:0,cy:0,radius:1},motionPath:{path:'route',progress:i/50}});
+  assert.doesNotThrow(()=>normalize(shared));
+  const keyed=motionScene(linePath(800));keyed.clips=[{id:'c',duration:1,tracks:[{nodeId:'route',property:'d',keyframes:[frame(0,linePath(700)),frame(1,linePath(800))]}]}];
+  assert.throws(()=>normalize(keyed),/Motion paths too complex/);
+  const over=motionScene(linePath(800));over.stateMachines=[{id:'m',initial:'a',states:[{id:'a',overrides:[{nodeId:'route',property:'d',value:linePath(800)}]}]}];
+  assert.throws(()=>normalize(over),/Motion paths too complex/);
+  const overMap=motionScene(linePath(800));overMap.stateMachines=[{id:'m',initial:'a',states:[{id:'a',overrides:{route:{d:linePath(800)}}}]}];
+  assert.throws(()=>normalize(overMap),/Motion paths too complex/);
+});
+test('long motion paths: tables are built once, progress is a binary search and samples match the chord walk',()=>{
+  const reference=require('./fixtures/splinely-reference.js');
+  const d='M0 0'+Array.from({length:700},(_,i)=>` Q${i*3+1} ${(i%7)*2} ${i*3+3} ${i%5} L${i*3+3.5} ${(i%3)-1}`).join('');
+  const p=motionScene(d);p.nodes[0].transform={};
+  for(let i=0;i<20;i++)p.nodes.push({id:'b'+i,kind:{type:'circle',cx:0,cy:0,radius:1},motionPath:{path:'route',orient:true}});
+  p.clips=[{id:'go',duration:2,looping:true,autoplay:true,tracks:p.nodes.filter(n=>n.motionPath).map((n,i)=>({nodeId:n.id,property:'motionProgress',keyframes:[frame(0,number(0)),frame(2,number(1-i/40))]}))}];
+  const ids=p.nodes.map(n=>n.id),a=runtime(JSON.parse(JSON.stringify(p)),{},ids),svg=root(ids),b=reference.createRuntime(svg,JSON.parse(JSON.stringify(p)),{autoTick:false});
+  let spent=0;
+  for(let k=0;k<30;k++){const t0=Date.now();a.f.tick(1/30);spent+=Date.now()-t0;b.tick(1/30);
+    for(let i=0;i<ids.length;i++){const x=a.svg.children[i].getAttribute('transform'),y=svg.children[i].getAttribute('transform');if(x===y)continue;
+      const num=t=>t.match(/-?\d[\d.]*(?:e[-+]?\d+)?/g).map(Number),nx=num(x),ny=num(y);nx.forEach((v,j)=>near(v,ny[j],1e-9));}}
+  assert.ok(spent<1500,'30 frames of 21 bindings to an 89600-chord path took '+spent+' ms');assert.deepEqual(a.f.diagnostics,[]);a.f.destroy();b.destroy();
+});
+test('clip durations below 0.001 s are rejected; tiny looping clips advance whole laps instead of a frame per lap',()=>{
+  assert.throws(()=>normalize({clips:[{id:'a',duration:0.0009}]}),/at least 0\.001 seconds/);
+  const p=project({clips:[{id:'a',duration:0.001,looping:true,autoplay:true,tracks:[{target:'n',property:'cx',keyframes:[frame(0,0),frame(0.001,1)]}]}]});
+  const {f,n}=runtime(p);let writes=0;const set=n.setAttribute;n.setAttribute=function(k,v){writes++;return set.call(this,k,v);};
+  for(let i=0;i<30;i++)f.tick(1/30);
+  assert.ok(writes<=30,'one frame per tick, not one per lap: '+writes+' writes');near(f.clip('a').time,(30/30)%0.001,1e-9);
+  // A long catch-up (e.g. after a hidden tab) keeps the clip playing: no 10000-segment pause.
+  f.tick(3600);assert.equal(f.clip('a').playing,true);assert.deepEqual(f.diagnostics,[]);
+  assert.ok(f.clip('a').time>=0 && f.clip('a').time<0.001);f.destroy();
+});
+test('after:0 timers restarting a tiny clip or an emit ping-pong cost a bounded number of frames and are stopped',()=>{
+  const act=[{type:'playClip',clipId:'a'}];
+  const p=project({clips:[{id:'a',duration:0.001,looping:true,autoplay:true,tracks:[{target:'n',property:'cx',keyframes:[frame(0,0),frame(0.001,1)]}]}],
+    stateMachines:[{id:'m',initial:'x',states:[{id:'x',onEnter:act},{id:'y',onEnter:act}],transitions:[{from:'x',to:'y',after:0},{from:'y',to:'x',after:0}]}]});
+  const {f,n}=runtime(p);let writes=0;const set=n.setAttribute;n.setAttribute=function(k,v){writes++;return set.call(this,k,v);};
+  for(let i=0;i<30;i++)f.tick(1/30);assert.ok(writes<=90,writes+' writes');assert.deepEqual(f.diagnostics,[]);f.destroy();
+  const emit=[{type:'emit',event:{name:'go'}}];
+  const q=project({clips:[],stateMachines:[{id:'m',initial:'a',states:[{id:'a',onEnter:emit},{id:'b',onEnter:emit}],
+    transitions:[{from:'a',to:'b',event:{name:'go'}},{from:'b',to:'a',event:{name:'go'}},{from:'a',to:'b',after:0},{from:'b',to:'a',after:0}]}]});
+  const r=runtime(q);let changes=0;r.f.on('state.change',()=>changes++);
+  for(let i=0;i<5;i++)r.f.tick(1/30);
+  assert.ok(changes>3*100,'the limit is hit on consecutive ticks: '+changes);
+  assert.match(r.f.diagnostics.at(-1).message,/State machine m stopped: event cycle limit exceeded on 3 consecutive ticks/);
+  changes=0;for(let i=0;i<10;i++)r.f.tick(1/30);r.f.emit('go');
+  assert.equal(changes,0,'a stopped machine ignores timers and events');r.f.destroy();
+  // One-off cycles (a host emit starting the ping-pong without timers) do not stop anything.
+  q.stateMachines[0].transitions=q.stateMachines[0].transitions.filter(t=>t.after==null);
+  const s=runtime(q);for(let i=0;i<4;i++){s.f.emit('go');s.f.tick(1/30);s.f.tick(1/30);}
+  assert.ok(s.f.diagnostics.some(e=>/Event cycle limit/.test(e.message)));
+  assert.ok(!s.f.diagnostics.some(e=>/stopped/.test(e.message)));s.f.destroy();
+});
+test('runtime auto-start honours data-splinely-max-fps and data-splinely-native-animations on the root svg',()=>{
+  const {createEnv}=require('./fake-waapi.cjs');
+  const start=attrs=>{
+    const {env,svg}=createEnv(`<svg ${attrs}><circle id="n" cx="0" cy="0" r="1"/></svg>`,{io:true});
+    const meta={id:'splinely-project',tagName:'metadata',parentNode:svg,getAttribute:()=>null,textContent:JSON.stringify({schemaVersion:1,nodes:[{id:'n',kind:{type:'circle',cx:0,cy:0,radius:1}}],
+      clips:[{id:'a',duration:1,looping:true,autoplay:true,tracks:[{nodeId:'n',property:'x',keyframes:[frame(0,number(0)),frame(1,number(10))]}]}]})};
+    const all=svg.querySelectorAll;svg.querySelectorAll=sel=>sel==='[id]'?all(sel):[meta];
+    env.document.currentScript={ownerSVGElement:svg};env.window=env;env.matchMedia=()=>({matches:false});env.console={error(e){throw e;}};
+    vm.runInNewContext(fs.readFileSync(require.resolve('../src/splinely.js'),'utf8'),env);assert.ok(svg.splinely);
+    const el=svg.all[0];let ticks=0,last=el.getAttribute('transform');
+    for(let i=0;i<60;i++){env.advanceTo(env.time+1000/60);const v=el.getAttribute('transform');if(v!==last){ticks++;last=v;}}
+    svg.splinely.destroy();return {ticks,animate:env.animateCalls};
+  };
+  const plain=start(''),capped=start('data-splinely-max-fps="20" data-splinely-native-animations="false"'),bad=start('data-splinely-max-fps="0" data-splinely-native-animations="no"');
+  assert.ok(plain.animate>0 && bad.animate>0,'native animations stay the default');
+  assert.equal(capped.animate,0);assert.ok(capped.ticks>=18 && capped.ticks<=22,'20 fps: '+capped.ticks);
+});
+test('throttled runtimes share the frame grid: several maxFps 30 runtimes tick in the same frames',()=>{
+  const {createEnv}=require('./fake-waapi.cjs');const SVG='<svg><circle id="n" cx="0" cy="0" r="1"/></svg>';
+  const {env,svg}=createEnv(SVG,{io:true,waapi:false}),svgs=[svg];
+  const proj=()=>({schemaVersion:1,nodes:[{id:'n',kind:{type:'circle',cx:0,cy:0,radius:1}}],clips:[{id:'a',duration:1,looping:true,autoplay:true,tracks:[{nodeId:'n',property:'x',keyframes:[frame(0,number(0)),frame(1,number(10))]}]}]});
+  const apis=[createRuntime(svg,proj(),{maxFps:30,reducedMotion:false})];
+  for(let k=1;k<4;k++){env.advanceTo(env.time+1000/60*k);const s=env.addSvg(SVG);svgs.push(s);apis.push(createRuntime(s,proj(),{maxFps:30,reducedMotion:false}));}
+  env.advanceTo(env.time+100);
+  const el=s=>s.all[0],last=svgs.map(s=>el(s).getAttribute('transform'));let any=0,each=0;
+  for(let i=0;i<120;i++){env.advanceTo(env.time+1000/60);let changed=false;svgs.forEach((s,k)=>{const v=el(s).getAttribute('transform');if(v!==last[k]){changed=true;each++;last[k]=v;}});if(changed)any++;}
+  assert.ok(each>=4*55 && each<=4*65,'each runtime ticks at ~30 fps: '+each);
+  assert.ok(any<=65,'all runtimes tick in the same ~60 of 120 frames: '+any);
+  for(const a of apis)a.destroy();
 });

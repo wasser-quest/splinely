@@ -71,6 +71,38 @@ const server = http.createServer((req, res) => {
     await tab.evaluate(() => window.graphic.destroy());
     const gone = await tab.evaluate(() => document.querySelectorAll('#stage > svg').length === 0);
     check('destroy removes the graphic', gone);
+
+    // Sanitizer: markup the exporter never writes does not reach the page.
+    const hostile = await tab.evaluate(() => {
+      const text = '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" onload="window.hit=1">' +
+        '<style>#stage{display:none}</style><rect id="r" onclick="window.hit=1" style="position:fixed" fill="url(https://example.invalid/x)" stroke="url(#r)"/>' +
+        '<foreignObject><div xmlns="http://www.w3.org/1999/xhtml">x</div></foreignObject><a href="javascript:window.hit=1"><circle r="1"/></a>' +
+        '<use href="https://example.invalid/s.svg#a"/><use xlink:href="#r"/><image href="https://example.invalid/i.png"/>' +
+        '<animate attributeName="href" to="javascript:x"/><set attributeName="fill" to="red"/><script>window.hit=1</script>' +
+        '<metadata id="splinely-project">{"schemaVersion":1,"nodes":[]}</metadata></svg>';
+      const g = window.SplinelyMount.mount(document.getElementById('stage'), text);
+      const html = g.svg.outerHTML;
+      g.destroy();
+      return { html, hit: !!window.hit, display: getComputedStyle(document.getElementById('stage')).display };
+    });
+    check('sanitizer removes scripts, styles, handlers, foreign content and external references',
+      !/style|onload|onclick|foreignObject|<a |<image|<animate|<set|<script|example\.invalid/.test(hostile.html) &&
+      /<use xlink:href="#r"/.test(hostile.html) && /stroke="url\(#r\)"/.test(hostile.html) && !hostile.hit && hostile.display !== 'none',
+      hostile.html);
+
+    // decodeSplyBase64: the native Uint8Array.fromBase64 path and the atob fallback agree.
+    await tab.addScriptTag({ url: '/runtime/src/sply_decode.js' });
+    const base64 = await tab.evaluate((valid) => {
+      const native = Uint8Array.fromBase64;
+      const run = (s, useNative) => {
+        if (!useNative) delete Uint8Array.fromBase64;
+        try { return JSON.stringify(window.SplyDecode.decodeSplyBase64(s)); } catch (e) { return 'E:' + e.message; }
+        finally { if (native) Uint8Array.fromBase64 = native; }
+      };
+      const cases = [valid, ' ' + valid + '\n', valid.slice(0, -1), valid.slice(0, -2) + '@=', '', 'AA==', 'AB==', 'AA=A', 'A===', '\u00a0' + valid];
+      return { native: typeof native, mismatches: cases.filter(s => run(s, true) !== run(s, false)).length };
+    }, /<metadata id="splinely-project" data-encoding="sply-base64"[^>]*>([^<]*)</.exec(fs.readFileSync(path.join(root, 'examples', 'water-drop.svg'), 'utf8'))[1]);
+    check('native and fallback base64 decoding agree', base64.mismatches === 0, JSON.stringify(base64));
     check('no page errors', errors.length === 0, errors.join(' | '));
   } finally {
     await browser.close();

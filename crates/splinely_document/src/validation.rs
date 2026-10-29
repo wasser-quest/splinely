@@ -27,18 +27,39 @@ fn unit(v: f64, context: &str) -> Result {
         format!("{context}: expected number in 0..1"),
     )
 }
+/// Longest accepted ID in bytes (every namespace). IDs are repeated in exported
+/// SVG markup, so this bounds export amplification; real assets stay under 32.
+pub const MAX_ID_BYTES: usize = 256;
+/// ID of the exported project metadata block. Reserved in the whole shared
+/// project namespace (nodes, groups, bones, clips, machines, ...), since any of
+/// them may end up as an SVG `id`. Other `splinely-*` export IDs (title, desc,
+/// gradients) are generated around project IDs instead (`export_id`).
+pub const RESERVED_ID: &str = "splinely-project";
+/// Shortest clip duration in seconds; the JS runtime's normalize() uses the same.
+pub const MIN_CLIP_DURATION: f64 = 0.001;
+
 fn id(value: &str) -> Result {
     let mut chars = value.chars();
     require(
-        matches!(chars.next(), Some(c) if c.is_ascii_alphabetic() || c == '_')
+        value.len() <= MAX_ID_BYTES
+            && matches!(chars.next(), Some(c) if c.is_ascii_alphabetic() || c == '_')
             && chars.all(|c| c.is_ascii_alphanumeric() || matches!(c, '_' | '-' | '.')),
-        format!("invalid ID: {value:?}"),
+        if value.len() > MAX_ID_BYTES {
+            format!("invalid ID: longer than {MAX_ID_BYTES} bytes")
+        } else {
+            format!("invalid ID: {value:?}")
+        },
     )
 }
 fn unique<'a>(ids: impl Iterator<Item = &'a str>, context: &str) -> Result {
     let mut seen = HashSet::new();
+    let shared = context == "project";
     for value in ids {
         id(value)?;
+        require(
+            !shared || value != RESERVED_ID,
+            format!("{RESERVED_ID} is a reserved ID"),
+        )?;
         require(
             seen.insert(value),
             format!("{context}: duplicate ID {value}"),
@@ -66,17 +87,25 @@ fn same_type(a: &serde_json::Value, b: &serde_json::Value) -> bool {
 /// collections (`unique` runs first), so first-match scans and map lookups agree.
 struct Index<'a> {
     nodes: HashMap<&'a str, &'a Node>,
-    bones: HashSet<&'a str>,
+    bones: HashMap<&'a str, &'a Bone>,
     clips: HashMap<&'a str, &'a Clip>,
     audio_assets: HashSet<&'a str>,
+    /// Variables that drive a blend space (`SetVariable` must keep them in range).
+    blend_parameters: HashSet<&'a str>,
 }
 impl<'a> Index<'a> {
     fn new(project: &'a Project) -> Self {
         Self {
             nodes: project.nodes.iter().map(|n| (n.id.as_str(), n)).collect(),
-            bones: project.bones.iter().map(|b| b.id.as_str()).collect(),
+            bones: project.bones.iter().map(|b| (b.id.as_str(), b)).collect(),
             clips: project.clips.iter().map(|c| (c.id.as_str(), c)).collect(),
             audio_assets: project.audio_assets.iter().map(|a| a.id.as_str()).collect(),
+            blend_parameters: project
+                .blend_spaces
+                .iter()
+                .flat_map(|s| &s.parameters)
+                .map(String::as_str)
+                .collect(),
         }
     }
 }
@@ -125,12 +154,7 @@ impl Project {
                 format!("group {}: name too long", g.id),
             )?;
             if let Some(rig) = &g.rig {
-                let parent = |id: &str| {
-                    self.bones
-                        .iter()
-                        .find(|b| b.id == id)
-                        .map(|b| b.parent_id.as_deref())
-                };
+                let parent = |id: &str| index.bones.get(id).map(|b| b.parent_id.as_deref());
                 require(
                     parent(&rig.move_bone).is_some()
                         && parent(&rig.turn_bone) == Some(Some(rig.move_bone.as_str()))
@@ -158,10 +182,6 @@ impl Project {
                 }
             }
         }
-        require(
-            !index.nodes.contains_key("splinely-project"),
-            "splinely-project is a reserved node ID",
-        )?;
         let poses = crate::bones::solve_bones(&self.bones)?;
         crate::bones::check_attachments(&self.nodes, &poses)?;
         crate::motion::validate(self, &index.nodes)?;
@@ -246,8 +266,11 @@ impl Project {
         for c in &self.clips {
             validate_clip_weight(c.weight)?;
             require(
-                c.duration.is_finite() && c.duration > 0.0,
-                format!("clip {}: duration must be positive", c.id),
+                c.duration.is_finite() && c.duration >= MIN_CLIP_DURATION,
+                format!(
+                    "clip {}: duration must be at least {MIN_CLIP_DURATION} seconds",
+                    c.id
+                ),
             )?;
             let mut targets = HashSet::new();
             for t in &c.tracks {
@@ -268,7 +291,7 @@ impl Project {
                         c.id, t.property, t.node_id
                     ),
                 )?;
-                let target = if index.bones.contains(t.node_id.as_str()) {
+                let target = if index.bones.contains_key(t.node_id.as_str()) {
                     Target::Bone
                 } else {
                     Target::Node(
@@ -355,10 +378,20 @@ impl Project {
                 }
             }
         }
+        let machines: HashMap<&str, HashSet<&str>> = self
+            .state_machines
+            .iter()
+            .map(|m| {
+                (
+                    m.id.as_str(),
+                    m.states.iter().map(|s| s.id.as_str()).collect(),
+                )
+            })
+            .collect();
         for f in &self.followers {
             let node = index.nodes.contains_key(f.target.as_str());
             require(
-                node || index.bones.contains(f.target.as_str()),
+                node || index.bones.contains_key(f.target.as_str()),
                 format!("follower {}: unknown node or bone {}", f.id, f.target),
             )?;
             unit(f.strength, "follower strength")?;
@@ -379,14 +412,11 @@ impl Project {
                 finite(&origin, "follower origin")?;
             }
             if let Some(when) = &f.when {
-                let machine = self.state_machines.iter().find(|m| m.id == when.machine);
+                let machine = machines.get(when.machine.as_str());
                 require(
                     machine.is_some_and(|m| {
                         !when.states.is_empty()
-                            && when
-                                .states
-                                .iter()
-                                .all(|s| m.states.iter().any(|st| &st.id == s))
+                            && when.states.iter().all(|s| m.contains(s.as_str()))
                     }),
                     format!("follower {}: unknown machine or state in when", f.id),
                 )?;
@@ -436,6 +466,8 @@ impl Project {
         }
         self.validate_accessibility()
     }
+    /// Linear-scan twin of `validate_property_at`, kept for the reference evaluator.
+    #[cfg(test)]
     pub(crate) fn validate_property(&self, node_id: &str, p: Property, v: &AnimValue) -> Result {
         let target = if self.bones.iter().any(|b| b.id == node_id) {
             Target::Bone
@@ -449,6 +481,21 @@ impl Project {
         };
         check_property(target, p, v)
     }
+    /// `validate_property` with a target already resolved by an `EvalIndex`.
+    pub(crate) fn validate_property_at(
+        &self,
+        target: Option<crate::animation::TargetRef>,
+        node_id: &str,
+        p: Property,
+        v: &AnimValue,
+    ) -> Result {
+        let target = match target {
+            Some(crate::animation::TargetRef::Bone(_)) => Target::Bone,
+            Some(crate::animation::TargetRef::Node(i)) => Target::Node(&self.nodes[i]),
+            None => return Err(DocumentError(format!("missing node {node_id}"))),
+        };
+        check_property(target, p, v)
+    }
     fn validate_property_in(
         &self,
         index: &Index,
@@ -456,7 +503,7 @@ impl Project {
         p: Property,
         v: &AnimValue,
     ) -> Result {
-        let target = if index.bones.contains(node_id) {
+        let target = if index.bones.contains_key(node_id) {
             Target::Bone
         } else {
             Target::Node(
@@ -522,8 +569,12 @@ impl Project {
                         .is_some_and(|v| same_type(v, value)),
                     "action references missing variable or mismatched type",
                 )?;
-                // `validate` already ran `validate_blend_spaces` on this project.
-                self.blend_space_weights_unchecked(&[(name.clone(), value.clone())].into())?;
+                // `validate` already ran `validate_blend_spaces`: every space has valid
+                // samples and authored parameters, so the only way the weights can
+                // fail is this value as a blend parameter (checked like `parameter`).
+                if index.blend_parameters.contains(name.as_str()) {
+                    crate::blend_space::parameter(Some(value))?;
+                }
                 Ok(())
             }
             Action::Emit { event } => self.validate_event(index, event),

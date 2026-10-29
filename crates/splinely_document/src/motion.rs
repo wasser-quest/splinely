@@ -1,12 +1,28 @@
 //! Deterministic arc-length motion shared by editor, CLI and native hosts.
 //! Curves use 64 chords per segment, identically to the browser runtime.
+//! Each distinct source path is flattened once per call and bindings locate
+//! their point by binary search on long paths, so the work is O(chords + bindings).
+//! The chord limits match the JS runtime's normalize() exactly.
 use crate::geometry::{apply as map_point, dist, matrix, parse};
 use crate::*;
+use std::collections::HashMap;
+
+/// Most nonzero chords in one sampled motion path.
+pub const MOTION_MAX_CHORDS: usize = 100_000;
+/// Most chords summed over the distinct motion source paths of a document,
+/// counting each source's `d` plus every `d` keyframe and state override value
+/// targeting it. Real assets use none (tests: a few hundred).
+pub const MOTION_TOTAL_CHORDS: usize = 100_000;
+/// Paths with more chords locate by binary search (same chord as the walk, as in JS).
+const SEARCH_FROM: usize = 1024;
+
+type Chord = ((f64, f64), (f64, f64), f64);
 
 pub(crate) fn validate(
     project: &Project,
-    nodes: &std::collections::HashMap<&str, &Node>,
+    nodes: &HashMap<&str, &Node>,
 ) -> Result<(), DocumentError> {
+    let mut sources: HashMap<&str, &Node> = HashMap::new();
     for node in &project.nodes {
         let Some(binding) = &node.motion_path else {
             continue;
@@ -25,17 +41,72 @@ pub(crate) fn validate(
         {
             return Err(DocumentError("motion targets and source paths must be unbound; chained motion paths are unsupported".into()));
         }
-        let NodeKind::Path { d, .. } = &path.kind else {
+        if !matches!(path.kind, NodeKind::Path { .. }) {
             return Err(DocumentError(
                 "motion path source must be a path node".into(),
             ));
-        };
-        sample(d, &path.transform, binding.progress)?;
+        }
+        sources.insert(&path.id, path);
+    }
+    if sources.is_empty() {
+        return Ok(());
+    }
+    // Sampling success does not depend on progress: flatten each source once.
+    let mut total = 0usize;
+    let mut count = |d: &str, transform: &Transform, strict: bool| {
+        match flatten(d, transform, &mut |_| ()) {
+            Ok((n, _)) => total += n,
+            // Animated values that cannot be sampled fail at evaluation instead (as in JS).
+            Err(e) if strict || e.0 == TOO_COMPLEX => return Err(e),
+            Err(_) => {}
+        }
+        if total > MOTION_TOTAL_CHORDS {
+            return Err(DocumentError(format!(
+                "motion paths too complex: more than {MOTION_TOTAL_CHORDS} chords"
+            )));
+        }
+        Ok(())
+    };
+    for node in &project.nodes {
+        if let (Some(_), NodeKind::Path { d, .. }) = (sources.get(node.id.as_str()), &node.kind) {
+            count(d, &node.transform, true)?;
+        }
+    }
+    let animated = project
+        .clips
+        .iter()
+        .flat_map(|c| &c.tracks)
+        .filter(|t| t.property == Property::D)
+        .flat_map(|t| {
+            t.keyframes
+                .iter()
+                .map(move |k| (t.node_id.as_str(), &k.value))
+        })
+        .chain(
+            project
+                .state_machines
+                .iter()
+                .flat_map(|m| &m.states)
+                .flat_map(|s| &s.overrides)
+                .filter(|o| o.property == Property::D)
+                .map(|o| (o.node_id.as_str(), &o.value)),
+        );
+    for (id, value) in animated {
+        if let (Some(source), AnimValue::Path(d)) = (sources.get(id), value) {
+            count(d, &source.transform, false)?;
+        }
     }
     Ok(())
 }
 
-fn sample(d: &str, transform: &Transform, progress: f64) -> Result<([f64; 2], f64), DocumentError> {
+const TOO_COMPLEX: &str = "motion path too complex";
+
+/// Flatten `d` into chords, passing each to `chord`; returns (count, total length).
+fn flatten(
+    d: &str,
+    transform: &Transform,
+    chord: &mut dyn FnMut(Chord),
+) -> Result<(usize, f64), DocumentError> {
     // Deliberately the same bounded syntax as the path editor, not browser DOM geometry.
     if d.chars()
         .any(|c| c.is_ascii_alphabetic() && !"MmLlQqCcZzeE".contains(c))
@@ -44,7 +115,7 @@ fn sample(d: &str, transform: &Transform, progress: f64) -> Result<([f64; 2], f6
     }
     let m = matrix(transform);
     let subs = parse(d, &|p| map_point(m, p))?;
-    let mut chords = Vec::new();
+    let mut count = 0;
     let mut total = 0.;
     for sub in subs {
         for seg in sub.segs {
@@ -54,55 +125,104 @@ fn sample(d: &str, transform: &Transform, progress: f64) -> Result<([f64; 2], f6
                 let length = dist(a, b);
                 if length > 1e-12 {
                     total += length;
-                    chords.push((a, b, length));
-                    if chords.len() > 1_000_000 {
-                        return Err(DocumentError("motion path too complex".into()));
+                    chord((a, b, length));
+                    count += 1;
+                    if count > MOTION_MAX_CHORDS {
+                        return Err(DocumentError(TOO_COMPLEX.into()));
                     }
                 }
                 a = b;
             }
         }
     }
-    if !total.is_finite() || total <= 1e-12 || chords.len() > 1_000_000 {
-        return Err(DocumentError(
-            "motion path must have finite nonzero length (at most 1000000 chords)".into(),
-        ));
+    if !total.is_finite() || total <= 1e-12 {
+        return Err(DocumentError(format!(
+            "motion path must have finite nonzero length (at most {MOTION_MAX_CHORDS} chords)"
+        )));
     }
+    Ok((count, total))
+}
+
+/// Point and tangent angle at `progress`; `cum` holds prefix lengths on long paths.
+fn locate(chords: &[Chord], cum: &[f64], total: f64, progress: f64) -> ([f64; 2], f64) {
     let mut distance = progress.clamp(0., 1.) * total;
     let last = chords.len() - 1;
-    for (i, (a, b, length)) in chords.into_iter().enumerate() {
-        // Roundoff from accumulated chord lengths must not flip the tangent
-        // at an exact corner. Keep this relative tolerance identical in JS.
-        if distance <= length + total * 1e-12 || i == last {
-            let t = (distance / length).clamp(0., 1.);
-            return Ok((
-                [a.0 + (b.0 - a.0) * t, a.1 + (b.1 - a.1) * t],
-                (b.1 - a.1).atan2(b.0 - a.0).to_degrees(),
-            ));
+    // Roundoff from accumulated chord lengths must not flip the tangent
+    // at an exact corner. Keep this relative tolerance identical in JS.
+    let eps = total * 1e-12;
+    let mut i = 0;
+    if cum.is_empty() {
+        while i < last && distance > chords[i].2 + eps {
+            distance -= chords[i].2;
+            i += 1;
         }
-        distance -= length;
+    } else {
+        // First chord the walk above would stop at, as in the JS runtime.
+        let mut hi = last;
+        while i < hi {
+            let mid = (i + hi) / 2;
+            if distance - cum[mid] <= chords[mid].2 + eps {
+                hi = mid;
+            } else {
+                i = mid + 1;
+            }
+        }
+        distance -= cum[i];
     }
-    unreachable!()
+    let (a, b, length) = chords[i];
+    let t = (distance / length).clamp(0., 1.);
+    (
+        [a.0 + (b.0 - a.0) * t, a.1 + (b.1 - a.1) * t],
+        (b.1 - a.1).atan2(b.0 - a.0).to_degrees(),
+    )
 }
 
 pub(crate) fn apply(nodes: &mut [Node]) -> Result<(), DocumentError> {
-    let sources = nodes.to_vec();
-    for node in nodes {
+    // Bindings grouped by source index; sources are unbound, so targets never alias them.
+    let index: HashMap<&str, usize> = nodes
+        .iter()
+        .enumerate()
+        .map(|(i, n)| (n.id.as_str(), i))
+        .rev()
+        .collect();
+    let mut by_source: Vec<(usize, Vec<usize>)> = vec![];
+    let mut slot: HashMap<usize, usize> = HashMap::new();
+    for (i, node) in nodes.iter().enumerate() {
         let Some(binding) = &node.motion_path else {
             continue;
         };
-        let path = sources
-            .iter()
-            .find(|n| n.id == binding.path)
-            .expect("validated path");
-        let NodeKind::Path { d, .. } = &path.kind else {
+        let source = *index.get(binding.path.as_str()).expect("validated path");
+        let s = *slot.entry(source).or_insert_with(|| {
+            by_source.push((source, vec![]));
+            by_source.len() - 1
+        });
+        by_source[s].1.push(i);
+    }
+    drop(index);
+    for (source, targets) in by_source {
+        let NodeKind::Path { d, .. } = &nodes[source].kind else {
             unreachable!()
         };
-        let (point, angle) = sample(d, &path.transform, binding.progress)?;
-        node.transform.x += point[0];
-        node.transform.y += point[1];
-        if binding.orient {
-            node.transform.rotation += angle;
+        // Animated `d` is flattened as evaluated; `flatten` caps each path.
+        let mut chords = vec![];
+        let (count, total) = flatten(d, &nodes[source].transform, &mut |c| chords.push(c))?;
+        let mut cum = vec![];
+        if count > SEARCH_FROM {
+            cum.reserve(count + 1);
+            cum.push(0.);
+            for c in &chords {
+                cum.push(cum[cum.len() - 1] + c.2);
+            }
+        }
+        for i in targets {
+            let node = &mut nodes[i];
+            let binding = node.motion_path.as_ref().expect("bound node");
+            let (point, angle) = locate(&chords, &cum, total, binding.progress);
+            node.transform.x += point[0];
+            node.transform.y += point[1];
+            if binding.orient {
+                node.transform.rotation += angle;
+            }
         }
     }
     Ok(())

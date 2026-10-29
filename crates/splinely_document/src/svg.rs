@@ -1,4 +1,6 @@
+use crate::accessibility::export_id_in;
 use crate::*;
+use std::collections::HashMap;
 use std::fmt::Write;
 
 /// How the project is embedded in `<metadata id="splinely-project">` of an exported SVG.
@@ -11,6 +13,35 @@ pub enum EmbedFormat {
     Binary,
 }
 
+/// Largest SVG any export writes (bytes). Real assets stay under 0.5 MiB; the
+/// cap turns pathological documents into an error instead of an out-of-memory abort.
+pub const MAX_SVG_BYTES: usize = 256 * 1024 * 1024;
+/// Most bytes of re-opened `<g>` tags per export. A group's ancestry is written
+/// again whenever consecutive nodes leave it, so this bounds that amplification.
+pub const MAX_SVG_GROUP_MARKUP_BYTES: usize = 32 * 1024 * 1024;
+
+/// Options for [`Project::to_svg_with`] and [`Project::svg_from_bytes`].
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
+pub struct SvgOptions<'a> {
+    /// How `<metadata id="splinely-project">` embeds the project.
+    pub embed: EmbedFormat,
+    /// Runtime source for the `<script>`. `None` writes no `<script>` at all, for
+    /// hosts that already loaded the runtime and mount the SVG inline
+    /// (`SplinelyMount` / `createRuntime` read the metadata).
+    pub runtime: Option<&'a str>,
+    /// Root `data-splinely-max-fps="N"`: frame cap for the runtime's auto-start (N >= 1).
+    pub max_fps: Option<u32>,
+    /// Root `data-splinely-native-animations="true|false"` for the runtime's auto-start.
+    pub native_animations: Option<bool>,
+}
+
+fn too_large() -> DocumentError {
+    DocumentError(format!(
+        "SVG export exceeds {} MiB limit",
+        MAX_SVG_BYTES / (1024 * 1024)
+    ))
+}
+
 impl Project {
     /// Export a standalone SVG embedding the project as base64 binary `.sply`.
     /// The caller supplies the bundled runtime source, avoiding a build-time
@@ -20,39 +51,91 @@ impl Project {
     }
     /// Export a standalone SVG with an explicit project embedding format.
     pub fn to_svg_embed(&self, runtime: &str, embed: EmbedFormat) -> Result<String, DocumentError> {
-        let mut svg = self.svg_start(0.0, true)?;
-        match embed {
+        self.to_svg_with(&SvgOptions {
+            embed,
+            runtime: Some(runtime),
+            ..Default::default()
+        })
+    }
+    /// Export an interactive SVG as configured by `options` (validates once).
+    pub fn to_svg_with(&self, options: &SvgOptions) -> Result<String, DocumentError> {
+        self.validate()?;
+        self.export_svg(options, None)
+    }
+    /// Load `.sply` (or project JSON) bytes and export them in one step, like
+    /// `from_bytes` + `to_svg_with`. Binary input holding exactly the canonical
+    /// members (nothing normalized or defaulted) is embedded byte for byte
+    /// instead of being re-encoded; it decodes to the same project either way.
+    pub fn svg_from_bytes(bytes: &[u8], options: &SvgOptions) -> Result<String, DocumentError> {
+        if Self::is_binary(bytes) {
+            let (project, exact) = Self::from_binary_exact(bytes)?;
+            return project.export_svg(options, exact.then_some(bytes));
+        }
+        Self::from_bytes(bytes)?.export_svg(options, None)
+    }
+    /// `options` export of a validated project; `source` is its own `.sply` encoding.
+    fn export_svg(
+        &self,
+        options: &SvgOptions,
+        source: Option<&[u8]>,
+    ) -> Result<String, DocumentError> {
+        if options.max_fps == Some(0) {
+            return Err(DocumentError("max_fps must be at least 1".into()));
+        }
+        let mut svg = self.svg_start(0.0, true, true, options)?;
+        match options.embed {
             EmbedFormat::Json => {
                 // JSON control characters are already escaped by serde. XML-forbidden
                 // Unicode noncharacters must also be JSON escaped, not discarded.
                 let json = serde_json::to_string(self)?
                     .replace('\u{fffe}', "\\ufffe")
                     .replace('\u{ffff}', "\\uffff");
-                writeln!(
-                    svg,
-                    "<metadata id=\"splinely-project\">{}</metadata>",
-                    xml(&json)?
-                )
-                .unwrap();
+                let json = xml(&json)?;
+                if svg.len() + json.len() > MAX_SVG_BYTES {
+                    return Err(too_large());
+                }
+                writeln!(svg, "<metadata id=\"splinely-project\">{json}</metadata>").unwrap();
             }
             EmbedFormat::Binary => {
+                let encoded;
+                let bytes = match source {
+                    Some(bytes) => bytes,
+                    None => {
+                        encoded = crate::binary::encode_value(&serde_json::to_value(self)?)?;
+                        &encoded
+                    }
+                };
+                if svg.len() + bytes.len().div_ceil(3) * 4 > MAX_SVG_BYTES {
+                    return Err(too_large());
+                }
                 // Base64 is plain ASCII (A-Za-z0-9+/=): always XML-safe, no escaping needed.
                 writeln!(
                     svg,
                     "<metadata id=\"splinely-project\" data-encoding=\"sply-base64\">{}</metadata>",
-                    crate::binary::base64_encode(&self.to_binary()?)
+                    crate::binary::base64_encode(bytes)
                 )
                 .unwrap();
             }
         }
-        ensure_xml(runtime)?;
-        writeln!(
-            svg,
-            "<script type=\"application/ecmascript\"><![CDATA[{}]]></script>",
-            runtime.replace("]]>", "]]]]><![CDATA[>")
-        )
-        .unwrap();
+        if let Some(runtime) = options.runtime {
+            ensure_xml(runtime)?;
+            if svg.len() + runtime.len() > MAX_SVG_BYTES {
+                return Err(too_large());
+            }
+            svg.reserve(runtime.len() + 64);
+            svg.push_str("<script type=\"application/ecmascript\"><![CDATA[");
+            for (i, part) in runtime.split("]]>").enumerate() {
+                if i > 0 {
+                    svg.push_str("]]]]><![CDATA[>");
+                }
+                svg.push_str(part);
+            }
+            svg.push_str("]]></script>\n");
+        }
         svg.push_str("</svg>\n");
+        if svg.len() > MAX_SVG_BYTES {
+            return Err(too_large());
+        }
         Ok(svg)
     }
     /// Read the project back out of an exported SVG's `splinely-project` metadata
@@ -114,17 +197,36 @@ impl Project {
         }
     }
     pub fn to_static_svg(&self, time: f64) -> Result<String, DocumentError> {
-        let mut svg = self.svg_start(time, false)?;
+        let mut svg = self.svg_start(time, false, false, &SvgOptions::default())?;
         svg.push_str("</svg>\n");
         Ok(svg)
     }
-    fn svg_start(&self, time: f64, runtime: bool) -> Result<String, DocumentError> {
-        let nodes = self.evaluate(time)?;
+    /// Root element and drawing; `validated` skips the `validate` in `evaluate`.
+    fn svg_start(
+        &self,
+        time: f64,
+        runtime: bool,
+        validated: bool,
+        options: &SvgOptions,
+    ) -> Result<String, DocumentError> {
+        let nodes = if validated {
+            let index = crate::animation::EvalIndex::build(self);
+            self.evaluate_frame(&index, time, &EvaluationContext::default())?
+                .0
+        } else {
+            self.evaluate(time)?
+        };
         // Accessibility semantics only for projects that opted in (see accessibility.rs).
         let a11y = self.a11y_enabled();
+        // Shared-namespace IDs, collected once for every generated export ID.
+        let taken = if a11y || nodes.iter().any(|n| n.gradient.is_some()) {
+            self.export_ids()
+        } else {
+            Default::default()
+        };
         let (title_id, desc_id) = (
-            self.export_id("splinely-title"),
-            self.export_id("splinely-desc"),
+            export_id_in(&taken, "splinely-title"),
+            export_id_in(&taken, "splinely-desc"),
         );
         let root_a11y = if a11y {
             let mut attrs = format!(
@@ -138,7 +240,14 @@ impl Project {
         } else {
             String::new()
         };
-        let mut svg = format!("<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"{}\" height=\"{}\" viewBox=\"0 0 {} {}\" data-splinely-version=\"{}\"{root_a11y}>\n", self.width,self.height,self.width,self.height,self.schema_version);
+        let mut host = String::new();
+        if let Some(fps) = options.max_fps {
+            write!(host, " data-splinely-max-fps=\"{fps}\"").unwrap();
+        }
+        if let Some(native) = options.native_animations {
+            write!(host, " data-splinely-native-animations=\"{native}\"").unwrap();
+        }
+        let mut svg = format!("<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"{}\" height=\"{}\" viewBox=\"0 0 {} {}\" data-splinely-version=\"{}\"{root_a11y}{host}>\n", self.width,self.height,self.width,self.height,self.schema_version);
         writeln!(
             svg,
             "<!-- Created with Splinely {} -->",
@@ -160,24 +269,44 @@ impl Project {
             writeln!(svg, "<title>{}</title>", xml(&self.name)?).unwrap();
         }
         // Open <g> elements, outermost first, mirroring the group hierarchy.
-        let mut open: Vec<String> = vec![];
+        let groups: HashMap<&str, &Group> = self
+            .groups
+            .iter()
+            .rev()
+            .map(|g| (g.id.as_str(), g))
+            .collect();
+        let mut open: Vec<&str> = vec![];
+        let mut path: Vec<&str> = vec![];
+        let mut group_markup = 0usize;
         for node in nodes {
             if !node.visible {
                 continue;
             }
-            let path = self.group_path(&node.id);
+            if svg.len() > MAX_SVG_BYTES {
+                return Err(too_large());
+            }
+            // Same walk as `group_path`, from the node's own group (validated, depth <= 32).
+            path.clear();
+            let mut current = node
+                .group
+                .as_deref()
+                .and_then(|id| groups.get_key_value(id));
+            while let Some((&id, g)) = current {
+                path.push(id);
+                if path.len() > 32 {
+                    break;
+                }
+                current = g.parent_id.as_deref().and_then(|p| groups.get_key_value(p));
+            }
+            path.reverse();
             let shared = open.iter().zip(&path).take_while(|(a, b)| a == b).count();
             while open.len() > shared {
                 open.pop();
                 svg.push_str("</g>\n");
             }
-            for id in &path[shared..] {
-                let name = self
-                    .groups
-                    .iter()
-                    .find(|g| &g.id == id)
-                    .map(|g| g.name.as_str())
-                    .unwrap_or_default();
+            for &id in &path[shared..] {
+                let start = svg.len();
+                let name = groups.get(id).map(|g| g.name.as_str()).unwrap_or_default();
                 writeln!(
                     svg,
                     "<g id=\"{}\" data-splinely-group=\"{}\" aria-label=\"{}\">",
@@ -186,13 +315,20 @@ impl Project {
                     xml(name)?
                 )
                 .unwrap();
-                open.push(id.clone());
+                group_markup += svg.len() - start;
+                if group_markup > MAX_SVG_GROUP_MARKUP_BYTES {
+                    return Err(DocumentError(format!(
+                        "SVG export: nested group markup exceeds {} MiB",
+                        MAX_SVG_GROUP_MARKUP_BYTES / (1024 * 1024)
+                    )));
+                }
+                open.push(id);
             }
             let t = node.transform;
             let s = node.style;
             let (fill, fill_opacity) = match &node.gradient {
                 Some(gradient) => {
-                    let id = self.gradient_id(&node.id);
+                    let id = export_id_in(&taken, &format!("{}-gradient", node.id));
                     writeln!(svg, "<defs>{}</defs>", gradient.svg_element(&id)).unwrap();
                     (format!("url(#{id})"), 1.0)
                 }
@@ -210,6 +346,9 @@ impl Project {
         for _ in open {
             svg.push_str("</g>\n");
         }
+        if svg.len() > MAX_SVG_BYTES {
+            return Err(too_large());
+        }
         Ok(svg)
     }
 }
@@ -223,9 +362,14 @@ fn css_color(c: Color) -> String {
     format!("rgb({}% {}% {}%)", c.r * 100.0, c.g * 100.0, c.b * 100.0)
 }
 fn ensure_xml(s: &str) -> Result<(), DocumentError> {
-    if s.chars().all(
-        |c| matches!(c as u32, 9 | 10 | 13 | 0x20..=0xd7ff | 0xe000..=0xfffd | 0x10000..=0x10ffff),
-    ) {
+    // Byte scan: XML 1.0 forbids C0 controls except tab/LF/CR, and U+FFFE/U+FFFF
+    // (UTF-8 EF BF BE/BF; EF always starts a character). Surrogates cannot occur in `str`.
+    let b = s.as_bytes();
+    let ok = b.iter().all(|&c| c >= 0x20 || matches!(c, 9 | 10 | 13))
+        && !b
+            .windows(3)
+            .any(|w| w[0] == 0xef && w[1] == 0xbf && w[2] >= 0xbe);
+    if ok {
         Ok(())
     } else {
         Err(DocumentError(

@@ -284,6 +284,20 @@ test('canonical base64 only: non-zero trailing bits and oversized text are rejec
   assert.throws(()=>decodeSplyBase64('A'.repeat(Math.ceil(64*1024*1024/3)*4+4)),/64 MiB/);
 });
 
+test('native Uint8Array.fromBase64 (strict) is used when present; its errors read like the fallback',()=>{
+  const dir=path.join(fixtureDir,'valid'),had=Object.getOwnPropertyDescriptor(Uint8Array,'fromBase64');
+  const file=fs.readdirSync(dir).find(f=>{try{decodeSply(new Uint8Array(fs.readFileSync(path.join(dir,f))));return true;}catch(_){return false;}});
+  const text=fs.readFileSync(path.join(dir,file)).toString('base64'),expected=decodeSplyBase64(text),calls=[];
+  // Stand-in with the spec's strict rules (Node 22 has no native one; Chromium's is compared in scripts/inline-mount-smoke.cjs).
+  Uint8Array.fromBase64=(s,o)=>{calls.push(o&&o.lastChunkHandling);const c=s.replace(/[ \t\n\f\r]/g,'');
+    if(c.length%4 || !/^[A-Za-z0-9+/]*={0,2}$/.test(c) || Buffer.from(Buffer.from(c,'base64').toString('base64'))+''!==c)throw new SyntaxError('bad');return new Uint8Array(Buffer.from(c,'base64'));};
+  try {
+    assert.deepEqual(decodeSplyBase64(' '+text+'\n'),expected);assert.deepEqual(calls,['strict']);
+    for(const bad of ['A','AB=C','####',text.slice(0,-1)+'@'])assert.throws(()=>decodeSplyBase64(bad),/^Error: sply: invalid base64$/);
+    assert.throws(()=>decodeSplyBase64('A'.repeat(Math.ceil(64*1024*1024/3)*4+4)),/64 MiB/);assert.equal(calls.length,5,'the size limit is checked first');
+  } finally {if(had)Object.defineProperty(Uint8Array,'fromBase64',had);else delete Uint8Array.fromBase64;}
+});
+
 test('tag 9 obeys the depth limit; container claims and string expansion are bounded like Rust',()=>{
   const f=new Uint8Array(16);
   const nest=(d,tail)=>{const b=[];for(let i=0;i<d;i++)b.push(7,1);return Buffer.concat([Buffer.from(b),tail]);};

@@ -8,7 +8,7 @@
 //! assistive technology.
 use crate::*;
 use serde::{Deserialize, Serialize};
-use std::collections::BTreeSet;
+use std::collections::{BTreeSet, HashSet};
 
 /// Longest node label / state announcement, in characters.
 pub const A11Y_LABEL_MAX: usize = 200;
@@ -111,12 +111,13 @@ impl Project {
     /// Node IDs targeted by a state-machine event that the pointer, keyboard or
     /// focus can trigger. These are focusable and keyboard-operable in the web player.
     pub fn interactive_node_ids(&self) -> BTreeSet<&str> {
+        let nodes: HashSet<&str> = self.nodes.iter().map(|n| n.id.as_str()).collect();
         self.state_machines
             .iter()
             .flat_map(|m| &m.transitions)
             .filter(|t| t.after.is_none() && INTERACTIVE_EVENTS.contains(&t.event.name.as_str()))
             .filter_map(|t| t.event.target.as_deref())
-            .filter(|id| self.nodes.iter().any(|n| n.id == *id))
+            .filter(|id| nodes.contains(id))
             .collect()
     }
     /// Does any state announce text to screen readers (live region)?
@@ -233,26 +234,36 @@ impl Project {
 
     /// Export ID not used by any project element (shared ID namespace).
     pub(crate) fn export_id(&self, base: &str) -> String {
-        let taken = |id: &str| {
-            self.nodes.iter().any(|n| n.id == id)
-                || self.bones.iter().any(|n| n.id == id)
-                || self.clips.iter().any(|n| n.id == id)
-                || self.state_machines.iter().any(|n| n.id == id)
-                || self.audio_assets.iter().any(|n| n.id == id)
-                || self.audio_cues.iter().any(|n| n.id == id)
-                || self
-                    .clips
+        export_id_in(&self.export_ids(), base)
+    }
+    /// Every ID of the shared namespace, for repeated `export_id_in` lookups.
+    pub(crate) fn export_ids(&self) -> HashSet<&str> {
+        self.nodes
+            .iter()
+            .map(|n| n.id.as_str())
+            .chain(self.bones.iter().map(|n| n.id.as_str()))
+            .chain(self.clips.iter().map(|n| n.id.as_str()))
+            .chain(self.state_machines.iter().map(|n| n.id.as_str()))
+            .chain(self.audio_assets.iter().map(|n| n.id.as_str()))
+            .chain(self.audio_cues.iter().map(|n| n.id.as_str()))
+            .chain(
+                self.clips
                     .iter()
                     .flat_map(|c| &c.audio_cues)
-                    .any(|n| n.id == id)
-                || self.followers.iter().any(|n| n.id == id)
-                || self.groups.iter().any(|g| g.id == id)
-                || self.blend_spaces.iter().any(|s| s.id == id)
-        };
-        let mut id = base.to_string();
-        while taken(&id) {
-            id.push('_');
-        }
-        id
+                    .map(|n| n.id.as_str()),
+            )
+            .chain(self.followers.iter().map(|n| n.id.as_str()))
+            .chain(self.groups.iter().map(|g| g.id.as_str()))
+            .chain(self.blend_spaces.iter().map(|s| s.id.as_str()))
+            .collect()
     }
+}
+
+/// `base`, suffixed with `_` until no ID in `taken` uses it.
+pub(crate) fn export_id_in(taken: &HashSet<&str>, base: &str) -> String {
+    let mut id = base.to_string();
+    while taken.contains(id.as_str()) {
+        id.push('_');
+    }
+    id
 }

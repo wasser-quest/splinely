@@ -219,3 +219,99 @@ fn optional_fields_round_trip_and_remain_strict() {
     value["nodes"][0]["motionPath"]["typo"] = true.into();
     assert!(Project::from_json(&value.to_string()).is_err());
 }
+
+/// `n` L segments along x (64 chords each).
+fn zigzag(n: usize) -> String {
+    let mut d = String::from("M0 0");
+    for i in 1..=n {
+        d.push_str(&format!(" L{i} {}", i % 2));
+    }
+    d
+}
+fn bind(p: &mut Project, count: usize, progress: f64) {
+    for i in 0..count {
+        let mut n = Node::circle(&format!("extra{i}"), 0., 0., 1.);
+        n.motion_path = Some(MotionPath {
+            path: "route".into(),
+            progress,
+            orient: true,
+        });
+        p.nodes.push(n);
+    }
+}
+#[test]
+fn chord_limits_match_the_js_runtime() {
+    assert_eq!((MOTION_MAX_CHORDS, MOTION_TOTAL_CHORDS), (100_000, 100_000));
+    // 1562 segments = 99968 chords: fine; 1563 = 100032: one path too complex.
+    scene(&zigzag(1562)).validate().unwrap();
+    let err = scene(&zigzag(1563)).validate().unwrap_err().0;
+    assert!(err.contains("motion path too complex"), "{err}");
+    // The total counts distinct sources once, however many bindings use them.
+    let mut p = scene(&zigzag(1562));
+    bind(&mut p, 2000, 0.3);
+    p.validate().unwrap();
+    // ...but adds `d` keyframes and state overrides targeting a source
+    // (700 segments = 44800 chords each).
+    let mut p = scene(&zigzag(700));
+    let keyframe = |time| Keyframe {
+        time,
+        value: AnimValue::Path(zigzag(700)),
+        easing: Easing::Linear,
+    };
+    p.clips.push(Clip {
+        audio_cues: vec![],
+        id: "morph".into(),
+        name: String::new(),
+        duration: 1.,
+        looping: false,
+        autoplay: false,
+        blend_mode: BlendMode::Override,
+        weight: 1.,
+        tracks: vec![Track {
+            node_id: "route".into(),
+            property: Property::D,
+            keyframes: vec![keyframe(0.)],
+        }],
+    });
+    p.validate().unwrap();
+    let mut q = p.clone();
+    q.clips[0].tracks[0].keyframes.push(keyframe(1.));
+    let err = q.validate().unwrap_err().0;
+    assert!(err.contains("motion paths too complex"), "{err}");
+    let mut value = serde_json::to_value(&p).unwrap();
+    value["stateMachines"] = serde_json::json!([{"id": "m", "initial": "a", "transitions": [], "states": [{"id": "a", "onEnter": [],
+        "overrides": [{"nodeId": "route", "property": "d", "value": {"type": "path", "value": zigzag(700)}}]}]}]);
+    let err = Project::from_json(&value.to_string()).unwrap_err().0;
+    assert!(err.contains("motion paths too complex"), "{err}");
+}
+#[test]
+fn many_bindings_sample_each_source_once() {
+    // Before: every binding re-flattened the path (bindings x chords, minutes).
+    let mut p = scene(&zigzag(1500));
+    bind(&mut p, 20_000, 0.37);
+    let start = std::time::Instant::now();
+    let nodes = p.evaluate(0.).unwrap();
+    assert!(start.elapsed().as_secs_f64() < 5.0, "{:?}", start.elapsed());
+    let (first, last) = (&nodes[2], &nodes[nodes.len() - 1]);
+    assert_eq!(first.transform, last.transform);
+    near(first.transform.x, 0.37 * 1500.);
+}
+#[test]
+fn long_paths_binary_search_the_walked_chord() {
+    // Over 1024 chords the lookup bisects prefix sums (as in JS); it must pick the
+    // chord the linear walk picks, including exact corners.
+    let d = zigzag(40); // 2560 chords, corners every 64
+    for k in [0usize, 1, 37, 64, 640, 1279, 1280, 2559, 2560] {
+        let progress = k as f64 / 2560.;
+        let mut p = scene(&d);
+        p.nodes[0].motion_path.as_mut().unwrap().progress = progress;
+        p.nodes[0].motion_path.as_mut().unwrap().orient = true;
+        let n = p.evaluate(0.).unwrap().remove(0);
+        let total = 40. * 2f64.sqrt();
+        let along = progress * total;
+        let seg = ((along / 2f64.sqrt()).ceil() as usize).clamp(1, 40);
+        let up = seg % 2 == 1;
+        near(n.transform.rotation, if up { 45. } else { -45. });
+        near(n.transform.x, along / 2f64.sqrt());
+    }
+}

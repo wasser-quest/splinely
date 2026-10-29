@@ -170,6 +170,20 @@ test('live region re-announces identical text after a clear',()=>{
   els.a.fire('click');assert.equal(live.textContent,'Same');els.c.fire('click');assert.equal(live.textContent,'');timers.shift()();assert.equal(live.textContent,'Same');
 });
 
+test('live region keeps one pending re-announcement: repeats replace it, a newer text cancels it, destroy clears it',()=>{
+  const pending=new Map();let id=0;const env={setTimeout:fn=>{pending.set(++id,fn);return id;},clearTimeout:i=>pending.delete(i)};
+  const p=demo();p.stateMachines[0].states[1].announce='Same';p.stateMachines[0].states[0].announce='Other';p.stateMachines[0].transitions.push({from:'on',to:'on',event:click('c')});
+  const {svg,els,f}=mount(p,{env});const live=svg.children.find(e=>e.getAttribute('data-splinely-live')!=null);
+  // Every second repeat finds the region cleared and announces at once; the others re-arm the timer.
+  els.a.fire('click');for(let i=0;i<999;i++)els.c.fire('click');
+  assert.equal(pending.size,1,'repeated identical announcements share one timer');assert.equal(id,500);
+  els.b.fire('click');assert.equal(live.textContent,'Other');assert.equal(pending.size,0,'a different text cancels the pending one');
+  els.a.fire('click');els.c.fire('click');assert.equal(pending.size,1);
+  const [k,fn]=[...pending][0];pending.delete(k);fn();assert.equal(live.textContent,'Same');
+  els.c.fire('click');assert.equal(pending.size,1,'a fired timer is forgotten; the new one is pending');
+  f.destroy();assert.equal(pending.size,0,'destroy clears the pending timer');
+});
+
 test('reduced motion stays honoured with accessibility data: instant states, no looping autoplay, announcements still work',()=>{
   const p=demo({description:'d',clips:[{id:'loop',duration:1,looping:true,autoplay:true,tracks:[]}]});
   p.stateMachines[0].transitions[0].blend=1;p.stateMachines[0].states[1].announce='On';

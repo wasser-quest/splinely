@@ -124,6 +124,13 @@
   function decodeSplyBase64(str) {
     if (typeof str !== 'string') return fail('base64 input must be a string');
     if (str.length > MAX_BASE64_TEXT) return fail('file exceeds 64 MiB limit'); // before any copy
+    // Native decoder where available: 'strict' accepts exactly what the checks below accept (ASCII whitespace
+    // skipped, standard alphabet, full padding, zero trailing bits).
+    if (typeof Uint8Array.fromBase64 === 'function') {
+      let bytes;
+      try { bytes = Uint8Array.fromBase64(str, { lastChunkHandling: 'strict' }); } catch (_) { return fail('invalid base64'); }
+      return decodeSply(bytes);
+    }
     const clean = str.replace(/[ \t\r\n\f]+/g, '');
     if (clean.length % 4 !== 0 || !/^[A-Za-z0-9+/]*={0,2}$/.test(clean)) return fail('invalid base64');
     // Canonical encoding only (as in Rust): the unused trailing bits of a padded final group must be zero.

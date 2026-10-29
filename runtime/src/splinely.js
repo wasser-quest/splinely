@@ -131,6 +131,13 @@
   function decodeSplyBase64(str) {
     if (typeof str !== 'string') return fail('base64 input must be a string');
     if (str.length > MAX_BASE64_TEXT) return fail('file exceeds 64 MiB limit'); // before any copy
+    // Native decoder where available: 'strict' accepts exactly what the checks below accept (ASCII whitespace
+    // skipped, standard alphabet, full padding, zero trailing bits).
+    if (typeof Uint8Array.fromBase64 === 'function') {
+      let bytes;
+      try { bytes = Uint8Array.fromBase64(str, { lastChunkHandling: 'strict' }); } catch (_) { return fail('invalid base64'); }
+      return decodeSply(bytes);
+    }
     const clean = str.replace(/[ \t\r\n\f]+/g, '');
     if (clean.length % 4 !== 0 || !/^[A-Za-z0-9+/]*={0,2}$/.test(clean)) return fail('invalid base64');
     // Canonical encoding only (as in Rust): the unused trailing bits of a padded final group must be zero.
@@ -546,15 +553,34 @@
     }
     return out;
   }
-  // Same deterministic 64-chord arc-length approximation as splinely_document.
-  function motionSample(d, transform, progress) {
+  // Same deterministic 64-chord arc-length approximation as splinely_document. Chord tables are built once per
+  // (d, transform) and shared by every binding and runtime (small LRU); a lookup walks the chords like Rust, or
+  // binary-searches the cumulative lengths on long paths (same chord, results within rounding).
+  const MOTION_MAX_CHORDS=100000, MOTION_TOTAL_CHORDS=100000, MOTION_SEARCH=1024, MOTION_CACHE=64, MOTION_CACHE_CHORDS=400000;
+  const motionCache=new Map();let motionCached=0;
+  const numKey=v=>v===0 && 1/v<0?'-0':String(v);
+  function motionBuild(d, tr) {
     if(typeof d!=='string' || d.replace(pathToken,'').replace(/[\s,]/g,''))throw new Error('Invalid motion path');
     if(/(?:^|[a-zA-Z,])\s*,|,\s*(?:[a-zA-Z]|$)/.test(d))throw new Error('Invalid motion path separators');
     if(!/^\s*[Mm]/.test(d))throw new Error('Motion path must start with M');
-    const tokens=d.match(pathToken)||[];let i=0,cmd='',current=[0,0],start=[0,0],total=0;const chords=[];
-    const tr=transform||{},angle=(tr.rotation||0)*Math.PI/180,c=Math.cos(angle),s=Math.sin(angle);
-    const map=p=>[c*(tr.scaleX==null?1:tr.scaleX)*p[0]-s*(tr.scaleY==null?1:tr.scaleY)*p[1]+(tr.x||0),s*(tr.scaleX==null?1:tr.scaleX)*p[0]+c*(tr.scaleY==null?1:tr.scaleY)*p[1]+(tr.y||0)];
-    const segment=(points)=>{let a=map(points[0]);for(let j=1;j<=64;j++){const t=j/64,u=1-t;const b=map([0,1].map(k=>u*u*u*points[0][k]+3*u*u*t*points[1][k]+3*u*t*t*points[2][k]+t*t*t*points[3][k]));const len=Math.hypot(b[0]-a[0],b[1]-a[1]);if(len>1e-12){total+=len;chords.push([a,b,len]);if(chords.length>1000000)throw new Error('Motion path too complex');}a=b;}};
+    const tokens=d.match(pathToken)||[];let i=0,cmd='',current=[0,0],start=[0,0],total=0,n=0,ch=new Float64Array(1024),lens=new Float64Array(256);
+    const angle=(tr.rotation||0)*Math.PI/180,c=Math.cos(angle),s=Math.sin(angle);
+    const sx=tr.scaleX==null?1:tr.scaleX, sy=tr.scaleY==null?1:tr.scaleY, tx=tr.x||0, ty=tr.y||0;
+    const segment=(points)=>{
+      const p0=points[0],p1=points[1],p2=points[2],p3=points[3];
+      let ax=c*sx*p0[0]-s*sy*p0[1]+tx, ay=s*sx*p0[0]+c*sy*p0[1]+ty;
+      for(let j=1;j<=64;j++){
+        const t=j/64,u=1-t,qx=u*u*u*p0[0]+3*u*u*t*p1[0]+3*u*t*t*p2[0]+t*t*t*p3[0],qy=u*u*u*p0[1]+3*u*u*t*p1[1]+3*u*t*t*p2[1]+t*t*t*p3[1];
+        const bx=c*sx*qx-s*sy*qy+tx, by=s*sx*qx+c*sy*qy+ty, len=Math.hypot(bx-ax,by-ay);
+        if(len>1e-12){
+          total+=len;
+          if(n>=MOTION_MAX_CHORDS)throw new Error('Motion path too complex');
+          if(n===lens.length){const l2=new Float64Array(n*2),c2=new Float64Array(n*8);l2.set(lens);c2.set(ch);lens=l2;ch=c2;}
+          ch[4*n]=ax;ch[4*n+1]=ay;ch[4*n+2]=bx;ch[4*n+3]=by;lens[n++]=len;
+        }
+        ax=bx;ay=by;
+      }
+    };
     const line=(a,b)=>segment([a,[a[0]+(b[0]-a[0])/3,a[1]+(b[1]-a[1])/3],[a[0]+2*(b[0]-a[0])/3,a[1]+2*(b[1]-a[1])/3],b]);
     while(i<tokens.length){
       if(/^[a-z]$/i.test(tokens[i]))cmd=tokens[i++];
@@ -571,8 +597,38 @@
       else segment([current,...points]);current=end;
     }
     if(!Number.isFinite(total) || total<=1e-12)throw new Error('Motion path must have finite nonzero length');
-    let distance=clamp(progress,0,1)*total;
-    for(let j=0;j<chords.length;j++){const [a,b,len]=chords[j];if(distance<=len+total*1e-12 || j===chords.length-1){const t=clamp(distance/len,0,1);return [a[0]+(b[0]-a[0])*t,a[1]+(b[1]-a[1])*t,Math.atan2(b[1]-a[1],b[0]-a[0])*180/Math.PI];}distance-=len;}
+    let cum=null;
+    if(n>MOTION_SEARCH){cum=new Float64Array(n+1);for(let j=0;j<n;j++)cum[j+1]=cum[j]+lens[j];}
+    return {n,ch,lens,cum,total};
+  }
+  // Table for (d, transform); failures are cached too (as their message), so a bad path is not re-parsed every frame.
+  function motionTable(d, tr) {
+    const x=tr.x,y=tr.y,r=tr.rotation,a=tr.scaleX,b=tr.scaleY,num=v=>v==null || typeof v==='number';
+    if(typeof d!=='string' || !(num(x) && num(y) && num(r) && num(a) && num(b)))return motionBuild(d,tr);
+    const key=d+'\u0000'+numKey(x||0)+','+numKey(y||0)+','+numKey(r||0)+','+numKey(a==null?1:a)+','+numKey(b==null?1:b);
+    let hit=motionCache.get(key);
+    if(hit!==undefined){motionCache.delete(key);motionCache.set(key,hit);}
+    else {
+      try{hit=motionBuild(d,tr);}catch(e){hit={error:e.message,n:0};}
+      motionCache.set(key,hit);motionCached+=hit.n;
+      for(const [k,v] of motionCache){if(motionCache.size<=MOTION_CACHE && motionCached<=MOTION_CACHE_CHORDS)break;if(v===hit)break;motionCache.delete(k);motionCached-=v.n;}
+    }
+    if(hit.error!==undefined)throw new Error(hit.error);
+    return hit;
+  }
+  const motionOut=[0,0,0];
+  function motionSample(d, transform, progress) {
+    const tb=motionTable(d,transform||{}),n=tb.n,lens=tb.lens,ch=tb.ch,total=tb.total,eps=total*1e-12;
+    let distance=clamp(progress,0,1)*total,j=0;
+    if(tb.cum!==null){
+      // First chord whose end is within the tolerance of the distance (the chord the walk below stops at).
+      const cum=tb.cum;let hi=n-1;
+      while(j<hi){const mid=(j+hi)>>1;if(distance-cum[mid]<=lens[mid]+eps)hi=mid;else j=mid+1;}
+      distance-=cum[j];
+    } else for(;j<n-1;j++){if(distance<=lens[j]+eps)break;distance-=lens[j];}
+    const t=clamp(distance/lens[j],0,1),k=4*j,ax=ch[k],ay=ch[k+1],bx=ch[k+2],by=ch[k+3];
+    motionOut[0]=ax+(bx-ax)*t;motionOut[1]=ay+(by-ay)*t;motionOut[2]=Math.atan2(by-ay,bx-ax)*180/Math.PI;
+    return motionOut;
   }
 
   const blendParameter = v => {finite(v,'Blend-space parameter');if(Math.abs(v)>1e7)throw new Error('Blend-space parameter out of range');return v;};
@@ -587,6 +643,8 @@
     }
     return result;
   }
+  // Same as splinely_document MIN_CLIP_DURATION: bounds loop laps per second.
+  const MIN_CLIP_DURATION=0.001;
   function normalize(project) {
     if (!project || typeof project !== 'object' || Array.isArray(project)) throw new Error('Project must be an object');
     if (project.schemaVersion != null && project.schemaVersion !== 1) throw new Error('Unsupported schemaVersion: ' + project.schemaVersion);
@@ -595,7 +653,7 @@
     };
     const clips = unique(list(project.clips).map(c => {
       if(c.id==='@timeline')throw new Error('Reserved clip id: @timeline');
-      const duration=finite(c.duration,'Clip duration'); if (duration <= 0) throw new Error('Clip duration must be positive');
+      const duration=finite(c.duration,'Clip duration'); if (duration < MIN_CLIP_DURATION) throw new Error('Clip duration must be at least '+MIN_CLIP_DURATION+' seconds');
       const blendMode=c.blendMode===undefined?'override':c.blendMode;
       if(!['override','weighted','additive'].includes(blendMode))throw new Error('Unsupported blendMode: '+blendMode);
       const weight=weightValue(c.weight===undefined?1:c.weight);
@@ -688,6 +746,22 @@
       weightValue(b.progress===undefined?0:b.progress);
       if(b.orient!==undefined && typeof b.orient!=='boolean')throw new Error('Motion orientation must be boolean');
       motionSample(source.kind.d,source.transform,b.progress||0);
+    }
+    // Total chord budget over the distinct source paths, including their animated `d` values (keyframes, overrides).
+    const motionSources=new Set(nodes.filter(n=>n.motionPath!=null).map(n=>n.motionPath.path));
+    if(motionSources.size) {
+      let chords=0;
+      const count=(d,tr,strict)=>{
+        try{chords+=motionTable(d,tr || {}).n;}catch(e){if(strict || e.message==='Motion path too complex')throw e;}
+        if(chords>MOTION_TOTAL_CHORDS)throw new Error('Motion paths too complex: more than '+MOTION_TOTAL_CHORDS+' chords');
+      };
+      for(const n of nodes)if(motionSources.has(n.id))count(n.kind.d,n.transform,true);
+      for(const c of clips)for(const t of c.tracks)if(t.property==='d' && motionSources.has(t.target)){const src=nodes.find(n=>n.id===t.target);for(const k of t.keyframes){const v=unwrap(k.value);if(typeof v==='string')count(v,src.transform,false);}}
+      for(const m of machines)for(const st of m.states) {
+        const o=st.overrides;
+        if(Array.isArray(o)){for(const x of o)if(x && x.property==='d' && motionSources.has(x.nodeId || x.target)){const v=unwrap(x.value);if(typeof v==='string')count(v,nodes.find(n=>n.id===(x.nodeId || x.target)).transform,false);}}
+        else if(o && typeof o==='object')for(const id of Object.keys(o))if(motionSources.has(id) && o[id] && typeof o[id]==='object' && own(o[id],'d')){const v=unwrap(o[id].d);if(typeof v==='string')count(v,nodes.find(n=>n.id===id).transform,false);}
+      }
     }
     const validatePatch=(id,props)=>{if(boneIds.has(id)) bonePatch(props);if(own(props,'motionProgress')){if(!nodes.some(n=>n.id===id && n.motionPath))throw new Error('motionProgress requires a motionPath binding');weightValue(unwrap(props.motionProgress));}};
     for(const c of clips) for(const t of c.tracks) {
@@ -792,16 +866,21 @@
     }
     const elements=new Map(); if(svg.id) elements.set(svg.id,svg);
     for(const el of svg.querySelectorAll('[id]'))if((!owningSvg(el) || owningSvg(el)===svg) && (!el.namespaceURI || el.namespaceURI==='http://www.w3.org/2000/svg') && !['svg','script','metadata'].includes((el.tagName || '').toLowerCase()))elements.set(el.id,el);
+    // Nested base values (colours, gradients, wrapped numbers) are private copies the runtime never mutates, so
+    // snapshotProps() can keep them by reference (see `owned`).
+    const owned=new WeakSet();
+    const ownCopy=v=>{if(v===null || typeof v!=='object')return v;let c;try{c=snapshot1(v,0);}catch(_){return v;}const mark=x=>{if(x!==null && typeof x==='object'){owned.add(x);for(const k of Object.keys(x))mark(x[k]);}};mark(c);return c;};
     for (const node of project.nodes) {
       const el=elements.get(node.id); if (!el && node.visible!==false) {report('Missing SVG node: '+node.id); continue;}
       const core=!!node.kind;
       const base=core ? {x:0,y:0,rotation:0,scaleX:1,scaleY:1,opacity:1,fill:{r:80/255,g:140/255,b:240/255,a:1},...node.transform,...node.style} : {...node.properties};
       if(core) { for(const k of ['width','height','radius','fontSize','d']) if(node.kind[k]!=null) base[k]=node.kind[k]; if(node.gradient) base.gradient=node.gradient; if(node.motionPath) base.motionProgress=node.motionPath.progress===undefined?0:node.motionPath.progress; }
-      nodes.set(node.id,{id:node.id,el,base,core,visible:node.visible!==false,boneId:node.boneId,gradient:!!(core && node.gradient),original:new Map(),lastKeys:new Set(),written:new Map(),lastProps:null,lastReports:null,atRest:false,restPoses:null,natMode:0,natStyle:null});
+      for(const k of Object.keys(base))base[k]=ownCopy(base[k]);
+      nodes.set(node.id,{id:node.id,el,base,core,visible:node.visible!==false,boneId:node.boneId,gradient:!!(core && node.gradient),original:new Map(),lastKeys:new Set(),spareKeys:new Set(),propsA:null,propsB:null,written:new Map(),lastProps:null,lastReports:null,atRest:false,restPoses:null,natMode:0,natStyle:null});
     }
     // Adapter allows exported elements without a corresponding node descriptor.
     function getNode(id) {
-      if(!nodes.has(id) && elements.has(id)) nodes.set(id,{id,el:elements.get(id),base:{},core:false,original:new Map(),lastKeys:new Set(),written:new Map(),lastProps:null,lastReports:null,atRest:false,restPoses:null,natMode:0,natStyle:null});
+      if(!nodes.has(id) && elements.has(id)) nodes.set(id,{id,el:elements.get(id),base:{},core:false,original:new Map(),lastKeys:new Set(),spareKeys:new Set(),propsA:null,propsB:null,written:new Map(),lastProps:null,lastReports:null,atRest:false,restPoses:null,natMode:0,natStyle:null});
       if(!nodes.has(id)) throw new Error('Unknown node: '+id); return nodes.get(id);
     }
     function attr(node,name,value) {
@@ -890,6 +969,7 @@
     }
     function fireTimers() {
       for(const m of machines.values()) {
+        if(m.halted)continue;
         const state=m.states.get(m.state);
         if(!m.timers)m.timers=new Map();
         let list=m.timers.get(state);
@@ -915,11 +995,11 @@
     // Native offload state (see nativeCheck); pendingDelta/armInterval are set by the auto-tick loop.
     const nat={on:false,hidden:false,sig:null,anims:new Map(),boneNative:false,clockMs:()=>null};
     let explicitRev=0, hiddenTicking=false, shadowing=false, pendingDelta=()=>0, armInterval=()=>{};
-    let followMoving=true, creditTick=false, dirty=true, renderDepth=0, reentered=false, renderReports=[], reportSink=renderReports, boneCache=null;
+    let followMoving=true, creditTick=false, dirty=true, renderDepth=0, reentered=false, renderReports=[], reportSink=renderReports, boneCache=null, renderBudget=Infinity;
     const rr=x=>{if(shadowing)return;reportSink.push(x);report(x);};
     const emptyMap=new Map(), noPoses=[], noEntries=[], stateEntries=new WeakMap();
     const transformKeys=new Set(['x','y','rotation','scaleX','scaleY']);
-    const motionNodes=project.nodes.filter(n=>n.motionPath);
+    const motionNodes=project.nodes.filter(n=>n.motionPath), motionTr={x:0,y:0,rotation:0,scaleX:1,scaleY:1};
     const entries=state=>{
       if(!state)return noEntries;
       let out=stateEntries.get(state);if(out)return out;
@@ -928,7 +1008,8 @@
       else for(const [id,p] of Object.entries(overrides || {})) for(const [k,v] of Object.entries(p)) out.push([id,k,v]);
       stateEntries.set(state,out);return out;
     };
-    // Snapshot of a node's last applied properties; null when it cannot be compared safely.
+    // Snapshot of a node's last applied properties; null when it cannot be compared safely. `props` is this frame's
+    // own object, so it is kept as the snapshot: only nested values the runtime does not own are replaced by copies.
     function snapshot1(v,depth) {
       if(v===null || typeof v!=='object')return v;
       if(depth>8)throw 0;
@@ -936,10 +1017,8 @@
       const out={};for(const k of Object.keys(v))out[k]=snapshot1(v[k],depth+1);return out;
     }
     function snapshotProps(props) {
-      let plain=true;const keys=Object.keys(props);
-      for(let i=0;i<keys.length;i++){const v=props[keys[i]];if(v!==null && typeof v==='object'){plain=false;break;}}
-      if(plain)return props;
-      try{const out={};for(const k of keys)out[k]=snapshot1(props[k],0);return out;}catch(_){return null;}
+      for(const k in props){const v=props[k];if(v!==null && typeof v==='object' && !owned.has(v)){try{props[k]=snapshot1(v,0);}catch(_){return null;}}}
+      return props;
     }
     function sameProps(a,b) {
       let n=0;
@@ -956,6 +1035,9 @@
       if(dead) return;
       // Clocks advanced by the hidden figure's timers draw nothing: the frame stays dirty until it is shown.
       if(hiddenTicking)return;
+      // Over the tick's budget of intermediate frames: the tick's final render draws the result.
+      if(renderBudget<=0)return;
+      renderBudget--;
       // Native animations are re-planned and re-synced once clip times are final: not during a tick's
       // intermediate segment renders (the tick checks again when it ends).
       if(nat.on && renderDepth===0 && !ticking)nativeCheck();
@@ -1127,7 +1209,8 @@
       for(const n of motionNodes) {
         try {
           const binding=n.motionPath,source=values.get(binding.path) || baseOf(binding.path),props=nodes.has(n.id)?touch(n.id):undefined;
-          const [x,y,angle]=motionSample(unwrap(source.d),Object.fromEntries(['x','y','rotation','scaleX','scaleY'].map(k=>[k,unwrap(source[k])])),unwrap(props.motionProgress));
+          motionTr.x=unwrap(source.x);motionTr.y=unwrap(source.y);motionTr.rotation=unwrap(source.rotation);motionTr.scaleX=unwrap(source.scaleX);motionTr.scaleY=unwrap(source.scaleY);
+          const [x,y,angle]=motionSample(unwrap(source.d),motionTr,unwrap(props.motionProgress));
           props.x=(unwrap(props.x)||0)+x;props.y=(unwrap(props.y)||0)+y;
           if(binding.orient)props.rotation=(unwrap(props.rotation)||0)+angle;
         } catch(e){rr(e);}
@@ -1162,7 +1245,12 @@
             if(again!==null)for(let i=0;i<again.length;i++)rr(again[i]);
             continue;
           }
-          props={...node.base};
+          // Core nodes reuse two property objects (base keys only; never the one held as lastProps).
+          if(node.core) {
+            const base=node.base;props=node.propsA===node.lastProps?node.propsB:node.propsA;
+            if(props===null){props={...base};if(node.propsA===null)node.propsA=props;else node.propsB=props;}
+            else for(const k in base)props[k]=base[k];
+          } else props={...node.base};
         }
         node.atRest=false;
         if(binding!=null && node.natMode!==1 && node.natMode!==3) {
@@ -1181,7 +1269,7 @@
           if(!touched){node.atRest=true;node.restPoses=poses;}
           continue;
         }
-        const keys=new Set(), mark=reportSink.length;
+        const keys=node.spareKeys, mark=reportSink.length;keys.clear();
         if(node.visible===false) {attr(node,'visibility','hidden'); keys.add('visibility');}
         const composed=node.core || binding!=null;
         if(composed) {
@@ -1220,7 +1308,7 @@
           keys.add(name);
         }
         for(const key of node.lastKeys) if(!keys.has(key)) attr(node,key,node.original.get(key));
-        node.lastKeys=keys;
+        node.spareKeys=node.lastKeys;node.lastKeys=keys;
         node.lastProps=snapshotProps(props);
         node.lastReports=reportSink.length>mark?reportSink.slice(mark):null;
         if(!touched && node.lastProps!==null && props.gradient===undefined){node.atRest=true;node.restPoses=poses;}
@@ -1270,22 +1358,31 @@
       try {
         let count=0;
         while(queue.length) {
-          if(++count>256) {queue.length=0;report('Event cycle limit exceeded (256)');break;}
+          if(++count>256) {queue.length=0;report('Event cycle limit exceeded (256)');cycleHit=true;break;}
           const e=queue.shift();
           if(e.broadcast) {dispatch(e.event,e.detail,e.target);queue.unshift(...[...machines.keys()].map(id=>({...e,id,broadcast:false})));continue;}
-          const m=machines.get(e.id); if(!m)continue;
+          const m=machines.get(e.id); if(!m || m.halted)continue;
           const state=m.states.get(m.state);
           const transitions=[...(state.transitions || []),...(m.transitions || [])];
           // Timer transitions fire from advanceBlends, never on events.
           const t=e.timer?(transitions.includes(e.timer) && guard(e.timer.guard)?e.timer:null):transitions.find(t=>t.after==null && (t.from==null || t.from===m.state || t.from==='*') && eventMatches(t.event,e.event,e.target) && guard(t.guard));
           if(!t)continue;
           const next=t.to || t.target; if(!m.states.has(next)) {report('Unknown state: '+next);continue;}
+          if(count>128)(cycling || (cycling=new Set())).add(m);
           actions(state.exit || state.onExit,e.detail); const previous=m.state; m.state=next;dirty=true;
           const blend=t.blend==null?0:t.blend;m.fade=blend>0 && !reducedMotion?{from:previous,elapsed:0,duration:blend}:null;m.elapsed=0;
           actions(t.actions,e.detail); actions(m.states.get(next).onEnter || m.states.get(next).entry,e.detail);
           render();dispatch('state.change',{machine:m.id,from:previous,to:next,event:e.timer?'after':e.event});if(liveRegion)announceState(m.id,next);
         }
       } finally {processing=false;}
+    }
+    // Sustained cycles (the limit hit on CYCLE_TICKS consecutive ticks, e.g. after:0 timers restarting an emit
+    // ping-pong every frame) stop the machines that kept transitioning, so they cannot burn every frame.
+    const CYCLE_TICKS=3;let cycleHit=false,cycleTicks=0,cycling=null;
+    function cycleGuard() {
+      if(!cycleHit){cycleTicks=0;cycling=null;return;}
+      cycleHit=false;if(++cycleTicks<CYCLE_TICKS)return;
+      cycleTicks=0;for(const m of cycling || []){m.halted=true;report('State machine '+m.id+' stopped: event cycle limit exceeded on '+CYCLE_TICKS+' consecutive ticks');}cycling=null;
     }
     function emit(event,detail,target) {ensure();enqueue({broadcast:true,event,detail,target});}
     for(const m of project.machines) {
@@ -1356,13 +1453,18 @@
         stop(){this.pause();c.ramp=null;c.time=0;c.cycle=0;c.active=false;dirty=true;render();return this;}
       };
     }
+    // Catch-up work per tick is bounded. Up to LAP_EXACT segments run exactly as always (a frame per segment and
+    // loop wrap). After that, or from the start when a looping clip would wrap LAP_EXACT times, looping clips without callbacks advance whole laps arithmetically instead of one
+    // segment per lap, and intermediate frames are drawn only when a callback or a clip.end can observe them.
+    // At most TICK_RENDERS intermediate frames per tick; the tick's final frame is always drawn.
+    const LAP_EXACT=8, TICK_RENDERS=64, freeBuf=[];
     function tick(delta) {
       ensure();if(finite(delta,'Tick delta')<0)throw new Error('Tick delta must be nonnegative');
       if(ticking)throw new Error('Reentrant tick is unsupported');
-      ticking=true;
+      ticking=true;renderBudget=TICK_RENDERS;
       try {
       if(advanceBlends(delta))render();
-      let remaining=delta,segments=0;
+      let remaining=delta,segments=0,fast=false;
       do {
         if(++segments>10000){report('Transport catch-up limit exceeded (10000)');for(const c of clips.values())if(c.playing)clip(c.id).pause();transportPause();break;}
         const active=activeBuf, fading=fadingBuf;
@@ -1370,13 +1472,16 @@
         if(transport.playing)active.push(transport);
         for(let i=0;i<clipList.length;i++){const c=clipList[i];if(c.playing)active.push(c);if(c.ramp)fading.push(c);}
         if(!active.length && !fading.length)break;
-        let step=remaining;
+        if(!fast){if(segments>LAP_EXACT)fast=true;else if(segments===1)for(let i=0;i<active.length;i++)if(active[i].loop && remaining>=LAP_EXACT*active[i].duration)fast=true;}
+        let step=remaining,observe=!fast || callbacks.size>0;
         for(const c of fading)step=Math.min(step,c.ramp.duration-c.ramp.elapsed);
-        for(const c of active) {
-          step=Math.min(step,c.duration-c.time);
-          for(const cb of callbacks)if(cb.clip===c.id && cb.time>c.time)step=Math.min(step,cb.time-c.time);
+        for(let i=0;i<active.length;i++) {
+          const c=active[i];let cbs=false;
+          for(const cb of callbacks)if(cb.clip===c.id){cbs=true;if(cb.time>c.time)step=Math.min(step,cb.time-c.time);}
+          freeBuf[i]=fast && c.loop && !cbs;
+          if(!freeBuf[i])step=Math.min(step,c.duration-c.time);
         }
-        for(let i=0;i<active.length;i++){fromBuf[i]=active[i].time;revBuf[i]=active[i].revision;}
+        for(let i=0;i<active.length;i++){const c=active[i];fromBuf[i]=c.time;revBuf[i]=c.revision;if(!c.loop && c.time+step>=c.duration)observe=true;}
         for(const c of active){c.time+=step;if(step!==0 && c!==transport && c.tracks.length && !c.allNative)dirty=true;}
         if(fading.length)dirty=true;
         for(const c of fading) {
@@ -1384,20 +1489,25 @@
           c.weight=r.elapsed===r.duration?r.to:r.from*(1-r.elapsed/r.duration)+r.to*(r.elapsed/r.duration);
           if(r.elapsed===r.duration)c.ramp=null;
         }
-        remaining=Math.max(0,remaining-step);render();
+        remaining=Math.max(0,remaining-step);if(observe)render();
         for(let i=0,n=active.length;i<n;i++) {
           const c=active[i],from=fromBuf[i],revision=revBuf[i];
           if(dead)return;if(c.revision!==revision || !c.playing)continue;
+          if(freeBuf[i]) {
+            // Whole laps at once (fmod is exact); the same per-wrap work as below, done once.
+            if(c.time>=c.duration){const r=c.time%c.duration;c.cycle+=Math.round((c.time-r)/c.duration);c.time=r;if(!c.allNative)dirty=true;for(const [key,h] of c.sources)if(Number(key.split(':')[0])<c.cycle){h.stop();c.sources.delete(key);}}
+            continue;
+          }
           if(!crossing(c,from,c.time,false))continue;
           if(c.time===c.duration) {
             if(!c.loop){c.playing=false;c.revision++;stopSources(c);emit('clip.end',{clip:c.id},c.id);}
-            else {c.time=0;if(!c.allNative)dirty=true;c.cycle++;for(const [key,h] of c.sources)if(Number(key.split(':')[0])<c.cycle){h.stop();c.sources.delete(key);}render();crossing(c,0,0,true);}
+            else {c.time=0;if(!c.allNative)dirty=true;c.cycle++;for(const [key,h] of c.sources)if(Number(key.split(':')[0])<c.cycle){h.stop();c.sources.delete(key);}if(!fast || callbacks.size)render();crossing(c,0,0,true);}
           }
         }
       } while(remaining>0 && !dead);
-      if(dead)return;schedule(transport);for(let i=0;i<clipList.length;i++)schedule(clipList[i]);render();
+      if(dead)return;schedule(transport);for(let i=0;i<clipList.length;i++)schedule(clipList[i]);renderBudget=Infinity;render();cycleGuard();
       if(frameHooks)runFrameHooks(delta);
-      } finally {ticking=false;}
+      } finally {ticking=false;renderBudget=Infinity;}
       if(nat.on && !dead){nativeCheck();if(dirty)render();}
     }
     function at(time,fn,opts) {
@@ -1508,14 +1618,17 @@
     };
     // Screen-reader semantics, keyboard activation, focus ring and live announcements.
     // Opt-in: projects without description, node a11y or state announce are left untouched.
+    let announceTimer=null;
     function announceState(machineId,stateId) {
       const m=machines.get(machineId),s=m && m.states.get(stateId),text=s && s.announce;
       if(!liveRegion || typeof text!=='string')return;
       const set=()=>{if(!dead)liveRegion.textContent=text;};
+      // One pending re-announcement per runtime: a newer announcement replaces it.
+      if(announceTimer!==null){if(env.clearTimeout)env.clearTimeout(announceTimer);announceTimer=null;}
       if(liveRegion.textContent!==text){set();return;}
       // Identical text is only re-announced when the region changes in between.
       liveRegion.textContent='';
-      if(typeof env.setTimeout==='function'){const id=env.setTimeout(set,50);cleanup.push(()=>{if(env.clearTimeout)env.clearTimeout(id);});}else set();
+      if(typeof env.setTimeout==='function')announceTimer=env.setTimeout(()=>{announceTimer=null;set();},50);else set();
     }
     function setupAccessibility() {
       const states=project.machines.flatMap(m=>m.states);
@@ -1542,6 +1655,7 @@
       if(live && doc && typeof doc.createElementNS==='function' && svg.appendChild) {
         liveRegion=make('text',{'data-splinely-live':'',role:'status','aria-live':'polite','aria-atomic':'true',x:'0',y:'0','font-size':'1','fill-opacity':'0','pointer-events':'none'});
         svg.appendChild(liveRegion);created.push(liveRegion);
+        cleanup.push(()=>{if(announceTimer!==null && env.clearTimeout)env.clearTimeout(announceTimer);announceTimer=null;});
       }
       if(!focusables.size)return;
       let modality=false,ring=null,ringFor=null,spaceDown=null;const entered=new Set();
@@ -2017,6 +2131,7 @@
       let due=Infinity;
       if(transport.playing)for(const cb of callbacks)if(cb.clip===transport.id){const left=cb.time-transport.time;if(left>0 && left<due)due=left;}
       for(const m of machines.values()) {
+        if(m.halted)continue;
         const list=m.timers && m.timers.get(m.states.get(m.state));
         if(!list)return -1;
         for(let i=0;i<list.length;i++) {
@@ -2058,11 +2173,13 @@
       const scheduler=env.requestAnimationFrame?frameScheduler(env):null;
       if(scheduler){
         const request=()=>{framePending=true;scheduler.request(frame);};
-        // maxFps: frames arriving sooner than the interval (minus 1 ms of vsync jitter) are skipped.
-        const interval=maxFps?1000/maxFps:0;let lastFrame=-Infinity;
-        function frame(){
+        // maxFps: one tick per slot of a grid shared by every runtime in the window (slot = floor((time+1 ms of
+        // vsync jitter)/interval) of the frame's rAF timestamp), so throttled runtimes all tick in the same vsync
+        // and the page draws at most maxFps frames instead of one per runtime phase.
+        const interval=maxFps?1000/maxFps:0;let lastSlot=NaN;
+        function frame(time){
           framePending=false;if(dead || hidden)return;
-          if(interval){const t=now();if(t-lastFrame<interval-1){request();return;}lastFrame=t;}
+          if(interval){const slot=Math.floor(((typeof time==='number' && Number.isFinite(time)?time:now())+1)/interval);if(slot===lastSlot){request();return;}lastSlot=slot;}
           advance();
           if(clock===env){const d=last-frameAt;if(!woke && d>0 && d<100)vsync+=(d-vsync)*0.1;frameAt=last;woke=false;}
           if(dead || hidden || framePending)return;
@@ -2191,12 +2308,21 @@
   function register(env,api){if(!env)return;if(!env[registryKey])env[registryKey]={instances:new Set(),alias:null};const r=env[registryKey];r.instances.add(api);syncAlias(env,r);}
   function unregister(env,api){const r=env && env[registryKey];if(r){r.instances.delete(api);syncAlias(env,r);}}
   function syncAlias(env,r){if(r.alias && env.splinely===r.alias)delete env.splinely;r.alias=null;if(r.instances.size===1 && env.splinely==null){r.alias=[...r.instances][0];env.splinely=r.alias;}}
+  // Options for the runtime's own start from the root <svg> (exporter host attributes): data-splinely-max-fps="N"
+  // (N > 0) and data-splinely-native-animations="false". Other values keep the defaults.
+  function autoStartOptions(svg) {
+    const options={},get=name=>typeof svg.getAttribute==='function'?svg.getAttribute(name):null;
+    const fps=get('data-splinely-max-fps');
+    if(fps!=null && /^\s*\d+(\.\d+)?\s*$/.test(fps) && Number(fps)>0)options.maxFps=Number(fps);
+    if(get('data-splinely-native-animations')==='false')options.nativeAnimations=false;
+    return options;
+  }
   const exported={createRuntime,readProject,normalize,evaluateTrack,interpolate,easing,PLUGIN_API_VERSION};
   if(typeof module==='object' && module.exports)module.exports=exported;
   else {
     if(!host.SplinelyRuntime)host.SplinelyRuntime=exported;
     const script=host.document && host.document.currentScript;
     const svg=script && (script.ownerSVGElement || (script.parentNode && script.parentNode.closest && script.parentNode.closest('svg')));
-    if(svg && !svg.splinely)try{createRuntime(svg);}catch(e){if(host.console)host.console.error('Splinely initialization failed; static SVG retained:',e);}
+    if(svg && !svg.splinely)try{createRuntime(svg,undefined,autoStartOptions(svg));}catch(e){if(host.console)host.console.error('Splinely initialization failed; static SVG retained:',e);}
   }
 })(typeof window!=='undefined'?window:globalThis);

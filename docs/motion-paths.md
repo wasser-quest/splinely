@@ -52,8 +52,13 @@ Invalid edits are rejected without overwriting the project.
   disconnected subpaths concatenate lengths **without measuring the jump**.
 - A source must have finite, nonzero evaluated length; a collapsed animated
   source (including zero scale) reports an evaluation error/JS diagnostic.
-  At most 1,000,000 nonzero chords are accepted per sample. This is an
-  approximation, not exact analytic constant-speed integration.
+  At most 100,000 nonzero chords are accepted per sampled path, and at most
+  100,000 chords summed over the distinct source paths of a document (each
+  source's `d` plus every `d` keyframe and state override targeting it).
+  Rust validation and the JS runtime enforce the same numbers. Each source is
+  flattened once per evaluation; on paths over 1,024 chords the position is
+  found by binary search over the prefix lengths (same chord as the walk).
+  This is an approximation, not exact analytic constant-speed integration.
 - Orientation rotates around the target's local origin. There is no automatic
   geometry centering, banking, offset-distance editor or bone motion binding.
 

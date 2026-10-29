@@ -2,7 +2,7 @@ use crate::*;
 use std::collections::{BTreeMap, HashSet};
 
 const LIMIT: f64 = 1e7;
-fn parameter(value: Option<&serde_json::Value>) -> Result<f64, DocumentError> {
+pub(crate) fn parameter(value: Option<&serde_json::Value>) -> Result<f64, DocumentError> {
     value
         .and_then(|v| v.as_f64())
         .filter(|v| v.is_finite() && v.abs() <= LIMIT)

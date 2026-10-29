@@ -628,3 +628,79 @@ fn nested_groups_export_as_nested_svg_groups() {
     let json = project.to_json().unwrap();
     assert_eq!(Project::from_json(&json).unwrap(), project);
 }
+
+#[test]
+fn ids_are_bounded_and_the_metadata_id_is_reserved_everywhere() {
+    let mut p = project();
+    p.nodes[0].id = "a".repeat(MAX_ID_BYTES);
+    p.validate().unwrap();
+    p.nodes[0].id.push('a');
+    assert!(p
+        .validate()
+        .unwrap_err()
+        .0
+        .contains("longer than 256 bytes"));
+    // Any shared-namespace ID can become an SVG id next to the metadata block.
+    let mut p = project();
+    p.groups.push(Group {
+        id: RESERVED_ID.into(),
+        name: String::new(),
+        parent_id: None,
+        rig: None,
+    });
+    p.nodes[0].group = Some(RESERVED_ID.into());
+    assert!(p.validate().unwrap_err().0.contains("reserved"));
+    let mut p = project();
+    p.clips.push(Clip {
+        id: RESERVED_ID.into(),
+        ..clip()
+    });
+    assert!(p.validate().is_err());
+    // Generated export IDs (title, desc, gradients) stay usable as project IDs.
+    let mut p = project();
+    p.nodes[0].id = "splinely-title".into();
+    p.validate().unwrap();
+}
+#[test]
+fn clip_duration_has_the_runtime_minimum() {
+    assert_eq!(MIN_CLIP_DURATION, 0.001);
+    let mut p = project();
+    p.clips.push(Clip {
+        duration: 0.001,
+        tracks: vec![],
+        ..clip()
+    });
+    p.validate().unwrap();
+    p.clips[0].duration = 0.000_999;
+    let err = p.validate().unwrap_err().0;
+    assert!(err.contains("at least 0.001 seconds"), "{err}");
+}
+#[test]
+fn nested_group_reemission_is_bounded() {
+    // 32 nested groups with 256-byte IDs; nodes alternate between the innermost
+    // group and none, so each node re-opens the whole ancestry (~18 KB).
+    let mut p = Project::default();
+    let mut parent = None;
+    for i in 0..32 {
+        let id = format!("g{i:02}{}", "x".repeat(MAX_ID_BYTES - 3));
+        p.groups.push(Group {
+            id: id.clone(),
+            name: String::new(),
+            parent_id: parent,
+            rig: None,
+        });
+        parent = Some(id);
+    }
+    for i in 0..4000 {
+        let mut n = Node::circle(&format!("n{i}"), 0., 0., 1.);
+        if i % 2 == 0 {
+            n.group = parent.clone();
+        }
+        p.nodes.push(n);
+    }
+    p.validate().unwrap();
+    let err = p.to_static_svg(0.).unwrap_err().0;
+    assert!(err.contains("group markup"), "{err}");
+    p.nodes.truncate(200);
+    assert!(p.to_static_svg(0.).is_ok());
+}

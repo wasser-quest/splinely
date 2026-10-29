@@ -227,3 +227,98 @@ fn metadata_rejects_non_canonical_base64() {
         .to_string()
         .contains("not canonical base64"));
 }
+
+#[test]
+fn inline_export_without_scripts_keeps_metadata_and_host_attributes() {
+    use splinely_document::SvgOptions;
+    let p = sample();
+    let svg = p
+        .to_svg_with(&SvgOptions {
+            max_fps: Some(30),
+            native_animations: Some(false),
+            ..Default::default()
+        })
+        .unwrap();
+    assert!(!svg.contains("<script"), "{svg}");
+    let doc = roxmltree::Document::parse(&svg).unwrap();
+    let root = doc.root_element();
+    assert_eq!(root.attribute("data-splinely-max-fps"), Some("30"));
+    assert_eq!(
+        root.attribute("data-splinely-native-animations"),
+        Some("false")
+    );
+    assert_eq!(metadata_attr(&svg).as_deref(), Some("sply-base64"));
+    assert_eq!(Project::from_svg_metadata(&svg).unwrap(), p);
+    // Without host options the document is the scripted export minus its script.
+    let plain = p.to_svg_with(&SvgOptions::default()).unwrap();
+    let scripted = p.to_svg("/*rt*/").unwrap();
+    let script = "<script type=\"application/ecmascript\"><![CDATA[/*rt*/]]></script>\n";
+    assert_eq!(scripted.replace(script, ""), plain);
+    assert!(p
+        .to_svg_with(&SvgOptions {
+            max_fps: Some(0),
+            ..Default::default()
+        })
+        .is_err());
+}
+
+#[test]
+fn svg_from_bytes_matches_load_then_export() {
+    use splinely_document::SvgOptions;
+    let mut files = vec![];
+    for dir in [
+        "examples",
+        "crates/splinely_document/tests/fixtures/sply/valid",
+    ] {
+        for entry in std::fs::read_dir(root().join(dir)).unwrap() {
+            let path = entry.unwrap().path();
+            let name = path.to_string_lossy().into_owned();
+            if name.ends_with(".sply") || name.ends_with(".splinely.json") {
+                files.push(path);
+            }
+        }
+    }
+    assert!(files.len() > 5);
+    // Re-encoded vs. embedded as-is: identical whenever the bytes are canonical,
+    // otherwise (defaults omitted, legacy data) the export re-encodes.
+    let mut broken = Project::default().to_binary().unwrap();
+    let mut legacy = serde_json::to_value(sample()).unwrap();
+    legacy["speechCues"] = serde_json::json!([]);
+    files.push(PathBuf::new());
+    for path in &files {
+        let bytes = if path.as_os_str().is_empty() {
+            splinely_document::encode_value(&legacy).unwrap()
+        } else {
+            std::fs::read(path).unwrap()
+        };
+        let options = SvgOptions {
+            runtime: Some("/*rt*/"),
+            ..Default::default()
+        };
+        let expected = Project::from_bytes(&bytes).and_then(|p| p.to_svg("/*rt*/"));
+        let actual = Project::svg_from_bytes(&bytes, &options);
+        match (expected, actual) {
+            (Ok(a), Ok(b)) => assert_eq!(a, b, "{path:?}"),
+            (Err(a), Err(b)) => assert_eq!(a.0, b.0, "{path:?}"),
+            (a, b) => panic!("{path:?}: {a:?} vs {b:?}"),
+        }
+    }
+    broken.push(0);
+    assert!(Project::svg_from_bytes(&broken, &SvgOptions::default()).is_err());
+}
+
+#[test]
+fn oversized_input_is_rejected_before_parsing() {
+    let limit = splinely_document::MAX_PROJECT_FILE_BYTES as usize;
+    let mut json = String::with_capacity(limit + 1);
+    json.push_str("{\"schemaVersion\":1,\"junk\":\"");
+    json.extend(std::iter::repeat_n('x', limit - json.len()));
+    json.push_str("\"}");
+    let start = std::time::Instant::now();
+    assert!(Project::from_json(&json).unwrap_err().0.contains("64 MiB"));
+    assert!(Project::from_bytes(json.as_bytes())
+        .unwrap_err()
+        .0
+        .contains("64 MiB"));
+    assert!(start.elapsed().as_secs_f64() < 1.0);
+}

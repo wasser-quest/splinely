@@ -51,7 +51,7 @@ pub struct EvalIndex {
     shape: [usize; 4],
 }
 impl EvalIndex {
-    fn build(project: &Project) -> Self {
+    pub(crate) fn build(project: &Project) -> Self {
         fn first_by_id<'a>(ids: impl Iterator<Item = &'a str>) -> HashMap<String, usize> {
             let mut map = HashMap::new();
             for (i, id) in ids.enumerate() {
@@ -174,12 +174,24 @@ impl Project {
         context: &EvaluationContext,
     ) -> Result<(Vec<Node>, Vec<Bone>), DocumentError> {
         valid_time(time)?;
+        // First machine per ID, as the linear scans found (IDs are unique once validated).
+        let machines: HashMap<&str, &StateMachine> =
+            if context.states.is_empty() && context.state_fades.is_empty() {
+                HashMap::new()
+            } else {
+                let mut map = HashMap::new();
+                for m in &self.state_machines {
+                    map.entry(m.id.as_str()).or_insert(m);
+                }
+                map
+            };
+        let has_state = |machine: &str, state: &str| {
+            machines
+                .get(machine)
+                .is_some_and(|m| m.states.iter().any(|s| s.id == state))
+        };
         for (machine, state) in &context.states {
-            if !self
-                .state_machines
-                .iter()
-                .any(|m| &m.id == machine && m.states.iter().any(|s| &s.id == state))
-            {
+            if !has_state(machine, state) {
                 return Err(DocumentError(format!(
                     "unknown machine/state {machine}/{state}"
                 )));
@@ -210,21 +222,29 @@ impl Project {
             // state sets fades between that value and the value underneath.
             let t = crate::follow::ease_fade(progress);
             let mut touched: Vec<(&str, Property)> = Vec::new();
+            let mut seen = std::collections::HashSet::new();
             for o in from.overrides.iter().chain(current) {
-                if !touched.contains(&(o.node_id.as_str(), o.property)) {
+                if seen.insert((o.node_id.as_str(), o.property)) {
                     touched.push((&o.node_id, o.property));
                 }
             }
+            // Last override per (target, property) wins, as in a reverse scan.
+            fn last(list: &[PropertyOverride]) -> HashMap<(&str, Property), &AnimValue> {
+                list.iter()
+                    .map(|o| ((o.node_id.as_str(), o.property), &o.value))
+                    .collect()
+            }
+            let (from_values, current_values) = (last(&from.overrides), last(current));
             for (id, property) in touched {
                 let target = index.expect_target(id);
                 let under = get_target(&nodes, &bones, target, property);
-                let pick = |list: &[PropertyOverride]| {
-                    list.iter()
-                        .rev()
-                        .find(|o| o.node_id == id && o.property == property)
-                        .map_or_else(|| under.clone(), |o| o.value.clone())
+                let pick = |values: &HashMap<(&str, Property), &AnimValue>| {
+                    values
+                        .get(&(id, property))
+                        .map_or_else(|| under.clone(), |v| (*v).clone())
                 };
-                let value = crate::follow::blend_values(&pick(&from.overrides), &pick(current), t);
+                let value =
+                    crate::follow::blend_values(&pick(&from_values), &pick(&current_values), t);
                 set_target(&mut nodes, &mut bones, target, property, value);
             }
         }
@@ -290,20 +310,22 @@ impl Project {
         }
         apply_weighted_group(&mut nodes, &mut bones, &group);
         for o in &context.overrides {
-            self.validate_property(&o.node_id, o.property, &o.value)?;
+            self.validate_property_at(index.target(&o.node_id), &o.node_id, o.property, &o.value)?;
             apply_override(&mut nodes, &mut bones, index, o);
         }
         for (machine, fade) in &context.state_fades {
-            let known = self
-                .state_machines
-                .iter()
-                .any(|m| &m.id == machine && m.states.iter().any(|s| s.id == fade.from));
+            let known = has_state(machine, &fade.from);
             if !known || !fade.progress.is_finite() {
                 return Err(DocumentError(format!("invalid state fade for {machine}")));
             }
         }
+        let followers: std::collections::HashSet<&str> = if context.follow.is_empty() {
+            Default::default()
+        } else {
+            self.followers.iter().map(|f| f.id.as_str()).collect()
+        };
         for (id, value) in &context.follow {
-            if !self.followers.iter().any(|f| &f.id == id) || !value.iter().all(|v| v.is_finite()) {
+            if !followers.contains(id.as_str()) || !value.iter().all(|v| v.is_finite()) {
                 return Err(DocumentError(format!("invalid follower value for {id}")));
             }
         }

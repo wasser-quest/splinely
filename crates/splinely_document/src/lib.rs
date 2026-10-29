@@ -46,7 +46,8 @@ pub use animation::{ClipPlayback, EvalIndex, EvaluationContext};
 pub use arrange::{transformed_bounds, AlignEdge, AlignTarget, Axis, Bounds, Stack};
 pub use behavior::*;
 pub use binary::{
-    crc32c, decode_to_value, encode_value, SPLY_MAGIC, SPLY_MAJOR, SPLY_MAX_DEPTH, SPLY_MINOR,
+    crc32c, decode_to_value, encode_value, FALLBACK_MAX_VALUES, SPLY_MAGIC, SPLY_MAJOR,
+    SPLY_MAX_DEPTH, SPLY_MINOR,
 };
 pub use boolean::BooleanOp;
 pub use browser_host::BrowserExportOptions;
@@ -55,8 +56,9 @@ pub use groups::group_rig_bone;
 pub use history::*;
 pub use model::*;
 pub use morph::morph_paths;
+pub use motion::{MOTION_MAX_CHORDS, MOTION_TOTAL_CHORDS};
 pub use project_file::MAX_PROJECT_FILE_BYTES;
-pub use svg::EmbedFormat;
+pub use svg::{EmbedFormat, SvgOptions, MAX_SVG_BYTES, MAX_SVG_GROUP_MARKUP_BYTES};
 pub use svg_import::path_bounds;
 pub use svg_import_report::{
     limits as svg_import_limits, ImportDiagnostic, ImportFailure, ImportOutcome, ImportReport,
@@ -64,6 +66,7 @@ pub use svg_import_report::{
 };
 pub use svg_source::SourceSync;
 pub use text_outline::{default_font_family, fontdb, system_fonts};
+pub use validation::{MAX_ID_BYTES, MIN_CLIP_DURATION, RESERVED_ID};
 
 use serde::Deserialize;
 use std::fmt;
@@ -148,7 +151,11 @@ impl Project {
         self.validate()?;
         Ok(serde_json::to_string_pretty(self)?)
     }
+    /// Strict load from JSON text; text over `MAX_PROJECT_FILE_BYTES` is rejected unparsed.
     pub fn from_json(json: &str) -> Result<Self, DocumentError> {
+        if json.len() as u64 > MAX_PROJECT_FILE_BYTES {
+            return Err(DocumentError("project file exceeds 64 MiB limit".into()));
+        }
         let mut input = json_loading::load_value(json)?;
         normalize_project_value(&mut input);
         let project = Self::deserialize(&input)?;
@@ -161,12 +168,14 @@ impl Project {
 /// Fast strict load straight from an arena (binary `.sply`). `None` means
 /// "use the reference pipeline": the document would be normalized, fails to
 /// deserialize, or the comparing serializer could not prove that nothing is lost.
-pub(crate) fn fast_load(tree: &tree::Tree<'_>) -> Option<Project> {
+/// The flag is true when the input also holds every canonical member.
+pub(crate) fn fast_load(tree: &tree::Tree<'_>) -> Option<(Project, bool)> {
     if would_normalize(tree) {
         return None;
     }
     let project = <Project as serde::Deserialize>::deserialize(tree.deserializer()).ok()?;
-    tree::preserved_by(tree, &project).then_some(project)
+    let complete = tree::preservation(tree, &project)?;
+    Some((project, complete))
 }
 
 /// Read-only twin of `normalize_project_value`: true if it could change anything.

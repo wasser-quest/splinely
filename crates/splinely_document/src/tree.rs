@@ -556,6 +556,8 @@ struct Ctx<'t> {
     tree: &'t Tree<'t>,
     /// Per-object "input member was matched" flags, used as a stack.
     seen: Vec<bool>,
+    /// No canonical member was missing from the input.
+    complete: bool,
 }
 
 /// True only if `check_preserved(<tree as Value>, to_value(value))` would
@@ -563,16 +565,25 @@ struct Ctx<'t> {
 /// arrays keep their length and numbers stay exactly representable. `false`
 /// means "unknown": use the reference check to learn the exact outcome.
 pub(crate) fn preserved_by<T: Serialize>(tree: &Tree<'_>, value: &T) -> bool {
+    preservation(tree, value).is_some()
+}
+
+/// `preserved_by`, plus `Some(true)` when the input also has every canonical
+/// member: then the input is the canonical form up to number spelling and
+/// member order.
+pub(crate) fn preservation<T: Serialize>(tree: &Tree<'_>, value: &T) -> Option<bool> {
     let mut ctx = Ctx {
         tree,
         seen: Vec::new(),
+        complete: true,
     };
     value
         .serialize(Check {
             ctx: &mut ctx,
             view: tree.view(ROOT),
         })
-        .is_ok()
+        .ok()?;
+    Some(ctx.complete)
 }
 
 struct Check<'c, 't> {
@@ -705,7 +716,10 @@ impl ObjectCheck<'_, '_> {
         Ok(found)
     }
     fn member<T: ?Sized + Serialize>(&mut self, found: Option<usize>, value: &T) -> Fast {
-        let Some(i) = found else { return Ok(()) };
+        let Some(i) = found else {
+            self.ctx.complete = false;
+            return Ok(());
+        };
         // A member written twice would make the last one win in `to_value`.
         if std::mem::replace(&mut self.ctx.seen[self.base + i], true) {
             return Err(Bail);

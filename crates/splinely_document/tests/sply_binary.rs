@@ -1484,3 +1484,20 @@ fn differential_edge_documents() {
     }
     assert!(stats[0] >= 5 && stats[1] >= 5, "{stats:?}");
 }
+
+#[test]
+fn strict_fallback_is_bounded_for_huge_invalid_documents() {
+    // Small documents keep the exact reference error...
+    let small = serde_json::json!({"schemaVersion": 1, "junk": [null, null]});
+    let err = Project::from_bytes(&encode_value(&small).unwrap())
+        .unwrap_err()
+        .0;
+    assert!(err.starts_with("Unsupported field at /junk"), "{err}");
+    // ...huge ones fail without building a `Value` per arena node.
+    let nulls = vec![Value::Null; splinely_document::FALLBACK_MAX_VALUES];
+    let huge = serde_json::json!({"schemaVersion": 1, "junk": nulls});
+    let err = Project::from_bytes(&encode_value(&huge).unwrap())
+        .unwrap_err()
+        .0;
+    assert!(err.contains("slow path"), "{err}");
+}

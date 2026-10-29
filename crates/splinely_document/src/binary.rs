@@ -34,6 +34,9 @@ pub const SPLY_MAX_NODES: u64 = 1 << 24;
 /// Longest accepted `sply-base64` text (whitespace included): base64 of the
 /// 64 MiB file limit. Checked before the text is cleaned or decoded.
 pub(crate) const MAX_BASE64_TEXT: usize = (MAX_PROJECT_FILE_BYTES as usize).div_ceil(3) * 4;
+/// Most values a document may have when it needs the reference loading
+/// pipeline (a `Value` tree); real assets have under 100000 values in total.
+pub const FALLBACK_MAX_VALUES: usize = 1 << 20;
 /// Upper bound for table-size reservations made from untrusted header counts.
 const MAX_PREALLOC: usize = 1 << 16;
 
@@ -687,10 +690,24 @@ impl Project {
     /// document `normalize_project_value` would rewrite) the reference
     /// pipeline reruns on an equivalent `Value`, so outcomes are identical.
     pub fn from_binary(bytes: &[u8]) -> Result<Self> {
+        Ok(Self::from_binary_exact(bytes)?.0)
+    }
+
+    /// `from_binary`, plus whether `bytes` hold exactly the canonical members of
+    /// the project (nothing normalized, defaulted or lost), so exports may embed
+    /// `bytes` as they are.
+    pub(crate) fn from_binary_exact(bytes: &[u8]) -> Result<(Self, bool)> {
         let tree = decode_to_tree(bytes)?;
-        if let Some(project) = crate::fast_load(&tree) {
+        if let Some((project, complete)) = crate::fast_load(&tree) {
             project.validate()?;
-            return Ok(project);
+            return Ok((project, complete));
+        }
+        // The reference pipeline needs a `Value` per arena node (several times the
+        // arena); real documents that take it are tiny, hostile ones are not.
+        if tree.nodes.len() > FALLBACK_MAX_VALUES {
+            return Err(fail(format!(
+                "document cannot be loaded strictly: more than {FALLBACK_MAX_VALUES} values need the slow path (unknown fields, wrong types or legacy data)"
+            )));
         }
         let mut input = tree.to_value(ROOT);
         drop(tree);
@@ -698,11 +715,15 @@ impl Project {
         let project = Self::deserialize(&input)?;
         json_loading::check_preserved(&input, &serde_json::to_value(&project)?, "")?;
         project.validate()?;
-        Ok(project)
+        Ok((project, false))
     }
 
-    /// Binary if the magic matches, otherwise UTF-8 JSON text.
+    /// Binary if the magic matches, otherwise UTF-8 JSON text. Input over
+    /// `MAX_PROJECT_FILE_BYTES` is rejected before parsing.
     pub fn from_bytes(bytes: &[u8]) -> Result<Self> {
+        if bytes.len() as u64 > MAX_PROJECT_FILE_BYTES {
+            return Err(DocumentError("project file exceeds 64 MiB limit".into()));
+        }
         if Self::is_binary(bytes) {
             return Self::from_binary(bytes);
         }
