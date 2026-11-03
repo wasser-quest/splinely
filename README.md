@@ -238,6 +238,15 @@ The script runs workspace tests, Node runtime tests, real CLI demo generation/ev
 
 An original SVG logo: an S drawn as a Bézier spline with anchors and a handle, plus a motion trail.
 
+## Contributing
+
+Splinely has one maintainer, who also maintains [Locora](https://github.com/wasser-quest/locora).
+Bug reports and ideas are welcome as issues; for a code change, open an issue first. Animations made
+with Splinely for Locora (pictures for packs to learn, app art) are contributed to the Locora
+repository, where CI checks them with a pinned `splinely-cli check`: see its
+[`community/packs/README.md`](https://github.com/wasser-quest/locora/blob/main/community/packs/README.md)
+and [`assets/README.md`](https://github.com/wasser-quest/locora/blob/main/assets/README.md).
+
 ## License
 
 MIT, see [LICENSE](LICENSE).
