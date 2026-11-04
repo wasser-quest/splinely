@@ -240,9 +240,9 @@ An original SVG logo: an S drawn as a Bézier spline with anchors and a handle, 
 
 ## Contributing
 
-Splinely has one maintainer, who also maintains [Locora](https://github.com/wasser-quest/locora).
+Splinely has one maintainer, who also maintains [Lociera](https://github.com/wasser-quest/locora).
 Bug reports and ideas are welcome as issues; for a code change, open an issue first. Animations made
-with Splinely for Locora (pictures for packs to learn, app art) are contributed to the Locora
+with Splinely for Lociera (pictures for packs to learn, app art) are contributed to the Lociera
 repository, where CI checks them with a pinned `splinely-cli check`: see its
 [`community/packs/README.md`](https://github.com/wasser-quest/locora/blob/main/community/packs/README.md)
 and [`assets/README.md`](https://github.com/wasser-quest/locora/blob/main/assets/README.md).

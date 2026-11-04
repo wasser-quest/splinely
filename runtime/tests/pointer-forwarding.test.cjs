@@ -1,5 +1,5 @@
 'use strict';
-// Hosts (Locora's bridge) forward the pointer as synthetic DOM events, often many per frame and to figures
+// Hosts (Lociera's bridge) forward the pointer as synthetic DOM events, often many per frame and to figures
 // that are off screen. Events nobody consumes must not tick or draw; hidden figures stay asleep; followers
 // still end where they would have.
 const {test}=require('node:test');
@@ -11,7 +11,7 @@ const SVG='<svg viewBox="0 0 100 100"><circle id="body" cx="0" cy="0" r="1"/><ci
 const circle=(id,extra)=>({id,kind:{type:'circle',cx:0,cy:0,radius:1},...extra});
 const num=v=>({type:'number',value:v});
 const track=(target,property,values,dur)=>({...target,property,keyframes:values.map((v,i)=>({time:dur*i/(values.length-1),value:num(v),easing:{type:'linear'}}))});
-// Like the Locora mascots: a breathing bone, an eye follower bound to it, a blink machine on timers.
+// Like the Lociera mascots: a breathing bone, an eye follower bound to it, a blink machine on timers.
 function project(extra={}){
   return {schemaVersion:1,
     bones:[{id:'torso',x:50,y:50,rotation:0,length:10}],
